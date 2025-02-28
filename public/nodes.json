@@ -40,8 +40,8 @@
           }
         ]
       },
-      { "id": "13", "name": "Results", "nodes": [] },
-      { "id": "14", "name": "Discussion", "nodes": [] }
+      { "id": "13", "name": "Results", "nodes": [{ "id": "14", "name": "Bullet points results","category": "list" }] },
+      { "id": "15", "name": "Discussion", "nodes": [] }
     ]
   }
 ]

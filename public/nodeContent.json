@@ -20,5 +20,12 @@
         "category": "code",
         "content": "```\n# Laden der benötigten Bibliotheken\nlibrary(ggplot2)\nlibrary(dplyr)\n\n# Beispiel: Einlesen einer CSV-Datei mit Bakteriendaten\nbacteria_data <- read.csv('bacteria_data.csv')\n\n# Überblick über die Daten\nhead(bacteria_data)\n\n# Datenaufbereitung: Filtern nach relevanten Bakterienarten\nfiltered_data <- bacteria_data %>%\n  filter(Species %in% c('Pseudomonas', 'Bacillus', 'Escherichia'))\n\n# Mittlere Anzahl der Bakterien pro Probenart berechnen\nsummary_data <- filtered_data %>%\n  group_by(Species, SampleType) %>%\n  summarise(MeanCount = mean(Count), .groups = 'drop')\n\n# Visualisierung der Bakterienverteilung\nggplot(summary_data, aes(x = SampleType, y = MeanCount, fill = Species)) +\n  geom_bar(stat = 'identity', position = 'dodge') +\n  labs(title = 'Bakterienverteilung in verschiedenen Proben',\n       x = 'Probenart',\n       y = 'Durchschnittliche Anzahl') +\n  theme_minimal()\n```"
       },
-    { "id": "12", "name": "Picture 2.2", "category": "image", "content": "Ich bin der Kontent zur ID 12." }
+    { "id": "12", "name": "Picture 2.2", "category": "image", "content": "Ich bin der Kontent zur ID 12." }, 
+    {
+      "id": "14",
+      "name": "Bullet points results",
+      "category": "list",
+      "content": "- **Vielfalt der Pseudomonas-Arten**: Verschiedene *Pseudomonas*-Arten wurden auf Blattoberflächen identifiziert, wobei einige nützlich und andere pathogen sind.\n\n- **Förderung des Pflanzenwachstums**: Bestimmte *Pseudomonas*-Stämme fördern das Pflanzenwachstum durch die Produktion von Phytohormonen wie IAA (Indol-3-Acetic Acid) und Cytokinin.\n\n- **Antimikrobielle Aktivität**: Einige *Pseudomonas*-Arten produzieren antimikrobielle Substanzen, die das Wachstum von Pflanzenschädlingen und Pathogenen hemmen.\n\n- **Biofilmbildung**: *Pseudomonas*-Bakterien bilden auf Blattoberflächen Biofilme, die sie vor Umweltstress wie UV-Strahlung und Austrocknung schützen.\n\n- **Pathogene Wirkung**: Bestimmte *Pseudomonas*-Arten wie *Pseudomonas syringae* können Pflanzenkrankheiten verursachen, z.B. Nekrosen und Blattflecken.\n\n- **Einfluss von Umweltfaktoren**: Temperatur, Feuchtigkeit und Lichtverhältnisse beeinflussen die Zusammensetzung und Aktivität von *Pseudomonas* auf Blattoberflächen.\n\n- **Wechselwirkungen mit anderen Mikroben**: *Pseudomonas* interagiert mit anderen Mikroorganismen auf der Phyllosphäre, was die mikrobiellen Gemeinschaften und das Pflanzenwachstum beeinflussen kann."
+    }
+    
 ]
