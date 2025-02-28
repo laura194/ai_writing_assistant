@@ -1,0 +1,47 @@
+[
+  {
+    "id": "1",
+    "name": "Test Project",
+    "nodes": [
+      {
+        "id": "2",
+        "name": "Introduction",
+        "nodes": [
+          {
+            "id": "3",
+            "name": "Background",
+            "nodes": [
+              { "id": "4", "name": "Background Info 1","category": "list"},
+              { "id": "5", "name": "Background Info 2","category": "text" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "6",
+        "name": "Methods",
+        "nodes": [
+          {
+            "id": "7",
+            "name": "Method 1",
+            "nodes": [
+              { "id": "8", "name": "Picture 1","category": "image" }
+            ]
+          },
+          {
+            "id": "9",
+            "name": "Method 2",
+            "nodes": [
+              { "id": "10", "name": "Picture 2.1","category": "image" },
+              { "id": "11", "name": "Code","category": "code" },
+              { "id": "12", "name": "Picture 2.2","category": "image" }
+              
+            ]
+          }
+        ]
+      },
+      { "id": "13", "name": "Results", "nodes": [] },
+      { "id": "14", "name": "Discussion", "nodes": [] }
+    ]
+  }
+]

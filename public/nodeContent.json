@@ -1,0 +1,24 @@
+[
+    {
+        "id": "4",
+        "name": "Background Info 1",
+        "category": "list",
+        "content": "- **Epiphytische Mikroorganismen**: Mikroorganismen, die auf der Oberfläche von Blättern leben, werden als epiphytisch bezeichnet. Dazu gehören Bakterien, Pilze, Hefen und Algen.\n\n- **Phyllosphäre**: Die Gesamtheit der Mikroorganismen auf Blättern wird als Phyllosphäre bezeichnet. Sie stellt eine der größten mikrobiellen Habitate auf der Erde dar.\n\n- **Wichtige Bakterienarten**: Häufige Bakterien auf Blättern sind *Pseudomonas*, *Xanthomonas*, *Sphingomonas* und *Methylobacterium*. Sie können sowohl nützlich als auch schädlich für die Pflanze sein.\n\n- **Wachsschicht als Barriere**: Die kutikuläre Wachsschicht der Blätter schützt Pflanzen vor Wasserverlust und bietet gleichzeitig Mikroorganismen eine Oberfläche zum Anhaften.\n\n- **Biofilmbildung**: Viele Mikroorganismen bilden Biofilme auf Blättern, die sie vor UV-Strahlung, Trockenheit und Umweltstress schützen.\n\n- **Klimafaktoren**: Temperatur, Feuchtigkeit und Sonneneinstrahlung beeinflussen die Zusammensetzung und Aktivität der Blatt-Mikrobiota."
+      }
+      ,
+      {
+        "id": "5",
+        "name": "Background Info 2",
+        "category": "text",
+        "content": "Die Bakteriengattung **Pseudomonas** gehört zur Familie der *Pseudomonadaceae* und umfasst eine Vielzahl von Arten, die in verschiedenen Umgebungen vorkommen. Diese Bakterien sind gramnegativ, stäbchenförmig und besitzen oft polare Geißeln, die ihnen eine hohe Beweglichkeit verleihen.\n\n**Eigenschaften von Pseudomonas:**\n- Sie sind weit verbreitet in Böden, Wasser und auf Pflanzen.\n- Viele Arten sind in der Lage, organische Substanzen abzubauen, wodurch sie eine wichtige Rolle im Kohlenstoffkreislauf spielen.\n- *Pseudomonas fluorescens* und *Pseudomonas putida* sind für ihre nützlichen Eigenschaften in der Landwirtschaft bekannt, da sie Pflanzenwachstum fördern und Krankheitserreger hemmen können.\n- *Pseudomonas aeruginosa* hingegen ist ein opportunistischer Krankheitserreger und kann Infektionen bei immungeschwächten Menschen verursachen.\n\n**Pseudomonas auf Pflanzen:**\nBestimmte *Pseudomonas*-Arten sind Teil der Blatt-Mikrobiota und können das Pflanzenwachstum durch die Produktion von Phytohormonen und antimikrobiellen Substanzen fördern. Einige Stämme können jedoch auch als Pathogene wirken und Pflanzenkrankheiten verursachen, beispielsweise *Pseudomonas syringae*, das Nekrosen auf Blättern hervorrufen kann.\n\nDie Fähigkeit dieser Bakterien, sich an verschiedene Umweltbedingungen anzupassen, macht sie zu einem faszinierenden Forschungsgebiet in der Mikrobiologie und Biotechnologie."
+      },
+    { "id": "8", "name": "Picture 1", "category": "image", "content": "Ich bin der Kontent zur ID 8." },
+    { "id": "10", "name": "Picture 2.1", "category": "image", "content": "Ich bin der Kontent zur ID 10." },
+    {
+        "id": "11",
+        "name": "Data analysis in R",
+        "category": "code",
+        "content": "```\n# Laden der benötigten Bibliotheken\nlibrary(ggplot2)\nlibrary(dplyr)\n\n# Beispiel: Einlesen einer CSV-Datei mit Bakteriendaten\nbacteria_data <- read.csv('bacteria_data.csv')\n\n# Überblick über die Daten\nhead(bacteria_data)\n\n# Datenaufbereitung: Filtern nach relevanten Bakterienarten\nfiltered_data <- bacteria_data %>%\n  filter(Species %in% c('Pseudomonas', 'Bacillus', 'Escherichia'))\n\n# Mittlere Anzahl der Bakterien pro Probenart berechnen\nsummary_data <- filtered_data %>%\n  group_by(Species, SampleType) %>%\n  summarise(MeanCount = mean(Count), .groups = 'drop')\n\n# Visualisierung der Bakterienverteilung\nggplot(summary_data, aes(x = SampleType, y = MeanCount, fill = Species)) +\n  geom_bar(stat = 'identity', position = 'dodge') +\n  labs(title = 'Bakterienverteilung in verschiedenen Proben',\n       x = 'Probenart',\n       y = 'Durchschnittliche Anzahl') +\n  theme_minimal()\n```"
+      },
+    { "id": "12", "name": "Picture 2.2", "category": "image", "content": "Ich bin der Kontent zur ID 12." }
+]
