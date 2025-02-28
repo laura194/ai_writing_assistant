@@ -42,7 +42,7 @@ function Folder({ node, onNodeClick }: FolderProps) {
   return (
     <li className="my-1.5">
       <span className="flex items-center gap-1.5">
-        {node.nodes && node.nodes.length > 0 && (
+        {node.nodes && node.nodes.length > 0 ? (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -53,6 +53,8 @@ function Folder({ node, onNodeClick }: FolderProps) {
               className={`size-4 text-gray-500 ${isOpen ? "rotate-90" : ""}`}
             />
           </button>
+        ) : (
+          <span className="pl-4" /> // Placeholder for ChevronRightIcon for empty folders
         )}
         {node.nodes ? (
           <>

@@ -23,12 +23,12 @@ function App() {
   });
 
   useEffect(() => {
-    fetch("/nodes.json")
+    fetch("/projectStructure.json")
       .then((response) => response.json())
       .then((data: Node[]) => setNodes(data))
       .catch((error) => console.error("Error loading JSON:", error));
 
-    fetch("/nodeContent.json")
+    fetch("/fileContent.json")
       .then((response) => response.json())
       .then((data: Node[]) => {
         setNodeContents(data);
