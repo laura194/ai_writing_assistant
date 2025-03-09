@@ -1,7 +1,7 @@
 /**
  * Represents a file or folder node with optional content and nested nodes.
  * This is used to describe the structure of files and folders in a tree-like format.
- * 
+ *
  * @interface Node
  * @property {string} id - A unique identifier for the node.
  * @property {string} name - The name of the node (e.g., file or folder name).
@@ -16,4 +16,3 @@ export interface Node {
   content?: string; // Optional content for the node (e.g., file content).
   nodes?: Node[]; // Optional field for nested nodes (subfolders or files).
 }
-
