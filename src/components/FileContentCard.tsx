@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import { Node } from "../utils/types";
 import { getIcon } from "../utils/icons";
+import AIResponseComponent from "./AIResponseComponent";
 
 /**
  * Properties for the FileContentCard component.
@@ -41,6 +42,8 @@ function FileContentCard({ node }: FileContentCardProps) {
       >
         {node.content}
       </ReactMarkdown>
+      <br></br>
+      <AIResponseComponent />
     </div>
   );
 }
