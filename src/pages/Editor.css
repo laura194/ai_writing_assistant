@@ -1,0 +1,86 @@
+/* Container für den Editor */
+.editor-container {
+    padding: 20px;
+    background-color: #f3f4f6;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Kapitel und Unterkapitel */
+.chapter-list {
+    width: 80%;
+    margin-bottom: 20px;
+}
+
+.chapter {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #e5e7eb;
+    border-radius: 8px;
+}
+
+.chapter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chapter-name-input {
+    width: 80%;
+    padding: 5px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.delete-chapter-button,
+.delete-sub-chapter-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.sub-chapter {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.sub-chapter-name-input {
+    width: 75%;
+    padding: 5px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.add-sub-chapter-button {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.add-chapter-button {
+    background-color: #3b82f6;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.save-project-button {
+    background-color: #10b981;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+}
