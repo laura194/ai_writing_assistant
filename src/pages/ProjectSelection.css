@@ -1,0 +1,70 @@
+/* Styling für den Container der Seite */
+.project-selection-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f3f4f6; /* Helles Grau als Hintergrund */
+    padding: 20px;
+}
+
+/* Styling für den Titel */
+.project-selection-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 40px;
+    color: #333;
+    text-align: center;
+}
+
+/* Styling für die Buttons */
+.project-selection-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Styling für die Buttons */
+.project-selection-button {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    width: 250px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Button spezifische Farben */
+.project-selection-button.structure1 {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.project-selection-button.structure2 {
+    background-color: #10b981;
+    color: white;
+}
+
+.project-selection-button.empty {
+    background-color: #9ca3af;
+    color: white;
+}
+
+/* Hover-Effekte für Buttons */
+.project-selection-button:hover {
+    transform: scale(1.05);
+}
+
+.project-selection-button.structure1:hover {
+    background-color: #2563eb;
+}
+
+.project-selection-button.structure2:hover {
+    background-color: #047857;
+}
+
+.project-selection-button.empty:hover {
+    background-color: #6b7280;
+}
