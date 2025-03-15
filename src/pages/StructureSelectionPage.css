@@ -1,0 +1,65 @@
+/* Struktur Auswahl Seite Styling */
+.structure-selection-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f3f4f6;
+    padding: 20px;
+}
+
+.structure-selection-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 40px;
+    color: #333;
+    text-align: center;
+}
+
+.structure-selection-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.structure-selection-button {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    width: 250px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.structure-selection-button.structure1 {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.structure-selection-button.structure2 {
+    background-color: #10b981;
+    color: white;
+}
+
+.structure-selection-button.empty {
+    background-color: #9ca3af;
+    color: white;
+}
+
+.structure-selection-button:hover {
+    transform: scale(1.05);
+}
+
+.structure-selection-button.structure1:hover {
+    background-color: #2563eb;
+}
+
+.structure-selection-button.structure2:hover {
+    background-color: #047857;
+}
+
+.structure-selection-button.empty:hover {
+    background-color: #6b7280;
+}

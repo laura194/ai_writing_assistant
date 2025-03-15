@@ -10,25 +10,25 @@ function ProjectSelection() {
 
     return (
         <div className="project-selection-container">
-            <h1 className="project-selection-title">Wähle dein Projekt</h1>
+            <h1 className="project-selection-title">Choose structure</h1>
             <div className="project-selection-buttons">
                 <button
                     className="project-selection-button structure1"
                     onClick={() => handleSelection("structure1")}
                 >
-                    Projektstruktur 1 starten
+                    Story-for-Explanation Pattern (IMRaD)
                 </button>
                 <button
                     className="project-selection-button structure2"
                     onClick={() => handleSelection("structure2")}
                 >
-                    Projektstruktur 2 starten
+                    Story-for-Design Pattern
                 </button>
                 <button
                     className="project-selection-button empty"
                     onClick={() => handleSelection("empty")}
                 >
-                    Leeres Projekt starten
+                    Create structure from scratch
                 </button>
             </div>
         </div>
