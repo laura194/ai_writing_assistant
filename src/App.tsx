@@ -85,6 +85,7 @@ function App() {
             </li>
           </ul>
         )}
+        <HelloMessage />
       </div>
 
       <div
