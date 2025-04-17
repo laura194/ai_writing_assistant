@@ -1,0 +1,14 @@
+[
+  {
+    "id": "file-1",
+    "name": "App.tsx",
+    "type": "file",
+    "content": "import React from 'react';\n\nfunction App() {\n  return <div>Hello World</div>;\n}\n\nexport default App;"
+  },
+  {
+    "id": "file-2",
+    "name": "index.tsx",
+    "type": "file",
+    "content": "import ReactDOM from 'react-dom';\nimport App from './App';\n\nReactDOM.render(<App />, document.getElementById('root'));"
+  }
+]

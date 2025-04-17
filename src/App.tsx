@@ -15,7 +15,7 @@ import { Node } from "./utils/types";
  */
 function App() {
   const [nodes, setNodes] = useState<Node[]>([]);
-  const [nodeContents, setNodeContents] = useState<Node[]>([]);
+  // const [nodeContents, setNodeContents] = useState<Node[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [menuOpen, setMenuOpen] = useState<boolean>(() => {
     const savedMenuOpen = localStorage.getItem("menuOpen");
@@ -23,18 +23,18 @@ function App() {
   });
 
   useEffect(() => {
-    fetch("/projectStructure.json")
-      .then((response) => response.json())
-      .then((data: Node[]) => setNodes(data))
-      .catch((error) => console.error("Error loading JSON:", error));
-
-    fetch("/fileContent.json")
+  fetch("http://localhost:4000/api/structure")
       .then((response) => response.json())
       .then((data: Node[]) => {
-        setNodeContents(data);
+          setNodes(data);
 
         const savedNodeId = localStorage.getItem("selectedNodeId");
         if (savedNodeId) {
+            fetch(`http://localhost:4000/api/file/${savedNodeId}`)
+                .then((res) => res.json())
+                .then((data: Node) => {
+                    setSelectedNode(data);
+                });
           const savedNode = data.find((item) => item.id === savedNodeId);
           if (savedNode) {
             setSelectedNode(savedNode);
@@ -50,8 +50,18 @@ function App() {
   }, [menuOpen]);
 
   const handleNodeClick = (node: Node) => {
-    const content = nodeContents.find((item) => item.id === node.id);
-    setSelectedNode(content || null);
+      fetch(`http://localhost:4000/api/file/${node.id}`)
+          .then((res) => res.json())
+          .then((data: Node) => {
+              setSelectedNode(data);
+              localStorage.setItem("selectedNodeId", node.id);
+          })
+          .catch((err) => {
+              console.error("Error fetching file:", err);
+              setSelectedNode(null);
+          });
+    //const content = nodeContents.find((item) => item.id === node.id);
+    //setSelectedNode(content || null);
     localStorage.setItem("selectedNodeId", node.id);
   };
 

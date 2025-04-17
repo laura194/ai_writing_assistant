@@ -1,0 +1,19 @@
+[
+  {
+    "id": "root",
+    "name": "src",
+    "type": "folder",
+    "children": [
+      {
+        "id": "file-1",
+        "name": "App.tsx",
+        "type": "file"
+      },
+      {
+        "id": "file-2",
+        "name": "index.tsx",
+        "type": "file"
+      }
+    ]
+  }
+]
