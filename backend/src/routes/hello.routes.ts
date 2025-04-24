@@ -1,8 +1,15 @@
-import { Router } from 'express';
-import { getHello } from '../controllers/hello.controller';
+import { getHello, createPlant, getPlants } from '../controllers/hello.controller';
+import express, { Request, Response } from 'express';
 
-const router = Router();
+const router = express.Router();
 
-router.get("/", getHello);
+// Standard-Greeting Route
+router.get("", getHello);
+
+// Route zum Speichern einer Pflanze
+router.post("/plant", createPlant);
+
+// Route zum Abrufen aller Pflanzen
+router.get("/plants", getPlants);
 
 export default router;
