@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-
+import { Logger } from "vite";
 const HelloMessage = () => {
   const [message, setMessage] = useState<string>("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/hello")
+    fetch("/api/hello")
       .then((res) => res.json())
       .then((data) => setMessage(data.message))
       .catch((err) => {

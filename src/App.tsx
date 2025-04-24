@@ -5,6 +5,7 @@ import FileContentCard from "./components/FileContentCard";
 import { Bars3Icon } from "@heroicons/react/24/solid";
 import { Node } from "./utils/types";
 import HelloMessage from "./components/HelloMessage";
+import HelloApp from "./components/HelloApp";
 
 /**
  * App component that manages the main layout and state of the application.
@@ -86,6 +87,7 @@ function App() {
           </ul>
         )}
         <HelloMessage />
+        <HelloApp />
       </div>
 
       <div
