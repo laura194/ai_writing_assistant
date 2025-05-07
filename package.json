@@ -14,8 +14,10 @@
     "start": "concurrently \"npm run dev\" \"npm run dev --prefix backend\""
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.31.1",
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.0.9",
+    "loglevel": "^1.9.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.0.0",

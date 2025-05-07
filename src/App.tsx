@@ -1,20 +1,38 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import EditPage from "./pages/EditPage";
-import LandingPage from "./pages/LandingPage";
 import StructureSelectionPage from "./pages/StructureSelectionPage.tsx";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import HomePage from "./pages/HomePage.tsx";
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route
-          path="/structureSelectionPage"
-          element={<StructureSelectionPage />}
-        />
-        <Route path="/editPage" element={<EditPage />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/structureSelectionPage"
+        element={
+          <ProtectedRoute>
+            <StructureSelectionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/editPage"
+        element={
+          <ProtectedRoute>
+            <EditPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<p>Page not found</p>} />
+    </Routes>
   );
 };
 
