@@ -1,3 +1,3 @@
 export const getGreetingMessage = () => {
-    return "Yes, the backend is working! 🚀";
-  };
+  return "Yes, the backend is working! 🚀";
+};

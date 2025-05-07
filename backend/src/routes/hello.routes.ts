@@ -1,5 +1,9 @@
-import { getHello, createPlant, getPlants } from '../controllers/hello.controller';
-import express, { Request, Response } from 'express';
+import {
+  getHello,
+  createPlant,
+  getPlants,
+} from "../controllers/hello.controller";
+import express from "express";
 
 const router = express.Router();
 
