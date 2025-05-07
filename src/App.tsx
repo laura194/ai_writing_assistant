@@ -7,7 +7,7 @@ const App = () => {
         <Router>
             <Routes>
                 <Route path="/" element={<LandingPage />} /> {/* Neue Landing Page */}
-                <Route path="/app" element={<EditPage />} /> {/* Bestehende Anwendung */}
+                <Route path="/editPage" element={<EditPage />} /> {/* Bestehende Anwendung */}
             </Routes>
         </Router>
     );
