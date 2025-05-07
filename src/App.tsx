@@ -1,13 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import EditPage from "./pages/EditPage"; // Ausgelagerte Logik
-import LandingPage from "./pages/LandingPage"; // Neue Seite für Auswahl
+import EditPage from "./pages/EditPage";
+import LandingPage from "./pages/LandingPage";
+import StructureSelectionPage from "./pages/StructureSelectionPage.tsx";
 
 const App = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<LandingPage />} /> {/* Neue Landing Page */}
-                <Route path="/editPage" element={<EditPage />} /> {/* Bestehende Anwendung */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/structureSelectionPage" element={<StructureSelectionPage />} />
+                <Route path="/editPage" element={<EditPage />} />
             </Routes>
         </Router>
     );
