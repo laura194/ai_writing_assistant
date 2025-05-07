@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+interface Plant {
+  _id: string;
+  name: string;
+  type: string;
+}
+
 const HelloApp: React.FC = () => {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
-  const [plants, setPlants] = useState<any[]>([]);
+  const [plants, setPlants] = useState<Plant[]>([]);
 
   // Funktion zum Abrufen der Pflanzen von der API
   const fetchPlants = async () => {
