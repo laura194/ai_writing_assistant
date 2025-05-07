@@ -2,7 +2,7 @@ name: Security Audit
 
 on:
   schedule:
-    - cron: '0 0 * * 1' # Läuft jeden Montag um Mitternacht
+    - cron: "0 0 * * 1" # Läuft jeden Montag um Mitternacht
 
 jobs:
   security-check:

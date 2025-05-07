@@ -44,9 +44,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: "npm"
 
       - name: Install Dependencies
         run: npm install
 
       - name: Run TypeScript Compiler
-        run: npm run tsc --noEmit
+        run: npx tsc --noEmit

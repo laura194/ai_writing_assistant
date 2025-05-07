@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
-import { getGreetingMessage } from '../services/hello.service';
-import Plant from '../models/Hello';
+import { Request, Response } from "express";
+import { getGreetingMessage } from "../services/hello.service";
+import Plant from "../models/Hello";
 
 export const getHello = (_req: Request, res: Response) => {
   const message = getGreetingMessage();
@@ -17,7 +17,8 @@ export const createPlant = async (req: Request, res: Response) => {
     const savedPlant = await newPlant.save();
     res.status(201).json(savedPlant);
   } catch (error) {
-    res.status(400).json({ error: 'Fehler beim Speichern der Pflanze' });
+    res.status(400).json({ error: "Fehler beim Speichern der Pflanze" });
+    console.error("Fehler beim Speichern der Pflanze:", error);
   }
 };
 
@@ -27,8 +28,7 @@ export const getPlants = async (_req: Request, res: Response) => {
     const plants = await Plant.find();
     res.json(plants);
   } catch (error) {
-    res.status(500).json({ error: 'Fehler beim Abrufen der Pflanzen' });
+    res.status(500).json({ error: "Fehler beim Abrufen der Pflanzen" });
+    console.error("Fehler beim Abrufen der Pflanzen:", error);
   }
-
 };
-
