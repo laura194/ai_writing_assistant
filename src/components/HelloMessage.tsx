@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-// import { Logger } from "vite";
+
 const HelloMessage = () => {
   const [message, setMessage] = useState<string>("");
 
