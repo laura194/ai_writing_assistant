@@ -1,4 +1,6 @@
+import axios from "axios";
 import ReactMarkdown from "react-markdown";
+import { IAiProtocol } from "../models/IAIProtocol";
 
 /**
  * Properties für AIResponse
@@ -21,12 +23,30 @@ const AIResponse = ({ response, onReplace }: AIResponseProps) => {
     onReplace(oldText, response, prompt);
 
     // Optional: Protokoll in der Konsole anzeigen
-    console.log("KI-Protokoll:");
+    addProtocol({
+      aiName: "Gemini",
+      usageForm: prompt,
+      affectedParts: "test",
+      remarks: "-/-",
+    });
     console.log("Alter Text:", oldText);
     console.log("Neuer Text:", response);
     console.log("Prompt:", prompt);
   };
 
+  const addProtocol = async (protocolData: IAiProtocol) => {
+    try {
+      const response = await axios.post<IAiProtocol>(
+        "/api/ai/aiProtocol",
+        protocolData
+      );
+      console.log("Protokoll erfolgreich hinzugefügt:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Fehler beim Hinzufügen des Protokolls:", error);
+      throw error;
+    }
+  };
   return (
     <div className="mt-4 p-4 border border-gray-300 rounded bg-white shadow">
       <h3 className="font-bold text-lg">AI Response:</h3>

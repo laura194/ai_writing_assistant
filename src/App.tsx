@@ -4,8 +4,8 @@ import Folder from "./components/Folder";
 import FileContentCard from "./components/FileContentCard";
 import { Bars3Icon } from "@heroicons/react/24/solid";
 import { Node } from "./utils/types";
-import HelloMessage from "./components/HelloMessage";
-import HelloApp from "./components/HelloApp";
+import AiProtocolTable from "./components/AIProtocolTable";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 
 /**
  * App component that manages the main layout and state of the application.
@@ -23,6 +23,7 @@ function App() {
     const savedMenuOpen = localStorage.getItem("menuOpen");
     return savedMenuOpen ? JSON.parse(savedMenuOpen) : true;
   });
+  const [showAiProtocol, setShowAiProtocol] = useState(false);
 
   useEffect(() => {
     fetch("/projectStructure.json")
@@ -44,7 +45,7 @@ function App() {
         }
       })
       .catch((error) =>
-        console.error("Error loading node content JSON:", error),
+        console.error("Error loading node content JSON:", error)
       );
   }, []);
   useEffect(() => {
@@ -72,30 +73,45 @@ function App() {
         } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4`}
       >
         {menuOpen && (
-          <ul>
-            <li className="my-1.5">
-              <ul className="pl-10">
-                {nodes.map((node) => (
-                  <Folder
-                    node={node}
-                    key={node.id}
-                    onNodeClick={handleNodeClick}
-                  />
-                ))}
-              </ul>
-            </li>
-          </ul>
+          <div className="flex flex-col h-full justify-between">
+            <ul className="overflow-y-auto">
+              <li className="my-1.5">
+                <ul className="pl-10">
+                  {nodes.map((node) => (
+                    <Folder
+                      node={node}
+                      key={node.id}
+                      onNodeClick={(node) => {
+                        setShowAiProtocol(false); // Protokoll ausblenden, wenn anderes ausgewählt wird
+                        handleNodeClick(node);
+                      }}
+                    />
+                  ))}
+                </ul>
+              </li>
+            </ul>
+            <button
+              className="w-10 h-10 bg-gray-600 text-white rounded hover:bg-gray-500 flex items-center justify-center mt-4 ml-2"
+              onClick={() => {
+                setShowAiProtocol(true);
+                setSelectedNode(null);
+              }}
+              title="KI-Protokoll anzeigen"
+            >
+              <DocumentTextIcon className="h-6 w-6" />
+            </button>
+          </div>
         )}
-        <HelloMessage />
-        <HelloApp />
       </div>
 
       <div
         className={`${
           menuOpen ? "w-3/4" : "w-full"
-        } transition-all duration-300 p-4 bg-gray-400`}
+        } transition-all duration-300 p-4 bg-gray-400 overflow-y-auto`}
       >
-        {selectedNode ? (
+        {showAiProtocol ? (
+          <AiProtocolTable />
+        ) : selectedNode ? (
           <FileContentCard node={selectedNode} />
         ) : (
           <p>Wähle ein Element aus.</p>
