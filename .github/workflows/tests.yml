@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - main
-      
+
 jobs:
   test:
     name: Run Unit & Integration Tests
@@ -26,5 +26,5 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Tests
-        run: npm test -- --coverage
+      - name: Run Tests (with coverage)
+        run: npm run test:coverage
