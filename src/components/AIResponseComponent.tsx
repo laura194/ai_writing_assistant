@@ -1,3 +1,4 @@
+/*
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { fetchAIResponse } from "../utils/AIHandler";
@@ -30,7 +31,7 @@ const AIResponseComponent = () => {
           className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md"
           onClick={() => setExpanded(true)}
         >
-          <CodeBracketIcon className="h-5 w-5 mr-2" /> {/* AI-Icon */}
+          <CodeBracketIcon className="h-5 w-5 mr-2" /> 
           AI Anfragen
         </button>
       ) : (
@@ -41,7 +42,7 @@ const AIResponseComponent = () => {
               className="p-1 text-gray-500 hover:text-gray-700"
               onClick={() => setExpanded(false)}
             >
-              <XMarkIcon className="h-5 w-5" /> {/* X-Icon zum Einklappen */}
+              <XMarkIcon className="h-5 w-5" /> 
             </button>
           </div>
           <textarea
@@ -69,3 +70,4 @@ const AIResponseComponent = () => {
 };
 
 export default AIResponseComponent;
+*/

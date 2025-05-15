@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { Lightbulb, Atom } from "lucide-react";
 import { fetchAIResponse } from "../utils/AIHandler";
+import { AIResult } from "../models/IAIProtocol";
 
 interface AIPopupProps {
   isOpen: boolean;
   onClose: () => void;
   selectedText: string;
-  onFetchResponse: (response: string) => void;
+  onFetchResponse: (response: AIResult) => void;
 }
 
 const suggestions = [
@@ -44,9 +45,10 @@ const AIPopup = ({
   const handleConfirm = async () => {
     setLoading(true);
     const fullText = `${selectedText} ${additionalPrompt}`.trim();
-    const response = await fetchAIResponse(fullText);
+    const result = await fetchAIResponse(fullText);
+    result.prompt = additionalPrompt;
     setLoading(false);
-    onFetchResponse(response);
+    onFetchResponse(result);
     onClose(); // Schließt das Fenster nach der Antwort
   };
 

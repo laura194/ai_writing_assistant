@@ -7,3 +7,14 @@ export interface IAiProtocol {
     createdAt?: string;        // optional, falls du timestamps nutzt
     updatedAt?: string;
   }
+
+  export interface AIResult {
+    prompt?: string;
+    text: string;
+    modelVersion?: string;
+    usageMetadata?: {
+      promptTokenCount: number;
+      candidatesTokenCount: number;
+      totalTokenCount: number;
+    };
+  }

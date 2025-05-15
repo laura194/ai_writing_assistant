@@ -1,3 +1,5 @@
+import { AIResult } from "../models/IAIProtocol";
+
 interface APIRequest {
   contents: { parts: { text: string }[] }[];
 }
@@ -15,7 +17,7 @@ const API_URL =
  * @param {string} prompt - Der Eingabetext für die AI.
  * @returns {Promise<string>} - Die AI-Antwort als String.
  */
-export const fetchAIResponse = async (prompt: string): Promise<string> => {
+export const fetchAIResponse = async (prompt: string): Promise<AIResult> => {
   if (!API_KEY) {
     console.error(
       "Kein API-Key gefunden! Stelle sicher, dass die .env-Datei existiert und die Variable korrekt gesetzt ist.",
@@ -37,13 +39,27 @@ export const fetchAIResponse = async (prompt: string): Promise<string> => {
       throw new Error(`API-Fehler: ${response.status} ${response.statusText}`);
     }
 
-    const data: APIResponse = await response.json();
-    return (
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Keine Antwort erhalten."
-    );
+    const data: APIResponse & {
+      modelVersion?: string;
+      usageMetadata?: {
+        promptTokenCount: number;
+        candidatesTokenCount: number;
+        totalTokenCount: number;
+      };
+    } = await response.json();
+
+    return {
+      text:
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "Keine Antwort erhalten.",
+      modelVersion: data.modelVersion,
+      usageMetadata: data.usageMetadata,
+    };
   } catch (error) {
     console.error("Fehler bei der Anfrage:", error);
-    return "Fehler bei der AI-Anfrage.";
+    return {
+      text: "Fehler bei der AI-Anfrage.",
+    };
   }
 };
+

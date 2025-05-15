@@ -4,6 +4,7 @@ import { getIcon } from "../utils/icons";
 import AIResponse from "./AIResponse";
 import AIBubble from "./AIBubble";
 import AIPopup from "./AIPopup";
+import { AIResult } from "../models/IAIProtocol";
 
 export interface FileContentCardProps {
   node: Node;
@@ -14,7 +15,7 @@ function FileContentCard({ node }: FileContentCardProps) {
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const selectedTextRef = useRef<string | null>(null); // NEU: useRef für Text-Speicherung
   const [showBubble, setShowBubble] = useState(false);
-  const [aiResponse, setAIResponse] = useState<string | null>(null);
+  const [aiResponse, setAIResponse] = useState<AIResult | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [bubblePosition, setBubblePosition] = useState<{
     top: number;
@@ -79,7 +80,7 @@ function FileContentCard({ node }: FileContentCardProps) {
       const escapedText = escapeRegExp(selectedTextRef.current);
       const newContent = content.replace(
         new RegExp(escapedText, "g"),
-        aiResponse
+        aiResponse.text
       );
 
       console.log("🔹 Alter Inhalt:", content);
@@ -124,7 +125,11 @@ function FileContentCard({ node }: FileContentCardProps) {
       )}
 
       {aiResponse && (
-        <AIResponse response={aiResponse} onReplace={handleReplaceText} />
+        <AIResponse
+          response={aiResponse}
+          onReplace={handleReplaceText}
+          cardName={node.name}
+        />
       )}
     </div>
   );
