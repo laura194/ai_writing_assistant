@@ -1,0 +1,25 @@
+{
+  "id": "1",
+  "name": "Kapitel 1: Grundlagen",
+  "category": "folder",
+  "children": [
+    {
+      "id": "1.1",
+      "name": "Einleitung",
+      "category": "file",
+      "content": "Dies ist die Einleitung des Kapitels."
+    },
+    {
+      "id": "1.2",
+      "name": "Hintergrundwissen",
+      "category": "file",
+      "content": "Hier könnte ihr Text zu den wissenschaftlichen Grundlagen stehen."
+    },
+    {
+      "id": "1.3",
+      "name": "Zusammenfassung",
+      "category": "file",
+      "content": "Hier folgt eine kurze Zusammenfassung."
+    }
+  ]
+}

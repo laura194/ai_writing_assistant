@@ -1,5 +1,5 @@
 import { ChevronRightIcon, FolderIcon } from "@heroicons/react/24/solid";
-import File from "./File";
+// import File from "./File";
 import { useState, useEffect } from "react";
 import { Node } from "../utils/types";
 
@@ -15,22 +15,12 @@ interface FolderProps {
 }
 
 /**
- *
  * Folder component that represents a folder in a hierarchical file structure.
- * This component renders the folder's name, its contents (if any), and handles the opening and closing of the folder.
- * It manages the state of whether the folder is open or closed, saving this state in localStorage for persistence.
- * It renders nested folders recursively and allows interaction through clicks to toggle folder visibility.
+ * This component handles the display of folder names, their children (subfolders/files), and manages the open/close state.
  * @component
- * @param {FolderProps} props - The properties passed to the Folder component.
- * @param {Node} props.node - The folder's data, including its name, ID, and potential child nodes.
- * @param {Function} props.onNodeClick - A callback function to handle the click event for a file or folder.
- * @returns - A list item representing the folder, with possible child folders rendered below.
  */
 function Folder({ node, onNodeClick }: FolderProps) {
-  // Sicherstellen, dass `node` immer vorhanden ist
-  const safeNode = node ?? { id: "invalid", name: "Invalid", nodes: [] };
-
-  const storageKey = `isOpen-${safeNode.id}`;
+  const storageKey = `isOpen-${node.id}`;
   const [isOpen, setIsOpen] = useState<boolean>(() => {
     const savedState = localStorage.getItem(storageKey);
     return savedState ? JSON.parse(savedState) : false;
@@ -40,48 +30,43 @@ function Folder({ node, onNodeClick }: FolderProps) {
     localStorage.setItem(storageKey, JSON.stringify(isOpen));
   }, [isOpen, storageKey]);
 
+  // Render fallback, falls ein ungültiger Knoten übergeben wird
   if (!node) {
     return <li className="my-1.5">Invalid node</li>;
   }
 
   return (
-    <li className="my-1.5">
+      <li className="my-1.5">
       <span className="flex items-center gap-1.5">
-        {safeNode.nodes && safeNode.nodes.length > 0 ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsOpen(!isOpen);
-            }}
-          >
-            <ChevronRightIcon
-              className={`size-4 text-gray-500 ${isOpen ? "rotate-90" : ""}`}
-            />
-          </button>
+        {node.children && node.children.length > 0 ? (
+            <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(!isOpen);
+                }}
+            >
+              <ChevronRightIcon
+                  className={`size-4 text-gray-500 ${isOpen ? "rotate-90" : ""}`}
+              />
+            </button>
         ) : (
-          <span className="pl-4" /> // Platzhalter für leere Ordner
+            <span className="pl-4" /> // Platzhalter für leere Elemente (keine Kinder)
         )}
-        {safeNode.nodes ? (
-          <>
-            <FolderIcon className="size-6 text-gray-700" />
-            {safeNode.name}
-          </>
-        ) : (
-          <File node={safeNode} onClick={() => onNodeClick(safeNode)} />
-        )}
+        <FolderIcon className="size-6 text-gray-700" />
+        <span onClick={() => onNodeClick(node)}>{node.name}</span>
       </span>
-      {isOpen && safeNode.nodes && (
-        <ul className="pl-6">
-          {safeNode.nodes.map((childNode) => (
-            <Folder
-              node={childNode}
-              key={childNode.id}
-              onNodeClick={onNodeClick}
-            />
-          ))}
-        </ul>
-      )}
-    </li>
+        {isOpen && node.children && (
+            <ul className="pl-6">
+              {node.children.map((childNode) => (
+                  <Folder
+                      node={childNode}
+                      key={childNode.id}
+                      onNodeClick={onNodeClick}
+                  />
+              ))}
+            </ul>
+        )}
+      </li>
   );
 }
 

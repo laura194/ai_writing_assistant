@@ -1,0 +1,25 @@
+{
+  "id": "2",
+  "name": "Kapitel 2: Anwendungen",
+  "category": "folder",
+  "children": [
+    {
+      "id": "2.1",
+      "name": "Theorie zur Anwendung",
+      "category": "file",
+      "content": "Details zur Theorie..."
+    },
+    {
+      "id": "2.2",
+      "name": "Beispiel 1: Künstliche Intelligenz in der Medizin",
+      "category": "file",
+      "content": "..."
+    },
+    {
+      "id": "2.3",
+      "name": "Beispiel 2: KI im Umweltschutz",
+      "category": "file",
+      "content": "..."
+    }
+  ]
+}
