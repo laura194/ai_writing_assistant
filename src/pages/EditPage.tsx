@@ -4,6 +4,8 @@ import Folder from "../components/Folder";
 import FileContentCard from "../components/FileContentCard";
 import { Bars3Icon } from "@heroicons/react/24/solid";
 import { Node } from "../utils/types";
+import BottomNavigationBar from "../components/BottomNavigationBar";
+import AIProtocolCard from "../components/AIProtocolCard";
 
 const EditPage = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -14,14 +16,18 @@ const EditPage = () => {
     return savedMenuOpen ? JSON.parse(savedMenuOpen) : true;
   });
 
+  const [activeView, setActiveView] = useState("file");
+
   useEffect(() => {
-    // Lade die Projektstruktur
+    // Load the project structure
+    // This should be replaced with the actual database
     fetch("/projectStructure.json")
       .then((response) => response.json())
       .then((data: Node[]) => setNodes(data))
       .catch((error) => console.error("Error loading JSON:", error));
 
-    // Lade den Dateiinhalt
+    // Load the file content
+    // This should be replaced with the actual database
     fetch("/fileContent.json")
       .then((response) => response.json())
       .then((data: Node[]) => {
@@ -48,11 +54,12 @@ const EditPage = () => {
     const content = nodeContents.find((item) => item.id === node.id);
     setSelectedNode(content || null);
     localStorage.setItem("selectedNodeId", node.id);
+    setActiveView("file");
   };
 
   return (
     <div className="flex h-screen relative">
-      {/* Button zum Öffnen/Schließen des Menüs */}
+      {/* Button to open/close the menu */}
       <button
         className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
         onClick={() => setMenuOpen(!menuOpen)}
@@ -60,11 +67,12 @@ const EditPage = () => {
         <Bars3Icon className="h-5 w-5 text-white" />
       </button>
 
-      {/* Menüansicht */}
+      {/* Menu */}
+
       <div
         className={`${
           menuOpen ? "w-1/4" : "w-12"
-        } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4`}
+        } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
       >
         {menuOpen && (
           <ul>
@@ -81,18 +89,33 @@ const EditPage = () => {
             </li>
           </ul>
         )}
+        {/* BottomNavigationBar bleibt im Menübereich unten */}
+        {menuOpen && (
+          <BottomNavigationBar
+            activeView={activeView}
+            onChangeView={setActiveView}
+          />
+        )}
       </div>
 
-      {/* Hauptinhalt */}
+      {/* Main Content */}
+
       <div
-        className={`${
-          menuOpen ? "w-3/4" : "w-full"
-        } transition-all duration-300 p-4 bg-gray-400`}
+        className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-4 bg-gray-400`}
       >
+         {" "}
         {selectedNode ? (
-          <FileContentCard node={selectedNode} />
+          activeView === "file" ? (
+            <FileContentCard node={selectedNode} />
+          ) : activeView === "ai" ? (
+            <AIProtocolCard />
+          ) : activeView === "fullDocument" ? (
+            <p>Full Document</p>
+          ) : (
+            <p>Settings or other view</p>
+          )
         ) : (
-          <p>Wähle ein Element aus.</p>
+          <p>Select an element.</p>
         )}
       </div>
     </div>
