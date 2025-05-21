@@ -4,8 +4,6 @@ import Folder from "../components/Folder";
 import FileContentCard from "../components/FileContentCard";
 import { Bars3Icon } from "@heroicons/react/24/solid";
 import { Node } from "../utils/types";
-import HelloMessage from "../components/HelloMessage";
-import HelloApp from "../components/HelloApp";
 
 const EditPage = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -38,7 +36,7 @@ const EditPage = () => {
         }
       })
       .catch((error) =>
-        console.error("Error loading node content JSON:", error),
+        console.error("Error loading node content JSON:", error)
       );
   }, []);
 
@@ -83,8 +81,6 @@ const EditPage = () => {
             </li>
           </ul>
         )}
-        <HelloMessage />
-        <HelloApp />
       </div>
 
       {/* Hauptinhalt */}
