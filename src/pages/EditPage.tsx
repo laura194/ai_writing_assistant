@@ -6,6 +6,7 @@ import { Bars3Icon } from "@heroicons/react/24/solid";
 import { Node } from "../utils/types";
 import BottomNavigationBar from "../components/BottomNavigationBar";
 import Header from "../components/Header";
+import AIProtocolCard from "../components/AIProtocolCard";
 
 const EditPage = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -42,7 +43,7 @@ const EditPage = () => {
         }
       })
       .catch((error) =>
-        console.error("Error loading node content JSON:", error),
+        console.error("Error loading node content JSON:", error)
       );
   }, []);
 
@@ -109,7 +110,7 @@ const EditPage = () => {
             activeView === "file" ? (
               <FileContentCard node={selectedNode} />
             ) : activeView === "ai" ? (
-              <p>AI Protocol</p>
+              <AIProtocolCard />
             ) : activeView === "fullDocument" ? (
               <p>Full Document</p>
             ) : (

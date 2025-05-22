@@ -1,46 +1,79 @@
-import ReactMarkdown from "react-markdown";
+import { useEffect, useState } from "react";
 import { Node } from "../utils/types";
 import { getIcon } from "../utils/icons";
+import MarkdownContent from "./MarkdownContent";
+import AIPopup from "../components/ai/AIPopup";
+import { AIResult } from "../models/IAITypes";
+import { Atom } from "lucide-react";
+import AIResponseDialog from "./ai/AIResponseDialog";
+import { createAIProtocolEntry } from "../utils/AIHandler";
 
-/**
- * Properties for the FileContentCard component.
- * @interface FileContentCardProps
- * @property {Node} node - The node representing the file to display.
- */
 export interface FileContentCardProps {
   node: Node;
 }
 
 /**
- * FileContentCard component that renders a card displaying file content with an icon, title, and markdown content.
- * @component
- * @param {FileContentCardProps} props - The properties passed to the component.
- * @returns- The rendered file content card component.
+ * Component for displaying a file with a title, icon, and content.
  */
 function FileContentCard({ node }: FileContentCardProps) {
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isResponseOpen, setIsResponseOpen] = useState(false);
+  const [aiResult, setAIResult] = useState<AIResult | null>(null);
+  const [fileContent, setFileContent] = useState<string>(node.content || "...");
+
+  useEffect(() => {
+    setFileContent(node.content || "...");
+  }, [node]);
+
+  const handleReplaceContent = (newContent: string) => {
+    setFileContent(newContent);
+
+    // Create AI protocol entry
+    createAIProtocolEntry({
+      aiName: aiResult?.modelVersion || "Unknown AI",
+      usageForm: aiResult?.prompt || "Unknown prompt",
+      affectedParts: node.name || "Unknown file",
+      remarks: aiResult?.text || "No remarks",
+    });
+  };
+
+  const handleFetchResponse = (result: AIResult) => {
+    setAIResult(result);
+    setIsPopupOpen(false);
+    setIsResponseOpen(true);
+  };
+
   return (
     <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
-      {/* Icon oben rechts */}
-      <div className="absolute top-3 right-3 ">{getIcon(node, "size-8")}</div>
       <h2 className="text-lg font-bold mb-4">{node.name}</h2>
-      {/* Markdown ohne className, stattdessen über `components` gestylt */}
-      <ReactMarkdown
-        components={{
-          p: ({ children }) => <p className="mt-2">{children}</p>,
-          strong: ({ children }) => (
-            <strong className="font-bold">{children}</strong>
-          ),
-          ul: ({ children }) => (
-            <ul className="list-disc pl-5 mt-2">{children}</ul>
-          ),
-          ol: ({ children }) => (
-            <ol className="list-decimal pl-5 mt-2">{children}</ol>
-          ),
-          li: ({ children }) => <li className="mt-1">{children}</li>,
-        }}
-      >
-        {node.content}
-      </ReactMarkdown>
+      <div className="absolute top-3 right-3 flex items-center space-x-2">
+        <button
+          className="text-blue-800 hover:text-blue-800 hover:bg-gray-300 p-1 rounded"
+          onClick={() => setIsPopupOpen(true)}
+          title="Ask AI about this content"
+        >
+          <Atom className="w-6 h-6" />
+        </button>
+        {getIcon(node, "size-8")}
+      </div>
+
+      <AIPopup
+        isOpen={isPopupOpen}
+        onClose={() => setIsPopupOpen(false)}
+        selectedText={fileContent || ""}
+        onFetchResponse={handleFetchResponse}
+      />
+
+      {aiResult && (
+        <AIResponseDialog
+          isOpen={isResponseOpen}
+          onClose={() => setIsResponseOpen(false)}
+          result={aiResult}
+          onReplaceContent={handleReplaceContent}
+        />
+      )}
+
+      <MarkdownContent content={fileContent} />
     </div>
   );
 }
