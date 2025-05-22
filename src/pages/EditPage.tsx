@@ -42,7 +42,7 @@ const EditPage = () => {
         }
       })
       .catch((error) =>
-        console.error("Error loading node content JSON:", error),
+        console.error("Error loading node content JSON:", error)
       );
   }, []);
 
@@ -105,7 +105,6 @@ const EditPage = () => {
         <div
           className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-4 bg-gray-400`}
         >
-           {" "}
           {selectedNode ? (
             activeView === "file" ? (
               <FileContentCard node={selectedNode} />
