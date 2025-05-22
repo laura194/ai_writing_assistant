@@ -42,7 +42,7 @@ const EditPage = () => {
         }
       })
       .catch((error) =>
-        console.error("Error loading node content JSON:", error)
+        console.error("Error loading node content JSON:", error),
       );
   }, []);
 
