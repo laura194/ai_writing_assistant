@@ -17,7 +17,14 @@ const EditPage = () => {
     return savedMenuOpen ? JSON.parse(savedMenuOpen) : true;
   });
 
-  const [activeView, setActiveView] = useState("file");
+  const [activeView, setActiveView] = useState(() => {
+    const savedView = localStorage.getItem("activeView");
+    return savedView ? savedView : "file";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("activeView", activeView);
+  }, [activeView]);
 
   useEffect(() => {
     // Load the project structure
