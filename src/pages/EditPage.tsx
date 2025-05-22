@@ -112,7 +112,7 @@ const EditPage = () => {
           ) : activeView === "fullDocument" ? (
             <p>Full Document</p>
           ) : (
-            <p>Settings or other view</p>
+            <p>Settings</p>
           )
         ) : (
           <p>Select an element.</p>
