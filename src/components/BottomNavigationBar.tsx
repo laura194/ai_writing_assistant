@@ -3,11 +3,13 @@ import { Brain, Settings, File } from "lucide-react";
 interface BottomNavigationBarProps {
   activeView: string;
   onChangeView: (view: string) => void;
+  menuOpen: boolean;
 }
 
 const BottomNavigationBar = ({
   activeView,
   onChangeView,
+  menuOpen,
 }: BottomNavigationBarProps) => {
   const buttons = [
     { icon: <Brain className="w-5 h-5" />, view: "ai", label: "AI Protocol" },
@@ -24,12 +26,16 @@ const BottomNavigationBar = ({
   ];
 
   return (
-    <div className="w-full flex justify-around py-2">
+    <div
+      className={`w-full ${
+        menuOpen ? "flex justify-around" : "flex flex-col items-center mt-auto"
+      } py-2`}
+    >
       {buttons.map((btn) => (
         <button
           key={btn.view}
           onClick={() => onChangeView(btn.view)}
-          className={`p-2 rounded-full ${
+          className={`p-2 rounded-full mb-2 ${
             activeView === btn.view
               ? "bg-blue-500 text-white"
               : "hover:bg-gray-300"

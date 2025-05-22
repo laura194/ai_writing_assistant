@@ -6,6 +6,7 @@ import { Bars3Icon } from "@heroicons/react/24/solid";
 import { Node } from "../utils/types";
 import BottomNavigationBar from "../components/BottomNavigationBar";
 import AIProtocolCard from "../components/AIProtocolCard";
+import Header from "../components/Header";
 
 const EditPage = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -58,65 +59,68 @@ const EditPage = () => {
   };
 
   return (
-    <div className="flex h-screen relative">
-      {/* Button to open/close the menu */}
-      <button
-        className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
-        onClick={() => setMenuOpen(!menuOpen)}
-      >
-        <Bars3Icon className="h-5 w-5 text-white" />
-      </button>
+    <div className="flex flex-col h-screen">
+      <Header />
+      <div className="flex flex-1 relative">
+        {/* Button to open/close the menu */}
+        <button
+          className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <Bars3Icon className="h-5 w-5 text-white" />
+        </button>
 
-      {/* Menu */}
+        {/* Menu */}
 
-      <div
-        className={`${
-          menuOpen ? "w-1/4" : "w-12"
-        } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
-      >
-        {menuOpen && (
-          <ul>
-            <li className="my-1.5">
-              <ul className="pl-10">
-                {nodes.map((node) => (
-                  <Folder
-                    node={node}
-                    key={node.id}
-                    onNodeClick={handleNodeClick}
-                  />
-                ))}
-              </ul>
-            </li>
-          </ul>
-        )}
-        {/* BottomNavigationBar bleibt im Menübereich unten */}
-        {menuOpen && (
+        <div
+          className={`${
+            menuOpen ? "w-1/4" : "w-12"
+          } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
+        >
+          {menuOpen && (
+            <ul>
+              <li className="my-1.5">
+                <ul className="pl-10">
+                  {nodes.map((node) => (
+                    <Folder
+                      node={node}
+                      key={node.id}
+                      onNodeClick={handleNodeClick}
+                    />
+                  ))}
+                </ul>
+              </li>
+            </ul>
+          )}
+          {/* BottomNavigationBar */}
+
           <BottomNavigationBar
             activeView={activeView}
             onChangeView={setActiveView}
+            menuOpen={menuOpen}
           />
-        )}
-      </div>
+        </div>
 
-      {/* Main Content */}
+        {/* Main Content */}
 
-      <div
-        className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-4 bg-gray-400`}
-      >
-         {" "}
-        {selectedNode ? (
-          activeView === "file" ? (
-            <FileContentCard node={selectedNode} />
-          ) : activeView === "ai" ? (
-            <AIProtocolCard />
-          ) : activeView === "fullDocument" ? (
-            <p>Full Document</p>
+        <div
+          className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-4 bg-gray-400`}
+        >
+           {" "}
+          {selectedNode ? (
+            activeView === "file" ? (
+              <FileContentCard node={selectedNode} />
+            ) : activeView === "ai" ? (
+              <AIProtocolCard />
+            ) : activeView === "fullDocument" ? (
+              <p>Full Document</p>
+            ) : (
+              <p>Settings</p>
+            )
           ) : (
-            <p>Settings</p>
-          )
-        ) : (
-          <p>Select an element.</p>
-        )}
+            <p>Select an element.</p>
+          )}
+        </div>
       </div>
     </div>
   );
