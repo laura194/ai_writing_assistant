@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helloRoutes from "./routes/hello.routes";
 import connectDB from "./db";
+import aiRoutes from "./routes/ai.routes";
 
 const app = express();
 
@@ -13,5 +14,6 @@ connectDB();
 
 // Routen
 app.use("/api/hello", helloRoutes);
+app.use("/api/ai", aiRoutes);
 
 export default app;
