@@ -12,7 +12,6 @@ const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 const API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
-
 /**
  * Sends a request to the AI API and returns the response.
  * @param {string} prompt - The input text for the AI.
@@ -65,10 +64,9 @@ export const fetchAIResponse = async (prompt: string): Promise<AIResult> => {
   }
 };
 
-
-
-
-export const createAIProtocolEntry = async (entry: IAiProtocolEntry): Promise<void> => {
+export const createAIProtocolEntry = async (
+  entry: IAiProtocolEntry,
+): Promise<void> => {
   try {
     const response = await fetch("/api/ai/aiProtocol", {
       method: "POST",

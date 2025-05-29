@@ -21,7 +21,7 @@ const AIProtocolCard: React.FC = () => {
           "/api/ai/aiProtocol",
           {
             params: { username: user?.username || user?.id },
-          }
+          },
         );
 
         setProtocols(response.data);
