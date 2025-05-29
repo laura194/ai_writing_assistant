@@ -34,11 +34,10 @@ const AIPopup = ({
   const dialogRef = useRef<HTMLDivElement>(null);
   const startPosition = useRef({ x: 0, y: 0 });
 
-  // Setzt das Fenster in die Bildschirmmitte, wenn es geöffnet wird
   useEffect(() => {
     if (isOpen) {
-      const centerX = window.innerWidth / 2 - 200; // Fensterbreite ~400px
-      const centerY = window.innerHeight / 2 - 100; // Fensterhöhe ~200px
+      const centerX = window.innerWidth / 2 - 200;
+      const centerY = window.innerHeight / 2 - 100;
       setPosition({ x: centerX, y: centerY });
     }
   }, [isOpen]);
@@ -52,10 +51,8 @@ const AIPopup = ({
     setResponseText(result.text);
     setLoading(false);
     onFetchResponse(result);
-    // Entferne onClose(); damit das Fenster offen bleibt
   };
 
-  // Schließen beim Klicken außerhalb
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -69,7 +66,6 @@ const AIPopup = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
-  // Drag & Drop Start
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     setDragging(true);
     startPosition.current = {
@@ -78,7 +74,6 @@ const AIPopup = ({
     };
   };
 
-  // Dragging Bewegung
   const handleMouseMove = (event: MouseEvent) => {
     if (!dragging) return;
     setPosition({
@@ -87,7 +82,6 @@ const AIPopup = ({
     });
   };
 
-  // Drag & Drop Ende
   const handleMouseUp = () => setDragging(false);
 
   useEffect(() => {
