@@ -12,6 +12,9 @@ import { Node } from "../utils/types";
 interface FolderProps {
   node: Node;
   onNodeClick: (node: Node) => void;
+  onDelete?: (nodeId: string) => void; // Optional: Callback für das Löschen eines Knotens
+  onRename?: (nodeId: string, newName: string) => void; // Optional: Callback für das Umbenennen eines Knotens
+  onAddChild?: (parentId?: string | null) => void; // Optional: Callback für das Hinzufügen eines neuen untergeordneten Knotens
 }
 
 /**
