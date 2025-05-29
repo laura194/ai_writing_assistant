@@ -61,35 +61,47 @@ const EditPage = () => {
     };
 
     // Funktion: Neues Kapitel hinzufügen
-    const handleAddNode = (parentNodeId: string | null) => {
+    const handleAddNode = (parentNodeId: string | null, position: number | null) => {
         const addNode = (nodes: Node[]): Node[] => {
             if (parentNodeId === null) {
-                // Neues Kapitel auf der obersten Ebene hinzufügen
-                return [
-                    ...nodes,
-                    {
-                        id: Date.now().toString(), // Eindeutige ID generieren
-                        name: "New Chapter",
-                        nodes: [],
-                    },
-                ];
+                // Neues Kapitel auf der obersten Ebene an einer bestimmten Position einfügen
+                const newNode = {
+                    id: Date.now().toString(),
+                    name: "New Chapter",
+                    nodes: [],
+                };
+
+                if (position === null || position >= nodes.length) {
+                    // An das Ende einfügen
+                    return [...nodes, newNode];
+                }
+
+                // An der gewünschten Position einfügen
+                return [...nodes.slice(0, position), newNode, ...nodes.slice(position)];
             }
 
-            // Kapitel an das richtige übergeordnete Kapitel anhängen
+            // Unterkapitel an der richtigen Position hinzufügen
             return nodes.map((node) =>
                 node.id === parentNodeId
                     ? {
                         ...node,
-                        nodes: [
-                            ...(node.nodes || []), // Absicherung für undefined
-                            {
+                        nodes: (() => {
+                            const newNode = {
                                 id: Date.now().toString(),
                                 name: "New Subchapter",
                                 nodes: [],
-                            },
-                        ],
+                            };
+                            if (position === null || position >= (node.nodes || []).length) {
+                                return [...(node.nodes || []), newNode];
+                            }
+                            return [
+                                ...(node.nodes || []).slice(0, position),
+                                newNode,
+                                ...(node.nodes || []).slice(position),
+                            ];
+                        })(),
                     }
-                    : { ...node, nodes: addNode(node.nodes || []) } // Absicherung für undefined
+                    : { ...node, nodes: addNode(node.nodes || []) }
             );
         };
 
@@ -102,20 +114,40 @@ const EditPage = () => {
             <aside className="w-1/4 bg-gray-200 p-4 overflow-y-auto">
                 <h2 className="text-lg font-bold mb-4">Chapter Structure</h2>
                 <button
-                    onClick={() => handleAddNode(null)}
+                    onClick={() => handleAddNode(null, null)} // Fügt Kapitel am Ende ein
                     className="mb-4 bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500"
                 >
                     Add New Chapter
                 </button>
                 <ul>
-                    {nodes.map((node) => (
-                        <Folder
-                            key={node.id}
-                            node={node}
-                            onNodeClick={handleNodeClick}
-                            onDeleteNode={handleDeleteNode}
-                            onEditNode={handleEditNode}
-                        />
+                    {nodes.map((node, index) => (
+                        <li key={node.id}>
+                            {/* Button vor einem Kapitel einfügen */}
+                            <button
+                                onClick={() => handleAddNode(null, index)} // Fügt Kapitel an der angegebenen Position ein
+                                className="bg-green-200 text-green-700 px-2 py-1 rounded hover:bg-green-300 mb-2"
+                            >
+                                + Add Chapter Here
+                            </button>
+
+                            {/* Das Kapitel selbst */}
+                            <Folder
+                                node={node}
+                                onNodeClick={handleNodeClick}
+                                onDeleteNode={handleDeleteNode}
+                                onEditNode={handleEditNode}
+                            />
+
+                            {/* Nach dem letzten Kapitel einfügen */}
+                            {index === nodes.length - 1 && (
+                                <button
+                                    onClick={() => handleAddNode(null, null)} // Fügt Kapitel am Ende ein
+                                    className="bg-green-200 text-green-700 px-2 py-1 rounded hover:bg-green-300 mt-2"
+                                >
+                                    + Add Chapter at End
+                                </button>
+                            )}
+                        </li>
                     ))}
                 </ul>
             </aside>
@@ -126,10 +158,10 @@ const EditPage = () => {
                     <>
                         <h1 className="text-2xl font-bold mb-4">{currentNode.name}</h1>
                         <button
-                            onClick={() => handleAddNode(currentNode.id)}
+                            onClick={() => handleAddNode(currentNode.id, null)} // Fügt ein neues Unterkapitel am Ende ein
                             className="mb-4 bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500"
                         >
-                            Add Subchapter to "{currentNode.name}"
+                            Add Subchapter
                         </button>
                         <p>You can add content or edit this chapter!</p>
                     </>
