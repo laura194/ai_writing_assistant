@@ -16,5 +16,4 @@ connectDB();
 app.use("/api/hello", helloRoutes);
 app.use("/api/ai", aiRoutes);
 
-
 export default app;
