@@ -47,6 +47,7 @@ export const getAiProtocols = async (
     const aiProtocols = await AIProtocol.find({ username });
     res.status(200).json(aiProtocols);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

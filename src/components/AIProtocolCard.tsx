@@ -26,14 +26,17 @@ const AIProtocolCard: React.FC = () => {
 
         setProtocols(response.data);
       } catch (err) {
+        console.error(err);
         setError("Error while fetching protocols.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProtocols();
-  }, []);
+    if (user?.username || user?.id) {
+      fetchProtocols();
+    }
+  }, [user?.username, user?.id]);
 
   return (
     <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
