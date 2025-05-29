@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Dialog } from "@headlessui/react";
 import { Lightbulb, Atom } from "lucide-react";
 import { fetchAIResponse } from "../../utils/AIHandler";
@@ -74,15 +74,18 @@ const AIPopup = ({
     };
   };
 
-  const handleMouseMove = (event: MouseEvent) => {
-    if (!dragging) return;
-    setPosition({
-      x: event.clientX - startPosition.current.x,
-      y: event.clientY - startPosition.current.y,
-    });
-  };
+  const handleMouseMove = useCallback(
+    (event: MouseEvent) => {
+      if (!dragging) return;
+      setPosition({
+        x: event.clientX - startPosition.current.x,
+        y: event.clientY - startPosition.current.y,
+      });
+    },
+    [dragging],
+  );
 
-  const handleMouseUp = () => setDragging(false);
+  const handleMouseUp = useCallback(() => setDragging(false), []);
 
   useEffect(() => {
     if (dragging) {
@@ -96,7 +99,7 @@ const AIPopup = ({
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [dragging]);
+  }, [dragging, handleMouseMove, handleMouseUp]);
 
   useEffect(() => {
     if (!isOpen) {
