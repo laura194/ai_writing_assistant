@@ -28,17 +28,24 @@ function FileContentCard({ node }: FileContentCardProps) {
     setFileContent(node.content || "...");
   }, [node]);
 
-  const handleReplaceContent = (newContent: string) => {
-    setFileContent(newContent);
-
-    // Create AI protocol entry
+  const createProtocol = (result: AIResult) => {
     createAIProtocolEntry({
-      aiName: aiResult?.modelVersion || "Unknown AI",
-      usageForm: aiResult?.prompt || "Unknown prompt",
+      aiName: result?.modelVersion || "Unknown AI",
+      usageForm: result?.prompt || "Unknown prompt",
       affectedParts: node.name || "Unknown file",
-      remarks: aiResult?.text || "No remarks",
+      remarks: result?.text || "No remarks",
       username: user?.username || user?.id || "unknown-user",
     });
+  };
+
+  const handleReplaceContent = (newContent: string) => {
+    setFileContent(newContent);
+    if (aiResult) createProtocol(aiResult);
+  };
+
+  const handleAppendContent = (additionalContent: string) => {
+    setFileContent((prev) => `${prev}\n\n${additionalContent}`);
+    if (aiResult) createProtocol(aiResult);
   };
 
   const handleFetchResponse = (result: AIResult) => {
@@ -74,6 +81,7 @@ function FileContentCard({ node }: FileContentCardProps) {
           onClose={() => setIsResponseOpen(false)}
           result={aiResult}
           onReplaceContent={handleReplaceContent}
+          onAppendContent={handleAppendContent} // Neu hinzugefügt
         />
       )}
 
