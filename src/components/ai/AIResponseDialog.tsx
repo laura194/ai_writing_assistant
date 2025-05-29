@@ -2,11 +2,13 @@ import { Dialog } from "@headlessui/react";
 import { X } from "lucide-react";
 import { AIResult } from "../../models/IAITypes";
 import MarkdownContent from "../MarkdownContent";
+
 interface AIResponseDialogProps {
   isOpen: boolean;
   onClose: () => void;
   result: AIResult;
   onReplaceContent: (newContent: string) => void;
+  onAppendContent: (additionalContent: string) => void; // NEU
 }
 
 const AIResponseDialog = ({
@@ -14,6 +16,7 @@ const AIResponseDialog = ({
   onClose,
   result,
   onReplaceContent,
+  onAppendContent, // NEU
 }: AIResponseDialogProps) => {
   return (
     <Dialog
@@ -35,17 +38,30 @@ const AIResponseDialog = ({
           <MarkdownContent content={result.text} />
         </div>
 
-        <button
-          onClick={() => {
-            onReplaceContent(result.text);
-            onClose();
-          }}
-          className="mt-4 bg-gray-500 text-white px-4 py-2 rounded w-full"
-        >
-          Replace Text in File
-        </button>
+        <div className="mt-4 flex justify-between gap-2">
+          <button
+            onClick={() => {
+              onReplaceContent(result.text);
+              onClose();
+            }}
+            className="bg-gray-500 text-white px-4 py-2 rounded w-1/2"
+          >
+            Replace Text in File
+          </button>
+
+          <button
+            onClick={() => {
+              onAppendContent(result.text);
+              onClose();
+            }}
+            className="bg-gray-300 text-black px-4 py-2 rounded w-1/2"
+          >
+            Append Text to File
+          </button>
+        </div>
       </div>
     </Dialog>
   );
 };
+
 export default AIResponseDialog;
