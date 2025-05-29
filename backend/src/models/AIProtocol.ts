@@ -5,6 +5,10 @@ export interface IAiProtocol extends Document {
   usageForm: string;
   affectedParts: string;
   remarks: string;
+  username: string;
+  createdAt?: Date; // Optional, will be added by mongoose timestamps
+  updatedAt?: Date; // Optional, will be added by mongoose timestamps
+  
 }
 
 const aiProtocolSchema: Schema = new Schema(
@@ -13,6 +17,7 @@ const aiProtocolSchema: Schema = new Schema(
     usageForm: { type: String, required: true },
     affectedParts: { type: String, required: true },
     remarks: { type: String, required: true },
+    username: { type: String, required: true }, 
   },
   { timestamps: true }  
 );

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { IAiProtocolEntry } from "../models/IAITypes";
+import { useUser } from "@clerk/clerk-react";
 
 const truncateText = (text: string, maxLength = 300) => {
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -11,11 +12,18 @@ const AIProtocolCard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { user } = useUser();
+
   useEffect(() => {
     const fetchProtocols = async () => {
       try {
-        const response =
-          await axios.get<IAiProtocolEntry[]>("/api/ai/aiProtocol");
+        const response = await axios.get<IAiProtocolEntry[]>(
+          "/api/ai/aiProtocol",
+          {
+            params: { username: user?.username || user?.id },
+          }
+        );
+
         setProtocols(response.data);
       } catch (err) {
         setError("Error while fetching protocols.");
@@ -34,6 +42,10 @@ const AIProtocolCard: React.FC = () => {
         <p>Loading Protocols...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
+      ) : protocols.length === 0 ? (
+        <p className="text-gray-600">
+          No entries have been created in the AI protocol yet.
+        </p>
       ) : (
         <div className="relative max-h-200 overflow-y-auto">
           <table className="min-w-full bg-white shadow-md rounded-xl">
@@ -43,6 +55,8 @@ const AIProtocolCard: React.FC = () => {
                 <th className="text-left px-4 py-2">Usage</th>
                 <th className="text-left px-4 py-2">Affected sections</th>
                 <th className="text-left px-4 py-2">Notes</th>
+                <th className="text-left px-4 py-2">Created at</th>
+                <th className="text-left px-4 py-2">Updated at</th>
               </tr>
             </thead>
             <tbody>
@@ -57,6 +71,22 @@ const AIProtocolCard: React.FC = () => {
                   </td>
                   <td className="px-4 py-2">
                     {truncateText(protocol.remarks)}
+                  </td>
+                  <td className="px-4 py-2">
+                    {protocol.createdAt
+                      ? new Date(protocol.createdAt).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })
+                      : "N/A"}
+                  </td>
+                  <td className="px-4 py-2">
+                    {protocol.updatedAt
+                      ? new Date(protocol.updatedAt).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })
+                      : "N/A"}
                   </td>
                 </tr>
               ))}

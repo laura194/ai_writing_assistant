@@ -7,6 +7,7 @@ import { AIResult } from "../models/IAITypes";
 import { Atom } from "lucide-react";
 import AIResponseDialog from "./ai/AIResponseDialog";
 import { createAIProtocolEntry } from "../utils/AIHandler";
+import { useUser } from "@clerk/clerk-react";
 
 export interface FileContentCardProps {
   node: Node;
@@ -21,6 +22,13 @@ function FileContentCard({ node }: FileContentCardProps) {
   const [aiResult, setAIResult] = useState<AIResult | null>(null);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
 
+  const { user } = useUser();
+
+  fetch("/api/test")
+    .then((res) => res.text())
+    .then(console.log)
+    .catch(console.error);
+
   useEffect(() => {
     setFileContent(node.content || "...");
   }, [node]);
@@ -34,6 +42,7 @@ function FileContentCard({ node }: FileContentCardProps) {
       usageForm: aiResult?.prompt || "Unknown prompt",
       affectedParts: node.name || "Unknown file",
       remarks: aiResult?.text || "No remarks",
+      username: user?.username || user?.id || "unknown-user",
     });
   };
 
