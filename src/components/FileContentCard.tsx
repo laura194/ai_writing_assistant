@@ -24,11 +24,6 @@ function FileContentCard({ node }: FileContentCardProps) {
 
   const { user } = useUser();
 
-  fetch("/api/test")
-    .then((res) => res.text())
-    .then(console.log)
-    .catch(console.error);
-
   useEffect(() => {
     setFileContent(node.content || "...");
   }, [node]);
