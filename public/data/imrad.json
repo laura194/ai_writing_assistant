@@ -1,0 +1,33 @@
+[
+  {
+    "id": "1",
+    "name": "Introduction",
+    "nodes": [
+      {
+        "id": "2",
+        "name": "Background",
+        "nodes": []
+      },
+      {
+        "id": "3",
+        "name": "Objectives",
+        "nodes": []
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Methods",
+    "nodes": []
+  },
+  {
+    "id": "5",
+    "name": "Results",
+    "nodes": []
+  },
+  {
+    "id": "6",
+    "name": "Discussion",
+    "nodes": []
+  }
+]

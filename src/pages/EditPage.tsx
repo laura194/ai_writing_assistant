@@ -1,135 +1,144 @@
-import { useState, useEffect } from "react";
-import "../App.css";
+import { useEffect, useState } from "react";
 import Folder from "../components/Folder";
-import FileContentCard from "../components/FileContentCard";
-import { Bars3Icon } from "@heroicons/react/24/solid";
 import { Node } from "../utils/types";
-import BottomNavigationBar from "../components/BottomNavigationBar";
-import Header from "../components/Header";
-import AIProtocolCard from "../components/AIProtocolCard";
 
 const EditPage = () => {
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [nodeContents, setNodeContents] = useState<Node[]>([]);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-  const [menuOpen, setMenuOpen] = useState<boolean>(() => {
-    const savedMenuOpen = localStorage.getItem("menuOpen");
-    return savedMenuOpen ? JSON.parse(savedMenuOpen) : true;
-  });
+    const [nodes, setNodes] = useState<Node[]>([]);
+    const [currentNode, setCurrentNode] = useState<Node | null>(null);
 
-  const [activeView, setActiveView] = useState(() => {
-    const savedView = localStorage.getItem("activeView");
-    return savedView ? savedView : "file";
-  });
+    // Funktion: Laden der Baumstruktur
+    useEffect(() => {
+        const selectedStructure = localStorage.getItem("selectedStructure");
 
-  useEffect(() => {
-    localStorage.setItem("activeView", activeView);
-  }, [activeView]);
+        let structurePath = "/data/custom.json";
+        if (selectedStructure === "imrad") structurePath = "/data/imrad.json";
+        if (selectedStructure === "design") structurePath = "/data/design.json";
 
-  useEffect(() => {
-    // Load the project structure
-    // This should be replaced with the actual database
-    fetch("/projectStructure.json")
-      .then((response) => response.json())
-      .then((data: Node[]) => setNodes(data))
-      .catch((error) => console.error("Error loading JSON:", error));
-
-    // Load the file content
-    // This should be replaced with the actual database
-    fetch("/fileContent.json")
-      .then((response) => response.json())
-      .then((data: Node[]) => {
-        setNodeContents(data);
-
-        const savedNodeId = localStorage.getItem("selectedNodeId");
-        if (savedNodeId) {
-          const savedNode = data.find((item) => item.id === savedNodeId);
-          if (savedNode) {
-            setSelectedNode(savedNode);
-          }
-        }
-      })
-      .catch((error) =>
-        console.error("Error loading node content JSON:", error),
-      );
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("menuOpen", JSON.stringify(menuOpen));
-  }, [menuOpen]);
-
-  const handleNodeClick = (node: Node) => {
-    const content = nodeContents.find((item) => item.id === node.id);
-    setSelectedNode(content || null);
-    localStorage.setItem("selectedNodeId", node.id);
-    setActiveView("file");
-  };
-
-  return (
-    <div className="flex flex-col h-screen">
-      <Header />
-      <div className="flex flex-1 relative">
-        {/* Button to open/close the menu */}
-        <button
-          className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <Bars3Icon className="h-5 w-5 text-white" />
-        </button>
-
-        {/* Menu */}
-
-        <div
-          className={`${
-            menuOpen ? "w-1/4" : "w-12"
-          } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
-        >
-          {menuOpen && (
-            <ul>
-              <li className="my-1.5">
-                <ul className="pl-10">
-                  {nodes.map((node) => (
-                    <Folder
-                      node={node}
-                      key={node.id}
-                      onNodeClick={handleNodeClick}
-                    />
-                  ))}
-                </ul>
-              </li>
-            </ul>
-          )}
-          {/* BottomNavigationBar */}
-
-          <BottomNavigationBar
-            activeView={activeView}
-            onChangeView={setActiveView}
-            menuOpen={menuOpen}
-          />
-        </div>
-
-        {/* Main Content */}
-
-        <div
-          className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-4 bg-gray-400`}
-        >
-          {selectedNode ? (
-            activeView === "file" ? (
-              <FileContentCard node={selectedNode} />
-            ) : activeView === "ai" ? (
-              <AIProtocolCard />
-            ) : activeView === "fullDocument" ? (
-              <p>Full Document</p>
-            ) : (
-              <p>Settings</p>
+        fetch(structurePath)
+            .then((response) => response.json())
+            .then((data: Node[]) =>
+                setNodes(
+                    data.map((node) => ({
+                        ...node,
+                        nodes: node.nodes || [],
+                    }))
+                )
             )
-          ) : (
-            <p>Select an element.</p>
-          )}
+            .catch((error) => console.error("Error loading structure JSON:", error));
+    }, []);
+
+    // Funktion: Kapitel auswählen
+    const handleNodeClick = (node: Node) => {
+        setCurrentNode(node);
+    };
+
+    // Funktion: Kapitel bearbeiten
+    const handleEditNode = (updatedNode: Node) => {
+        const updateNodes = (nodes: Node[]): Node[] =>
+            nodes.map((node) =>
+                node.id === updatedNode.id
+                    ? { ...node, name: updatedNode.name }
+                    : { ...node, nodes: node.nodes ? updateNodes(node.nodes) : [] }
+            );
+
+        setNodes(updateNodes(nodes));
+    };
+
+    // Funktion: Kapitel löschen
+    const handleDeleteNode = (nodeId: string) => {
+        const deleteNode = (nodes: Node[]): Node[] =>
+            nodes
+                .filter((node) => node.id !== nodeId)
+                .map((node) => ({
+                    ...node,
+                    nodes: node.nodes ? deleteNode(node.nodes) : [],
+                }));
+
+        setNodes(deleteNode(nodes));
+        if (currentNode?.id === nodeId) {
+            setCurrentNode(null);
+        }
+    };
+
+    // Funktion: Neues Kapitel hinzufügen
+    const handleAddNode = (parentNodeId: string | null) => {
+        const addNode = (nodes: Node[]): Node[] => {
+            if (parentNodeId === null) {
+                // Neues Kapitel auf der obersten Ebene hinzufügen
+                return [
+                    ...nodes,
+                    {
+                        id: Date.now().toString(), // Eindeutige ID generieren
+                        name: "New Chapter",
+                        nodes: [],
+                    },
+                ];
+            }
+
+            // Kapitel an das richtige übergeordnete Kapitel anhängen
+            return nodes.map((node) =>
+                node.id === parentNodeId
+                    ? {
+                        ...node,
+                        nodes: [
+                            ...(node.nodes || []), // Absicherung für undefined
+                            {
+                                id: Date.now().toString(),
+                                name: "New Subchapter",
+                                nodes: [],
+                            },
+                        ],
+                    }
+                    : { ...node, nodes: addNode(node.nodes || []) } // Absicherung für undefined
+            );
+        };
+
+        setNodes((prevNodes) => addNode(prevNodes));
+    };
+
+    return (
+        <div className="flex">
+            {/* Sidebar: Kapitelstruktur */}
+            <aside className="w-1/4 bg-gray-200 p-4 overflow-y-auto">
+                <h2 className="text-lg font-bold mb-4">Chapter Structure</h2>
+                <button
+                    onClick={() => handleAddNode(null)}
+                    className="mb-4 bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500"
+                >
+                    Add New Chapter
+                </button>
+                <ul>
+                    {nodes.map((node) => (
+                        <Folder
+                            key={node.id}
+                            node={node}
+                            onNodeClick={handleNodeClick}
+                            onDeleteNode={handleDeleteNode}
+                            onEditNode={handleEditNode}
+                        />
+                    ))}
+                </ul>
+            </aside>
+
+            {/* Hauptbereich: Aktuelles Kapitel */}
+            <main className="flex-1 p-4">
+                {currentNode ? (
+                    <>
+                        <h1 className="text-2xl font-bold mb-4">{currentNode.name}</h1>
+                        <button
+                            onClick={() => handleAddNode(currentNode.id)}
+                            className="mb-4 bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500"
+                        >
+                            Add Subchapter to "{currentNode.name}"
+                        </button>
+                        <p>You can add content or edit this chapter!</p>
+                    </>
+                ) : (
+                    <p>Select a chapter to view or edit its details.</p>
+                )}
+            </main>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default EditPage;

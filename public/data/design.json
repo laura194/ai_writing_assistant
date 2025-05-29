@@ -1,0 +1,22 @@
+[
+  {
+    "id": "1",
+    "name": "Problem Statement",
+    "nodes": []
+  },
+  {
+    "id": "2",
+    "name": "Design Concept",
+    "nodes": []
+  },
+  {
+    "id": "3",
+    "name": "Implementation",
+    "nodes": []
+  },
+  {
+    "id": "4",
+    "name": "Evaluation",
+    "nodes": []
+  }
+]
