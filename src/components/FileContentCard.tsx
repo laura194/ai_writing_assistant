@@ -11,12 +11,13 @@ import { useUser } from "@clerk/clerk-react";
 
 export interface FileContentCardProps {
   node: Node;
+  onUpdate: (updatedNode: Node) => void; // Prop hinzugefügt
 }
 
 /**
  * Component for displaying a file with a title, icon, and content.
  */
-function FileContentCard({ node }: FileContentCardProps) {
+function FileContentCard({ node, onUpdate }: FileContentCardProps) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isResponseOpen, setIsResponseOpen] = useState(false);
   const [aiResult, setAIResult] = useState<AIResult | null>(null);
@@ -29,7 +30,11 @@ function FileContentCard({ node }: FileContentCardProps) {
   }, [node]);
 
   const handleReplaceContent = (newContent: string) => {
+    const updatedNode = { ...node, content: newContent };
     setFileContent(newContent);
+
+    // Rückgabe des aktualisierten Knotens
+    onUpdate(updatedNode);
 
     // Create AI protocol entry
     createAIProtocolEntry({
@@ -48,37 +53,37 @@ function FileContentCard({ node }: FileContentCardProps) {
   };
 
   return (
-    <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
-      <h2 className="text-lg font-bold mb-4">{node.name}</h2>
-      <div className="absolute top-3 right-3 flex items-center space-x-2">
-        <button
-          className="text-blue-800 hover:text-blue-800 hover:bg-gray-300 p-1 rounded"
-          onClick={() => setIsPopupOpen(true)}
-          title="Ask AI about this content"
-        >
-          <Atom className="w-6 h-6" />
-        </button>
-        {getIcon(node, "size-8")}
-      </div>
+      <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
+        <h2 className="text-lg font-bold mb-4">{node.name}</h2>
+        <div className="absolute top-3 right-3 flex items-center space-x-2">
+          <button
+              className="text-blue-800 hover:text-blue-800 hover:bg-gray-300 p-1 rounded"
+              onClick={() => setIsPopupOpen(true)}
+              title="Ask AI about this content"
+          >
+            <Atom className="w-6 h-6" />
+          </button>
+          {getIcon(node, "size-8")}
+        </div>
 
-      <AIPopup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        selectedText={fileContent || ""}
-        onFetchResponse={handleFetchResponse}
-      />
-
-      {aiResult && (
-        <AIResponseDialog
-          isOpen={isResponseOpen}
-          onClose={() => setIsResponseOpen(false)}
-          result={aiResult}
-          onReplaceContent={handleReplaceContent}
+        <AIPopup
+            isOpen={isPopupOpen}
+            onClose={() => setIsPopupOpen(false)}
+            selectedText={fileContent || ""}
+            onFetchResponse={handleFetchResponse}
         />
-      )}
 
-      <MarkdownContent content={fileContent} />
-    </div>
+        {aiResult && (
+            <AIResponseDialog
+                isOpen={isResponseOpen}
+                onClose={() => setIsResponseOpen(false)}
+                result={aiResult}
+                onReplaceContent={handleReplaceContent}
+            />
+        )}
+
+        <MarkdownContent content={fileContent} />
+      </div>
   );
 }
 

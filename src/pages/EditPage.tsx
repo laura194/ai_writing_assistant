@@ -1,134 +1,140 @@
 import { useState, useEffect } from "react";
-import "../App.css";
 import Folder from "../components/Folder";
 import FileContentCard from "../components/FileContentCard";
 import { Bars3Icon } from "@heroicons/react/24/solid";
-import { Node } from "../utils/types";
 import BottomNavigationBar from "../components/BottomNavigationBar";
 import Header from "../components/Header";
-import AIProtocolCard from "../components/AIProtocolCard";
+import { Node } from "../utils/types";
 
 const EditPage = () => {
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [nodeContents, setNodeContents] = useState<Node[]>([]);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-  const [menuOpen, setMenuOpen] = useState<boolean>(() => {
-    const savedMenuOpen = localStorage.getItem("menuOpen");
-    return savedMenuOpen ? JSON.parse(savedMenuOpen) : true;
+  const [nodes, setNodes] = useState<Node[]>([]); // Kapitelstruktur
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null); // Aktuell ausgewählter Knoten
+  const [menuOpen, setMenuOpen] = useState(() => {
+    const savedMenuState = localStorage.getItem("menuOpen");
+    return savedMenuState ? JSON.parse(savedMenuState) : true;
   });
+  const [activeView, setActiveView] = useState<string>("ai");
 
-  const [activeView, setActiveView] = useState(() => {
-    const savedView = localStorage.getItem("activeView");
-    return savedView ? savedView : "file";
-  });
-
+  // Kapitelstruktur laden
   useEffect(() => {
-    localStorage.setItem("activeView", activeView);
-  }, [activeView]);
-
-  useEffect(() => {
-    // Load the project structure
-    // This should be replaced with the actual database
     fetch("/projectStructure.json")
-      .then((response) => response.json())
-      .then((data: Node[]) => setNodes(data))
-      .catch((error) => console.error("Error loading JSON:", error));
-
-    // Load the file content
-    // This should be replaced with the actual database
-    fetch("/fileContent.json")
-      .then((response) => response.json())
-      .then((data: Node[]) => {
-        setNodeContents(data);
-
-        const savedNodeId = localStorage.getItem("selectedNodeId");
-        if (savedNodeId) {
-          const savedNode = data.find((item) => item.id === savedNodeId);
-          if (savedNode) {
-            setSelectedNode(savedNode);
-          }
-        }
-      })
-      .catch((error) =>
-        console.error("Error loading node content JSON:", error),
-      );
+        .then((res) => res.json())
+        .then((data: Node[]) => setNodes(data))
+        .catch((err) => console.error("Fehler beim Laden der Kapitelstruktur", err));
   }, []);
 
+  // Menüstatus speichern
   useEffect(() => {
     localStorage.setItem("menuOpen", JSON.stringify(menuOpen));
   }, [menuOpen]);
 
-  const handleNodeClick = (node: Node) => {
-    const content = nodeContents.find((item) => item.id === node.id);
-    setSelectedNode(content || null);
-    localStorage.setItem("selectedNodeId", node.id);
-    setActiveView("file");
+  // Kapitel hinzufügen
+  const addChapter = (parentId: string | null, newNode: Node) => {
+    const recursiveAdd = (nodes: Node[]): Node[] => {
+      return nodes.map((node) => {
+        if (node.id === parentId) {
+          return {
+            ...node,
+            nodes: [...(node.nodes || []), newNode],
+          };
+        }
+        if (node.nodes) {
+          return { ...node, nodes: recursiveAdd(node.nodes) };
+        }
+        return node;
+      });
+    };
+
+    if (parentId) {
+      setNodes((prev) => recursiveAdd(prev));
+    } else {
+      setNodes((prev) => [...prev, newNode]);
+    }
+  };
+
+  // Kapitel aktualisieren
+  const updateChapter = (updatedNode: Node) => {
+    const recursiveUpdate = (nodes: Node[]): Node[] => {
+      return nodes.map((node) => {
+        if (node.id === updatedNode.id) {
+          return updatedNode;
+        }
+        if (node.nodes) {
+          return { ...node, nodes: recursiveUpdate(node.nodes) };
+        }
+        return node;
+      });
+    };
+
+    setNodes((prev) => recursiveUpdate(prev));
+  };
+
+  // Kapitel löschen
+  const deleteChapter = (nodeId: string) => {
+    const recursiveDelete = (nodes: Node[]): Node[] => {
+      return nodes
+          .filter((node) => node.id !== nodeId)
+          .map((node) => ({
+            ...node,
+            nodes: recursiveDelete(node.nodes || []),
+          }));
+    };
+
+    setNodes((prev) => recursiveDelete(prev));
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <Header />
-      <div className="flex flex-1 relative">
-        {/* Button to open/close the menu */}
-        <button
-          className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <Bars3Icon className="h-5 w-5 text-white" />
-        </button>
-
-        {/* Menu */}
-
-        <div
-          className={`${
-            menuOpen ? "w-1/4" : "w-12"
-          } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
-        >
-          {menuOpen && (
+      <div className="h-screen flex flex-col">
+        <Header />
+        <div className="flex flex-grow relative">
+          {/* Left Sidebar */}
+          <div
+              className={`${
+                  menuOpen ? "w-1/4" : "w-12"
+              } bg-gray-200 p-4 transition-all duration-300`}
+          >
+            <button
+                className="bg-blue-500 text-white p-2 rounded mb-4"
+                onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
             <ul>
-              <li className="my-1.5">
-                <ul className="pl-10">
-                  {nodes.map((node) => (
-                    <Folder
-                      node={node}
+              {nodes.map((node) => (
+                  <Folder
                       key={node.id}
-                      onNodeClick={handleNodeClick}
-                    />
-                  ))}
-                </ul>
-              </li>
+                      node={node}
+                      onNodeClick={setSelectedNode}
+                      onAdd={addChapter}
+                      onRemove={deleteChapter}
+                  />
+              ))}
             </ul>
-          )}
-          {/* BottomNavigationBar */}
+          </div>
 
-          <BottomNavigationBar
-            activeView={activeView}
-            onChangeView={setActiveView}
-            menuOpen={menuOpen}
-          />
-        </div>
-
-        {/* Main Content */}
-
-        <div
-          className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-4 bg-gray-400`}
-        >
-          {selectedNode ? (
-            activeView === "file" ? (
-              <FileContentCard node={selectedNode} />
-            ) : activeView === "ai" ? (
-              <AIProtocolCard />
-            ) : activeView === "fullDocument" ? (
-              <p>Full Document</p>
+          {/* Content Section */}
+          <div className="flex-1 p-4 bg-white shadow-inner">
+            {selectedNode ? (
+                <FileContentCard
+                    node={selectedNode}
+                    onUpdate={(updatedNode) => {
+                      updateChapter(updatedNode);
+                      setSelectedNode(updatedNode);
+                    }}
+                />
             ) : (
-              <p>Settings</p>
-            )
-          ) : (
-            <p>Select an element.</p>
-          )}
+                <p>Wähle ein Kapitel zum Bearbeiten aus.</p>
+            )}
+          </div>
         </div>
+
+        {/* Bottom Navigation */}
+        <BottomNavigationBar
+            activeView={activeView}
+            menuOpen={menuOpen}
+            onChangeView={setActiveView}
+        />
       </div>
-    </div>
   );
 };
 
