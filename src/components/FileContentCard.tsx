@@ -13,9 +13,77 @@ export interface FileContentCardProps {
   node: Node;
 }
 
+function FileContentCard({ node }: FileContentCardProps) {
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isResponseOpen, setIsResponseOpen] = useState(false);
+  const [aiResult, setAIResult] = useState<AIResult | null>(null);
+  const [fileContent, setFileContent] = useState<string>(node.content || "...");
+
+  const { user } = useUser();
+
+  useEffect(() => {
+    setFileContent(node.content || "...");
+  }, [node]);
+
+  const handleReplaceContent = (newContent: string) => {
+    setFileContent(newContent);
+
+    createAIProtocolEntry({
+      aiName: aiResult?.modelVersion || "Unknown AI",
+      usageForm: aiResult?.prompt || "Unknown prompt",
+      affectedParts: node.name || "Unknown file",
+      remarks: aiResult?.text || "No remarks",
+      username: user?.username || user?.id || "unknown-user",
+    });
+  };
+
+  const handleFetchResponse = (result: AIResult) => {
+    setAIResult(result);
+    setIsPopupOpen(false);
+    setIsResponseOpen(true);
+  };
+
+  return (
+      <div className="relative bg-white p-6 shadow-md rounded-lg max-w-2xl w-full mx-auto">
+        {/* Titel */}
+        <h2 className="text-2xl font-semibold mb-4 text-gray-800">{node.name}</h2>
+
+        {/* Icon und KI-Button */}
+        <div className="absolute top-3 right-3 flex items-center space-x-3">
+          <button
+              className="text-blue-500 hover:text-blue-700 hover:bg-gray-100 p-2 rounded-full"
+              onClick={() => setIsPopupOpen(true)}
+              title="Ask AI about this content"
+          >
+            <Atom className="w-6 h-6" />
+          </button>
+          {getIcon(node, "size-6")}
+        </div>
+
+        {/* KI-Popup */}
+        <AIPopup
+            isOpen={isPopupOpen}
+            onClose={() => setIsPopupOpen(false)}
+            selectedText={fileContent || ""}
+            onFetchResponse={handleFetchResponse}
+        />
+
+        {aiResult && (
+            <AIResponseDialog
+                isOpen={isResponseOpen}
+                onClose={() => setIsResponseOpen(false)}
+                result={aiResult}
+                onReplaceContent={handleReplaceContent}
+            />
+        )}
+
+        {/* Inhaltsbereich */}
+        <MarkdownContent content={fileContent} />
+      </div>
+  );
+}
+
 /**
- * Component for displaying a file with a title, icon, and content.
- */
 function FileContentCard({ node }: FileContentCardProps) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isResponseOpen, setIsResponseOpen] = useState(false);
@@ -81,5 +149,6 @@ function FileContentCard({ node }: FileContentCardProps) {
     </div>
   );
 }
+    **/
 
 export default FileContentCard;
