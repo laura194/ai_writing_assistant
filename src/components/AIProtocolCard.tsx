@@ -3,7 +3,7 @@ import axios from "axios";
 import { IAiProtocolEntry } from "../models/IAITypes";
 import { useUser } from "@clerk/clerk-react";
 
-const truncateText = (text: string, maxLength = 300) => {
+const truncateText = (text: string, maxLength = 100) => {
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 };
 
@@ -21,7 +21,7 @@ const AIProtocolCard: React.FC = () => {
           "/api/ai/aiProtocol",
           {
             params: { username: user?.username || user?.id },
-          },
+          }
         );
 
         setProtocols(response.data);
@@ -50,7 +50,7 @@ const AIProtocolCard: React.FC = () => {
           No entries have been created in the AI protocol yet.
         </p>
       ) : (
-        <div className="relative max-h-200 overflow-y-auto">
+        <div className="relative max-h-150 overflow-y-auto">
           <table className="min-w-full bg-white shadow-md rounded-xl">
             <thead className="sticky top-0 z-10 bg-gray-100">
               <tr>

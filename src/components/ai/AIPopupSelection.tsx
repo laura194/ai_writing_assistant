@@ -4,7 +4,7 @@ import { Lightbulb, Atom } from "lucide-react";
 import { fetchAIResponse } from "../../utils/AIHandler";
 import { AIResult } from "../../models/IAITypes";
 
-interface AIPopupProps {
+interface AIPopupSelectionProps {
   isOpen: boolean;
   onClose: () => void;
   selectedText: string;
@@ -17,12 +17,12 @@ const suggestions = [
   "Expand on this idea.",
 ];
 
-const AIPopup = ({
+const AIPopupSelection = ({
   isOpen,
   onClose,
   selectedText,
   onFetchResponse,
-}: AIPopupProps) => {
+}: AIPopupSelectionProps) => {
   const [additionalPrompt, setAdditionalPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -45,8 +45,8 @@ const AIPopup = ({
     setLoading(true);
     const fullText = `${selectedText} ${additionalPrompt}`.trim();
     const result = await fetchAIResponse(fullText);
-    result.originalText = selectedText;
     result.prompt = additionalPrompt;
+    result.originalText = selectedText;
     setLoading(false);
     onFetchResponse(result);
   };
@@ -125,6 +125,12 @@ const AIPopup = ({
           <Atom className="w-6 h-6 text-gray-600" />
         </div>
 
+        {selectedText && (
+          <div className="mb-2 max-h-32 overflow-y-auto bg-gray-50 border border-gray-300 rounded p-2 text-sm text-gray-800">
+            {selectedText}
+          </div>
+        )}
+
         <textarea
           className="w-full p-2 border rounded bg-gray-100 text-gray-700"
           placeholder="Prompt for AI..."
@@ -168,4 +174,4 @@ const AIPopup = ({
   );
 };
 
-export default AIPopup;
+export default AIPopupSelection;

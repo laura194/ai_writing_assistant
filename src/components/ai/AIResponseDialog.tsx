@@ -8,7 +8,7 @@ interface AIResponseDialogProps {
   onClose: () => void;
   result: AIResult;
   onReplaceContent: (newContent: string) => void;
-  onAppendContent: (additionalContent: string) => void; // NEU
+  onAppendContent: (additionalContent: string) => void;
 }
 
 const AIResponseDialog = ({
@@ -16,7 +16,7 @@ const AIResponseDialog = ({
   onClose,
   result,
   onReplaceContent,
-  onAppendContent, // NEU
+  onAppendContent,
 }: AIResponseDialogProps) => {
   return (
     <Dialog
@@ -24,7 +24,7 @@ const AIResponseDialog = ({
       onClose={onClose}
       className="fixed inset-0 flex items-center justify-center p-4"
     >
-      <div className="relative bg-white p-4 rounded-lg shadow-lg w-200 border border-gray-300">
+      <div className="relative bg-white p-4 rounded-lg shadow-lg w-[600px] border border-gray-300">
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
@@ -34,8 +34,25 @@ const AIResponseDialog = ({
         </button>
 
         <h2 className="text-lg font-bold mb-2">AI Response</h2>
-        <div className="max-h-64 overflow-auto border-t pt-2">
-          <MarkdownContent content={result.text} />
+
+        {/* Original Text */}
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-gray-600 mb-1">
+            Original Text
+          </h3>
+          <div className="max-h-32 overflow-auto border rounded p-2 bg-gray-50 text-sm text-gray-800">
+            {result.originalText}
+          </div>
+        </div>
+
+        {/* AI Response */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 mb-1">
+            AI Suggestion
+          </h3>
+          <div className="max-h-48 overflow-auto border-t pt-2">
+            <MarkdownContent content={result.text} />
+          </div>
         </div>
 
         <div className="mt-4 flex justify-between gap-2">

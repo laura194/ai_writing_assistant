@@ -8,6 +8,8 @@ import { Atom } from "lucide-react";
 import AIResponseDialog from "./ai/AIResponseDialog";
 import { createAIProtocolEntry } from "../utils/AIHandler";
 import { useUser } from "@clerk/clerk-react";
+import AIBubble from "./ai/AIBubble";
+import AIPopupSelection from "./ai/AIPopupSelection";
 
 export interface FileContentCardProps {
   node: Node;
@@ -19,8 +21,15 @@ export interface FileContentCardProps {
 function FileContentCard({ node }: FileContentCardProps) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isResponseOpen, setIsResponseOpen] = useState(false);
+  const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [aiResult, setAIResult] = useState<AIResult | null>(null);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
+  const [selectedText, setSelectedText] = useState("");
+  const [isSelectionPopupOpen, setIsSelectionPopupOpen] = useState(false);
+  const [bubblePosition, setBubblePosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const { user } = useUser();
 
@@ -54,6 +63,17 @@ function FileContentCard({ node }: FileContentCardProps) {
     setIsResponseOpen(true);
   };
 
+  const handleTextSelect = (text: string, coords: { x: number; y: number }) => {
+    setSelectedText(text);
+    setBubblePosition(coords);
+    setIsAIBubbleOpen(true);
+  };
+
+  const handleAIBubbleClick = () => {
+    setIsAIBubbleOpen(false);
+    setIsSelectionPopupOpen(true);
+  };
+
   return (
     <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
       <h2 className="text-lg font-bold mb-4">{node.name}</h2>
@@ -71,7 +91,17 @@ function FileContentCard({ node }: FileContentCardProps) {
       <AIPopup
         isOpen={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
-        selectedText={fileContent || ""}
+        selectedText={fileContent}
+        onFetchResponse={handleFetchResponse}
+      />
+
+      <AIPopupSelection
+        isOpen={isSelectionPopupOpen}
+        onClose={() => {
+          setIsSelectionPopupOpen(false);
+          setSelectedText("");
+        }}
+        selectedText={selectedText}
         onFetchResponse={handleFetchResponse}
       />
 
@@ -81,11 +111,15 @@ function FileContentCard({ node }: FileContentCardProps) {
           onClose={() => setIsResponseOpen(false)}
           result={aiResult}
           onReplaceContent={handleReplaceContent}
-          onAppendContent={handleAppendContent} // Neu hinzugefügt
+          onAppendContent={handleAppendContent}
         />
       )}
 
-      <MarkdownContent content={fileContent} />
+      {isAIBubbleOpen && bubblePosition && (
+        <AIBubble position={bubblePosition} onClick={handleAIBubbleClick} />
+      )}
+
+      <MarkdownContent content={fileContent} onTextSelect={handleTextSelect} />
     </div>
   );
 }
