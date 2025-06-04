@@ -182,8 +182,8 @@ function AIComponent({
             <div className="mt-4 space-y-6 max-h-[400px] overflow-auto">
               <div>
                 <h4 className="text-xs text-gray-500 mb-1">Original Text</h4>
-                <div className="bg-gray-100 p-2 rounded text-sm">
-                  {selectedText}
+                <div className="bg-gray-100 p-2 rounded text-sm max-w-[1100px]">
+                  <MarkdownContent content={selectedText} />
                 </div>
               </div>
 
