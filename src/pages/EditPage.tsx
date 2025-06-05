@@ -1,34 +1,46 @@
 import { useState, useEffect } from "react";
-import Folder from "../components/Folder";
-import FileContentCard from "../components/FileContentCard";
-import { Bars3Icon } from "@heroicons/react/24/solid";
-import BottomNavigationBar from "../components/BottomNavigationBar";
-import Header from "../components/Header";
-import { Node } from "../utils/types";
+
+// Importieren von Komponenten
+import Folder from "../components/Folder"; // Baumstruktur im Sidebar
+import FileContentCard from "../components/FileContentCard"; // Hauptinhalt bei Auswahl
+import { Bars3Icon } from "@heroicons/react/24/solid"; // Icon für das Menü
+import BottomNavigationBar from "../components/BottomNavigationBar"; // Navigationsleiste unten
+import Header from "../components/Header"; // Kopfzeile oben
+
+import { Node } from "../utils/types"; // Datentyp für Knotenstruktur
 
 const EditPage = () => {
-  const [nodes, setNodes] = useState<Node[]>([]); // Kapitelstruktur
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null); // Aktuell ausgewählter Knoten
+  // State für die Kapitelstruktur
+  const [nodes, setNodes] = useState<Node[]>([]);
+
+  // State für das aktuell ausgewählte Kapitel
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+
+  // Sidebar Menüstatus (offen/zu)
   const [menuOpen, setMenuOpen] = useState(() => {
     const savedMenuState = localStorage.getItem("menuOpen");
     return savedMenuState ? JSON.parse(savedMenuState) : true;
   });
+
+  // Aktuelle Ansicht unten
   const [activeView, setActiveView] = useState<string>("ai");
 
-  // Kapitelstruktur laden
+  // Lade die Kapitelstruktur bei Erstaufruf
   useEffect(() => {
     fetch("/projectStructure.json")
         .then((res) => res.json())
         .then((data: Node[]) => setNodes(data))
-        .catch((err) => console.error("Fehler beim Laden der Kapitelstruktur", err));
+        .catch((err) =>
+            console.error("Fehler beim Laden der Kapitelstruktur", err)
+        );
   }, []);
 
-  // Menüstatus speichern
+  // Speichere den Menüstatus bei Änderungen
   useEffect(() => {
     localStorage.setItem("menuOpen", JSON.stringify(menuOpen));
   }, [menuOpen]);
 
-  // Kapitel hinzufügen
+  // Funktion zum Hinzufügen eines Kapitels
   const addChapter = (parentId: string | null, newNode: Node) => {
     const recursiveAdd = (nodes: Node[]): Node[] => {
       return nodes.map((node) => {
@@ -83,22 +95,24 @@ const EditPage = () => {
     setNodes((prev) => recursiveDelete(prev));
   };
 
+  // JSX-Struktur der Seite
   return (
       <div className="h-screen flex flex-col">
+        {/* Header-Komponente oben */}
         <Header />
+
+        {/* Hauptbereich */}
         <div className="flex flex-grow relative">
-          {/* Left Sidebar */}
-          <div
-              className={`${
-                  menuOpen ? "w-1/4" : "w-12"
-              } bg-gray-200 p-4 transition-all duration-300`}
-          >
+
+          {/* Sidebar mit Folder-Komponente */}
+          <div className={`${menuOpen ? "w-1/4" : "w-12"} bg-gray-200 p-4 transition-all duration-300`}>
             <button
                 className="bg-blue-500 text-white p-2 rounded mb-4"
                 onClick={() => setMenuOpen(!menuOpen)}
             >
               <Bars3Icon className="h-6 w-6" />
             </button>
+
             <ul>
               {nodes.map((node) => (
                   <Folder
@@ -112,7 +126,7 @@ const EditPage = () => {
             </ul>
           </div>
 
-          {/* Content Section */}
+          {/* Inhalt (rechte Seite) */}
           <div className="flex-1 p-4 bg-white shadow-inner">
             {selectedNode ? (
                 <FileContentCard
@@ -128,7 +142,7 @@ const EditPage = () => {
           </div>
         </div>
 
-        {/* Bottom Navigation */}
+        {/* Untere Navigationsleiste */}
         <BottomNavigationBar
             activeView={activeView}
             menuOpen={menuOpen}
