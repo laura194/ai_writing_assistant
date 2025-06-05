@@ -15,13 +15,13 @@ const HomePage = () => {
 
         <div className="flex flex-col gap-4 mb-6">
           <button
-            onClick={() => navigate("/editPage")}
+            onClick={() => navigate("/edit")}
             className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
           >
             Bestehendes Projekt öffnen
           </button>
           <button
-            onClick={() => navigate("/structureSelectionPage")}
+            onClick={() => navigate("/structureSelection")}
             className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
           >
             Neues Projekt erstellen
