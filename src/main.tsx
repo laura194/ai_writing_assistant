@@ -1,40 +1,36 @@
+/* ENTRY POINT FOR THE APPLICATION
+ *
+ * This file is the main entry point for the React application.
+ * It initializes the application, sets up the Clerk provider for authentication,
+ * and renders the App component within a BrowserRouter.
+ *
+ * It also includes the global CSS styles of the index.css file.
+ */
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import App from "./App.tsx";
 import logger from "loglevel";
-import {
-  ClerkProvider,
-  RedirectToSignIn,
-  SignIn,
-  SignUp,
-} from "@clerk/clerk-react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import LandingPage from "./pages/LandingPage.tsx";
+import { ClerkProvider } from "@clerk/clerk-react";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App.tsx";
 
 logger.info("[main.tsx] Application started 🥳");
 
-// Import Clerk Publishable Key
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Check if the Clerk Publishable Key is defined
 if (!CLERK_PUBLISHABLE_KEY) {
-  logger.error("[App.tsx] Missing Clerk Publishable Key");
+  logger.error("[main.tsx] Missing Clerk Publishable Key");
   throw new Error("Missing Clerk Publishable Key");
 }
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
+    {/* URL AFTER SIGN OUT */}
     <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/sign-in/*" element={<SignIn />} />
-          <Route path="/sign-up/*" element={<SignUp />} />
-          <Route path="/*" element={<App />} />
-          <Route path="*" element={<RedirectToSignIn />} />
-        </Routes>
+        <App />
       </BrowserRouter>
     </ClerkProvider>
-  </StrictMode>,
+  </StrictMode>
 );

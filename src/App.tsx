@@ -1,38 +1,21 @@
-import { Routes, Route } from "react-router-dom";
-import EditPage from "./pages/EditPage";
-import StructureSelectionPage from "./pages/StructureSelectionPage.tsx";
-import ProtectedRoute from "./components/ProtectedRoute.tsx";
-import HomePage from "./pages/HomePage.tsx";
+/* CENTRAL COMPONENT FOR ROUTING AND LAYOUT
+ *
+ * In this file, we define the App component that serves as the central point for routing and layout.
+ *
+ * It imports the AppRoutes component, which contains all the routes of the application.
+ * Also sets up the main structure of the application.
+ * Here you define the main layout, which can include headers, footers, or other common elements.
+ */
+
+import AppRoutes from "./AppRoutes";
 
 const App = () => {
   return (
-    <Routes>
-      <Route
-        path="/home"
-        element={
-          <ProtectedRoute>
-            <HomePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/structureSelectionPage"
-        element={
-          <ProtectedRoute>
-            <StructureSelectionPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/editPage"
-        element={
-          <ProtectedRoute>
-            <EditPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="*" element={<p>Page not found</p>} />
-    </Routes>
+    <>
+      <main>
+        <AppRoutes />
+      </main>
+    </>
   );
 };
 
