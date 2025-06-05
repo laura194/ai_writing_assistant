@@ -27,9 +27,10 @@ interface FolderProps {
  * @returns - A list item representing the folder, with possible child folders rendered below.
  */
 function Folder({ node, onNodeClick }: FolderProps) {
-  if (!node) return null;
+  // Sicherstellen, dass `node` immer vorhanden ist
+  const safeNode = node ?? { id: "invalid", name: "Invalid", nodes: [] };
 
-  const storageKey = `isOpen-${node.id}`;
+  const storageKey = `isOpen-${safeNode.id}`;
   const [isOpen, setIsOpen] = useState<boolean>(() => {
     const savedState = localStorage.getItem(storageKey);
     return savedState ? JSON.parse(savedState) : false;
@@ -39,10 +40,14 @@ function Folder({ node, onNodeClick }: FolderProps) {
     localStorage.setItem(storageKey, JSON.stringify(isOpen));
   }, [isOpen, storageKey]);
 
+  if (!node) {
+    return <li className="my-1.5">Invalid node</li>;
+  }
+
   return (
     <li className="my-1.5">
       <span className="flex items-center gap-1.5">
-        {node.nodes && node.nodes.length > 0 ? (
+        {safeNode.nodes && safeNode.nodes.length > 0 ? (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -54,20 +59,20 @@ function Folder({ node, onNodeClick }: FolderProps) {
             />
           </button>
         ) : (
-          <span className="pl-4" /> // Placeholder for ChevronRightIcon for empty folders
+          <span className="pl-4" /> // Platzhalter für leere Ordner
         )}
-        {node.nodes ? (
+        {safeNode.nodes ? (
           <>
             <FolderIcon className="size-6 text-gray-700" />
-            {node.name}
+            {safeNode.name}
           </>
         ) : (
-          <File node={node} onClick={() => onNodeClick(node)} />
+          <File node={safeNode} onClick={() => onNodeClick(safeNode)} />
         )}
       </span>
-      {isOpen && node.nodes && (
+      {isOpen && safeNode.nodes && (
         <ul className="pl-6">
-          {node.nodes.map((childNode) => (
+          {safeNode.nodes.map((childNode) => (
             <Folder
               node={childNode}
               key={childNode.id}
@@ -79,5 +84,6 @@ function Folder({ node, onNodeClick }: FolderProps) {
     </li>
   );
 }
+
 
 export default Folder;
