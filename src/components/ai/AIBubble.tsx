@@ -16,7 +16,7 @@ const AIBubble: FC<AIBubbleProps> = ({ position, onClick }) => {
         transform: "translate(-50%, -100%)",
       }}
       onClick={onClick}
-      title="Ask AI about selection"
+      title="Ask the AI about the highlighted selection"
     >
       <Atom className="w-5 h-5 text-blue-700" />
     </div>
