@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Node } from "../utils/types";
 import { getIcon } from "../utils/icons";
-import MarkdownContent from "./MarkdownContent";
 import { Atom } from "lucide-react";
 import AIBubble from "./ai/AIBubble";
 import AIComponent from "./ai/AIComponent";
@@ -10,34 +9,41 @@ export interface FileContentCardProps {
   node: Node;
 }
 
-/**
- * Component for displaying a file with a title, icon, and content.
- */
 function FileContentCard({ node }: FileContentCardProps) {
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [selectedText, setSelectedText] = useState("");
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
-  const [bubblePosition, setBubblePosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setFileContent(node.content || "...");
   }, [node]);
 
   const handleReplace = (newContent: string) => {
-    setFileContent(newContent);
+    if (!selectedText) return;
+
+    setFileContent((prev) => {
+      if (!prev.includes(selectedText)) return prev;
+      return prev.replace(selectedText, newContent);
+    });
   };
 
   const handleAppend = (additionalContent: string) => {
     setFileContent((prev) => `${prev}\n${additionalContent}`);
   };
 
-  const handleTextSelect = (text: string, coords: { x: number; y: number }) => {
-    setSelectedText(text);
-    setBubblePosition(coords);
+  const handleTextSelect = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const selection = textarea.value
+      .substring(textarea.selectionStart, textarea.selectionEnd)
+      .trim();
+    if (!selection) return;
+
+    setSelectedText(selection);
     setIsAIBubbleOpen(true);
   };
 
@@ -46,13 +52,46 @@ function FileContentCard({ node }: FileContentCardProps) {
     setIsAIComponentShown(true);
   };
 
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      const selection = textarea.value
+        .substring(textarea.selectionStart, textarea.selectionEnd)
+        .trim();
+
+      if (!selection) {
+        setSelectedText("");
+        setIsAIBubbleOpen(false);
+      }
+    };
+
+    document.addEventListener("selectionchange", handleSelectionChange);
+    return () => {
+      document.removeEventListener("selectionchange", handleSelectionChange);
+    };
+  }, []);
+
   return (
     <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
-      <h2 className="text-lg font-bold mb-4">{node.name}</h2>
+      <h2 className="text-lg font-bold mb-4 flex items-center justify-between">
+        {node.name}
+        {isAIBubbleOpen && selectedText && (
+          <AIBubble
+            position={{ x: 200, y: 40 }}
+            onClick={handleAIBubbleClick}
+          />
+        )}
+      </h2>
+
       <div className="absolute top-3 right-3 flex items-center space-x-2">
         <button
           className="text-blue-800 hover:text-blue-800 hover:bg-gray-300 p-1 rounded"
-          onClick={() => setIsAIComponentShown(true)}
+          onClick={() => {
+            setSelectedText(fileContent);
+            setIsAIComponentShown(true);
+          }}
           title="Ask AI about this content"
         >
           <Atom className="w-6 h-6" />
@@ -60,13 +99,9 @@ function FileContentCard({ node }: FileContentCardProps) {
         {getIcon(node, "size-8")}
       </div>
 
-      {isAIBubbleOpen && bubblePosition && (
-        <AIBubble position={bubblePosition} onClick={handleAIBubbleClick} />
-      )}
-
       {isAIComponentShown && (
         <AIComponent
-          selectedText={fileContent}
+          selectedText={selectedText}
           nodeName={node.name || ""}
           isOpen={isAIComponentShown}
           onClose={() => setIsAIComponentShown(false)}
@@ -75,7 +110,15 @@ function FileContentCard({ node }: FileContentCardProps) {
         />
       )}
 
-      <MarkdownContent content={fileContent} onTextSelect={handleTextSelect} />
+      <textarea
+        ref={textareaRef}
+        value={fileContent}
+        onChange={(e) => setFileContent(e.target.value)}
+        onMouseUp={handleTextSelect}
+        className="w-full h-80 p-3 rounded bg-white text-sm resize-none focus:outline-none focus:ring focus:ring-blue-300"
+        placeholder="Write your content here..."
+        spellCheck={false}
+      />
     </div>
   );
 }
