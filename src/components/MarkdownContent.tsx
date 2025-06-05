@@ -24,10 +24,8 @@ const MarkdownContent: React.FC<MarkdownContentProps> = ({
     };
 
     onTextSelect?.(selection.toString(), coords);
-    // Wichtig: Nicht die Selektion hier löschen!
   };
 
-  // Optional: Entferne Auswahl beim Klick außerhalb
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const selection = window.getSelection();
