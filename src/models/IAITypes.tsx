@@ -10,6 +10,7 @@ export interface IAiProtocolEntry {
 }
 
 export interface AIResult {
+  originalText?: string;
   text: string;
   prompt?: string;
   modelVersion?: string;
