@@ -7,6 +7,7 @@ import { Node } from "../utils/types";
 import BottomNavigationBar from "../components/BottomNavigationBar";
 import Header from "../components/Header";
 import AIProtocolCard from "../components/AIProtocolCard";
+import UnsavedChangesDialog from "../components/UnsavedChangesDialog";
 
 const EditPage = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -21,6 +22,10 @@ const EditPage = () => {
     const savedView = localStorage.getItem("activeView");
     return savedView ? savedView : "file";
   });
+
+  const [isDirty, setIsDirty] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [pendingNode, setPendingNode] = useState<Node | null>(null);
 
   useEffect(() => {
     localStorage.setItem("activeView", activeView);
@@ -50,7 +55,7 @@ const EditPage = () => {
         }
       })
       .catch((error) =>
-        console.error("Error loading node content JSON:", error),
+        console.error("Error loading node content JSON:", error)
       );
   }, []);
 
@@ -59,8 +64,16 @@ const EditPage = () => {
   }, [menuOpen]);
 
   const handleNodeClick = (node: Node) => {
-    const content = nodeContents.find((item) => item.id === node.id);
-    setSelectedNode(content || null);
+    if (isDirty) {
+      setPendingNode(node);
+      setShowDialog(true);
+      return;
+    }
+
+    const contentNode = nodeContents.find((item) => item.id === node.id);
+    const fullNode = contentNode || { ...node, content: "..." };
+
+    setSelectedNode(fullNode);
     localStorage.setItem("selectedNodeId", node.id);
     setActiveView("file");
   };
@@ -115,7 +128,10 @@ const EditPage = () => {
         >
           {selectedNode ? (
             activeView === "file" ? (
-              <FileContentCard node={selectedNode} />
+              <FileContentCard
+                node={selectedNode}
+                onDirtyChange={(dirty: boolean) => setIsDirty(dirty)}
+              />
             ) : activeView === "ai" ? (
               <AIProtocolCard />
             ) : activeView === "fullDocument" ? (
@@ -128,6 +144,27 @@ const EditPage = () => {
           )}
         </div>
       </div>
+      <UnsavedChangesDialog
+        isOpen={showDialog}
+        onCancel={() => {
+          setShowDialog(false);
+          setPendingNode(null);
+        }}
+        onConfirm={() => {
+          if (pendingNode) {
+            const contentNode = nodeContents.find(
+              (item) => item.id === pendingNode.id
+            );
+            const fullNode = contentNode || { ...pendingNode, content: "..." };
+
+            setSelectedNode(fullNode);
+            localStorage.setItem("selectedNodeId", pendingNode.id);
+            setActiveView("file");
+            setPendingNode(null);
+          }
+          setShowDialog(false);
+        }}
+      />
     </div>
   );
 };
