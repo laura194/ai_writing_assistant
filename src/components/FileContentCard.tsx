@@ -55,7 +55,9 @@ function FileContentCard({ node }: FileContentCardProps) {
   useEffect(() => {
     const handleSelectionChange = () => {
       const textarea = textareaRef.current;
-      if (!textarea) return;
+      const activeElement = document.activeElement;
+
+      if (!textarea || activeElement !== textarea) return;
 
       const selection = textarea.value
         .substring(textarea.selectionStart, textarea.selectionEnd)
