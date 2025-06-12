@@ -1,0 +1,10 @@
+/* GLOBAL STYLES 
+ *
+ * This file is used to import global styles for the application.
+ * Here are the styles defined, for the whole application.
+ *
+ * When you define styles here, they will be applied globally.
+ * So be careful with the selectors you use.
+ */
+
+@import "tailwindcss";

@@ -1,4 +1,4 @@
-import { SignInButton, SignUpButton, useUser } from "@clerk/clerk-react";
+import { useUser } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
 
 export default function LandingPage() {
@@ -30,16 +30,18 @@ export default function LandingPage() {
           </>
         ) : (
           <div className="flex flex-col gap-4">
-            <SignInButton mode="modal">
-              <button className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg transition">
-                Sign In
-              </button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <button className="w-full py-2 px-4 bg-gray-700 hover:bg-gray-800 text-white rounded-lg transition">
-                Sign Up
-              </button>
-            </SignUpButton>
+            <Link
+              to="/signIn"
+              className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg transition text-center"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/signUp"
+              className="w-full py-2 px-4 bg-gray-700 hover:bg-gray-800 text-white rounded-lg transition text-center"
+            >
+              Sign Up
+            </Link>
           </div>
         )}
       </section>
