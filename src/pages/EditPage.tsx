@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Folder from "../components/Folder"; // Baumstruktur im Sidebar
 import FileContentCard from "../components/FileContentCard"; // Hauptinhalt bei Auswahl
 import { Bars3Icon } from "@heroicons/react/24/solid"; // Icon für das Menü
-import BottomNavigationBar from "../components/BottomNavigationBar"; // Navigationsleiste unten
 import Header from "../components/Header"; // Kopfzeile oben
 
 import { Node } from "../utils/types"; // Datentyp für Knotenstruktur
@@ -21,9 +20,6 @@ const EditPage = () => {
     const savedMenuState = localStorage.getItem("menuOpen");
     return savedMenuState ? JSON.parse(savedMenuState) : true;
   });
-
-  // Aktuelle Ansicht unten
-  const [activeView, setActiveView] = useState<string>("ai");
 
   // Lade die Kapitelstruktur bei Erstaufruf
   useEffect(() => {
@@ -108,17 +104,24 @@ const EditPage = () => {
 
         {/* Hauptbereich */}
         <div className="flex flex-grow relative">
-
           {/* Sidebar mit Folder-Komponente */}
-          <div className={`${menuOpen ? "w-1/4" : "w-12"} bg-gray-200 p-4 transition-all duration-300`}>
+          <div
+              className={`relative ${
+                  menuOpen ? "w-1/4" : "w-12"
+              } bg-gray-200 h-full transition-all duration-300 z-10 flex-shrink-0`}
+          >
             <button
-                className="bg-blue-500 text-white p-2 rounded mb-4"
+                className="absolute top-5 left-4 bg-blue-500 text-white p-2 rounded z-20"
                 onClick={() => setMenuOpen(!menuOpen)}
             >
               <Bars3Icon className="h-6 w-6" />
             </button>
-
-            <ul>
+            {/* Füge hier Abstand nach unten hinzu, damit die Kapitelstruktur nicht höher als der Button ist */}
+            <ul
+                className={`transition-all duration-300 mt-14 pl-4 ${
+                    menuOpen ? "opacity-100 max-h-screen" : "opacity-0 max-h-0"
+                } overflow-hidden`}
+            >
               {nodes.map((node) => (
                   <Folder
                       key={node.id}
@@ -126,33 +129,24 @@ const EditPage = () => {
                       onNodeClick={handleNodeClick}
                       onAdd={addChapter}
                       onRemove={deleteChapter}
+                      isVisible={menuOpen} // Sichtbarkeit hängt vom Status der Sidebar ab
                   />
               ))}
             </ul>
           </div>
 
-          {/* Inhalt (rechte Seite) */}
-          <div className="flex-1 p-4 bg-white shadow-inner">
+          {/* Hauptinhalt mit FileContentCard */}
+          <div className="flex-grow relative z-0 transition-all duration-300 ml-2">
             {selectedNode ? (
                 <FileContentCard
                     node={selectedNode}
-                    onUpdate={(updatedNode) => {
-                      updateChapter(updatedNode);
-                      setSelectedNode(updatedNode);
-                    }}
+                    onUpdate={(updatedNode) => updateChapter(updatedNode)}
                 />
             ) : (
-                <p>Wähle ein Kapitel zum Bearbeiten aus.</p>
+                <p className="text-center mt-4">Wählen Sie ein Kapitel aus</p>
             )}
           </div>
         </div>
-
-        {/* Untere Navigationsleiste */}
-        <BottomNavigationBar
-            activeView={activeView}
-            menuOpen={menuOpen}
-            onChangeView={setActiveView}
-        />
       </div>
   );
 };
