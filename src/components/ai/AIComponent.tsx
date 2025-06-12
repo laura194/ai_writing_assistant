@@ -66,11 +66,11 @@ function AIComponent({
     };
   }, [showSuggestions]);
 
-  const createProtocolAt = (index: number) => {
+  const createProtocolAt = (index: number, action: "Replace" | "Append") => {
     const relevantPrompts = prompts.slice(0, index + 1);
     createAIProtocolEntry({
       aiName: history[index]?.modelVersion || "Unknown AI",
-      usageForm: relevantPrompts.join(" | ") || "Unknown prompt",
+      usageForm: `${action}: ${relevantPrompts.join(" | ") || "Unknown prompt"}`,
       affectedParts: nodeName || "Unknown file",
       remarks: history[index]?.text || "No remarks",
       username: user?.username || user?.id || "unknown-user",
@@ -79,7 +79,7 @@ function AIComponent({
 
   const handleReplaceAt = (index: number) => {
     if (history[index]) {
-      createProtocolAt(index);
+      createProtocolAt(index, "Replace");
       onReplace(history[index].text);
       onClose();
     }
@@ -87,7 +87,7 @@ function AIComponent({
 
   const handleAppendAt = (index: number) => {
     if (history[index]) {
-      createProtocolAt(index);
+      createProtocolAt(index, "Append");
       onAppend(history[index].text);
       onClose();
     }
