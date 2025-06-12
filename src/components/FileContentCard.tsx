@@ -1,59 +1,102 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Node } from "../utils/types";
 import { getIcon } from "../utils/icons";
-import MarkdownContent from "./MarkdownContent";
-import AIPopup from "../components/ai/AIPopup";
-import { AIResult } from "../models/IAITypes";
 import { Atom } from "lucide-react";
-import AIResponseDialog from "./ai/AIResponseDialog";
-import { createAIProtocolEntry } from "../utils/AIHandler";
-import { useUser } from "@clerk/clerk-react";
+import AIBubble from "./ai/AIBubble";
+import AIComponent from "./ai/AIComponent";
 
 export interface FileContentCardProps {
   node: Node;
 }
 
-/**
- * Component for displaying a file with a title, icon, and content.
- */
 function FileContentCard({ node }: FileContentCardProps) {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isResponseOpen, setIsResponseOpen] = useState(false);
-  const [aiResult, setAIResult] = useState<AIResult | null>(null);
+  const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
+  const [selectedText, setSelectedText] = useState("");
+  const [isAIComponentShown, setIsAIComponentShown] = useState(false);
+  const [aiNodeName, setAiNodeName] = useState(node.name || "");
 
-  const { user } = useUser();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setFileContent(node.content || "...");
   }, [node]);
 
-  const handleReplaceContent = (newContent: string) => {
-    setFileContent(newContent);
+  const handleReplace = (newContent: string) => {
+    if (!selectedText) return;
 
-    // Create AI protocol entry
-    createAIProtocolEntry({
-      aiName: aiResult?.modelVersion || "Unknown AI",
-      usageForm: aiResult?.prompt || "Unknown prompt",
-      affectedParts: node.name || "Unknown file",
-      remarks: aiResult?.text || "No remarks",
-      username: user?.username || user?.id || "unknown-user",
+    setFileContent((prev) => {
+      if (!prev.includes(selectedText)) return prev;
+      return prev.replace(selectedText, newContent);
     });
   };
 
-  const handleFetchResponse = (result: AIResult) => {
-    setAIResult(result);
-    setIsPopupOpen(false);
-    setIsResponseOpen(true);
+  const handleAppend = (additionalContent: string) => {
+    setFileContent((prev) => `${prev}\n${additionalContent}`);
   };
+
+  const handleTextSelect = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const selection = textarea.value
+      .substring(textarea.selectionStart, textarea.selectionEnd)
+      .trim();
+    if (!selection) return;
+
+    setSelectedText(selection);
+    setIsAIBubbleOpen(true);
+  };
+
+  const handleAIBubbleClick = () => {
+    setIsAIBubbleOpen(false);
+    setAiNodeName(`${node.name} (Selection)`);
+    setIsAIComponentShown(true);
+  };
+
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const textarea = textareaRef.current;
+      const activeElement = document.activeElement;
+
+      if (!textarea || activeElement !== textarea) return;
+
+      const selection = textarea.value
+        .substring(textarea.selectionStart, textarea.selectionEnd)
+        .trim();
+
+      if (!selection) {
+        setSelectedText("");
+        setIsAIBubbleOpen(false);
+      }
+    };
+
+    document.addEventListener("selectionchange", handleSelectionChange);
+    return () => {
+      document.removeEventListener("selectionchange", handleSelectionChange);
+    };
+  }, []);
 
   return (
     <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
-      <h2 className="text-lg font-bold mb-4">{node.name}</h2>
+      <h2 className="text-lg font-bold mb-4 flex items-center justify-between">
+        {node.name}
+        {isAIBubbleOpen && selectedText && (
+          <AIBubble
+            position={{ x: 200, y: 40 }}
+            onClick={handleAIBubbleClick}
+          />
+        )}
+      </h2>
+
       <div className="absolute top-3 right-3 flex items-center space-x-2">
         <button
           className="text-blue-800 hover:text-blue-800 hover:bg-gray-300 p-1 rounded"
-          onClick={() => setIsPopupOpen(true)}
+          onClick={() => {
+            setSelectedText(fileContent);
+            setAiNodeName(node.name || "");
+            setIsAIComponentShown(true);
+          }}
           title="Ask AI about this content"
         >
           <Atom className="w-6 h-6" />
@@ -61,23 +104,26 @@ function FileContentCard({ node }: FileContentCardProps) {
         {getIcon(node, "size-8")}
       </div>
 
-      <AIPopup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        selectedText={fileContent || ""}
-        onFetchResponse={handleFetchResponse}
-      />
-
-      {aiResult && (
-        <AIResponseDialog
-          isOpen={isResponseOpen}
-          onClose={() => setIsResponseOpen(false)}
-          result={aiResult}
-          onReplaceContent={handleReplaceContent}
+      {isAIComponentShown && (
+        <AIComponent
+          selectedText={selectedText}
+          nodeName={aiNodeName || ""}
+          isOpen={isAIComponentShown}
+          onClose={() => setIsAIComponentShown(false)}
+          onReplace={handleReplace}
+          onAppend={handleAppend}
         />
       )}
 
-      <MarkdownContent content={fileContent} />
+      <textarea
+        ref={textareaRef}
+        value={fileContent}
+        onChange={(e) => setFileContent(e.target.value)}
+        onMouseUp={handleTextSelect}
+        className="w-full h-80 p-3 rounded bg-white text-sm resize-none focus:outline-none focus:ring focus:ring-blue-300"
+        placeholder="Write your content here..."
+        spellCheck={false}
+      />
     </div>
   );
 }
