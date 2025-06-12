@@ -1,1 +1,10 @@
-@import "tailwindcss";
+/* STYLES FOR THE APP COMPONENT 
+ *
+ * This file contains styles that are specific to the App component.
+ * These styles will be applied to the App component and its children.
+
+ * Here you define styles for Routing and Layout such as header, footer, and main content.
+ * You can also define styles for specific components that are used in the App component.
+ *
+ * But like the global styles inside the index.css, be careful with the selectors you use.
+ */
