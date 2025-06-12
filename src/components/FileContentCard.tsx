@@ -14,6 +14,7 @@ function FileContentCard({ node }: FileContentCardProps) {
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [selectedText, setSelectedText] = useState("");
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
+  const [aiNodeName, setAiNodeName] = useState(node.name || "");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -49,6 +50,7 @@ function FileContentCard({ node }: FileContentCardProps) {
 
   const handleAIBubbleClick = () => {
     setIsAIBubbleOpen(false);
+    setAiNodeName(`${node.name} (Selection)`);
     setIsAIComponentShown(true);
   };
 
@@ -92,6 +94,7 @@ function FileContentCard({ node }: FileContentCardProps) {
           className="text-blue-800 hover:text-blue-800 hover:bg-gray-300 p-1 rounded"
           onClick={() => {
             setSelectedText(fileContent);
+            setAiNodeName(node.name || "");
             setIsAIComponentShown(true);
           }}
           title="Ask AI about this content"
@@ -104,7 +107,7 @@ function FileContentCard({ node }: FileContentCardProps) {
       {isAIComponentShown && (
         <AIComponent
           selectedText={selectedText}
-          nodeName={node.name || ""}
+          nodeName={aiNodeName || ""}
           isOpen={isAIComponentShown}
           onClose={() => setIsAIComponentShown(false)}
           onReplace={handleReplace}
