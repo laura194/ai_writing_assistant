@@ -7,20 +7,54 @@ import AIComponent from "./ai/AIComponent";
 
 export interface FileContentCardProps {
   node: Node;
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
-function FileContentCard({ node }: FileContentCardProps) {
+function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
+  const [originalContent, setOriginalContent] = useState<string>(
+    node.content || "..."
+  );
   const [selectedText, setSelectedText] = useState("");
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
   const [aiNodeName, setAiNodeName] = useState(node.name || "");
+  const [isDirty, setIsDirty] = useState(false);
+  const [pendingNode, setPendingNode] = useState<Node | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    setFileContent(node.content || "...");
+    if (!pendingNode) {
+      setFileContent(node.content || "...");
+      setOriginalContent(node.content || "...");
+      setIsDirty(false);
+    }
   }, [node]);
+
+  useEffect(() => {
+    if (node !== pendingNode) {
+      if (isDirty) {
+        setPendingNode(node);
+      } else {
+        setFileContent(node.content || "...");
+        setOriginalContent(node.content || "...");
+        setIsDirty(false);
+      }
+    }
+  }, [node]);
+
+  useEffect(() => {
+    const dirty = fileContent !== originalContent;
+    setIsDirty(dirty);
+    onDirtyChange?.(dirty);
+  }, [fileContent, originalContent]);
+
+  const handleSave = () => {
+    console.log("Saved content:", fileContent);
+    setOriginalContent(fileContent);
+    setIsDirty(false);
+  };
 
   const handleReplace = (newContent: string) => {
     if (!selectedText) return;
@@ -124,6 +158,22 @@ function FileContentCard({ node }: FileContentCardProps) {
         placeholder="Write your content here..."
         spellCheck={false}
       />
+
+      {/* Save Button */}
+      <div className="mt-4 mb-2 flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={!isDirty}
+          title={!isDirty ? "No changes" : "Save changes"}
+          className={`px-4 py-2 rounded text-white text-sm transition ${
+            isDirty
+              ? "bg-blue-600 hover:bg-blue-700"
+              : "bg-gray-400 cursor-not-allowed"
+          }`}
+        >
+          Save
+        </button>
+      </div>
     </div>
   );
 }
