@@ -64,6 +64,11 @@ const EditPage = () => {
     }
   };
 
+  const handleNodeClick = (updatedNode: Node) => {
+    setSelectedNode(updatedNode); // Aktualisiert den ausgewählten Node
+    updateChapter(updatedNode); // Speichert Änderungen in nodes
+  };
+
   // Kapitel aktualisieren
   const updateChapter = (updatedNode: Node) => {
     const recursiveUpdate = (nodes: Node[]): Node[] => {
@@ -118,7 +123,7 @@ const EditPage = () => {
                   <Folder
                       key={node.id}
                       node={node}
-                      onNodeClick={setSelectedNode}
+                      onNodeClick={handleNodeClick}
                       onAdd={addChapter}
                       onRemove={deleteChapter}
                   />
