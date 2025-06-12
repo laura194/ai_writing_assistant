@@ -10,7 +10,7 @@ interface APIResponse {
 
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 const API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 /**
  * Sends a request to the AI API and returns the response.
