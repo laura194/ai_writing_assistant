@@ -80,7 +80,7 @@ const AIPopupSelection = ({
         y: event.clientY - startPosition.current.y,
       });
     },
-    [dragging]
+    [dragging],
   );
 
   const handleMouseUp = useCallback(() => setDragging(false), []);
