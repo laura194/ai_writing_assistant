@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Node } from "../utils/types";
-import File from "./File";
+// import File from "./File";
 
 interface FolderProps {
   node: Node;
@@ -66,23 +66,19 @@ function Folder({ node, onNodeClick, onAdd, onRemove }: FolderProps) {
           </button>
         </div>
 
-        {/* Kinder des Nodes rendern */}
-        {hasChildren ? (
-            <ul className="pl-4">
-              {node.nodes!.map((childNode) => (
-                  <Folder
-                      key={childNode.id}
-                      node={childNode}
-                      onNodeClick={onNodeClick}
-                      onAdd={onAdd}
-                      onRemove={onRemove}
-                  />
-              ))}
-            </ul>
-        ) : (
-            // Falls der Node keine Kinder hat, wird die File-Komponente gerendert
-            <File node={node} onClick={onNodeClick} />
-        )}
+          {hasChildren && ( // Nur Kinder rendern, keine File-Komponente am Ende
+              <ul className="pl-4">
+                  {node.nodes!.map((childNode) => (
+                      <Folder
+                          key={childNode.id}
+                          node={childNode}
+                          onNodeClick={onNodeClick}
+                          onAdd={onAdd}
+                          onRemove={onRemove}
+                      />
+                  ))}
+              </ul>
+          )}
       </li>
   );
 }
