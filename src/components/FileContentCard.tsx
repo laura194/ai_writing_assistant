@@ -14,7 +14,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [originalContent, setOriginalContent] = useState<string>(
-    node.content || "..."
+    node.content || "...",
   );
   const [selectedText, setSelectedText] = useState("");
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
@@ -30,7 +30,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
       setOriginalContent(node.content || "...");
       setIsDirty(false);
     }
-  }, [node]);
+  }, [node, pendingNode]);
 
   useEffect(() => {
     if (node !== pendingNode) {
@@ -42,13 +42,13 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
         setIsDirty(false);
       }
     }
-  }, [node]);
+  }, [node, pendingNode, isDirty]);
 
   useEffect(() => {
     const dirty = fileContent !== originalContent;
     setIsDirty(dirty);
     onDirtyChange?.(dirty);
-  }, [fileContent, originalContent]);
+  }, [fileContent, originalContent, onDirtyChange]);
 
   const handleSave = () => {
     console.log("Saved content:", fileContent);

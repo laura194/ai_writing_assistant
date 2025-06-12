@@ -55,7 +55,7 @@ const EditPage = () => {
         }
       })
       .catch((error) =>
-        console.error("Error loading node content JSON:", error)
+        console.error("Error loading node content JSON:", error),
       );
   }, []);
 
@@ -153,7 +153,7 @@ const EditPage = () => {
         onConfirm={() => {
           if (pendingNode) {
             const contentNode = nodeContents.find(
-              (item) => item.id === pendingNode.id
+              (item) => item.id === pendingNode.id,
             );
             const fullNode = contentNode || { ...pendingNode, content: "..." };
 
