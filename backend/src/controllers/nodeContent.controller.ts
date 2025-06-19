@@ -21,12 +21,10 @@ export const createNodeContent = async (
   try {
     const existing = await NodeContent.findOne({ nodeId });
     if (existing) {
-      res
-        .status(409)
-        .json({
-          error: "NodeContent with this nodeId already exists",
-          existing,
-        });
+      res.status(409).json({
+        error: "NodeContent with this nodeId already exists",
+        existing,
+      });
       return;
     }
 
