@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useDrag, useDrop } from "react-dnd";
 import { Node } from "../utils/types";
-// import File from "./File";
 
 interface FolderProps {
     node: Node;
+    onMove: (draggedNodeId: string, targetNodeId: string) => void; // Neuer Callback
     onNodeClick: (node: Node) => void;
     onAdd: (parentId: string | null, newNode: Node) => void;
     onRemove: (nodeId: string) => void;
-    isVisible?: boolean; // Neuer Prop, um Sichtbarkeit der Nodes zu steuern
+    isVisible?: boolean;
 }
 
-function Folder({ node, onNodeClick, onAdd, onRemove, isVisible = true }: FolderProps) {
+function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }: FolderProps) {
+    const ref = useRef<HTMLLIElement>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editableName, setEditableName] = useState(node.name);
 
@@ -18,6 +20,26 @@ function Folder({ node, onNodeClick, onAdd, onRemove, isVisible = true }: Folder
         onNodeClick({ ...node, name: editableName });
         setIsEditing(false);
     };
+
+    // Drag-and-Drop-Logik
+    const [{ isDragging }, dragRef] = useDrag({
+        type: "node",
+        item: { id: node.id },
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    });
+
+    const [, dropRef] = useDrop({
+        accept: "node",
+        hover: (draggedItem: { id: string }) => {
+            if (draggedItem.id !== node.id) {
+                onMove(draggedItem.id, node.id); // Bewege den Knoten
+            }
+        },
+    });
+
+    dragRef(dropRef(ref));
 
     // Prüfen, ob der Node Kinder hat
     const hasChildren = Array.isArray(node.nodes) && node.nodes.length > 0;
@@ -27,6 +49,8 @@ function Folder({ node, onNodeClick, onAdd, onRemove, isVisible = true }: Folder
             className={`my-2 transition-opacity duration-300 ${
                 isVisible ? "opacity-100" : "opacity-0"
             } ${isVisible ? "max-h-screen" : "max-h-0 overflow-hidden"} `}
+            ref={ref}
+            style={{ opacity: isDragging ? 0.5 : 1 }}
         >
             <div className="flex items-center gap-2">
                 {/* Knotenname bearbeiten */}
@@ -77,10 +101,11 @@ function Folder({ node, onNodeClick, onAdd, onRemove, isVisible = true }: Folder
                         <Folder
                             key={childNode.id}
                             node={childNode}
+                            onMove={onMove}
                             onNodeClick={onNodeClick}
                             onAdd={onAdd}
                             onRemove={onRemove}
-                            isVisible={isVisible} // Kindknoten erhalten Sichtbarkeit vom Elternknoten
+                            isVisible={isVisible}
                         />
                     ))}
                 </ul>

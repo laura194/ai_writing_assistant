@@ -1,27 +1,18 @@
 import { useState, useEffect } from "react";
-
-// Importieren von Komponenten
-import Folder from "../components/Folder"; // Baumstruktur im Sidebar
-import FileContentCard from "../components/FileContentCard"; // Hauptinhalt bei Auswahl
-import { Bars3Icon } from "@heroicons/react/24/solid"; // Icon für das Menü
-import Header from "../components/Header"; // Kopfzeile oben
-
-import { Node } from "../utils/types"; // Datentyp für Knotenstruktur
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import Folder from "../components/Folder";
+import Header from "../components/Header";
+import { Node } from "../utils/types";
+import { Bars3Icon } from "@heroicons/react/24/solid";
 
 const EditPage = () => {
-  // State für die Kapitelstruktur
   const [nodes, setNodes] = useState<Node[]>([]);
-
-  // State für das aktuell ausgewählte Kapitel
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-
-  // Sidebar Menüstatus (offen/zu)
   const [menuOpen, setMenuOpen] = useState(() => {
     const savedMenuState = localStorage.getItem("menuOpen");
     return savedMenuState ? JSON.parse(savedMenuState) : true;
   });
 
-  // Lade die Kapitelstruktur bei Erstaufruf
   useEffect(() => {
     fetch("/projectStructure.json")
         .then((res) => res.json())
@@ -31,12 +22,10 @@ const EditPage = () => {
         );
   }, []);
 
-  // Speichere den Menüstatus bei Änderungen
   useEffect(() => {
     localStorage.setItem("menuOpen", JSON.stringify(menuOpen));
   }, [menuOpen]);
 
-  // Funktion zum Hinzufügen eines Kapitels
   const addChapter = (parentId: string | null, newNode: Node) => {
     const recursiveAdd = (nodes: Node[]): Node[] => {
       return nodes.map((node) => {
@@ -60,12 +49,6 @@ const EditPage = () => {
     }
   };
 
-  const handleNodeClick = (updatedNode: Node) => {
-    setSelectedNode(updatedNode); // Aktualisiert den ausgewählten Node
-    updateChapter(updatedNode); // Speichert Änderungen in nodes
-  };
-
-  // Kapitel aktualisieren
   const updateChapter = (updatedNode: Node) => {
     const recursiveUpdate = (nodes: Node[]): Node[] => {
       return nodes.map((node) => {
@@ -82,7 +65,6 @@ const EditPage = () => {
     setNodes((prev) => recursiveUpdate(prev));
   };
 
-  // Kapitel löschen
   const deleteChapter = (nodeId: string) => {
     const recursiveDelete = (nodes: Node[]): Node[] => {
       return nodes
@@ -96,58 +78,83 @@ const EditPage = () => {
     setNodes((prev) => recursiveDelete(prev));
   };
 
-  // JSX-Struktur der Seite
+  const handleMoveNode = (draggedNodeId: string, targetNodeId: string | null = null) => {
+    let draggedNode: Node | null = null;
+
+    const recursiveRemove = (nodes: Node[]): Node[] => {
+      return nodes
+          .filter((node) => {
+            if (node.id === draggedNodeId) {
+              draggedNode = node;
+              return false;
+            }
+            return true;
+          })
+          .map((node) => ({ ...node, nodes: recursiveRemove(node.nodes || []) }));
+    };
+
+    const recursiveAdd = (nodes: Node[]): Node[] => {
+      return nodes.map((node) => {
+        if (node.id === targetNodeId) {
+          return {
+            ...node,
+            nodes: [...(node.nodes || []), draggedNode!],
+          };
+        }
+        return { ...node, nodes: recursiveAdd(node.nodes || []) };
+      });
+    };
+
+    setNodes((prevNodes) => {
+      const withoutDraggedNode = recursiveRemove(prevNodes); // Entfernen
+
+      // Fallback: Wenn kein Ziel gefunden, füge das Kapitel in die Wurzelebene ein
+      if (!draggedNode || !targetNodeId) {
+        return [...withoutDraggedNode, draggedNode!];
+      }
+
+      const updatedStructure = recursiveAdd(withoutDraggedNode); // Hinzufügen
+      return updatedStructure;
+    });
+  };
+
   return (
-      <div className="h-screen flex flex-col">
-        {/* Header-Komponente oben */}
-        <Header />
-
-        {/* Hauptbereich */}
-        <div className="flex flex-grow relative">
-          {/* Sidebar mit Folder-Komponente */}
-          <div
-              className={`relative ${
-                  menuOpen ? "w-1/4" : "w-12"
-              } bg-gray-200 h-full transition-all duration-300 z-10 flex-shrink-0`}
-          >
-            <button
-                className="absolute top-5 left-4 bg-blue-500 text-white p-2 rounded z-20"
-                onClick={() => setMenuOpen(!menuOpen)}
+      <DndProvider backend={HTML5Backend}>
+        <div className="h-screen flex flex-col">
+          <Header />
+          <div className="flex flex-grow relative">
+            <div
+                className={`relative ${
+                    menuOpen ? "w-1/4" : "w-12"
+                } bg-gray-200 h-full transition-all duration-300 z-10 flex-shrink-0`}
             >
-              <Bars3Icon className="h-6 w-6" />
-            </button>
-            {/* Füge hier Abstand nach unten hinzu, damit die Kapitelstruktur nicht höher als der Button ist */}
-            <ul
-                className={`transition-all duration-300 mt-14 pl-4 ${
-                    menuOpen ? "opacity-100 max-h-screen" : "opacity-0 max-h-0"
-                } overflow-hidden`}
-            >
-              {nodes.map((node) => (
-                  <Folder
-                      key={node.id}
-                      node={node}
-                      onNodeClick={handleNodeClick}
-                      onAdd={addChapter}
-                      onRemove={deleteChapter}
-                      isVisible={menuOpen} // Sichtbarkeit hängt vom Status der Sidebar ab
-                  />
-              ))}
-            </ul>
-          </div>
-
-          {/* Hauptinhalt mit FileContentCard */}
-          <div className="flex-grow relative z-0 transition-all duration-300 ml-2">
-            {selectedNode ? (
-                <FileContentCard
-                    node={selectedNode}
-                    onUpdate={(updatedNode) => updateChapter(updatedNode)}
-                />
-            ) : (
-                <p className="text-center mt-4">Wählen Sie ein Kapitel aus</p>
-            )}
+              <button
+                  className="absolute top-5 left-4 bg-blue-500 text-white p-2 rounded z-20"
+                  onClick={() => setMenuOpen(!menuOpen)}
+              >
+                <Bars3Icon className="h-6 w-6" />
+              </button>
+              <ul
+                  className={`transition-all duration-300 mt-14 pl-4 ${
+                      menuOpen ? "opacity-100 max-h-screen" : "opacity-0 max-h-0"
+                  } overflow-hidden`}
+              >
+                {nodes.map((node) => (
+                    <Folder
+                        key={node.id}
+                        node={node}
+                        onMove={handleMoveNode}
+                        onNodeClick={updateChapter} // Direkter Aufruf der Funktion
+                        onAdd={addChapter}
+                        onRemove={deleteChapter}
+                        isVisible={menuOpen}
+                    />
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
+      </DndProvider>
   );
 };
 
