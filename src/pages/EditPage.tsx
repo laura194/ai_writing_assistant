@@ -45,7 +45,7 @@ const EditPage = () => {
         .then((nodeContent) => {
           if (nodeContent) {
             setSelectedNode({
-              id: nodeContent.nodeId,
+              id: nodeContent.nodeId || "",
               name: nodeContent.name,
               content: nodeContent.content,
               category: nodeContent.category,
