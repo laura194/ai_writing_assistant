@@ -4,6 +4,7 @@ import { getIcon } from "../utils/icons";
 import { Atom } from "lucide-react";
 import AIBubble from "./ai/AIBubble";
 import AIComponent from "./ai/AIComponent";
+import { NodeContentService } from "../utils/NodeContentService"; // Import the service
 
 export interface FileContentCardProps {
   node: Node;
@@ -14,7 +15,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [originalContent, setOriginalContent] = useState<string>(
-    node.content || "...",
+    node.content || "..."
   );
   const [selectedText, setSelectedText] = useState("");
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
@@ -50,10 +51,25 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
     onDirtyChange?.(dirty);
   }, [fileContent, originalContent, onDirtyChange]);
 
-  const handleSave = () => {
-    console.log("Saved content:", fileContent);
-    setOriginalContent(fileContent);
-    setIsDirty(false);
+  // Updated save function
+  const handleSave = async () => {
+    try {
+      // Call the update function from NodeContentService to update the content
+      await NodeContentService.updateNodeContent(node.id, {
+        nodeId: node.id,
+        name: node.name,
+        category: node.category,
+        content: fileContent, // Send the updated content
+      });
+
+      // On success, update the original content and mark as no longer dirty
+      setOriginalContent(fileContent);
+      setIsDirty(false);
+    } catch (error) {
+      console.error("Error updating node content:", error);
+      // Optionally show an error message to the user
+      alert("Failed to save content. Please try again.");
+    }
   };
 
   const handleReplace = (newContent: string) => {
