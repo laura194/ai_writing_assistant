@@ -46,22 +46,26 @@ export const getNodeContents = async (req: Request, res: Response): Promise<void
   }
 };
 
-// Get a specific NodeContent entry by its MongoDB _id
+// Get a specific NodeContent entry by its nodeId
 export const getNodeContentById = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  try {
-    const nodeContent = await NodeContent.findById(id);
-    if (!nodeContent) {
-      res.status(404).json({ error: "NodeContent not found" });
-      return; // Exit if the nodeContent is not found
+    const { id } = req.params; // id ist jetzt die nodeId
+  
+    try {
+      // Suche nach dem NodeContent-Dokument anhand der nodeId
+      const nodeContent = await NodeContent.findOne({ nodeId: id });
+  
+      if (!nodeContent) {
+        res.status(404).json({ error: "NodeContent with the given nodeId not found" });
+        return; // Exit if the nodeContent is not found
+      }
+  
+      res.status(200).json(nodeContent);  // Send the found node content
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-    res.status(200).json(nodeContent);  // Send the found node content
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+  };
+  
 
 // Update a specific NodeContent entry by nodeId
 export const updateNodeContent = async (req: Request, res: Response): Promise<void> => {
