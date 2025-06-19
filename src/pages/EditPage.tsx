@@ -8,6 +8,7 @@ import BottomNavigationBar from "../components/BottomNavigationBar";
 import Header from "../components/Header";
 import AIProtocolCard from "../components/AIProtocolCard";
 import UnsavedChangesDialog from "../components/UnsavedChangesDialog";
+import { NodeContentService } from "../utils/NodeContentService";
 
 const EditPage = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -41,41 +42,46 @@ const EditPage = () => {
 
     // Load the file content
     // This should be replaced with the actual database
-    fetch("/fileContent.json")
-      .then((response) => response.json())
-      .then((data: Node[]) => {
-        setNodeContents(data);
 
-        const savedNodeId = localStorage.getItem("selectedNodeId");
-        if (savedNodeId) {
-          const savedNode = data.find((item) => item.id === savedNodeId);
-          if (savedNode) {
-            setSelectedNode(savedNode);
+    const savedNodeId = localStorage.getItem("selectedNodeId");
+    if (savedNodeId) {
+      NodeContentService.getNodeContentById(savedNodeId)
+        .then((nodeContent) => {
+          if (nodeContent) {
+            setSelectedNode({
+              id: nodeContent.nodeId,
+              name: nodeContent.name,
+              content: nodeContent.content,
+              category: nodeContent.category,
+            });
           }
-        }
-      })
-      .catch((error) =>
-        console.error("Error loading node content JSON:", error)
-      );
+        })
+        .catch((error) => console.error("Error fetching node content:", error));
+    }
   }, []);
 
   useEffect(() => {
     localStorage.setItem("menuOpen", JSON.stringify(menuOpen));
   }, [menuOpen]);
 
-  const handleNodeClick = (node: Node) => {
+  const handleNodeClick = async (node: Node) => {
+    const switchNode = async () => {
+      try {
+        const nodeContent =
+          await NodeContentService.getOrCreateNodeContent(node);
+        const fullNode = { ...node, content: nodeContent.content };
+        setSelectedNode(fullNode);
+        localStorage.setItem("selectedNodeId", node.id); // Save selected node ID to localStorage
+        setActiveView("file"); // Change to 'file' view on node selection
+      } catch (error) {
+        console.error("Error loading node content:", error);
+      }
+    };
     if (isDirty) {
-      setPendingNode(node);
       setShowDialog(true);
-      return;
+    } else {
+      switchNode();
     }
-
-    const contentNode = nodeContents.find((item) => item.id === node.id);
-    const fullNode = contentNode || { ...node, content: "..." };
-
-    setSelectedNode(fullNode);
-    localStorage.setItem("selectedNodeId", node.id);
-    setActiveView("file");
   };
 
   return (
