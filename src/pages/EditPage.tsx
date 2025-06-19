@@ -26,6 +26,7 @@ const EditPage = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [pendingNode, setPendingNode] = useState<Node | null>(null);
+  const [pendingView, setPendingView] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem("activeView", activeView);
@@ -58,7 +59,7 @@ const EditPage = () => {
     localStorage.setItem("menuOpen", JSON.stringify(menuOpen));
   }, [menuOpen]);
 
-  const handleNodeClick = async (node: Node) => {
+  const handleNodeChange = async (node: Node) => {
     const switchNode = async () => {
       try {
         const nodeContent =
@@ -74,10 +75,51 @@ const EditPage = () => {
 
     if (isDirty) {
       setPendingNode(node);
+      setPendingView("file"); // Default view when switching nodes
       setShowDialog(true);
     } else {
       switchNode();
     }
+  };
+
+  const handleViewChange = (newView: string) => {
+    if (isDirty) {
+      setPendingView(newView);
+      setShowDialog(true);
+    } else {
+      setActiveView(newView);
+    }
+  };
+
+  const handleDialogConfirm = async () => {
+    if (pendingNode) {
+      // Switching the node and view after confirmation
+      try {
+        const nodeContent =
+          await NodeContentService.getOrCreateNodeContent(pendingNode);
+        const fullNode = { ...pendingNode, content: nodeContent.content };
+        setSelectedNode(fullNode);
+        localStorage.setItem("selectedNodeId", pendingNode.id);
+      } catch (error) {
+        console.error("Error loading node content after confirmation:", error);
+      }
+      setPendingNode(null);
+    }
+
+    if (pendingView) {
+      // Set the view after the dialog is confirmed
+      setActiveView(pendingView);
+      setPendingView(null);
+    }
+
+    setIsDirty(false);
+    setShowDialog(false);
+  };
+
+  const handleDialogCancel = () => {
+    setShowDialog(false);
+    setPendingNode(null);
+    setPendingView(null);
   };
 
   return (
@@ -104,7 +146,7 @@ const EditPage = () => {
                     <Folder
                       node={node}
                       key={node.id}
-                      onNodeClick={handleNodeClick}
+                      onNodeClick={handleNodeChange}
                     />
                   ))}
                 </ul>
@@ -114,7 +156,7 @@ const EditPage = () => {
 
           <BottomNavigationBar
             activeView={activeView}
-            onChangeView={setActiveView}
+            onChangeView={handleViewChange}
             menuOpen={menuOpen}
           />
         </div>
@@ -143,30 +185,8 @@ const EditPage = () => {
 
       <UnsavedChangesDialog
         isOpen={showDialog}
-        onCancel={() => {
-          setShowDialog(false);
-          setPendingNode(null);
-        }}
-        onConfirm={async () => {
-          if (pendingNode) {
-            try {
-              const nodeContent =
-                await NodeContentService.getOrCreateNodeContent(pendingNode);
-              const fullNode = { ...pendingNode, content: nodeContent.content };
-              console.log("Pending node content:", fullNode);
-              setSelectedNode(fullNode);
-              localStorage.setItem("selectedNodeId", pendingNode.id);
-              setActiveView("file");
-            } catch (error) {
-              console.error(
-                "Error loading node content after confirmation:",
-                error
-              );
-            }
-            setPendingNode(null);
-          }
-          setShowDialog(false);
-        }}
+        onCancel={handleDialogCancel}
+        onConfirm={handleDialogConfirm}
       />
     </div>
   );
