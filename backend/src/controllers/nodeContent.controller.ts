@@ -28,17 +28,10 @@ export const createNodeContent = async (req: Request, res: Response): Promise<vo
   }
 };
 
-// Get all NodeContent entries by nodeId
+// Get all NodeContent entries
 export const getNodeContents = async (req: Request, res: Response): Promise<void> => {
-  const { nodeId } = req.query;
-
-  if (!nodeId || typeof nodeId !== "string") {
-    res.status(400).json({ error: "nodeId is required as a query parameter" });
-    return; // Exit after sending error response
-  }
-
   try {
-    const contents = await NodeContent.find({ nodeId });
+    const contents = await NodeContent.find();  // Keine Filterung nach nodeId
     res.status(200).json(contents);
   } catch (error) {
     console.error(error);
