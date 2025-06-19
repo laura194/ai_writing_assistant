@@ -59,7 +59,12 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
                         className="border px-2 py-1"
                         value={editableName}
                         onChange={(e) => setEditableName(e.target.value)}
-                        onBlur={handleSaveEdit}
+                        onBlur={handleSaveEdit} // Speichert weiterhin beim Rausklicken
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                handleSaveEdit();
+                            }
+                        }} // Speichert beim Drücken der Enter-Taste
                         autoFocus
                     />
                 ) : (
@@ -68,8 +73,8 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
                         onDoubleClick={() => setIsEditing(true)}
                         onClick={() => onNodeClick(node)}
                     >
-            {node.name}
-          </span>
+        {node.name}
+    </span>
                 )}
 
                 {/* Kapitel hinzufügen */}
