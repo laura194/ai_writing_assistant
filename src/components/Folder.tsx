@@ -84,8 +84,8 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
                         }}
                         onClick={() => onNodeClick(node)}
                     >
-       {node.name}
-   </span>
+                        {node.name}
+                    </span>
                 )}
 
                 {/* Kapitel hinzufügen */}
@@ -94,7 +94,7 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
                     onClick={() =>
                         onAdd(node.id, {
                             id: Date.now().toString(),
-                            name: "Neues Kapitel",
+                            name: "New chapter",
                             nodes: [],
                         })
                     }
@@ -103,12 +103,14 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
                 </button>
 
                 {/* Kapitel löschen */}
-                <button
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() => onRemove(node.id)}
-                >
-                    x
-                </button>
+                {node.name !== "Add chapter to project" && ( // Bedingung: Kein Löschen des Root-Knotens
+                    <button
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => onRemove(node.id)}
+                    >
+                        x
+                    </button>
+                )}
             </div>
 
             {hasChildren && (
