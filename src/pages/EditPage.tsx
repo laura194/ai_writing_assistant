@@ -9,6 +9,7 @@ import Header from "../components/Header";
 import AIProtocolCard from "../components/AIProtocolCard";
 import UnsavedChangesDialog from "../components/UnsavedChangesDialog";
 import { NodeContentService } from "../utils/NodeContentService";
+import FullDocumentCard from "../components/FullDocumentCard";
 
 const EditPage = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -192,7 +193,7 @@ const EditPage = () => {
             ) : activeView === "ai" ? (
               <AIProtocolCard />
             ) : activeView === "fullDocument" ? (
-              <p>Full Document</p>
+              <FullDocumentCard />
             ) : (
               <p>Settings</p>
             )
