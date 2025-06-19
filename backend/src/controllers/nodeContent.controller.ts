@@ -1,99 +1,104 @@
 import { Request, Response } from "express";
 import NodeContent from "../models/NodeContent";
 
-// Create a new NodeContent entry
+// Create a new NodeContent entry (prevents duplicates)
 export const createNodeContent = async (req: Request, res: Response): Promise<void> => {
   const { nodeId, name, category, content } = req.body;
 
-  // Check if content is empty and set it to a default value
   if (!content) {
     res.status(400).json({ error: "Content cannot be empty" });
-    return; // Ensure we exit the function after sending the response
+    return;
   }
 
-  // Further validation for other fields
   if (!nodeId || !name || !category) {
     res.status(400).json({ error: "All fields are required" });
-    return; // Ensure we exit the function after sending the response
+    return;
   }
 
-  const newNodeContent = new NodeContent({ nodeId, name, category, content });
-
   try {
+    const existing = await NodeContent.findOne({ nodeId });
+    if (existing) {
+      res.status(409).json({ error: "NodeContent with this nodeId already exists", existing });
+      return;
+    }
+
+    const newNodeContent = new NodeContent({ nodeId, name, category, content });
     const savedNodeContent = await newNodeContent.save();
-    res.status(201).json(savedNodeContent);  // Send successful response
+    res.status(201).json(savedNodeContent);
   } catch (error) {
-    console.error('Error saving node content:', error);
+    console.error("Error saving node content:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-// Get all NodeContent entries
+// Get all NodeContent entries, or filter by ?nodeId=...
 export const getNodeContents = async (req: Request, res: Response): Promise<void> => {
   try {
-    const contents = await NodeContent.find();  // Keine Filterung nach nodeId
-    res.status(200).json(contents);
+    const { nodeId } = req.query;
+
+    if (nodeId) {
+      const filtered = await NodeContent.find({ nodeId: nodeId.toString() });
+      res.status(200).json(filtered);
+    } else {
+      const contents = await NodeContent.find();
+      res.status(200).json(contents);
+    }
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching node contents:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-// Get a specific NodeContent entry by its nodeId
+// Get a specific NodeContent entry by its nodeId (via URL param)
 export const getNodeContentById = async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params; // id ist jetzt die nodeId
-  
-    try {
-      // Suche nach dem NodeContent-Dokument anhand der nodeId
-      const nodeContent = await NodeContent.findOne({ nodeId: id });
-  
-      if (!nodeContent) {
-        res.status(404).json({ error: "NodeContent with the given nodeId not found" });
-        return; // Exit if the nodeContent is not found
-      }
-  
-      res.status(200).json(nodeContent);  // Send the found node content
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error" });
+  const { id } = req.params;
+
+  try {
+    const nodeContent = await NodeContent.findOne({ nodeId: id });
+
+    if (!nodeContent) {
+      res.status(404).json({ error: "NodeContent with the given nodeId not found" });
+      return;
     }
-  };
-  
+
+    res.status(200).json(nodeContent);
+  } catch (error) {
+    console.error("Error fetching node content by ID:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 // Update a specific NodeContent entry by nodeId
 export const updateNodeContent = async (req: Request, res: Response): Promise<void> => {
-    const { nodeId } = req.params;  // Get nodeId from URL params
-    const { name, category, content } = req.body;  // Get the updated data from the request body
-    
-    // Check if content is empty
-    if (!content) {
-      res.status(400).json({ error: "Content cannot be empty" });
+  const { nodeId } = req.params;
+  const { name, category, content } = req.body;
+
+  if (!content) {
+    res.status(400).json({ error: "Content cannot be empty" });
+    return;
+  }
+
+  if (!nodeId || !name || !category) {
+    res.status(400).json({ error: "All fields are required" });
+    return;
+  }
+
+  try {
+    const updatedNodeContent = await NodeContent.findOneAndUpdate(
+      { nodeId },
+      { name, category, content },
+      { new: true }
+    );
+
+    if (!updatedNodeContent) {
+      console.log("No content found with the given nodeId:", nodeId);
+      res.status(404).json({ error: "NodeContent not found" });
       return;
     }
-  
-    // Further validation for other fields
-    if (!nodeId || !name || !category) {
-      res.status(400).json({ error: "All fields are required" });
-      return;
-    }
-  
-    try {
-      // Find and update the document by nodeId
-      const updatedNodeContent = await NodeContent.findOneAndUpdate(
-        { nodeId },  // Find by nodeId
-        { name, category, content },  // Update these fields
-        { new: true }  // Return the updated document
-      );
-  
-      if (!updatedNodeContent) {
-        console.log('No content found with the given nodeId:', nodeId);
-        res.status(404).json({ error: "NodeContent not found" });
-        return;
-      }
-  
-      res.status(200).json(updatedNodeContent);  // Return the updated node content
-    } catch (error) {
-      console.error('Error updating node content:', error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  };
+
+    res.status(200).json(updatedNodeContent);
+  } catch (error) {
+    console.error("Error updating node content:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
