@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import NodeContent from "../models/NodeContent";
 
 // Create a new NodeContent entry (prevents duplicates)
-export const createNodeContent = async (req: Request, res: Response): Promise<void> => {
+export const createNodeContent = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   const { nodeId, name, category, content } = req.body;
 
   if (!content) {
@@ -18,7 +21,12 @@ export const createNodeContent = async (req: Request, res: Response): Promise<vo
   try {
     const existing = await NodeContent.findOne({ nodeId });
     if (existing) {
-      res.status(409).json({ error: "NodeContent with this nodeId already exists", existing });
+      res
+        .status(409)
+        .json({
+          error: "NodeContent with this nodeId already exists",
+          existing,
+        });
       return;
     }
 
@@ -32,7 +40,10 @@ export const createNodeContent = async (req: Request, res: Response): Promise<vo
 };
 
 // Get all NodeContent entries, or filter by ?nodeId=...
-export const getNodeContents = async (req: Request, res: Response): Promise<void> => {
+export const getNodeContents = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { nodeId } = req.query;
 
@@ -50,14 +61,19 @@ export const getNodeContents = async (req: Request, res: Response): Promise<void
 };
 
 // Get a specific NodeContent entry by its nodeId (via URL param)
-export const getNodeContentById = async (req: Request, res: Response): Promise<void> => {
+export const getNodeContentById = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
 
   try {
     const nodeContent = await NodeContent.findOne({ nodeId: id });
 
     if (!nodeContent) {
-      res.status(404).json({ error: "NodeContent with the given nodeId not found" });
+      res
+        .status(404)
+        .json({ error: "NodeContent with the given nodeId not found" });
       return;
     }
 
@@ -69,7 +85,10 @@ export const getNodeContentById = async (req: Request, res: Response): Promise<v
 };
 
 // Update a specific NodeContent entry by nodeId
-export const updateNodeContent = async (req: Request, res: Response): Promise<void> => {
+export const updateNodeContent = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   const { nodeId } = req.params;
   const { name, category, content } = req.body;
 
@@ -87,7 +106,7 @@ export const updateNodeContent = async (req: Request, res: Response): Promise<vo
     const updatedNodeContent = await NodeContent.findOneAndUpdate(
       { nodeId },
       { name, category, content },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedNodeContent) {
