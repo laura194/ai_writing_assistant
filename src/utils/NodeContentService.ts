@@ -28,7 +28,6 @@ export class NodeContentService {
      * @returns A list of all node contents.
      */
     static async getNodeContents(): Promise<any[]> {
-        console.log('Fetching all node contents from the backend...');
         try {
             const response = await axios.get(API_BASE_URL);
             console.log('Node contents fetched successfully:', response.data);  // Log success response
@@ -45,10 +44,8 @@ export class NodeContentService {
      * @returns The node content with the specified ID.
      */
     static async getNodeContentById(id: string): Promise<any> {
-        console.log(`Fetching node content with ID: ${id}`);  // Log the ID of the content being fetched
         try {
             const response = await axios.get(`${API_BASE_URL}/${id}`);
-            console.log('Node content fetched successfully:', response.data);  // Log success response
             return response.data;
         } catch (error) {
             console.error(`Error fetching node content with ID ${id}:`, error);  // Log error if it occurs
