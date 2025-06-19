@@ -127,7 +127,7 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
                 </button>
 
                 {/* Kapitel löschen */}
-                {node.name !== "Projektübersicht" && (
+                {node.name !== "Add chapter to project" && (
                     <button
                         className="text-red-500 hover:text-red-700"
                         onClick={() => handleDeleteClick(node.id)} // Popup öffnen
