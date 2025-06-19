@@ -155,7 +155,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
         value={fileContent}
         onChange={(e) => setFileContent(e.target.value)}
         onMouseUp={handleTextSelect}
-        className="w-full h-80 p-3 rounded bg-white text-sm resize-none focus:outline-none focus:ring focus:ring-blue-300"
+        className="w-full h-140 p-3 rounded bg-white text-sm resize-none focus:outline-none focus:ring focus:ring-blue-300"
         placeholder="Write your content here..."
         spellCheck={false}
       />
