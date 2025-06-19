@@ -21,29 +21,14 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
   const [aiNodeName, setAiNodeName] = useState(node.name || "");
   const [isDirty, setIsDirty] = useState(false);
-  const [pendingNode, setPendingNode] = useState<Node | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (!pendingNode) {
-      setFileContent(node.content || "...");
-      setOriginalContent(node.content || "...");
-      setIsDirty(false);
-    }
-  }, [node, pendingNode]);
-
-  useEffect(() => {
-    if (node !== pendingNode) {
-      if (isDirty) {
-        setPendingNode(node);
-      } else {
-        setFileContent(node.content || "...");
-        setOriginalContent(node.content || "...");
-        setIsDirty(false);
-      }
-    }
-  }, [node, pendingNode, isDirty]);
+    setFileContent(node.content || "...");
+    setOriginalContent(node.content || "...");
+    setIsDirty(false);
+  }, [node]);
 
   useEffect(() => {
     const dirty = fileContent !== originalContent;
