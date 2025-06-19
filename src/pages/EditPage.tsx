@@ -12,7 +12,6 @@ import { NodeContentService } from "../utils/NodeContentService";
 
 const EditPage = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
-  const [nodeContents, setNodeContents] = useState<Node[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [menuOpen, setMenuOpen] = useState<boolean>(() => {
     const savedMenuOpen = localStorage.getItem("menuOpen");
@@ -33,15 +32,10 @@ const EditPage = () => {
   }, [activeView]);
 
   useEffect(() => {
-    // Load the project structure
-    // This should be replaced with the actual database
     fetch("/projectStructure.json")
       .then((response) => response.json())
       .then((data: Node[]) => setNodes(data))
       .catch((error) => console.error("Error loading JSON:", error));
-
-    // Load the file content
-    // This should be replaced with the actual database
 
     const savedNodeId = localStorage.getItem("selectedNodeId");
     if (savedNodeId) {
@@ -71,13 +65,15 @@ const EditPage = () => {
           await NodeContentService.getOrCreateNodeContent(node);
         const fullNode = { ...node, content: nodeContent.content };
         setSelectedNode(fullNode);
-        localStorage.setItem("selectedNodeId", node.id); // Save selected node ID to localStorage
-        setActiveView("file"); // Change to 'file' view on node selection
+        localStorage.setItem("selectedNodeId", node.id);
+        setActiveView("file");
       } catch (error) {
         console.error("Error loading node content:", error);
       }
     };
+
     if (isDirty) {
+      setPendingNode(node);
       setShowDialog(true);
     } else {
       switchNode();
@@ -88,15 +84,12 @@ const EditPage = () => {
     <div className="flex flex-col h-screen">
       <Header />
       <div className="flex flex-1 relative">
-        {/* Button to open/close the menu */}
         <button
           className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           <Bars3Icon className="h-5 w-5 text-white" />
         </button>
-
-        {/* Menu */}
 
         <div
           className={`${
@@ -118,7 +111,6 @@ const EditPage = () => {
               </li>
             </ul>
           )}
-          {/* BottomNavigationBar */}
 
           <BottomNavigationBar
             activeView={activeView}
@@ -126,8 +118,6 @@ const EditPage = () => {
             menuOpen={menuOpen}
           />
         </div>
-
-        {/* Main Content */}
 
         <div
           className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-4 bg-gray-400`}
@@ -150,22 +140,29 @@ const EditPage = () => {
           )}
         </div>
       </div>
+
       <UnsavedChangesDialog
         isOpen={showDialog}
         onCancel={() => {
           setShowDialog(false);
           setPendingNode(null);
         }}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (pendingNode) {
-            const contentNode = nodeContents.find(
-              (item) => item.id === pendingNode.id
-            );
-            const fullNode = contentNode || { ...pendingNode, content: "..." };
-
-            setSelectedNode(fullNode);
-            localStorage.setItem("selectedNodeId", pendingNode.id);
-            setActiveView("file");
+            try {
+              const nodeContent =
+                await NodeContentService.getOrCreateNodeContent(pendingNode);
+              const fullNode = { ...pendingNode, content: nodeContent.content };
+              console.log("Pending node content:", fullNode);
+              setSelectedNode(fullNode);
+              localStorage.setItem("selectedNodeId", pendingNode.id);
+              setActiveView("file");
+            } catch (error) {
+              console.error(
+                "Error loading node content after confirmation:",
+                error
+              );
+            }
             setPendingNode(null);
           }
           setShowDialog(false);
@@ -176,5 +173,3 @@ const EditPage = () => {
 };
 
 export default EditPage;
-
-//TODO: unsavedchangesdialog auch wenn man die bottomNavigation bar benutzt und wenn man die url wechselt oder refresh drückt
