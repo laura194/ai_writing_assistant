@@ -11,6 +11,6 @@ const router = express.Router();
 router.post("/", createNodeContent);
 router.get("/", getNodeContents);
 router.get("/:id", getNodeContentById);
-router.put("/:nodeId", updateNodeContent);  // Use nodeId in the URL
+router.put("/:nodeId", updateNodeContent);  
 
 export default router;
