@@ -1,9 +1,7 @@
-import axios from 'axios';
-import { Node } from './types';
+import axios from "axios";
+import { Node } from "./types";
 
-const API_BASE_URL = '/api/nodeContent';
-
-
+const API_BASE_URL = "/api/nodeContent";
 
 export class NodeContentService {
   /**
@@ -11,7 +9,7 @@ export class NodeContentService {
    * @param data The data for the new node content.
    * @returns The created node content.
    */
-  static async createNodeContent(data: Omit<Node, 'id'>): Promise<Node> {
+  static async createNodeContent(data: Omit<Node, "id">): Promise<Node> {
     try {
       if (!data.content) {
         data.content = "Default content";
@@ -19,7 +17,10 @@ export class NodeContentService {
       const response = await axios.post<Node>(API_BASE_URL, data);
       return response.data;
     } catch (error) {
-      console.error('❌ [createNodeContent] Error creating node content:', error);
+      console.error(
+        "❌ [createNodeContent] Error creating node content:",
+        error,
+      );
       throw error;
     }
   }
@@ -33,7 +34,10 @@ export class NodeContentService {
       const response = await axios.get<Node[]>(API_BASE_URL);
       return response.data;
     } catch (error) {
-      console.error('❌ [getNodeContents] Error fetching node contents:', error);
+      console.error(
+        "❌ [getNodeContents] Error fetching node contents:",
+        error,
+      );
       throw error;
     }
   }
@@ -48,7 +52,10 @@ export class NodeContentService {
       const response = await axios.get<Node>(`${API_BASE_URL}/${nodeId}`);
       return response.data;
     } catch (error) {
-      console.error(`❌ [getNodeContentById] Error fetching node content with nodeId ${nodeId}:`, error);
+      console.error(
+        `❌ [getNodeContentById] Error fetching node content with nodeId ${nodeId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -57,9 +64,15 @@ export class NodeContentService {
    * Gets or creates a node content entry by node data (nodeId, name, category).
    * @param node The node to check or create.
    */
-  static async getOrCreateNodeContent(node: { id: string; name: string; category?: string }): Promise<Node> {
+  static async getOrCreateNodeContent(node: {
+    id: string;
+    name: string;
+    category?: string;
+  }): Promise<Node> {
     try {
-      const response = await axios.get<Node[]>(`${API_BASE_URL}?nodeId=${node.id}`);
+      const response = await axios.get<Node[]>(
+        `${API_BASE_URL}?nodeId=${node.id}`,
+      );
       if (response.data.length > 0) {
         return response.data[0];
       }
@@ -73,7 +86,10 @@ export class NodeContentService {
 
       return created;
     } catch (error) {
-      console.error('❌ [getOrCreateNodeContent] Error during get/create:', error);
+      console.error(
+        "❌ [getOrCreateNodeContent] Error during get/create:",
+        error,
+      );
       throw error;
     }
   }
@@ -84,7 +100,10 @@ export class NodeContentService {
    * @param data The new data for the node content.
    * @returns The updated node content.
    */
-  static async updateNodeContent(id: string, data: Partial<Node>): Promise<Node> {
+  static async updateNodeContent(
+    id: string,
+    data: Partial<Node>,
+  ): Promise<Node> {
     try {
       if (!data.content) {
         data.content = "Default content";
@@ -93,7 +112,10 @@ export class NodeContentService {
       const response = await axios.put<Node>(`${API_BASE_URL}/${id}`, data);
       return response.data;
     } catch (error) {
-      console.error(`❌ [updateNodeContent] Error updating node content with ID ${id}:`, error);
+      console.error(
+        `❌ [updateNodeContent] Error updating node content with ID ${id}:`,
+        error,
+      );
       throw error;
     }
   }
