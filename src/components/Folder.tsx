@@ -13,12 +13,19 @@ interface FolderProps {
 
 function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }: FolderProps) {
     const ref = useRef<HTMLLIElement>(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editableName, setEditableName] = useState(node.name);
 
     const handleSaveEdit = () => {
         onNodeClick({ ...node, name: editableName });
         setIsEditing(false);
+    };
+
+    const selectInputText = () => {
+        if (inputRef.current) {
+            inputRef.current.select();
+        }
     };
 
     // Drag-and-Drop-Logik
@@ -56,25 +63,29 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
                 {/* Knotenname bearbeiten */}
                 {isEditing ? (
                     <input
+                        ref={inputRef} // Verknüpfung des Inputs mit dem Ref
                         className="border px-2 py-1"
                         value={editableName}
                         onChange={(e) => setEditableName(e.target.value)}
-                        onBlur={handleSaveEdit} // Speichert weiterhin beim Rausklicken
+                        onBlur={handleSaveEdit} // Speichern beim Verlassen
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
                                 handleSaveEdit();
                             }
-                        }} // Speichert beim Drücken der Enter-Taste
+                        }}
                         autoFocus
                     />
                 ) : (
                     <span
                         className="cursor-pointer"
-                        onDoubleClick={() => setIsEditing(true)}
+                        onDoubleClick={() => {
+                            setIsEditing(true);
+                            setTimeout(() => selectInputText(), 0); // Warten, bis `isEditing` true ist
+                        }}
                         onClick={() => onNodeClick(node)}
                     >
-        {node.name}
-    </span>
+       {node.name}
+   </span>
                 )}
 
                 {/* Kapitel hinzufügen */}
