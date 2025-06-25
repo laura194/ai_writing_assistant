@@ -2,6 +2,9 @@ import { useState, useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { Node } from "../utils/types";
 
+import IconPicker from "../components/IconPicker";
+import { getIcon } from "../utils/icons";
+
 interface FolderProps {
     node: Node;
     onMove: (draggedNodeId: string, targetNodeId: string) => void;
@@ -14,6 +17,8 @@ interface FolderProps {
 function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }: FolderProps) {
     const ref = useRef<HTMLLIElement>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
+
+    const [showIconPicker, setShowIconPicker] = useState(false); // Zustandsvariable für den Icon-Picker
 
     // Lokale Zustände
     const [isEditing, setIsEditing] = useState(false);
@@ -83,7 +88,30 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
             ref={ref}
             style={{ opacity: isDragging ? 0.5 : 1 }}
         >
+
             <div className="flex items-center gap-2">
+
+                {/* Icon-Anzeige */}
+                <div
+                    className="cursor-pointer"
+                    onClick={() => setShowIconPicker(!showIconPicker)} // Picker ein-/ausblenden
+                    title="Klicke, um ein Icon auszuwählen"
+                >
+                    {getIcon(node, "size-6")}
+                </div>
+
+                {/* IconPicker nur anzeigen, wenn geöffnet */}
+                {showIconPicker && (
+                    <IconPicker
+                        currentIcon={node.icon} // Das aktuell selektierte Icon des Nodes
+                        onSelect={(newIcon) => {
+                            const updatedNode = { ...node, icon: newIcon }; // Icon im Node updaten
+                            onNodeClick(updatedNode); // Callback zur Weitergabe der Änderung
+                            setShowIconPicker(false); // Picker schließen
+                        }}
+                    />
+                )}
+
                 {/* Knotenname bearbeiten */}
                 {isEditing ? (
                     <input

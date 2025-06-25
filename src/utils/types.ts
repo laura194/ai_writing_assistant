@@ -15,4 +15,5 @@ export interface Node {
   category?: "text" | "list" | "code" | "image"; // Optional field for categorizing the node type.
   content?: string; // Optional content for the node (e.g., file content).
   nodes?: Node[]; // Optional field for nested nodes (subfolders or files).
+  icon?: string; // Neues Feld: Benutzerdefiniertes Icon
 }
