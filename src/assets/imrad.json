@@ -1,0 +1,43 @@
+[
+  {
+    "id": "1",
+    "name": "Add chapter to project",
+    "nodes": [
+      {
+        "id": "2",
+        "name": "Introduction",
+        "nodes": []
+      },
+      {
+        "id": "3",
+        "name": "Methods",
+        "nodes": []
+      },
+      {
+        "id": "4",
+        "name": "Results",
+        "nodes": []
+      },
+      {
+        "id": "5",
+        "name": "Discussion",
+        "nodes": []
+      },
+      {
+        "id": "6",
+        "name": "Conclusion",
+        "nodes": []
+      },
+      {
+        "id": "7",
+        "name": "References",
+        "nodes": []
+      },
+      {
+        "id": "8",
+        "name": "Appendix",
+        "nodes": []
+      }
+    ]
+  }
+]
