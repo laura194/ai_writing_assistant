@@ -6,6 +6,11 @@ import Header from "../components/Header";
 import { Node } from "../utils/types";
 import { Bars3Icon } from "@heroicons/react/24/solid";
 
+import { useLocation } from "react-router-dom"; // Für die Daten von StructureSelectionPage
+import ImradStructure from "../assets/imrad.json";
+import DesignStructure from "../assets/storyForDesign.json";
+import ScratchStructure from "../assets/projectStructure.json"; // Leere Struktur als Basis
+
 const EditPage = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [menuOpen, setMenuOpen] = useState(() => {
@@ -13,14 +18,19 @@ const EditPage = () => {
     return savedMenuState ? JSON.parse(savedMenuState) : true;
   });
 
+  const location = useLocation();
+  const structureType = location.state?.structureType || "scratch"; // StrukturTyp auslesen oder Standard "scratch"
+
   useEffect(() => {
-    fetch("/projectStructure.json")
-        .then((res) => res.json())
-        .then((data: Node[]) => setNodes(data))
-        .catch((err) =>
-            console.error("Fehler beim Laden der Kapitelstruktur", err)
-        );
-  }, []);
+    // Lade die richtige Struktur basierend auf structureType
+    if (structureType === "explanation") {
+      setNodes(ImradStructure); // IMRaD-Struktur laden
+    } else if (structureType === "design") {
+      setNodes(DesignStructure); // Design-Struktur laden
+    } else if (structureType === "scratch") {
+      setNodes(ScratchStructure); // Leere Struktur laden
+    }
+  }, [structureType]);
 
   useEffect(() => {
     localStorage.setItem("menuOpen", JSON.stringify(menuOpen));
@@ -113,7 +123,8 @@ const EditPage = () => {
         return [...withoutDraggedNode, draggedNode!];
       }
 
-      const updatedStructure = recursiveAdd(withoutDraggedNode); // Hinzufügen
+      // Hinzufügen: Konstante updatedStructure kann für Speicherung in DB genutzt werden
+      const updatedStructure = recursiveAdd(withoutDraggedNode);
       return updatedStructure;
     });
   };
