@@ -5,15 +5,19 @@ import "../App.css";
 import Folder from "../components/Folder";
 import FileContentCard from "../components/FileContentCard";
 import { Bars3Icon } from "@heroicons/react/24/solid";
-import { Node } from "../utils/types";
+import { Node, Project } from "../utils/types";
 import BottomNavigationBar from "../components/BottomNavigationBar";
 import Header from "../components/Header";
 import AIProtocolCard from "../components/AIProtocolCard";
 import UnsavedChangesDialog from "../components/UnsavedChangesDialog";
 import { NodeContentService } from "../utils/NodeContentService";
 import FullDocumentCard from "../components/FullDocumentCard";
+import { ProjectService } from "../utils/ProjectService";
+import { useParams } from "react-router-dom";
 
 const EditPage = () => {
+  const { projectId } = useParams<{ projectId: string }>(); // Extract projectId from the URL
+
   const [nodes, setNodes] = useState<Node[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [menuOpen, setMenuOpen] = useState<boolean>(() => {
@@ -36,10 +40,27 @@ const EditPage = () => {
   }, [activeView]);
 
   useEffect(() => {
-    fetch("/projectStructure.json")
-      .then((response) => response.json())
-      .then((data: Node[]) => setNodes(data))
-      .catch((error) => console.error("Error loading JSON:", error));
+    if (projectId) {
+      // Fetch project data using the projectId
+      ProjectService.getProjectById(projectId)
+        .then((project: Project) => {
+          // Die Antwort ist jetzt ein einzelnes Projekt
+          console.log("Fetched project:", project); // Logge das Projekt
+
+          // Überprüfe, ob projectStructure verfügbar und ein Array ist
+          if (Array.isArray(project.projectStructure)) {
+            setNodes(project.projectStructure); // Setze die Nodes
+            console.log("Parsed nodes:", project.projectStructure); // Logge die Nodes
+          } else {
+            console.error("Project structure is not an array or is undefined!");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching project:", error);
+        });
+    } else {
+      console.error("Project ID is not available!"); // Logge, falls keine projectId vorhanden ist
+    }
 
     const savedNodeId = localStorage.getItem("selectedNodeId");
     if (savedNodeId) {
@@ -56,7 +77,7 @@ const EditPage = () => {
         })
         .catch((error) => console.error("Error fetching node content:", error));
     }
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
     localStorage.setItem("menuOpen", JSON.stringify(menuOpen));

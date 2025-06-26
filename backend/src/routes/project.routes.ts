@@ -2,15 +2,14 @@ import express from "express";
 import {
   createProject,
   getProjects,
-  getProjectById,
-  updateProject,
+  updateProject
 } from "../controllers/project.controller";
 
 const router = express.Router();
 
-router.post("/", createProject);  // POST zum Erstellen eines neuen Projekts
-router.get("/", getProjects);  // GET zum Abrufen aller Projekte
-router.get("/:id", getProjectById);  // GET zum Abrufen eines Projekts nach ID
-router.put("/:id", updateProject);  // PUT zum Aktualisieren eines Projekts
+router.post("/", createProject);
+router.get("/", getProjects);
+router.get("/:id", getProjects);  // Retrieve by ID
+router.put("/:id", updateProject);  // Update by ID
 
 export default router;

@@ -40,6 +40,7 @@ function AllRoutes(isSignedIn: boolean) {
       {/* Protected Paths */}
       <Route path="/home" element={<HomePage />} />
       <Route path="/edit" element={<EditPage />} />
+      <Route path="/edit/:projectId" element={<EditPage />} />
       <Route path="/structureSelection" element={<StructureSelectionPage />} />
 
       {/* Catch-All (je nachdem ob der User signedIn ist oder nicht) */}
