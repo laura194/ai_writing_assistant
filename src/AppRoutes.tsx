@@ -23,6 +23,7 @@ import StructureSelectionPage from "./pages/StructureSelectionPage";
 import EditPage from "./pages/EditPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
+import ProjectOverview from "./pages/ProjectOverview";
 
 /*
  * AllRoutes Component
@@ -40,7 +41,9 @@ function AllRoutes(isSignedIn: boolean) {
       {/* Protected Paths */}
       <Route path="/home" element={<HomePage />} />
       <Route path="/edit" element={<EditPage />} />
+      <Route path="/edit/:projectId" element={<EditPage />} />
       <Route path="/structureSelection" element={<StructureSelectionPage />} />
+      <Route path="/myProjects" element={<ProjectOverview />} />
 
       {/* Catch-All (je nachdem ob der User signedIn ist oder nicht) */}
       <Route
