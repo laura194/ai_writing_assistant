@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { IAiProtocolEntry } from "../models/IAITypes";
-import { useUser } from "@clerk/clerk-react";
+import { useParams } from "react-router-dom";
 import { FunnelIcon } from "@heroicons/react/24/outline";
 
 const truncateText = (text: string, maxLength = 100) => {
@@ -14,15 +14,19 @@ const AIProtocolCard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("");
 
-  const { user } = useUser();
+  // Assuming you have projectId in the user object or you can fetch it from another source
+  const { projectId } = useParams<{ projectId: string }>();
 
   useEffect(() => {
     const fetchProtocols = async () => {
       try {
+        if (!projectId) {
+          throw new Error("Project ID is missing");
+        }
         const response = await axios.get<IAiProtocolEntry[]>(
           "/api/ai/aiProtocol",
           {
-            params: { username: user?.username || user?.id },
+            params: { projectId },
           },
         );
 
@@ -35,10 +39,13 @@ const AIProtocolCard: React.FC = () => {
       }
     };
 
-    if (user?.username || user?.id) {
+    if (projectId) {
       fetchProtocols();
+    } else {
+      setError("Project ID is required.");
+      setLoading(false);
     }
-  }, [user?.username, user?.id]);
+  }, [projectId]);
 
   // Filter logic
   const filteredProtocols = protocols.filter((protocol) => {

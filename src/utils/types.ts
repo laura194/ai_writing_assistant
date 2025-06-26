@@ -12,7 +12,18 @@
 export interface Node {
   id: string;
   name: string;
-  category?: "text" | "list" | "code" | "image"; // Optional field for categorizing the node type.
+  category?: string; // Optional field for categorizing the node type.
   content?: string; // Optional content for the node (e.g., file content).
   nodes?: Node[]; // Optional field for nested nodes (subfolders or files).
+  nodeId?: string; // Unique identifier for the node, used for backend operations.
+  icon?: string; // Neues Feld: Benutzerdefiniertes Icon
+}
+
+export interface Project {
+  _id?: string;
+  name: string;
+  username: string;
+  projectStructure: Node[];
+  created_at?: string;
+  updated_at?: string;
 }
