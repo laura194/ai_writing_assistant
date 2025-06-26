@@ -6,7 +6,7 @@ export interface IAiProtocol extends Document {
   affectedParts: string;
   remarks: string;
   projectId: mongoose.Types.ObjectId; // Referenz auf das Projekt
-  createdAt?: Date; 
+  createdAt?: Date;
   updatedAt?: Date;
 }
 
@@ -16,7 +16,11 @@ const aiProtocolSchema: Schema = new Schema(
     usageForm: { type: String, required: true },
     affectedParts: { type: String, required: true },
     remarks: { type: String, required: true },
-    projectId: { type: mongoose.Schema.Types.ObjectId, ref: "Project", required: true }, // Referenz zum Projekt
+    projectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+      required: true,
+    }, // Referenz zum Projekt
   },
   { timestamps: true },
 );
