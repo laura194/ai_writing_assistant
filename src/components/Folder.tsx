@@ -1,85 +1,217 @@
-import { ChevronRightIcon, FolderIcon } from "@heroicons/react/24/solid";
-import File from "./File";
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
+import { useDrag, useDrop } from "react-dnd";
 import { Node } from "../utils/types";
 
-/**
- * FolderProps interface that defines the expected properties for the Folder component.
- * @interface FolderProps
- * @property {Node} node - The folder node data, which includes information such as the folder's name, ID, and any nested child nodes.
- * @property {Function} onNodeClick - A callback function that is triggered when a file or folder is clicked. This function accepts a Node object as an argument.
- */
+import IconPicker from "../components/IconPicker";
+import { getIcon } from "../utils/icons";
+
 interface FolderProps {
   node: Node;
+  onMove: (draggedNodeId: string, targetNodeId: string) => void;
   onNodeClick: (node: Node) => void;
+  onAdd: (parentId: string | null, newNode: Node) => void;
+  onRemove: (nodeId: string) => void;
+  isVisible?: boolean;
 }
 
-/**
- *
- * Folder component that represents a folder in a hierarchical file structure.
- * This component renders the folder's name, its contents (if any), and handles the opening and closing of the folder.
- * It manages the state of whether the folder is open or closed, saving this state in localStorage for persistence.
- * It renders nested folders recursively and allows interaction through clicks to toggle folder visibility.
- * @component
- * @param {FolderProps} props - The properties passed to the Folder component.
- * @param {Node} props.node - The folder's data, including its name, ID, and potential child nodes.
- * @param {Function} props.onNodeClick - A callback function to handle the click event for a file or folder.
- * @returns - A list item representing the folder, with possible child folders rendered below.
- */
-function Folder({ node, onNodeClick }: FolderProps) {
-  // Sicherstellen, dass `node` immer vorhanden ist
-  const safeNode = node ?? { id: "invalid", name: "Invalid", nodes: [] };
+function Folder({
+  node,
+  onMove,
+  onNodeClick,
+  onAdd,
+  onRemove,
+  isVisible = true,
+}: FolderProps) {
+  const ref = useRef<HTMLLIElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const storageKey = `isOpen-${safeNode.id}`;
-  const [isOpen, setIsOpen] = useState<boolean>(() => {
-    const savedState = localStorage.getItem(storageKey);
-    return savedState ? JSON.parse(savedState) : false;
+  const [showIconPicker, setShowIconPicker] = useState(false); // Zustandsvariable für den Icon-Picker
+
+  // Lokale Zustände
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableName, setEditableName] = useState(node.name);
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false); // Popup-Zustand
+  const [nodeToDelete, setNodeToDelete] = useState<string | null>(null); // Speichert den zu löschenden Node
+
+  const handleSaveEdit = () => {
+    onNodeClick({ ...node, name: editableName });
+    setIsEditing(false);
+  };
+
+  const selectInputText = () => {
+    if (inputRef.current) {
+      inputRef.current.select();
+    }
+  };
+
+  // Drag-and-Drop-Logik
+  const [{ isDragging }, dragRef] = useDrag({
+    type: "node",
+    item: { id: node.id },
+    canDrag: node.name !== "Kapitel hinzufügen", // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
   });
 
-  useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(isOpen));
-  }, [isOpen, storageKey]);
+  const [, dropRef] = useDrop({
+    accept: "node",
+    hover: (draggedItem: { id: string }) => {
+      if (draggedItem.id !== node.id && node.name !== "Kapitel hinzufügen") {
+        onMove(draggedItem.id, node.id); // Bewege den Knoten
+      }
+    },
+  });
 
-  if (!node) {
-    return <li className="my-1.5">Invalid node</li>;
-  }
+  // Kombinierte Ref-Logik
+  dragRef(dropRef(ref));
+
+  const hasChildren = Array.isArray(node.nodes) && node.nodes.length > 0;
+
+  // Bestätigung zum Löschen anzeigen
+  const handleDeleteClick = (nodeId: string) => {
+    setNodeToDelete(nodeId); // Speichert den Node, dessen Löschung bestätigt werden soll
+    setShowConfirmPopup(true); // Zeigt das Popup an
+  };
+
+  // Löschung bestätigen
+  const confirmDelete = () => {
+    if (nodeToDelete) {
+      onRemove(nodeToDelete); // Führt die tatsächliche Löschung aus
+      setNodeToDelete(null);
+    }
+    setShowConfirmPopup(false); // Schließt das Popup
+  };
+
+  // Löschung abbrechen
+  const cancelDelete = () => {
+    setNodeToDelete(null); // Löscht den gespeicherten Node
+    setShowConfirmPopup(false); // Schließt das Popup
+  };
 
   return (
-    <li className="my-1.5">
-      <span className="flex items-center gap-1.5">
-        {safeNode.nodes && safeNode.nodes.length > 0 ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsOpen(!isOpen);
+    <li
+      className={`my-2 transition-opacity duration-300 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      } ${isVisible ? "max-h-screen" : "max-h-0 overflow-hidden"} `}
+      ref={ref}
+      style={{ opacity: isDragging ? 0.5 : 1 }}
+    >
+      <div className="flex items-center gap-2">
+        {/* Icon-Anzeige */}
+        <div
+          className="cursor-pointer"
+          onClick={() => setShowIconPicker(!showIconPicker)} // Picker ein-/ausblenden
+          title="Klicke, um ein Icon auszuwählen"
+        >
+          {getIcon(node, "size-6")}
+        </div>
+
+        {/* IconPicker nur anzeigen, wenn geöffnet */}
+        {showIconPicker && (
+          <IconPicker
+            currentIcon={node.icon} // Das aktuell selektierte Icon des Nodes
+            onSelect={(newIcon) => {
+              const updatedNode = { ...node, icon: newIcon }; // Icon im Node updaten
+              onNodeClick(updatedNode); // Callback zur Weitergabe der Änderung
+              setShowIconPicker(false); // Picker schließen
             }}
+          />
+        )}
+
+        {/* Knotenname bearbeiten */}
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            className="border px-2 py-1"
+            value={editableName}
+            onChange={(e) => setEditableName(e.target.value)}
+            onBlur={handleSaveEdit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSaveEdit();
+              }
+            }}
+            autoFocus
+          />
+        ) : (
+          <span
+            className="cursor-pointer"
+            onDoubleClick={() => {
+              setIsEditing(true);
+              setTimeout(() => selectInputText(), 0);
+            }}
+            onClick={() => onNodeClick(node)}
           >
-            <ChevronRightIcon
-              className={`size-4 text-gray-500 ${isOpen ? "rotate-90" : ""}`}
-            />
+            {node.name}
+          </span>
+        )}
+
+        {/* Kapitel hinzufügen */}
+        <button
+          className="text-green-500 hover:text-green-700"
+          onClick={() =>
+            onAdd(node.id, {
+              id: Date.now().toString(),
+              name: "New chapter",
+              nodes: [],
+            })
+          }
+        >
+          +
+        </button>
+
+        {/* Kapitel löschen */}
+        {node.name !== "Kapitel hinzufügen" && (
+          <button
+            className="text-red-500 hover:text-red-700"
+            onClick={() => handleDeleteClick(node.id)} // Popup öffnen
+          >
+            x
           </button>
-        ) : (
-          <span className="pl-4" /> // Platzhalter für leere Ordner
         )}
-        {safeNode.nodes ? (
-          <>
-            <FolderIcon className="size-6 text-gray-700" />
-            {safeNode.name}
-          </>
-        ) : (
-          <File node={safeNode} onClick={() => onNodeClick(safeNode)} />
-        )}
-      </span>
-      {isOpen && safeNode.nodes && (
-        <ul className="pl-6">
-          {safeNode.nodes.map((childNode) => (
+      </div>
+
+      {hasChildren && (
+        <ul className="pl-4">
+          {node.nodes!.map((childNode) => (
             <Folder
-              node={childNode}
               key={childNode.id}
+              node={childNode}
+              onMove={onMove}
               onNodeClick={onNodeClick}
+              onAdd={onAdd}
+              onRemove={onRemove}
+              isVisible={isVisible}
             />
           ))}
         </ul>
+      )}
+
+      {/* Bestätigungs-Popup */}
+      {showConfirmPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">
+          {" "}
+          <div className="bg-white rounded-lg shadow-xl p-6 space-y-4">
+            <p className="text-center text-lg font-bold">
+              Willst du dieses Kapitel wirklich löschen?
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                onClick={confirmDelete}
+              >
+                Yes, delete
+              </button>
+              <button
+                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                onClick={cancelDelete}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </li>
   );
