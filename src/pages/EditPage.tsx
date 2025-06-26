@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "../App.css";
-import Folder from "../components/Folder"; // Neue Folder-Komponente deiner Kollegin
+import Folder from "../components/Folder";
 import FileContentCard from "../components/FileContentCard";
 import { Bars3Icon } from "@heroicons/react/24/solid";
 import { Node } from "../utils/types";
@@ -12,19 +12,20 @@ import AIProtocolCard from "../components/AIProtocolCard";
 import UnsavedChangesDialog from "../components/UnsavedChangesDialog";
 import { NodeContentService } from "../utils/NodeContentService";
 import FullDocumentCard from "../components/FullDocumentCard";
-import axios from "axios";
 
 const EditPage = () => {
-  const [nodes, setNodes] = useState<Node[]>([]); // Leeres Array initialisieren
+  const [nodes, setNodes] = useState<Node[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [menuOpen, setMenuOpen] = useState<boolean>(() => {
-    const saved = localStorage.getItem("menuOpen");
-    return saved ? JSON.parse(saved) : true;
+    const savedMenuOpen = localStorage.getItem("menuOpen");
+    return savedMenuOpen ? JSON.parse(savedMenuOpen) : true;
   });
+
   const [activeView, setActiveView] = useState(() => {
-    const saved = localStorage.getItem("activeView");
-    return saved || "file";
+    const savedView = localStorage.getItem("activeView");
+    return savedView ? savedView : "file";
   });
+
   const [isDirty, setIsDirty] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [pendingNode, setPendingNode] = useState<Node | null>(null);
@@ -34,39 +35,49 @@ const EditPage = () => {
     localStorage.setItem("activeView", activeView);
   }, [activeView]);
 
-  // Lade die Projektstruktur aus der Datenbank
   useEffect(() => {
-    axios
-      .get("/api/projectStructures") // Hier wird der API-Endpunkt aufgerufen
-      .then((response) => {
-        // Überprüfe, ob die Struktur richtig geladen wird
-        if (response.data && response.data.length > 0) {
-          setNodes(response.data[0].structure); // Setze die Struktur aus der ersten Projektstruktur
-        }
-      })
-      .catch((err) => {
-        console.error("Error loading nodes:", err);
-        setNodes([]); // Setze ein leeres Array, falls ein Fehler auftritt
-      });
+    fetch("/projectStructure.json")
+      .then((response) => response.json())
+      .then((data: Node[]) => setNodes(data))
+      .catch((error) => console.error("Error loading JSON:", error));
 
     const savedNodeId = localStorage.getItem("selectedNodeId");
     if (savedNodeId) {
-      NodeContentService.getNodeContentById(savedNodeId).then((nodeContent) => {
-        if (nodeContent) {
-          setSelectedNode({
-            id: nodeContent.nodeId || "",
-            name: nodeContent.name,
-            content: nodeContent.content,
-            category: nodeContent.category,
-          });
-        }
-      });
+      NodeContentService.getNodeContentById(savedNodeId)
+        .then((nodeContent) => {
+          if (nodeContent) {
+            setSelectedNode({
+              id: nodeContent.nodeId || "",
+              name: nodeContent.name,
+              content: nodeContent.content,
+              category: nodeContent.category,
+            });
+          }
+        })
+        .catch((error) => console.error("Error fetching node content:", error));
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem("menuOpen", JSON.stringify(menuOpen));
   }, [menuOpen]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isDirty) {
+        const message =
+          "You have unsaved changes. Are you sure you want to leave?";
+        event.returnValue = message;
+        return message;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isDirty]);
 
   const handleNodeChange = async (node: Node) => {
     const switchNode = async () => {
@@ -77,8 +88,8 @@ const EditPage = () => {
         setSelectedNode(fullNode);
         localStorage.setItem("selectedNodeId", node.id);
         setActiveView("file");
-      } catch (err) {
-        console.error("Error loading node content:", err);
+      } catch (error) {
+        console.error("Error loading node content:", error);
       }
     };
 
@@ -108,8 +119,8 @@ const EditPage = () => {
         const fullNode = { ...pendingNode, content: nodeContent.content };
         setSelectedNode(fullNode);
         localStorage.setItem("selectedNodeId", pendingNode.id);
-      } catch (err) {
-        console.error("Error loading node after confirm:", err);
+      } catch (error) {
+        console.error("Error loading node content after confirmation:", error);
       }
       setPendingNode(null);
     }
@@ -129,79 +140,105 @@ const EditPage = () => {
     setPendingView(null);
   };
 
-  return (
-    <div className="flex flex-col h-screen">
-      <Header />
-      <div className="flex flex-1 relative">
-        {/* Menü-Button */}
-        <button
-          className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <Bars3Icon className="h-5 w-5 text-white" />
-        </button>
+  const handleNodeAdd = (parentId: string | null, newNode: Node) => {
+    const addNodeRecursively = (
+      nodes: Node[],
+      parentId: string | null
+    ): Node[] => {
+      return nodes.map((node) => {
+        if (node.id === parentId) {
+          return { ...node, nodes: [...(node.nodes || []), newNode] };
+        }
+        if (node.nodes) {
+          return { ...node, nodes: addNodeRecursively(node.nodes, parentId) };
+        }
+        return node;
+      });
+    };
 
-        {/* Seitenleiste */}
-        <div
-          className={`${menuOpen ? "w-1/4" : "w-12"} transition-all duration-300 bg-gray-200 p-4 flex flex-col justify-between`}
-        >
-          <div className="overflow-y-auto">
+    setNodes(addNodeRecursively(nodes, parentId));
+  };
+
+  const handleNodeRemove = (nodeId: string) => {
+    const removeNodeRecursively = (nodes: Node[], nodeId: string): Node[] => {
+      return nodes.filter((node) => {
+        if (node.id === nodeId) return false;
+        if (node.nodes) node.nodes = removeNodeRecursively(node.nodes, nodeId);
+        return true;
+      });
+    };
+
+    setNodes(removeNodeRecursively(nodes, nodeId));
+  };
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <div className="flex flex-col h-screen">
+        <Header />
+        <div className="flex flex-1 relative">
+          <button
+            className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <Bars3Icon className="h-5 w-5 text-white" />
+          </button>
+
+          <div
+            className={`${
+              menuOpen ? "w-1/4" : "w-12"
+            } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
+          >
             {menuOpen && (
-              <DndProvider backend={HTML5Backend}>
-                <ul>
-                  {nodes && nodes.length > 0 ? (
-                    nodes.map((node) => (
-                      <Folder
-                        key={node.id}
-                        node={node}
-                        onNodeClick={handleNodeChange}
-                        onMove={() => {}}
-                        onAdd={() => {}}
-                        onRemove={() => {}}
-                        isVisible={menuOpen}
-                      />
-                    ))
-                  ) : (
-                    <p>No nodes available</p> // Anzeige, falls keine Knoten geladen wurden
-                  )}
-                </ul>
-              </DndProvider>
+              <ul>
+                {nodes.map((node) => (
+                  <Folder
+                    key={node.id}
+                    node={node}
+                    onMove={() => {}}
+                    onNodeClick={handleNodeChange}
+                    onAdd={handleNodeAdd}
+                    onRemove={handleNodeRemove}
+                  />
+                ))}
+              </ul>
             )}
+
+            <BottomNavigationBar
+              activeView={activeView}
+              onChangeView={handleViewChange}
+              menuOpen={menuOpen}
+            />
           </div>
 
-          <BottomNavigationBar
-            activeView={activeView}
-            onChangeView={handleViewChange}
-            menuOpen={menuOpen}
-          />
-        </div>
-
-        {/* Hauptinhalt */}
-        <div
-          className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-4 bg-gray-400 overflow-y-auto`}
-        >
-          {selectedNode ? (
-            activeView === "file" ? (
-              <FileContentCard node={selectedNode} onDirtyChange={setIsDirty} />
-            ) : activeView === "ai" ? (
-              <AIProtocolCard />
-            ) : activeView === "fullDocument" ? (
-              <FullDocumentCard />
+          <div
+            className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-4 bg-gray-400`}
+          >
+            {selectedNode ? (
+              activeView === "file" ? (
+                <FileContentCard
+                  node={selectedNode}
+                  onDirtyChange={(dirty: boolean) => setIsDirty(dirty)}
+                />
+              ) : activeView === "ai" ? (
+                <AIProtocolCard />
+              ) : activeView === "fullDocument" ? (
+                <FullDocumentCard />
+              ) : (
+                <p>Settings</p>
+              )
             ) : (
-              <p>Settings</p>
-            )
-          ) : (
-            <p className="text-gray-700">Wähle ein Kapitel aus.</p>
-          )}
+              <p>Select an element.</p>
+            )}
+          </div>
         </div>
-      </div>
 
-      <UnsavedChangesDialog
-        isOpen={showDialog}
-        onCancel={handleDialogCancel}
-        onConfirm={handleDialogConfirm}
-      />
-    </div>
+        <UnsavedChangesDialog
+          isOpen={showDialog}
+          onCancel={handleDialogCancel}
+          onConfirm={handleDialogConfirm}
+        />
+      </div>
+    </DndProvider>
   );
 };
 
