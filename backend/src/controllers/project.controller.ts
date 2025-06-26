@@ -80,3 +80,28 @@ export const updateProject = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+// Get all projects by username
+export const getProjectsByUsername = async (req: Request, res: Response): Promise<void> => {
+    const { username } = req.query;
+  
+    if (!username) {
+      res.status(400).json({ error: "Username is required" });
+      return;
+    }
+  
+    try {
+      const projects = await Project.find({ username: username.toString() });
+  
+      if (projects.length === 0) {
+        res.status(404).json({ error: "No projects found for this username" });
+        return;
+      }
+  
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Error fetching projects by username:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+  
