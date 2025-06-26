@@ -48,7 +48,6 @@ const StructureSelectionPage = () => {
 
       // Navigate to the Edit page with the project ID
       navigate(`/edit/${createdProject._id}`);
-      alert(`Projekt "${createdProject.name}" erfolgreich erstellt!`);
     } catch (error) {
       console.error("Fehler beim Erstellen des Projekts:", error);
       alert("Fehler beim Erstellen des Projekts!");
