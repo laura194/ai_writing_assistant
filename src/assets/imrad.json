@@ -1,0 +1,33 @@
+[
+  {
+    "id": "1",
+    "name": "Kapitel hinzufügen",
+    "nodes": [
+      {
+        "id": "2",
+        "name": "Introduction",
+        "nodes": []
+      },
+      {
+        "id": "3",
+        "name": "Methods",
+        "nodes": []
+      },
+      {
+        "id": "4",
+        "name": "Results",
+        "nodes": []
+      },
+      {
+        "id": "5",
+        "name": "Discussion",
+        "nodes": []
+      },
+      {
+        "id": "6",
+        "name": "Conclusion",
+        "nodes": []
+      }
+    ]
+  }
+]
