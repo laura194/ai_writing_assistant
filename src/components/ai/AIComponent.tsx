@@ -3,8 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { Lightbulb, X, Check, Plus } from "lucide-react";
 import { fetchAIResponse, createAIProtocolEntry } from "../../utils/AIHandler";
 import { AIResult } from "../../models/IAITypes";
-import { useUser } from "@clerk/clerk-react";
 import MarkdownContent from "../MarkdownContent";
+import { useParams } from "react-router-dom";
 
 interface AIComponentProps {
   selectedText: string;
@@ -34,9 +34,9 @@ function AIComponent({
   const [additionalPrompt, setAdditionalPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const { user } = useUser();
   const dialogRef = useRef<HTMLDivElement>(null);
   const suggestionsMenuRef = useRef<HTMLDivElement>(null);
+  const { projectId } = useParams<{ projectId: string }>();
 
   useEffect(() => {
     if (isOpen) {
@@ -73,7 +73,7 @@ function AIComponent({
       usageForm: `${action}: ${relevantPrompts.join(" | ") || "Unknown prompt"}`,
       affectedParts: nodeName || "Unknown file",
       remarks: history[index]?.text || "No remarks",
-      username: user?.username || user?.id || "unknown-user",
+      projectId: projectId || "unknown-project",
     });
   };
 
