@@ -34,4 +34,17 @@ export class ProjectService {
       throw error;
     }
   }
+
+  // Neue Methode für Projekte nach Username
+  static async getProjectsByUsername(username: string): Promise<Project[]> {
+    try {
+      const response = await axios.get<Project[]>(`${API_BASE_URL}/by-username`, {
+        params: { username }, // Sende den username als Query-Parameter
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`❌ [getProjectsByUsername] Error fetching projects for username ${username}:`, error);
+      throw error;
+    }
+  }
 }
