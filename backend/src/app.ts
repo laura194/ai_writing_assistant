@@ -4,6 +4,7 @@ import helloRoutes from "./routes/hello.routes";
 import connectDB from "./db";
 import aiRoutes from "./routes/ai.routes";
 import nodeContentRoutes from "./routes/nodeContent.routes";
+import projectStructureRoutes from "./routes/projectStructure.routes";
 
 const app = express();
 
@@ -17,5 +18,6 @@ connectDB();
 app.use("/api/hello", helloRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/nodeContent", nodeContentRoutes);
+app.use("/api/projectStructures", projectStructureRoutes);
 
 export default app;
