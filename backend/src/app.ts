@@ -6,7 +6,6 @@ import aiRoutes from "./routes/ai.routes";
 import nodeContentRoutes from "./routes/nodeContent.routes";
 import projectRoutes from "./routes/project.routes";
 
-
 const app = express();
 
 app.use(cors());
@@ -20,6 +19,5 @@ app.use("/api/hello", helloRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/nodeContent", nodeContentRoutes);
 app.use("/api/projects", projectRoutes);
-
 
 export default app;

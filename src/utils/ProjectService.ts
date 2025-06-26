@@ -16,20 +16,29 @@ export class ProjectService {
 
   static async getProjectById(id: string): Promise<Project> {
     try {
-      const response = await axios.get<Project>(`${API_BASE_URL}/${id}`);  // Antwort als einzelnes Projekt
+      const response = await axios.get<Project>(`${API_BASE_URL}/${id}`); // Antwort als einzelnes Projekt
       return response.data; // Kein Array, sondern direkt das Projekt
     } catch (error) {
-      console.error(`❌ [getProjectById] Error fetching project with ID ${id}:`, error);
+      console.error(
+        `❌ [getProjectById] Error fetching project with ID ${id}:`,
+        error,
+      );
       throw error;
     }
   }
 
-  static async updateProject(id: string, data: Partial<Project>): Promise<Project> {
+  static async updateProject(
+    id: string,
+    data: Partial<Project>,
+  ): Promise<Project> {
     try {
       const response = await axios.put<Project>(`${API_BASE_URL}/${id}`, data);
       return response.data;
     } catch (error) {
-      console.error(`❌ [updateProject] Error updating project with ID ${id}:`, error);
+      console.error(
+        `❌ [updateProject] Error updating project with ID ${id}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -37,12 +46,18 @@ export class ProjectService {
   // Neue Methode für Projekte nach Username
   static async getProjectsByUsername(username: string): Promise<Project[]> {
     try {
-      const response = await axios.get<Project[]>(`${API_BASE_URL}/by-username`, {
-        params: { username }, // Send the username as a query parameter
-      });
+      const response = await axios.get<Project[]>(
+        `${API_BASE_URL}/by-username`,
+        {
+          params: { username }, // Send the username as a query parameter
+        },
+      );
       return response.data;
     } catch (error) {
-      console.error(`❌ [getProjectsByUsername] Error fetching projects for username ${username}:`, error);
+      console.error(
+        `❌ [getProjectsByUsername] Error fetching projects for username ${username}:`,
+        error,
+      );
       throw error;
     }
   }

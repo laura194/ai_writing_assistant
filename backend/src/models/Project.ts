@@ -9,15 +9,14 @@ export interface IProject extends Document {
 }
 
 const projectSchema: Schema = new Schema(
-    {
-      name: { type: String, required: true },
-      username: { type: String, required: true },
-      projectStructure: { type: Schema.Types.Mixed, required: true }, // Store JSON object directly
-    },
-    {
-      timestamps: true, // Automatically manage created_at and updated_at
-    }
-  );
-  
+  {
+    name: { type: String, required: true },
+    username: { type: String, required: true },
+    projectStructure: { type: Schema.Types.Mixed, required: true }, // Store JSON object directly
+  },
+  {
+    timestamps: true, // Automatically manage created_at and updated_at
+  },
+);
 
 export default mongoose.model<IProject>("Project", projectSchema);

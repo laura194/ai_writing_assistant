@@ -17,11 +17,12 @@ const ProjectOverview = () => {
       if (user?.username) {
         try {
           const userProjects = await ProjectService.getProjectsByUsername(
-            user.username
+            user.username,
           );
           setProjects(userProjects); // Setze die Projekte des Benutzers
         } catch (error) {
           setError("Fehler beim Laden der Projekte.");
+          console.error("Fehler beim Laden der Projekte:", error);
         } finally {
           setLoading(false);
         }
