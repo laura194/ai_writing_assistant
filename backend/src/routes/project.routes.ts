@@ -1,17 +1,19 @@
-import express from "express";
+import express from 'express';
 import {
   createProject,
-  getProjects,
+  getAllProjects,
+  getProjectById,
   updateProject,
-  getProjectsByUsername // Neue Funktion importieren
+  getProjectsByUsername // Importing the function
 } from "../controllers/project.controller";
 
 const router = express.Router();
 
+// Define your routes
 router.post("/", createProject);
-router.get("/", getProjects);
-router.get("/:id", getProjects);  // Retrieve by ID
+router.get("/", getAllProjects);
+router.get("/by-username", getProjectsByUsername);  
+router.get("/:id", getProjectById);  // Retrieve by ID
 router.put("/:id", updateProject);  // Update by ID
-router.get("/by-username", getProjectsByUsername);  // Neue Route für Projekte nach Username
 
 export default router;
