@@ -16,9 +16,8 @@ export class ProjectService {
 
   static async getProjectById(id: string): Promise<Project> {
     try {
-      const response = await axios.get<Project[]>(`${API_BASE_URL}/${id}`);  // Antwort als Array
-      const project = response.data[0]; // Hol das erste Projekt aus dem Array
-      return project;
+      const response = await axios.get<Project>(`${API_BASE_URL}/${id}`);  // Antwort als einzelnes Projekt
+      return response.data; // Kein Array, sondern direkt das Projekt
     } catch (error) {
       console.error(`❌ [getProjectById] Error fetching project with ID ${id}:`, error);
       throw error;
@@ -39,7 +38,7 @@ export class ProjectService {
   static async getProjectsByUsername(username: string): Promise<Project[]> {
     try {
       const response = await axios.get<Project[]>(`${API_BASE_URL}/by-username`, {
-        params: { username }, // Sende den username als Query-Parameter
+        params: { username }, // Send the username as a query parameter
       });
       return response.data;
     } catch (error) {
