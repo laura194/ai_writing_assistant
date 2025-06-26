@@ -16,10 +16,12 @@ import { ProjectService } from "../utils/ProjectService";
 import { useParams } from "react-router-dom";
 
 const EditPage = () => {
-  const { projectId } = useParams<{ projectId: string }>(); // Extract projectId from the URL
+  const { projectId } = useParams<{ projectId: string }>();
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
+
   const [menuOpen, setMenuOpen] = useState<boolean>(() => {
     const savedMenuOpen = localStorage.getItem("menuOpen");
     return savedMenuOpen ? JSON.parse(savedMenuOpen) : true;
@@ -41,16 +43,11 @@ const EditPage = () => {
 
   useEffect(() => {
     if (projectId) {
-      // Fetch project data using the projectId
       ProjectService.getProjectById(projectId)
         .then((project: Project) => {
-          // Die Antwort ist jetzt ein einzelnes Projekt
-          console.log("Fetched project:", project); // Logge das Projekt
-
-          // Überprüfe, ob projectStructure verfügbar und ein Array ist
           if (Array.isArray(project.projectStructure)) {
-            setNodes(project.projectStructure); // Setze die Nodes
-            console.log("Parsed nodes:", project.projectStructure); // Logge die Nodes
+            setNodes(project.projectStructure);
+            setProject(project);
           } else {
             console.error("Project structure is not an array or is undefined!");
           }
@@ -59,7 +56,7 @@ const EditPage = () => {
           console.error("Error fetching project:", error);
         });
     } else {
-      console.error("Project ID is not available!"); // Logge, falls keine projectId vorhanden ist
+      console.error("Project ID is not available!");
     }
 
     const savedNodeId = localStorage.getItem("selectedNodeId");
@@ -99,6 +96,24 @@ const EditPage = () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [isDirty]);
+
+  const saveProjectStructure = async (updatedNodes: Node[]) => {
+    if (!projectId) return;
+
+    // Füge die projectStructure hinzu, wenn sie nicht definiert ist, als leeres Array
+    const projectData = {
+      name: project?.name || "Untitled Project",
+      username: project?.username || "Anonymous",
+      projectStructure: updatedNodes || [],
+    };
+
+    try {
+      await ProjectService.updateProject(projectId, projectData);
+      console.log("✅ Project structure updated.");
+    } catch (error) {
+      console.error("❌ Failed to update project structure:", error);
+    }
+  };
 
   const handleNodeChange = async (node: Node) => {
     const switchNode = async () => {
@@ -177,7 +192,9 @@ const EditPage = () => {
       });
     };
 
-    setNodes(addNodeRecursively(nodes, parentId));
+    const updatedNodes = addNodeRecursively(nodes, parentId);
+    setNodes(updatedNodes);
+    saveProjectStructure(updatedNodes);
   };
 
   const handleNodeRemove = (nodeId: string) => {
@@ -189,7 +206,9 @@ const EditPage = () => {
       });
     };
 
-    setNodes(removeNodeRecursively(nodes, nodeId));
+    const updatedNodes = removeNodeRecursively(nodes, nodeId);
+    setNodes(updatedNodes);
+    saveProjectStructure(updatedNodes);
   };
 
   return (
@@ -210,7 +229,9 @@ const EditPage = () => {
             } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
           >
             {menuOpen && (
-              <ul>
+              <ul className="mt-8">
+                {" "}
+                {/* margin-top nur auf die Liste anwenden */}
                 {nodes.map((node) => (
                   <Folder
                     key={node.id}
@@ -232,7 +253,9 @@ const EditPage = () => {
           </div>
 
           <div
-            className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-4 bg-gray-400`}
+            className={`${
+              menuOpen ? "w-3/4" : "w-full"
+            } transition-all duration-300 p-4 bg-gray-400`}
           >
             {selectedNode ? (
               activeView === "file" ? (

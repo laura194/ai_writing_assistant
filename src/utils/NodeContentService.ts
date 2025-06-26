@@ -14,6 +14,10 @@ export class NodeContentService {
       if (!data.content) {
         data.content = "Default content";
       }
+      if (!data.category) {
+        data.category = "file";
+      }
+
       const response = await axios.post<Node>(API_BASE_URL, data);
       return response.data;
     } catch (error) {
@@ -80,7 +84,7 @@ export class NodeContentService {
       const created = await this.createNodeContent({
         nodeId: node.id,
         name: node.name,
-        category: node.category || "Uncategorized",
+        category: node.category || "file",
         content: "",
       });
 
@@ -107,6 +111,9 @@ export class NodeContentService {
     try {
       if (!data.content) {
         data.content = "Default content";
+      }
+      if (!data.category) {
+        data.category = "file";
       }
 
       const response = await axios.put<Node>(`${API_BASE_URL}/${id}`, data);

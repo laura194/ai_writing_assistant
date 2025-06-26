@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom"; // Importiere useParams
+import { ProjectService } from "../utils/ProjectService"; // Importiere den ProjectService
 import { NodeContentService } from "../utils/NodeContentService";
 
 interface StructureNode {
@@ -15,6 +17,7 @@ interface NodeContent {
 }
 
 const FullDocumentCard = () => {
+  const { projectId } = useParams<{ projectId: string }>(); // Hole die projectId aus der URL
   const containerRef = useRef<HTMLDivElement>(null);
   const [structure, setStructure] = useState<StructureNode[]>([]);
   const [nodeContents, setNodeContents] = useState<NodeContent[]>([]);
@@ -22,19 +25,29 @@ const FullDocumentCard = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // API-Aufruf anstelle von fetch("/projectStructure.json")
-    fetch("/api/projectStructures")
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.length > 0) {
-          setStructure(data[0].structure); // Falls die Struktur im ersten Projekt ist
+    if (!projectId) {
+      setError("Projekt-ID nicht gefunden.");
+      setLoading(false);
+      return;
+    }
+
+    const fetchStructure = async () => {
+      try {
+        const data = await ProjectService.getProjectById(projectId); // Verwende die projectId aus der URL
+        if (data && data.projectStructure) {
+          setStructure(data.projectStructure);
         } else {
           setError("Projektstruktur ist leer oder nicht verfügbar.");
         }
-      })
-      .catch(() => setError("Fehler beim Laden der Projektstruktur."))
-      .finally(() => setLoading(false));
-  }, []);
+      } catch {
+        setError("Fehler beim Laden der Projektstruktur.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStructure();
+  }, [projectId]); // Abhängigkeit hinzufügen, damit die Anfrage bei Änderung der projectId neu ausgeführt wird
 
   useEffect(() => {
     const fetchNodeContents = async () => {

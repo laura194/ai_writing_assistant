@@ -54,32 +54,32 @@ export const getProjects = async (req: Request, res: Response): Promise<void> =>
 
 // Update a specific project entry by ID
 export const updateProject = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const { name, username, projectStructure } = req.body;
-
-  if (!id || !name || !username || !projectStructure) {
-    res.status(400).json({ error: "All fields are required" });
-    return;
-  }
-
-  try {
-    const updatedProject = await Project.findOneAndUpdate(
-      { id },
-      { name, username, projectStructure },
-      { new: true }
-    );
-
-    if (!updatedProject) {
-      res.status(404).json({ error: "Project not found" });
+    const { id } = req.params;
+    const { name, username, projectStructure } = req.body;
+  
+    if (!id || !name || !username) { // Nur name, username und id sind zwingend
+      res.status(400).json({ error: "All fields are required" });
       return;
     }
-
-    res.status(200).json(updatedProject);
-  } catch (error) {
-    console.error("Error updating project:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+  
+    try {
+      const updatedProject = await Project.findOneAndUpdate(
+        { _id: id }, // Verwende _id statt id als Mongoose ID
+        { name, username, projectStructure: projectStructure || [] }, // Falls projectStructure nicht übergeben wurde, leer lassen
+        { new: true }
+      );
+  
+      if (!updatedProject) {
+        res.status(404).json({ error: "Project not found" });
+        return;
+      }
+  
+      res.status(200).json(updatedProject);
+    } catch (error) {
+      console.error("Error updating project:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
 
 // Get all projects by username
 export const getProjectsByUsername = async (req: Request, res: Response): Promise<void> => {
