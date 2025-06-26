@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { IAiProtocolEntry } from "../models/IAITypes";
 import { useUser } from "@clerk/clerk-react";
+import { FunnelIcon } from "@heroicons/react/24/outline";
 
 const truncateText = (text: string, maxLength = 100) => {
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -63,13 +64,18 @@ const AIProtocolCard: React.FC = () => {
   return (
     <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
       <h2 className="text-lg font-bold mb-4">AI Protocol</h2>
+      <div className="relative mb-4">
+      <span className="absolute top-3 left-0 flex items-center pl-3 pointer-events-none">
+        <FunnelIcon className="h-5 w-5 text-gray-400" />
+      </span>
       <input
         type="text"
-        placeholder="Filter protocols..."
+        placeholder="Filter the protocol by typing a keyword"
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
-        className="mb-4 px-3 py-2 border rounded w-full"
+        className="mb-4 px-3 py-2 pl-10 border rounded w-full"
       />
+      </div>
       {loading ? (
         <p>Loading Protocols...</p>
       ) : error ? (
