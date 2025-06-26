@@ -11,6 +11,7 @@ const AIProtocolCard: React.FC = () => {
   const [protocols, setProtocols] = useState<IAiProtocolEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>("");
 
   const { user } = useUser();
 
@@ -38,9 +39,37 @@ const AIProtocolCard: React.FC = () => {
     }
   }, [user?.username, user?.id]);
 
+  // Filter logic
+  const filteredProtocols = protocols.filter((protocol) => {
+    const search = filter.toLowerCase();
+    return (
+      protocol.aiName?.toLowerCase().includes(search) ||
+      protocol.usageForm?.toLowerCase().includes(search) ||
+      protocol.affectedParts?.toLowerCase().includes(search) ||
+      protocol.remarks?.toLowerCase().includes(search) ||
+      (protocol.createdAt &&
+        new Date(protocol.createdAt)
+          .toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
+          .toLowerCase()
+          .includes(search)) ||
+      (protocol.updatedAt &&
+        new Date(protocol.updatedAt)
+          .toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
+          .toLowerCase()
+          .includes(search))
+    );
+  });
+
   return (
     <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
       <h2 className="text-lg font-bold mb-4">AI Protocol</h2>
+      <input
+        type="text"
+        placeholder="Filter protocols..."
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        className="mb-4 px-3 py-2 border rounded w-full"
+      />
       {loading ? (
         <p>Loading Protocols...</p>
       ) : error ? (
@@ -63,7 +92,7 @@ const AIProtocolCard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {protocols.map((protocol) => (
+              {filteredProtocols.map((protocol) => (
                 <tr key={protocol._id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2">{truncateText(protocol.aiName)}</td>
                   <td className="px-4 py-2">
