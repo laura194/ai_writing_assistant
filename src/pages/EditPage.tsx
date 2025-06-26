@@ -177,7 +177,7 @@ const EditPage = () => {
   };
 
   const addChapter = (parentId: string | null, newNode: Node) => {
-    const addNodeRecursively = (
+    const recursiveUpdate = (
       nodes: Node[],
       parentId: string | null
     ): Node[] => {
@@ -186,27 +186,27 @@ const EditPage = () => {
           return { ...node, nodes: [...(node.nodes || []), newNode] };
         }
         if (node.nodes) {
-          return { ...node, nodes: addNodeRecursively(node.nodes, parentId) };
+          return { ...node, nodes: recursiveUpdate(node.nodes, parentId) };
         }
         return node;
       });
     };
 
-    const updatedNodes = addNodeRecursively(nodes, parentId);
+    const updatedNodes = recursiveUpdate(nodes, parentId);
     setNodes(updatedNodes);
     saveProjectStructure(updatedNodes);
   };
 
   const deleteChapter = (nodeId: string) => {
-    const removeNodeRecursively = (nodes: Node[], nodeId: string): Node[] => {
+    const recursiveDelete = (nodes: Node[], nodeId: string): Node[] => {
       return nodes.filter((node) => {
         if (node.id === nodeId) return false;
-        if (node.nodes) node.nodes = removeNodeRecursively(node.nodes, nodeId);
+        if (node.nodes) node.nodes = recursiveDelete(node.nodes, nodeId);
         return true;
       });
     };
 
-    const updatedNodes = removeNodeRecursively(nodes, nodeId);
+    const updatedNodes = recursiveDelete(nodes, nodeId);
     setNodes(updatedNodes);
     saveProjectStructure(updatedNodes);
   };
