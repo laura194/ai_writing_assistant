@@ -26,27 +26,37 @@ export const createProject = async (req: Request, res: Response): Promise<void> 
     }
 };
 
-// Get all projects or filter by project _id (Mongoose's internal ID)
-export const getProjects = async (req: Request, res: Response): Promise<void> => {
+// Get a project by its ID
+export const getProjectById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.query;
-  
-      if (id) {
-        // Verwenden von Mongoose's _id, statt der vorherigen "id"
-        const project = await Project.findById(id.toString());
-  
-        if (!project) {
-          res.status(404).json({ error: "Project not found" });
-          return;
-        }
-  
-        res.status(200).json(project);
-      } else {
-        const projects = await Project.find();
-        res.status(200).json(projects);
+      const { id } = req.params; // ID aus den URL-Parametern holen
+
+      if (!id) {
+        res.status(400).json({ error: "Project ID is required" });
+        return;
       }
+
+      const project = await Project.findById(id);
+
+      if (!project) {
+        res.status(404).json({ error: "Project not found" });
+        return;
+      }
+
+      res.status(200).json(project);
     } catch (error) {
-      console.error("Error fetching projects:", error);
+      console.error("Error fetching project by ID:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+  // Get all projects
+export const getAllProjects = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const projects = await Project.find();
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Error fetching all projects:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -104,4 +114,6 @@ export const getProjectsByUsername = async (req: Request, res: Response): Promis
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
+
+
   
