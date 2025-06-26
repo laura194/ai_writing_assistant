@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { IAiProtocolEntry } from "../models/IAITypes";
-import { useUser } from "@clerk/clerk-react";
+import { useParams } from "react-router-dom";
 
 const truncateText = (text: string, maxLength = 100) => {
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -12,16 +12,20 @@ const AIProtocolCard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { user } = useUser();
+  // Assuming you have projectId in the user object or you can fetch it from another source
+  const { projectId } = useParams<{ projectId: string }>();
 
   useEffect(() => {
     const fetchProtocols = async () => {
       try {
+        if (!projectId) {
+          throw new Error("Project ID is missing");
+        }
         const response = await axios.get<IAiProtocolEntry[]>(
           "/api/ai/aiProtocol",
           {
-            params: { username: user?.username || user?.id },
-          },
+            params: { projectId },
+          }
         );
 
         setProtocols(response.data);
@@ -33,10 +37,13 @@ const AIProtocolCard: React.FC = () => {
       }
     };
 
-    if (user?.username || user?.id) {
+    if (projectId) {
       fetchProtocols();
+    } else {
+      setError("Project ID is required.");
+      setLoading(false);
     }
-  }, [user?.username, user?.id]);
+  }, [projectId]);
 
   return (
     <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
