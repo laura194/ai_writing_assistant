@@ -9,7 +9,8 @@ import { Bars3Icon } from "@heroicons/react/24/solid";
 import { useLocation } from "react-router-dom"; // Für die Daten von StructureSelectionPage
 import ImradStructure from "../assets/imrad.json";
 import DesignStructure from "../assets/storyForDesign.json";
-import ScratchStructure from "../assets/projectStructure.json"; // Leere Struktur als Basis
+import ScratchStructure from "../assets/projectStructure.json";
+import FileContentCard from "../components/FileContentCard.tsx"; // Leere Struktur als Basis
 
 const EditPage = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -35,6 +36,12 @@ const EditPage = () => {
   useEffect(() => {
     localStorage.setItem("menuOpen", JSON.stringify(menuOpen));
   }, [menuOpen]);
+
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+
+  const handleNodeClick = (node: Node) => {
+    setSelectedNode(node);
+  };
 
   const addChapter = (parentId: string | null, newNode: Node) => {
     const recursiveAdd = (nodes: Node[]): Node[] => {
@@ -130,42 +137,61 @@ const EditPage = () => {
   };
 
   return (
-      <DndProvider backend={HTML5Backend}>
-        <div className="h-screen flex flex-col">
-          <Header />
-          <div className="flex flex-grow relative">
-            <div
-                className={`relative ${
-                    menuOpen ? "w-1/4" : "w-12"
-                } bg-gray-200 h-full transition-all duration-300 z-10 flex-shrink-0`}
-            >
+      <div className="flex flex-col h-screen">
+        {/* Header */}
+        <Header />
+
+        {/* Hauptbereich */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Seitenleiste */}
+          <div
+              className={`transition-all duration-300 ${
+                  menuOpen ? "w-96" : "w-20"
+              } flex-shrink-0 h-full border-r overflow-y-auto`}
+          >
+            <div className="flex items-center justify-start px-4 py-3 bg-gray-100 border-b">
               <button
-                  className="absolute top-5 left-4 bg-blue-500 text-white p-2 rounded z-20"
                   onClick={() => setMenuOpen(!menuOpen)}
+                  className="focus:outline-none p-2 rounded hover:bg-gray-200"
               >
-                <Bars3Icon className="h-6 w-6" />
+                <Bars3Icon className="w-6 h-6" />
               </button>
-              <ul
-                  className={`transition-all duration-300 mt-14 pl-4 ${
-                      menuOpen ? "opacity-100 max-h-screen" : "opacity-0 max-h-0"
-                  } overflow-hidden`}
-              >
+              <span className={`transition-all ${menuOpen ? "opacity-100" : "opacity-0"} font-semibold`}>
+            Kapitelstruktur
+          </span>
+            </div>
+            <DndProvider backend={HTML5Backend}>
+              <ul className="p-2">
                 {nodes.map((node) => (
                     <Folder
                         key={node.id}
                         node={node}
                         onMove={handleMoveNode}
-                        onNodeClick={updateChapter} // Direkter Aufruf der Funktion
+                        onNodeClick={handleNodeClick} // Hier das Callback für den Klick
                         onAdd={addChapter}
                         onRemove={deleteChapter}
                         isVisible={menuOpen}
                     />
                 ))}
               </ul>
-            </div>
+            </DndProvider>
+          </div>
+
+          {/* Hauptinhalt */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {selectedNode ? (
+                <FileContentCard
+                    node={selectedNode}
+                    onUpdate={updateChapter}
+                />
+            ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">Wähle ein Kapitel aus, um Inhalte zu bearbeiten.</p>
+                </div>
+            )}
           </div>
         </div>
-      </DndProvider>
+      </div>
   );
 };
 

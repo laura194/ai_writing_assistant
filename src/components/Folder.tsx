@@ -37,10 +37,11 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
         }
     };
 
-    // Drag-and-Drop-Logik
+// Drag-and-Drop-Logik
     const [{ isDragging }, dragRef] = useDrag({
         type: "node",
         item: { id: node.id },
+        canDrag: node.name !== "Kapitel hinzufügen", // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
         }),
@@ -49,12 +50,13 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
     const [, dropRef] = useDrop({
         accept: "node",
         hover: (draggedItem: { id: string }) => {
-            if (draggedItem.id !== node.id) {
+            if (draggedItem.id !== node.id && node.name !== "Kapitel hinzufügen") {
                 onMove(draggedItem.id, node.id); // Bewege den Knoten
             }
         },
     });
 
+// Kombinierte Ref-Logik
     dragRef(dropRef(ref));
 
     const hasChildren = Array.isArray(node.nodes) && node.nodes.length > 0;
@@ -155,7 +157,7 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
                 </button>
 
                 {/* Kapitel löschen */}
-                {node.name !== "Add chapter to project" && (
+                {node.name !== "Kapitel hinzufügen" && (
                     <button
                         className="text-red-500 hover:text-red-700"
                         onClick={() => handleDeleteClick(node.id)} // Popup öffnen
@@ -185,7 +187,7 @@ function Folder({ node, onMove, onNodeClick, onAdd, onRemove, isVisible = true }
             {showConfirmPopup && (
                 <div className="fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">                    <div className="bg-white rounded-lg shadow-xl p-6 space-y-4">
                         <p className="text-center text-lg font-bold">
-                            Are you sure you want to delete this chapter?
+                            Willst du dieses Kapitel wirklich löschen?
                         </p>
                         <div className="flex justify-center gap-4">
                             <button
