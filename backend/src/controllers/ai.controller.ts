@@ -6,10 +6,10 @@ export const createAiProtocol = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { aiName, usageForm, affectedParts, remarks, username } = req.body;
+  const { aiName, usageForm, affectedParts, remarks, projectId } = req.body;
 
-  if (!username) {
-    res.status(400).json({ error: "Username is required" });
+  if (!projectId) {
+    res.status(400).json({ error: "ProjectId is required" });
     return;
   }
 
@@ -18,7 +18,7 @@ export const createAiProtocol = async (
     usageForm,
     affectedParts,
     remarks,
-    username,
+    projectId,
   });
 
   try {
@@ -34,17 +34,17 @@ export const getAiProtocols = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { username } = req.query;
+  const { projectId } = req.query;
 
-  if (!username || typeof username !== "string") {
+  if (!projectId || typeof projectId !== "string") {
     res
       .status(400)
-      .json({ error: "Username is required as a query parameter" });
+      .json({ error: "ProjectId is required as a query parameter" });
     return;
   }
 
   try {
-    const aiProtocols = await AIProtocol.find({ username });
+    const aiProtocols = await AIProtocol.find({ projectId });
     res.status(200).json(aiProtocols);
   } catch (error) {
     console.error(error);
