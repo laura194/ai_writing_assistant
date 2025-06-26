@@ -115,7 +115,7 @@ const EditPage = () => {
     }
   };
 
-  const handleNodeChange = async (node: Node) => {
+  const handleNodeClick = async (node: Node) => {
     const switchNode = async () => {
       try {
         const nodeContent =
@@ -176,7 +176,7 @@ const EditPage = () => {
     setPendingView(null);
   };
 
-  const handleNodeAdd = (parentId: string | null, newNode: Node) => {
+  const addChapter = (parentId: string | null, newNode: Node) => {
     const addNodeRecursively = (
       nodes: Node[],
       parentId: string | null
@@ -197,7 +197,7 @@ const EditPage = () => {
     saveProjectStructure(updatedNodes);
   };
 
-  const handleNodeRemove = (nodeId: string) => {
+  const deleteChapter = (nodeId: string) => {
     const removeNodeRecursively = (nodes: Node[], nodeId: string): Node[] => {
       return nodes.filter((node) => {
         if (node.id === nodeId) return false;
@@ -209,6 +209,50 @@ const EditPage = () => {
     const updatedNodes = removeNodeRecursively(nodes, nodeId);
     setNodes(updatedNodes);
     saveProjectStructure(updatedNodes);
+  };
+
+  const handleMoveNode = (
+    draggedNodeId: string,
+    targetNodeId: string | null = null
+  ) => {
+    let draggedNode: Node | null = null;
+
+    const recursiveRemove = (nodes: Node[]): Node[] => {
+      return nodes
+        .filter((node) => {
+          if (node.id === draggedNodeId) {
+            draggedNode = node;
+            return false;
+          }
+          return true;
+        })
+        .map((node) => ({ ...node, nodes: recursiveRemove(node.nodes || []) }));
+    };
+
+    const recursiveAdd = (nodes: Node[]): Node[] => {
+      return nodes.map((node) => {
+        if (node.id === targetNodeId) {
+          return {
+            ...node,
+            nodes: [...(node.nodes || []), draggedNode!],
+          };
+        }
+        return { ...node, nodes: recursiveAdd(node.nodes || []) };
+      });
+    };
+
+    setNodes((prevNodes) => {
+      const withoutDraggedNode = recursiveRemove(prevNodes); // Entfernen
+
+      // Fallback: Wenn kein Ziel gefunden, füge das Kapitel in die Wurzelebene ein
+      if (!draggedNode || !targetNodeId) {
+        return [...withoutDraggedNode, draggedNode!];
+      }
+
+      // Hinzufügen: Konstante updatedStructure kann für Speicherung in DB genutzt werden
+      const updatedStructure = recursiveAdd(withoutDraggedNode);
+      return updatedStructure;
+    });
   };
 
   return (
@@ -236,10 +280,10 @@ const EditPage = () => {
                   <Folder
                     key={node.id}
                     node={node}
-                    onMove={() => {}}
-                    onNodeClick={handleNodeChange}
-                    onAdd={handleNodeAdd}
-                    onRemove={handleNodeRemove}
+                    onMove={handleMoveNode}
+                    onNodeClick={handleNodeClick}
+                    onAdd={addChapter}
+                    onRemove={deleteChapter}
                   />
                 ))}
               </ul>
