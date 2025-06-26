@@ -19,18 +19,11 @@ export interface Node {
   icon?: string; // Neues Feld: Benutzerdefiniertes Icon
 }
 
-/**
- * Represents the project structure, which contains an ID, a username, and a hierarchical structure.
- * This can be used to describe a project in a tree-like format, with folders and files representing different parts of the project.
- *
- * @interface ProjectStructure
- * @property {string} id - The unique identifier for the project structure.
- * @property {string} username - The username of the user to whom the project structure belongs.
- * @property {Node[]} structure - An array of nodes representing the hierarchical structure of the project.
- */
-export interface ProjectStructure {
-  id: string;
+export interface Project {
+  _id?: string;
+  name: string;
   username: string;
-  structure: Node[]; // Hierarchical structure of the project, composed of nodes.
+  projectStructure: Node[];
+  created_at?: string;
+  updated_at?: string;
 }
-

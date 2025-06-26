@@ -1,76 +1,64 @@
 import { Request, Response } from "express";
-import Project from "../models/project.model";  // Hier das neue Project Modell importieren
+import Project from "../models/Project";
 
-// Project erstellen (verhindert Duplikate)
+// Create a new Project entry
 export const createProject = async (req: Request, res: Response): Promise<void> => {
-  const { id, name, username, projectStructure } = req.body;
+    const { name, username, projectStructure } = req.body;
 
-  if (!id || !name || !username || !projectStructure) {
-    res.status(400).json({ error: "All fields are required" });
-    return;
-  }
-
-  try {
-    // Überprüfen, ob das Projekt bereits existiert
-    const existing = await Project.findOne({ id });
-    if (existing) {
-      res.status(409).json({ error: "Project with this id already exists" });
+    if (!name || !username || !projectStructure) {
+      res.status(400).json({ error: "Alle Felder sind erforderlich" });
       return;
     }
 
-    const newProject = new Project({ id, name, username, projectStructure });
-    const savedProject = await newProject.save();
-    res.status(201).json(savedProject);
-  } catch (error) {
-    console.error("Error saving project:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
+    try {
+      // Save the project with projectStructure as an object (not a string)
+      const newProject = new Project({
+        name,
+        username,
+        projectStructure, // projectStructure is stored as an object
+      });
+
+      const savedProject = await newProject.save();
+      res.status(201).json(savedProject);
+    } catch (error) {
+      console.error("Fehler beim Erstellen des Projekts:", error);
+      res.status(500).json({ error: "Interner Serverfehler" });
+    }
 };
 
-// Alle Projekte abrufen oder nach id filtern
+// Get all projects or filter by project _id (Mongoose's internal ID)
 export const getProjects = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.query;
-
-    if (id) {
-      const filtered = await Project.find({ id: id.toString() });
-      res.status(200).json(filtered);
-    } else {
-      const projects = await Project.find();
-      res.status(200).json(projects);
+    try {
+      const { id } = req.query;
+  
+      if (id) {
+        // Verwenden von Mongoose's _id, statt der vorherigen "id"
+        const project = await Project.findById(id.toString());
+  
+        if (!project) {
+          res.status(404).json({ error: "Project not found" });
+          return;
+        }
+  
+        res.status(200).json(project);
+      } else {
+        const projects = await Project.find();
+        res.status(200).json(projects);
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-  } catch (error) {
-    console.error("Error fetching projects:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+  };
+  
 
-// Ein spezifisches Project nach id abrufen
-export const getProjectById = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  try {
-    const project = await Project.findOne({ id });
-
-    if (!project) {
-      res.status(404).json({ error: "Project not found" });
-      return;
-    }
-
-    res.status(200).json(project);
-  } catch (error) {
-    console.error("Error fetching project by ID:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-// Ein spezifisches Project nach id aktualisieren
+// Update a specific project entry by ID
 export const updateProject = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const { name, username, projectStructure } = req.body;
 
-  if (!name || !username || !projectStructure) {
-    res.status(400).json({ error: "Name, username, and project structure are required" });
+  if (!id || !name || !username || !projectStructure) {
+    res.status(400).json({ error: "All fields are required" });
     return;
   }
 
