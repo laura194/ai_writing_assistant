@@ -21,7 +21,6 @@ const FullDocumentCard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Struktur laden
   useEffect(() => {
     fetch("/projectStructure.json")
       .then((response) => response.json())
@@ -29,12 +28,16 @@ const FullDocumentCard = () => {
       .catch(() => setError("Fehler beim Laden der Projektstruktur."));
   }, []);
 
-  // Inhalte laden
   useEffect(() => {
     const fetchNodeContents = async () => {
       try {
         const data = await NodeContentService.getNodeContents();
-        setNodeContents(data);
+        const mappedData = data.map((node) => ({
+          nodeId: node.nodeId || "",
+          name: node.name,
+          content: node.content || "",
+        }));
+        setNodeContents(mappedData);
       } catch {
         setError("Fehler beim Laden der Inhalte.");
       } finally {
@@ -45,7 +48,6 @@ const FullDocumentCard = () => {
     fetchNodeContents();
   }, []);
 
-  // HTML aus Struktur + Inhalten erzeugen (ohne JSX)
   useEffect(() => {
     if (
       !containerRef.current ||
@@ -82,7 +84,6 @@ const FullDocumentCard = () => {
     containerRef.current.innerHTML = finalHtml;
   }, [structure, nodeContents]);
 
-  // Hilfsfunktion zum Escapen von HTML-Zeichen
   const escapeHtml = (unsafe: string) => {
     return unsafe
       .replace(/&/g, "&amp;")
