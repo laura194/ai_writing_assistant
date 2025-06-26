@@ -22,10 +22,18 @@ const FullDocumentCard = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/projectStructure.json")
+    // API-Aufruf anstelle von fetch("/projectStructure.json")
+    fetch("/api/projectStructures")
       .then((response) => response.json())
-      .then((data: StructureNode[]) => setStructure(data))
-      .catch(() => setError("Fehler beim Laden der Projektstruktur."));
+      .then((data) => {
+        if (data && data.length > 0) {
+          setStructure(data[0].structure); // Falls die Struktur im ersten Projekt ist
+        } else {
+          setError("Projektstruktur ist leer oder nicht verfügbar.");
+        }
+      })
+      .catch(() => setError("Fehler beim Laden der Projektstruktur."))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
