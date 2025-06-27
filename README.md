@@ -56,7 +56,11 @@ follow these steps:
     ```bash
      npm i
      ```
-
+3. Run the app:
+     ```bash
+     npm start
+     ```
+     
 ## Development & Configuration
 
 This project is based on a modern React + TypeScript + Vite setup. For development and production, we recommend an extended ESLint configuration with type-aware rules (see below).
@@ -95,11 +99,6 @@ export default tseslint.config({
   },
 });
 ```
-
-3. Run the app:
-     ```bash
-     npm start
-     ```
 
 ## 🏗️ Project Structure
 //TODO
