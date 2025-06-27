@@ -1,28 +1,74 @@
-# React + TypeScript + Vite
+# AI Writing Assistant
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📑 Table of Contents
+1. [Introduction](#introduction)
+2. [Abstract](#-abstract)
+3. [Features Overview](#-features-overview)
+4. [Prerequisites](#prerequisites)
+5. [Local Development](#local-development)
+6. [Project Structure](#-project-structure)
+7. [Dependencies Overview](#-dependencies-overview)
+8. [Testing](#-testing)
+9. [Sample of Views](#-sample-of-views)
 
-Currently, two official plugins are available:
+## 🌟 Introduction
+Members: Laura, Lisa, Gero, and Aylin
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This repository contains a student project created for the ongoing course
+on Study Project I & II at HWR Berlin, spanning the summmer term 2025 through 
+the winter term 2026.
 
-## Expanding the ESLint configuration
+## 📖 Abstract
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The goal of this project is to develop a web-based application that supports users in the structured writing of academic texts. The application allows users to create, customize, and save chapter structures and provides AI-powered assistance during the writing process. All interactions with the AI are automatically documented to ensure transparency and traceability. The application combines modern web technologies with a user-friendly interface to enable efficient, structured, and methodologically sound work.
+
+## 📱 Features Overview
+
+- **Chapter Structure:** Create, customize, and save chapters and sections,
+- **AI Assistance:** AI-powered suggestions and help during writing,
+- **Protocol with filter:** Automatic documentation of all AI interactions for transparency,
+- **Word Export:** Export the entire document as a Word file,
+- **User-Friendly Interface:** Intuitive operation and modern design.
+
+
+## 🛠️ Prerequisites 
+
+To run this project locally, ensure the following are installed:
+
+1.	IDE of your choice (e.g., Webstorm or Visual Studio Code)
+2.  // TODO
+3.	
+4.  
+5.  
+
+## 💻 Local Development
+
+This project uses ... as its framework. To build and run the app locally,
+follow these steps:
+
+1. Clone the repository:
+    ```bash
+    git clone ...
+    cd ...
+   ```
+
+2. Fetch dependencies:
+    ```bash
+     npm i
+     ```
+
+## Development & Configuration
+
+This project is based on a modern React + TypeScript + Vite setup. For development and production, we recommend an extended ESLint configuration with type-aware rules (see below).
 
 ```js
 export default tseslint.config({
   extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
     ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
+    // Optionally: ...tseslint.configs.strictTypeChecked,
+    // Optionally: ...tseslint.configs.stylisticTypeChecked,
   ],
   languageOptions: {
-    // other options...
     parserOptions: {
       project: ["./tsconfig.node.json", "./tsconfig.app.json"],
       tsconfigRootDir: import.meta.dirname,
@@ -40,15 +86,36 @@ import reactDom from "eslint-plugin-react-dom";
 
 export default tseslint.config({
   plugins: {
-    // Add the react-x and react-dom plugins
     "react-x": reactX,
     "react-dom": reactDom,
   },
   rules: {
-    // other rules...
-    // Enable its recommended typescript rules
     ...reactX.configs["recommended-typescript"].rules,
     ...reactDom.configs.recommended.rules,
   },
 });
 ```
+
+3. Run the app:
+     ```bash
+     npm start
+     ```
+
+## 🏗️ Project Structure
+//TODO
+
+## 🛠️ Dependencies Overview
+- **React** with **TypeScript**
+- **Vite** for fast development and HMR
+- **Tailwind CSS** for styling
+- **Clerk** for authentication
+- **docx** and **file-saver** for Word export
+- **ESLint** for code quality
+
+
+## 🧪 Testing
+
+Due to time constraints during the project development phase, comprehensive tests have not been implemented in this web application. We used exploratory testing to ensure the usability.
+
+## 📸 Sample of Views
+//TODO
