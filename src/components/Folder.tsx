@@ -104,7 +104,7 @@ function Folder({
           onClick={() => setShowIconPicker(!showIconPicker)} // Picker ein-/ausblenden
           title="Klicke, um ein Icon auszuwählen"
         >
-          {getIcon(node, "size-6")}
+          {getIcon(node, "size-6", node.icon)}
         </div>
 
         {/* IconPicker nur anzeigen, wenn geöffnet */}
