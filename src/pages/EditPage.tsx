@@ -211,7 +211,6 @@ const EditPage = () => {
     saveProjectStructure(updatedNodes);
   };
 
-  // Neue Implementierung
   const handleMoveNode = (draggedNodeId: string, targetNodeId: string, asSibling: boolean = false) => {
     const newNodes = [...nodes];
 
@@ -246,9 +245,11 @@ const EditPage = () => {
             // Als Sibling einfügen (gleiche Ebene)
             nodes.splice(i + 1, 0, nodeToAdd);
           } else {
-            // Als Kind einfügen
-            nodes[i].nodes = (nodes[i].nodes ?? []);
-            nodes[i].nodes.push(nodeToAdd); // scheint trotz des Fehlers zu funktionieren
+            // Als Kind einfügen - hier ist die korrigierte Zeile:
+            if (!nodes[i].nodes) {
+              nodes[i].nodes = [];
+            }
+            nodes[i].nodes.push(nodeToAdd); // scheint trotzdem zu funktionieren
           }
           return true;
         }
