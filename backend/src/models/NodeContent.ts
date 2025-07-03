@@ -5,6 +5,7 @@ export interface INodeContent extends Document {
   name: string;
   category: string;
   content: string;
+  projectId: string;
 }
 
 const nodeContent: Schema = new Schema({
@@ -12,6 +13,7 @@ const nodeContent: Schema = new Schema({
   name: { type: String, required: true },
   category: { type: String, required: true },
   content: { type: String, required: true },
+  projectId: { type: String, required: true }
 });
 
 export default mongoose.model<INodeContent>("Node Content", nodeContent);

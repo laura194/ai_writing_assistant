@@ -17,6 +17,7 @@ export interface Node {
   nodes?: Node[]; // Optional field for nested nodes (subfolders or files).
   nodeId?: string; // Unique identifier for the node, used for backend operations.
   icon?: string; // Neues Feld: Benutzerdefiniertes Icon
+  projectId?: string; // Optional field to associate the node with a specific project.
 }
 
 export interface Project {
