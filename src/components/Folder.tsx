@@ -48,7 +48,7 @@ function Folder({
   const [{ isDragging }, dragRef] = useDrag({
     type: "node",
     item: { id: node.id },
-    canDrag: node.name !== "Kapitel hinzufügen", // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
+    canDrag: node.name !== "Chapter structure", // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -57,7 +57,7 @@ function Folder({
   const [, dropRef] = useDrop({
     accept: "node",
     hover: (draggedItem: { id: string }, monitor) => {
-      if (draggedItem.id !== node.id && node.name !== "Kapitel hinzufügen") {
+      if (draggedItem.id !== node.id && node.name !== "Chapter structure") {
         if (!ref.current) return;
 
         // Bestimme die Position des Mauszeigers relativ zum Drop-Target
@@ -178,7 +178,7 @@ function Folder({
         </button>
 
         {/* Kapitel löschen */}
-        {node.name !== "Kapitel hinzufügen" && (
+        {node.name !== "Chapter structure" && (
           <button
             className="text-red-500 hover:text-red-700"
             onClick={() => handleDeleteClick(node.id)} // Popup öffnen
@@ -210,7 +210,7 @@ function Folder({
           {" "}
           <div className="bg-white rounded-lg shadow-xl p-6 space-y-4">
             <p className="text-center text-lg font-bold">
-              Willst du dieses Kapitel wirklich löschen?
+              Do you really want to delete this chapter?
             </p>
             <div className="flex justify-center gap-4">
               <button
