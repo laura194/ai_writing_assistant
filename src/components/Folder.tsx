@@ -7,7 +7,7 @@ import { getIcon } from "../utils/icons";
 
 interface FolderProps {
   node: Node;
-  onMove: (draggedNodeId: string, targetNodeId: string) => void;
+  onMove: (draggedNodeId: string, targetNodeId: string, asSibling?: boolean) => void;
   onNodeClick: (node: Node) => void;
   onAdd: (parentId: string | null, newNode: Node) => void;
   onRemove: (nodeId: string) => void;
@@ -56,9 +56,25 @@ function Folder({
 
   const [, dropRef] = useDrop({
     accept: "node",
-    hover: (draggedItem: { id: string }) => {
+    hover: (draggedItem: { id: string }, monitor) => {
       if (draggedItem.id !== node.id && node.name !== "Kapitel hinzufügen") {
-        onMove(draggedItem.id, node.id); // Bewege den Knoten
+        if (!ref.current) return;
+
+        // Bestimme die Position des Mauszeigers relativ zum Drop-Target
+        const hoverBoundingRect = ref.current.getBoundingClientRect();
+        const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+        const clientOffset = monitor.getClientOffset();
+
+        if (!clientOffset) return;
+
+        const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+        // Wenn der Mauszeiger in der oberen Hälfte ist, als Sibling behandeln
+        // Wenn in der unteren Hälfte, als Kind behandeln
+        const isSibling = hoverClientY < hoverMiddleY;
+
+        // Rufe onMove mit zusätzlichem Parameter auf
+        onMove(draggedItem.id, node.id, isSibling);
       }
     },
   });

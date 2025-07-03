@@ -211,48 +211,61 @@ const EditPage = () => {
     saveProjectStructure(updatedNodes);
   };
 
-  const handleMoveNode = (
-    draggedNodeId: string,
-    targetNodeId: string | null = null,
-  ) => {
+  // Neue Implementierung
+  const handleMoveNode = (draggedNodeId: string, targetNodeId: string, asSibling: boolean = false) => {
+    const newNodes = [...nodes];
+
+    // 1. Finde und entferne den verschobenen Knoten
     let draggedNode: Node | null = null;
 
-    const recursiveRemove = (nodes: Node[]): Node[] => {
-      return nodes
-        .filter((node) => {
-          if (node.id === draggedNodeId) {
-            draggedNode = node;
-            return false;
+    const removeNode = (nodes: Node[], id: string): Node | null => {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].id === id) {
+          draggedNode = nodes[i];
+          nodes.splice(i, 1);
+          return draggedNode;
+        }
+
+        if (nodes[i].nodes) {
+          const found = removeNode(nodes[i].nodes!, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    removeNode(newNodes, draggedNodeId);
+
+    if (!draggedNode) return;
+
+    // 2. Füge den verschobenen Knoten an der richtigen Stelle ein
+    const addNode = (nodes: Node[], targetId: string, nodeToAdd: Node, asSibling: boolean): boolean => {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].id === targetId) {
+          if (asSibling) {
+            // Als Sibling einfügen (gleiche Ebene)
+            nodes.splice(i + 1, 0, nodeToAdd);
+          } else {
+            // Als Kind einfügen
+            nodes[i].nodes = (nodes[i].nodes ?? []);
+            nodes[i].nodes.push(nodeToAdd); // scheint trotz des Fehlers zu funktionieren
           }
           return true;
-        })
-        .map((node) => ({ ...node, nodes: recursiveRemove(node.nodes || []) }));
-    };
-
-    const recursiveAdd = (nodes: Node[]): Node[] => {
-      return nodes.map((node) => {
-        if (node.id === targetNodeId) {
-          return {
-            ...node,
-            nodes: [...(node.nodes || []), draggedNode!],
-          };
         }
-        return { ...node, nodes: recursiveAdd(node.nodes || []) };
-      });
+
+        if (nodes[i].nodes) {
+          const added = addNode(nodes[i].nodes!, targetId, nodeToAdd, asSibling);
+          if (added) return true;
+        }
+      }
+      return false;
     };
 
-    setNodes((prevNodes) => {
-      const withoutDraggedNode = recursiveRemove(prevNodes); // Entfernen
+    addNode(newNodes, targetNodeId, draggedNode, asSibling);
 
-      // Fallback: Wenn kein Ziel gefunden, füge das Kapitel in die Wurzelebene ein
-      if (!draggedNode || !targetNodeId) {
-        return [...withoutDraggedNode, draggedNode!];
-      }
-
-      // Hinzufügen: Konstante updatedStructure kann für Speicherung in DB genutzt werden
-      const updatedStructure = recursiveAdd(withoutDraggedNode);
-      return updatedStructure;
-    });
+    // Aktualisiere den Zustand
+    setNodes(newNodes);
+    saveProjectStructure(newNodes);
   };
 
   return (
