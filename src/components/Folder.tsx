@@ -189,20 +189,31 @@ function Folder({
       </div>
 
       {hasChildren && (
-        <ul className="pl-4">
-          {node.nodes!.map((childNode) => (
-            <Folder
-              key={childNode.id}
-              node={childNode}
-              onMove={onMove}
-              onNodeClick={onNodeClick}
-              onAdd={onAdd}
-              onRemove={onRemove}
-              isVisible={isVisible}
-            />
-          ))}
-        </ul>
+          <ul className={`pl-4 ${
+              node.name === "Chapter structure"
+                  ? "max-h-[500px] overflow-y-auto pr-2 max-w-full overflow-x-auto"
+                  : ""
+          }`}>
+            <div className={`${
+                node.name === "Chapter structure"
+                    ? "min-w-fit"
+                    : ""
+            }`}>
+              {node.nodes!.map((childNode) => (
+                  <Folder
+                      key={childNode.id}
+                      node={childNode}
+                      onMove={onMove}
+                      onNodeClick={onNodeClick}
+                      onAdd={onAdd}
+                      onRemove={onRemove}
+                      isVisible={isVisible}
+                  />
+              ))}
+            </div>
+          </ul>
       )}
+
 
       {/* Bestätigungs-Popup */}
       {showConfirmPopup && (
