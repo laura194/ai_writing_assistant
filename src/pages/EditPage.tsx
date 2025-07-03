@@ -60,8 +60,8 @@ const EditPage = () => {
     }
 
     const savedNodeId = localStorage.getItem("selectedNodeId");
-    if (savedNodeId) {
-      NodeContentService.getNodeContentById(savedNodeId)
+    if (savedNodeId && projectId) {
+      NodeContentService.getNodeContentById(savedNodeId, projectId)
         .then((nodeContent) => {
           if (nodeContent) {
             setSelectedNode({
@@ -118,8 +118,11 @@ const EditPage = () => {
   const handleNodeClick = async (node: Node) => {
     const switchNode = async () => {
       try {
-        const nodeContent =
-          await NodeContentService.getOrCreateNodeContent(node);
+        if (!projectId) return;
+        const nodeContent = await NodeContentService.getOrCreateNodeContent({
+          ...node,
+          projectId,
+        });
         const fullNode = { ...node, content: nodeContent.content };
         setSelectedNode(fullNode);
         localStorage.setItem("selectedNodeId", node.id);
@@ -148,10 +151,12 @@ const EditPage = () => {
   };
 
   const handleDialogConfirm = async () => {
-    if (pendingNode) {
+    if (pendingNode && projectId) {
       try {
-        const nodeContent =
-          await NodeContentService.getOrCreateNodeContent(pendingNode);
+        const nodeContent = await NodeContentService.getOrCreateNodeContent({
+          ...pendingNode,
+          projectId,
+        });
         const fullNode = { ...pendingNode, content: nodeContent.content };
         setSelectedNode(fullNode);
         localStorage.setItem("selectedNodeId", pendingNode.id);
@@ -179,7 +184,7 @@ const EditPage = () => {
   const addChapter = (parentId: string | null, newNode: Node) => {
     const recursiveUpdate = (
       nodes: Node[],
-      parentId: string | null,
+      parentId: string | null
     ): Node[] => {
       return nodes.map((node) => {
         if (node.id === parentId) {
@@ -213,7 +218,7 @@ const EditPage = () => {
 
   const handleMoveNode = (
     draggedNodeId: string,
-    targetNodeId: string | null = null,
+    targetNodeId: string | null = null
   ) => {
     let draggedNode: Node | null = null;
 
