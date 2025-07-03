@@ -1,0 +1,43 @@
+[
+  {
+    "id": "1",
+    "name": "Kapitel hinzufügen",
+    "nodes": [
+      {
+        "id": "2",
+        "name": "Introduction",
+        "nodes": []
+      },
+      {
+        "id": "3",
+        "name": "Related Work",
+        "nodes": []
+      },
+      {
+        "id": "4",
+        "name": "Methodology",
+        "nodes": []
+      },
+      {
+        "id": "5",
+        "name": "Design and Development",
+        "nodes": []
+      },
+      {
+        "id": "6",
+        "name": "Evaluation",
+        "nodes": []
+      },
+      {
+        "id": "7",
+        "name": "Discussion",
+        "nodes": []
+      },
+      {
+        "id": "8",
+        "name": "Conclusion",
+        "nodes": []
+      }
+    ]
+  }
+]

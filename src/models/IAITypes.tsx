@@ -4,7 +4,7 @@ export interface IAiProtocolEntry {
   affectedParts: string;
   remarks: string;
   _id?: string;
-  username: string;
+  projectId: string;
   createdAt?: string;
   updatedAt?: string;
 }
