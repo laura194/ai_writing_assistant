@@ -59,7 +59,9 @@ const EditPage = () => {
       console.error("Project ID is not available!");
     }
 
-    const savedNodeId = localStorage.getItem("selectedNodeId");
+    const savedNodeId = projectId
+      ? localStorage.getItem(`selectedNodeId_${projectId}`)
+      : null;
     if (savedNodeId && projectId) {
       NodeContentService.getNodeContentById(savedNodeId, projectId)
         .then((nodeContent) => {
@@ -125,7 +127,7 @@ const EditPage = () => {
         });
         const fullNode = { ...node, content: nodeContent.content };
         setSelectedNode(fullNode);
-        localStorage.setItem("selectedNodeId", node.id);
+        localStorage.setItem(`selectedNodeId_${projectId}`, node.id);
         setActiveView("file");
       } catch (error) {
         console.error("Error loading node content:", error);
