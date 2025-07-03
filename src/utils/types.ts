@@ -24,6 +24,6 @@ export interface Project {
   name: string;
   username: string;
   projectStructure: Node[];
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
