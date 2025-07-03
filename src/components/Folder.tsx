@@ -114,53 +114,73 @@ function Folder({
       style={{ opacity: isDragging ? 0.5 : 1 }}
     >
       <div className="flex items-center gap-2">
+
         {/* Icon-Anzeige */}
         <div
-          className="cursor-pointer"
-          onClick={() => setShowIconPicker(!showIconPicker)} // Picker ein-/ausblenden
-          title="Klicke, um ein Icon auszuwählen"
+            className={`${
+                node.name !== "Chapter structure" ? "cursor-pointer" : "cursor-default"
+            }`}
+            onClick={() => {
+              if (node.name !== "Chapter structure") {
+                setShowIconPicker(!showIconPicker); // IconPicker nur umschalten, wenn nicht "Chapter structure"
+              }
+            }}
+            title={
+              node.name !== "Chapter structure"
+                  ? "Klicke, um ein Icon auszuwählen"
+                  : "Das Icon dieses Kapitels kann nicht geändert werden"
+            }
         >
           {getIcon(node, "size-6", node.icon)}
         </div>
 
-        {/* IconPicker nur anzeigen, wenn geöffnet */}
-        {showIconPicker && (
-          <IconPicker
-            currentIcon={node.icon} // Das aktuell selektierte Icon des Nodes
-            onSelect={(newIcon) => {
-              const updatedNode = { ...node, icon: newIcon }; // Icon im Node updaten
-              onNodeClick(updatedNode); // Callback zur Weitergabe der Änderung
-              setShowIconPicker(false); // Picker schließen
-            }}
-          />
+        {/* IconPicker nur anzeigen, wenn geöffnet und nicht "Chapter structure" */}
+        {showIconPicker && node.name !== "Chapter structure" && (
+            <IconPicker
+                currentIcon={node.icon} // Das aktuell ausgewählte Icon des Nodes
+                onSelect={(newIcon) => {
+                  // Verhindere Änderungen am obersten Knoten
+                  if (node.name !== "Chapter structure") {
+                    const updatedNode = { ...node, icon: newIcon }; // Icon im Node updaten
+                    onNodeClick(updatedNode); // Callback zur Weitergabe der Änderung
+                  }
+                  setShowIconPicker(false); // Picker schließen
+                }}
+            />
         )}
 
         {/* Knotenname bearbeiten */}
-        {isEditing ? (
-          <input
-            ref={inputRef}
-            className="border px-2 py-1"
-            value={editableName}
-            onChange={(e) => setEditableName(e.target.value)}
-            onBlur={handleSaveEdit}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSaveEdit();
-              }
-            }}
-            autoFocus
-          />
+        {isEditing && node.name !== "Chapter structure" ? ( // Bearbeiten nur ermöglichen, wenn es sich nicht um "Chapter structure" handelt
+            <input
+                ref={inputRef}
+                className="border px-2 py-1"
+                value={editableName}
+                onChange={(e) => setEditableName(e.target.value)}
+                onBlur={handleSaveEdit}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSaveEdit();
+                  }
+                }}
+                autoFocus
+            />
         ) : (
-          <span
-            className="cursor-pointer"
-            onDoubleClick={() => {
-              setIsEditing(true);
-              setTimeout(() => selectInputText(), 0);
-            }}
-            onClick={() => onNodeClick(node)}
-          >
-            {node.name}
-          </span>
+            <span
+                className={`${
+                    node.name !== "Chapter structure"
+                        ? "cursor-pointer"
+                        : "cursor-default" // Kein Cursor für nicht bearbeitbare Knoten
+                }`}
+                onDoubleClick={() => {
+                  if (node.name !== "Chapter structure") { // Bearbeiten auf Doppelklick verhindern, falls "Chapter structure"
+                    setIsEditing(true);
+                    setTimeout(() => selectInputText(), 0);
+                  }
+                }}
+                onClick={() => onNodeClick(node)}
+            >
+    {node.name}
+  </span>
         )}
 
         {/* Kapitel hinzufügen */}
