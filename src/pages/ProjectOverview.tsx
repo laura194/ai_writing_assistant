@@ -4,17 +4,21 @@ import { ProjectService } from "../utils/ProjectService";
 import { useUser } from "@clerk/clerk-react";
 import { Project } from "../utils/types";
 import Header from "../components/Header";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, Trash2, Pencil, FolderPlus } from "lucide-react";
 
 const ProjectOverview = () => {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [editedName, setEditedName] = useState<string>("");
 
   useEffect(() => {
     const fetchProjects = async () => {
+      if (!isLoaded) return;
+
       if (user?.username) {
         try {
           const userProjects = await ProjectService.getProjectsByUsername(
@@ -34,7 +38,7 @@ const ProjectOverview = () => {
     };
 
     fetchProjects();
-  }, [user]);
+  }, [user, isLoaded]);
 
   const handleProjectClick = (id: string) => {
     navigate(`/edit/${id}`);
@@ -47,6 +51,18 @@ const ProjectOverview = () => {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this project?")) {
+      try {
+        await ProjectService.deleteProject(id);
+        setProjects((prev) => prev.filter((p) => p._id !== id));
+      } catch (error) {
+        console.error("Failed to delete project:", error);
+        alert("Failed to delete project.");
+      }
+    }
   };
 
   return (
@@ -64,43 +80,146 @@ const ProjectOverview = () => {
             <div className="text-red-600">{error}</div>
           ) : projects.length > 0 ? (
             <ul className="space-y-4 text-left">
-              {projects.map((project) => (
-                <li
-                  key={project._id}
-                  onClick={() => handleProjectClick(project._id ?? "")}
-                  className="bg-gray-100 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    {/* Left: Project name */}
-                    <div
-                      className="flex items-center gap-2 text-gray-800 font-medium text-lg hover:text-gray-900 transition whitespace-nowrap overflow-hidden text-ellipsis max-w-[60%]"
-                      title={project.name}
-                    >
-                      <FolderOpen className="w-5 h-5 shrink-0" />
-                      {project.name}
-                    </div>
+              {projects.map((project) => {
+                const isEditing = editingProjectId === project._id;
 
-                    {/* Right: Dates (stacked vertically) */}
-                    <div className="flex flex-col text-sm text-gray-600 text-right min-w-[120px]">
-                      <div>
-                        <span className="font-medium text-gray-700">
-                          Created:
-                        </span>{" "}
-                        {formatDate(project.createdAt ?? "")}
+                return (
+                  <li
+                    key={project._id}
+                    className="bg-gray-100 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 text-gray-800 font-medium text-lg max-w-[60%] overflow-hidden">
+                        <FolderOpen className="w-5 h-5 shrink-0" />
+
+                        {/* 🔁 Edit mode or normal name */}
+                        {isEditing ? (
+                          <input
+                            className="border rounded px-2 py-1 text-sm w-full max-w-[200px]"
+                            value={editedName}
+                            onChange={(e) => setEditedName(e.target.value)}
+                            autoFocus
+                          />
+                        ) : (
+                          <span
+                            onClick={() =>
+                              handleProjectClick(project._id ?? "")
+                            }
+                            className="cursor-pointer hover:text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis"
+                            title={project.name}
+                          >
+                            {project.name}
+                          </span>
+                        )}
+
+                        {/* 🛠 Action Buttons */}
+                        {isEditing ? (
+                          <>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  const updated =
+                                    await ProjectService.updateProject(
+                                      project._id!,
+                                      {
+                                        name: editedName,
+                                        username: user?.username || "",
+                                        projectStructure:
+                                          project.projectStructure || [],
+                                      }
+                                    );
+
+                                  setProjects((prev) =>
+                                    prev.map((p) =>
+                                      p._id === project._id ? updated : p
+                                    )
+                                  );
+                                } catch (e) {
+                                  alert("Failed to update project");
+                                  console.error(e);
+                                } finally {
+                                  setEditingProjectId(null);
+                                  setEditedName("");
+                                }
+                              }}
+                              disabled={
+                                editedName.trim() === "" ||
+                                editedName.trim() === project.name.trim()
+                              }
+                              className={`p-1 transition ${
+                                editedName.trim() === "" ||
+                                editedName.trim() === project.name.trim()
+                                  ? "text-blue-300 cursor-not-allowed"
+                                  : "text-blue-600 hover:text-blue-800"
+                              }`}
+                              title="Save"
+                            >
+                              ✓
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setEditingProjectId(null);
+                                setEditedName("");
+                              }}
+                              className="text-blue-600 hover:text-blue-800 p-1 transition"
+                              title="Cancel"
+                            >
+                              ✕
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => {
+                                setEditingProjectId(project._id ?? null);
+                                setEditedName(project.name);
+                              }}
+                              className="text-gray-500 hover:text-blue-600 p-1"
+                              title="Edit project"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(project._id ?? "")}
+                              className="text-gray-500 hover:text-red-600 p-1"
+                              title="Delete project"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
-                      <div>
-                        <span className="font-medium text-gray-700">
-                          Updated:
-                        </span>{" "}
-                        {formatDate(project.updatedAt ?? "")}
+
+                      <div className="flex flex-col text-sm text-gray-600 text-right min-w-[120px]">
+                        <div>
+                          <span className="font-medium text-gray-700">
+                            Created:
+                          </span>{" "}
+                          {formatDate(project.createdAt ?? "")}
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-700">
+                            Updated:
+                          </span>{" "}
+                          {formatDate(project.updatedAt ?? "")}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           ) : (
-            <div className="text-gray-600">No projects found.</div>
+            <div className="text-gray-600 text-center flex flex-col items-center gap-4">
+              <button
+                onClick={() => navigate("/structureSelection")}
+                className="flex items-center justify-center gap-2 bg-gray-400 hover:bg-gray-500 text-white font-medium py-3 px-4 rounded-md transition"
+              >
+                <FolderPlus className="w-5 h-5" />
+                Create First Project
+              </button>
+            </div>
           )}
         </div>
       </div>

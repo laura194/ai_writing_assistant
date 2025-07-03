@@ -4,7 +4,8 @@ import {
   getAllProjects,
   getProjectById,
   updateProject,
-  getProjectsByUsername, // Importing the function
+  getProjectsByUsername,
+  deleteProject, 
 } from "../controllers/project.controller";
 
 const router = express.Router();
@@ -13,7 +14,8 @@ const router = express.Router();
 router.post("/", createProject);
 router.get("/", getAllProjects);
 router.get("/by-username", getProjectsByUsername);
-router.get("/:id", getProjectById); // Retrieve by ID
-router.put("/:id", updateProject); // Update by ID
+router.get("/:id", getProjectById); 
+router.put("/:id", updateProject); 
+router.delete("/:id", deleteProject);
 
 export default router;

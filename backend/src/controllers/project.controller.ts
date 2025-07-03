@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import Project from "../models/Project";
+import NodeContent from "../models/NodeContent";
+import AiProtocol from "../models/AIProtocol";
 
 // Create a new Project entry
 export const createProject = async (
@@ -78,8 +80,7 @@ export const updateProject = async (
   const { id } = req.params;
   const { name, username, projectStructure } = req.body;
 
-  if (!id || !name || !username) {
-    // Nur name, username und id sind zwingend
+  if (!id || !name || !username || !projectStructure) {
     res.status(400).json({ error: "All fields are required" });
     return;
   }
@@ -126,6 +127,42 @@ export const getProjectsByUsername = async (
     res.status(200).json(projects);
   } catch (error) {
     console.error("Error fetching projects by username:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Delete a project by its ID
+export const deleteProject = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { id } = req.params;
+
+  if (!id) {
+    res.status(400).json({ error: "Project ID is required" });
+    return;
+  }
+
+  try {
+    const deletedProject = await Project.findByIdAndDelete(id);
+
+    if (!deletedProject) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    const deletedNodeContents = await NodeContent.deleteMany({ projectId: id });
+
+    const deletedAiProtocols = await AiProtocol.deleteMany({ projectId: id });
+
+    res.status(200).json({
+      message: "Project and related data successfully deleted",
+      deletedProject,
+      deletedNodeContents: deletedNodeContents.deletedCount,
+      deletedAiProtocols: deletedAiProtocols.deletedCount,
+    });
+  } catch (error) {
+    console.error("Error deleting project:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
