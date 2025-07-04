@@ -44,17 +44,17 @@ const EditPage = () => {
   useEffect(() => {
     if (projectId) {
       ProjectService.getProjectById(projectId)
-        .then((project: Project) => {
-          if (Array.isArray(project.projectStructure)) {
-            setNodes(project.projectStructure);
-            setProject(project);
-          } else {
-            console.error("Project structure is not an array or is undefined!");
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching project:", error);
-        });
+          .then((project: Project) => {
+            if (Array.isArray(project.projectStructure)) {
+              setNodes(project.projectStructure);
+              setProject(project);
+            } else {
+              console.error("Project structure is not an array or is undefined!");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching project:", error);
+          });
     } else {
       console.error("Project ID is not available!");
     }
@@ -62,17 +62,17 @@ const EditPage = () => {
     const savedNodeId = localStorage.getItem("selectedNodeId");
     if (savedNodeId) {
       NodeContentService.getNodeContentById(savedNodeId)
-        .then((nodeContent) => {
-          if (nodeContent) {
-            setSelectedNode({
-              id: nodeContent.nodeId || "",
-              name: nodeContent.name,
-              content: nodeContent.content,
-              category: nodeContent.category,
-            });
-          }
-        })
-        .catch((error) => console.error("Error fetching node content:", error));
+          .then((nodeContent) => {
+            if (nodeContent) {
+              setSelectedNode({
+                id: nodeContent.nodeId || "",
+                name: nodeContent.name,
+                content: nodeContent.content,
+                category: nodeContent.category,
+              });
+            }
+          })
+          .catch((error) => console.error("Error fetching node content:", error));
     }
   }, [projectId]);
 
@@ -83,8 +83,7 @@ const EditPage = () => {
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (isDirty) {
-        const message =
-          "You have unsaved changes. Are you sure you want to leave?";
+        const message = "You have unsaved changes. Are you sure you want to leave?";
         event.returnValue = message;
         return message;
       }
@@ -100,7 +99,6 @@ const EditPage = () => {
   const saveProjectStructure = async (updatedNodes: Node[]) => {
     if (!projectId) return;
 
-    // Füge die projectStructure hinzu, wenn sie nicht definiert ist, als leeres Array
     const projectData = {
       name: project?.name || "Untitled Project",
       username: project?.username || "Anonymous",
@@ -118,8 +116,7 @@ const EditPage = () => {
   const handleNodeClick = async (node: Node) => {
     const switchNode = async () => {
       try {
-        const nodeContent =
-          await NodeContentService.getOrCreateNodeContent(node);
+        const nodeContent = await NodeContentService.getOrCreateNodeContent(node);
         const fullNode = { ...node, content: nodeContent.content };
         setSelectedNode(fullNode);
         localStorage.setItem("selectedNodeId", node.id);
@@ -138,6 +135,14 @@ const EditPage = () => {
     }
   };
 
+  const reloadProjectStructure = () => {
+    setNodes([...nodes]); // shallow copy → triggers re-render
+  };
+
+  const handleNodeSave = () => {
+    reloadProjectStructure();
+  };
+
   const handleViewChange = (newView: string) => {
     if (isDirty) {
       setPendingView(newView);
@@ -150,8 +155,7 @@ const EditPage = () => {
   const handleDialogConfirm = async () => {
     if (pendingNode) {
       try {
-        const nodeContent =
-          await NodeContentService.getOrCreateNodeContent(pendingNode);
+        const nodeContent = await NodeContentService.getOrCreateNodeContent(pendingNode);
         const fullNode = { ...pendingNode, content: nodeContent.content };
         setSelectedNode(fullNode);
         localStorage.setItem("selectedNodeId", pendingNode.id);
@@ -177,10 +181,7 @@ const EditPage = () => {
   };
 
   const addChapter = (parentId: string | null, newNode: Node) => {
-    const recursiveUpdate = (
-      nodes: Node[],
-      parentId: string | null,
-    ): Node[] => {
+    const recursiveUpdate = (nodes: Node[], parentId: string | null): Node[] => {
       return nodes.map((node) => {
         if (node.id === parentId) {
           return { ...node, nodes: [...(node.nodes || []), newNode] };
@@ -211,136 +212,139 @@ const EditPage = () => {
     saveProjectStructure(updatedNodes);
   };
 
+  const handleRenameOrIconUpdate = (updatedNode: Node) => {
+    const updateNodes = (nodes: Node[], updatedNode: Node): Node[] => {
+      return nodes.map((node) => {
+        if (node.id === updatedNode.id) {
+          return updatedNode; // Aktualisiere den Namen oder das Icon
+        }
+        if (node.nodes) {
+          return { ...node, nodes: updateNodes(node.nodes, updatedNode) }; // Rekursion
+        }
+        return node;
+      });
+    };
+
+    const updatedNodes = updateNodes(nodes, updatedNode);
+    setNodes(updatedNodes); // Aktualisiere die Node-Struktur
+
+    // Überprüfe, ob der `selectedNode` aktualisiert werden muss
+    if (selectedNode?.id === updatedNode.id) {
+      setSelectedNode(updatedNode); // Aktualisiere den aktuell ausgewählten Node
+    }
+
+    saveProjectStructure(updatedNodes); // Speichere die Änderungen
+  };
+
+
   const handleMoveNode = (draggedNodeId: string, targetNodeId: string, asSibling: boolean = false) => {
     const newNodes = [...nodes];
 
-    // 1. Finde und entferne den verschobenen Knoten
     let draggedNode: Node | null = null;
-
-    const removeNode = (nodes: Node[], id: string): Node | null => {
+    const removeNode = (nodes: Node[], id: string): void => {
       for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].id === id) {
           draggedNode = nodes[i];
           nodes.splice(i, 1);
-          return draggedNode;
+          return;
         }
-
         if (nodes[i].nodes) {
-          const found = removeNode(nodes[i].nodes!, id);
-          if (found) return found;
+          removeNode(nodes[i].nodes, id);
         }
       }
-      return null;
     };
-
     removeNode(newNodes, draggedNodeId);
 
     if (!draggedNode) return;
 
-    // 2. Füge den verschobenen Knoten an der richtigen Stelle ein
-    const addNode = (nodes: Node[], targetId: string, nodeToAdd: Node, asSibling: boolean): boolean => {
+    const addNode = (nodes: Node[], targetId: string): void => {
       for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].id === targetId) {
-          if (asSibling) {
-            // Als Sibling einfügen (gleiche Ebene)
-            nodes.splice(i + 1, 0, nodeToAdd);
-          } else {
-            // Als Kind einfügen - hier ist die korrigierte Zeile:
-            if (!nodes[i].nodes) {
-              nodes[i].nodes = [];
-            }
-            nodes[i].nodes.push(nodeToAdd); // scheint trotzdem zu funktionieren
+          if (!nodes[i].nodes) {
+            nodes[i].nodes = [];
           }
-          return true;
+          nodes[i].nodes.push(draggedNode);
+          return;
         }
-
         if (nodes[i].nodes) {
-          const added = addNode(nodes[i].nodes!, targetId, nodeToAdd, asSibling);
-          if (added) return true;
+          addNode(nodes[i].nodes, targetId);
         }
       }
-      return false;
     };
+    addNode(newNodes, targetNodeId);
 
-    addNode(newNodes, targetNodeId, draggedNode, asSibling);
-
-    // Aktualisiere den Zustand
     setNodes(newNodes);
     saveProjectStructure(newNodes);
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="flex flex-col h-screen">
-        <Header />
-        <div className="flex flex-1 relative">
-          <button
-            className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            <Bars3Icon className="h-5 w-5 text-white" />
-          </button>
-
-          <div
-            className={`${
-              menuOpen ? "w-1/4" : "w-12"
-            } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
-          >
-            {menuOpen && (
-              <ul className="mt-8">
-                {" "}
-                {/* margin-top nur auf die Liste anwenden */}
-                {nodes.map((node) => (
-                  <Folder
-                    key={node.id}
-                    node={node}
-                    onMove={handleMoveNode}
-                    onNodeClick={handleNodeClick}
-                    onAdd={addChapter}
-                    onRemove={deleteChapter}
-                  />
-                ))}
-              </ul>
-            )}
-
-            <BottomNavigationBar
-              activeView={activeView}
-              onChangeView={handleViewChange}
-              menuOpen={menuOpen}
-            />
-          </div>
-
-          <div
-            className={`${
-              menuOpen ? "w-3/4" : "w-full"
-            } transition-all duration-300 p-4 bg-gray-400`}
-          >
-            {selectedNode ? (
-              activeView === "file" ? (
-                <FileContentCard
-                  node={selectedNode}
-                  onDirtyChange={(dirty: boolean) => setIsDirty(dirty)}
-                />
-              ) : activeView === "ai" ? (
-                <AIProtocolCard />
-              ) : activeView === "fullDocument" ? (
-                <FullDocumentCard />
+      <DndProvider backend={HTML5Backend}>
+        <div className="flex flex-col h-screen">
+          <Header />
+          <div className="flex flex-1 relative">
+            <button
+                className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
+                onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <Bars3Icon className="h-5 w-5 text-white" />
+            </button>
+            <div
+                className={`${
+                    menuOpen ? "w-1/4" : "w-12"
+                } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
+            >
+              {menuOpen && (
+                  <ul className="mt-8">
+                    {nodes.map((node) => (
+                        <Folder
+                            key={node.id}
+                            node={node}
+                            onMove={handleMoveNode}
+                            onNodeClick={handleNodeClick}
+                            onAdd={addChapter}
+                            onRemove={deleteChapter}
+                            onRenameOrIconUpdate={handleRenameOrIconUpdate}
+                        />
+                    ))}
+                  </ul>
+              )}
+              <BottomNavigationBar
+                  activeView={activeView}
+                  onChangeView={handleViewChange}
+                  menuOpen={menuOpen}
+              />
+            </div>
+            <div
+                className={`${
+                    menuOpen ? "w-3/4" : "w-full"
+                } transition-all duration-300 p-4 bg-gray-400`}
+            >
+              {selectedNode ? (
+                  activeView === "file" ? (
+                      <FileContentCard
+                          node={selectedNode}
+                          onDirtyChange={(dirty: boolean) => setIsDirty(dirty)}
+                          onSave={handleNodeSave}
+                      />
+                  ) : activeView === "ai" ? (
+                      <AIProtocolCard />
+                  ) : activeView === "fullDocument" ? (
+                      <FullDocumentCard />
+                  ) : (
+                      <p>Settings</p>
+                  )
               ) : (
-                <p>Settings</p>
-              )
-            ) : (
-              <p>Select an element.</p>
-            )}
+                  <p>Select an element.</p>
+              )}
+            </div>
           </div>
+          <UnsavedChangesDialog
+              isOpen={showDialog}
+              onCancel={handleDialogCancel}
+              onConfirm={handleDialogConfirm}
+          />
         </div>
-
-        <UnsavedChangesDialog
-          isOpen={showDialog}
-          onCancel={handleDialogCancel}
-          onConfirm={handleDialogConfirm}
-        />
-      </div>
-    </DndProvider>
+      </DndProvider>
   );
 };
 

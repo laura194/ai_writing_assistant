@@ -9,9 +9,10 @@ import { NodeContentService } from "../utils/NodeContentService"; // Import the 
 export interface FileContentCardProps {
   node: Node;
   onDirtyChange?: (dirty: boolean) => void;
+  onSave?: () => void;
 }
 
-function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
+function FileContentCard({ node, onDirtyChange, onSave }: FileContentCardProps) {
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [originalContent, setOriginalContent] = useState<string>(
@@ -27,6 +28,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
   useEffect(() => {
     setFileContent(node.content || "...");
     setOriginalContent(node.content || "...");
+    setAiNodeName(node.name || ""); // Aktualisiere den Namen
     setIsDirty(false);
   }, [node]);
 
@@ -50,6 +52,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
       // On success, update the original content and mark as no longer dirty
       setOriginalContent(fileContent);
       setIsDirty(false);
+      onSave?.();
     } catch (error) {
       console.error("Error updating node content:", error);
       // Optionally show an error message to the user

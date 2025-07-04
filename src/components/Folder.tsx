@@ -15,13 +15,15 @@ interface FolderProps {
 }
 
 function Folder({
-  node,
-  onMove,
-  onNodeClick,
-  onAdd,
-  onRemove,
-  isVisible = true,
-}: FolderProps) {
+                  node,
+                  onMove,
+                  onNodeClick,
+                  onAdd,
+                  onRemove,
+                  isVisible = true,
+                  onRenameOrIconUpdate, // Neuer Callback für Änderungen
+                }: FolderProps & { onRenameOrIconUpdate: (updatedNode: Node) => void }) {
+
   const ref = useRef<HTMLLIElement>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -33,10 +35,20 @@ function Folder({
   const [showConfirmPopup, setShowConfirmPopup] = useState(false); // Popup-Zustand
   const [nodeToDelete, setNodeToDelete] = useState<string | null>(null); // Speichert den zu löschenden Node
 
+  // Speichert den neuen Namen und übergibt den geänderten Node an `onRenameOrIconUpdate`
   const handleSaveEdit = () => {
-    onNodeClick({ ...node, name: editableName });
-    setIsEditing(false);
+    const updatedNode = { ...node, name: editableName }; // Aktuellen Node mit geändertem Namen erstellen
+    onRenameOrIconUpdate(updatedNode); // Callback mit aktualisiertem Node aufrufen
+    setIsEditing(false); // Bearbeitungsmodus beenden
   };
+
+
+  const handleIconChange = (newIcon: string) => {
+    const updatedNode = { ...node, icon: newIcon };
+    onRenameOrIconUpdate(updatedNode); // Aktualisierte Node zurückgeben
+    setShowIconPicker(false);
+  };
+
 
   const selectInputText = () => {
     if (inputRef.current) {
@@ -138,14 +150,7 @@ function Folder({
         {showIconPicker && node.name !== "Chapter structure" && (
             <IconPicker
                 currentIcon={node.icon} // Das aktuell ausgewählte Icon des Nodes
-                onSelect={(newIcon) => {
-                  // Verhindere Änderungen am obersten Knoten
-                  if (node.name !== "Chapter structure") {
-                    const updatedNode = { ...node, icon: newIcon }; // Icon im Node updaten
-                    onNodeClick(updatedNode); // Callback zur Weitergabe der Änderung
-                  }
-                  setShowIconPicker(false); // Picker schließen
-                }}
+                onSelect={(handleIconChange)}
             />
         )}
 
@@ -228,6 +233,7 @@ function Folder({
                       onAdd={onAdd}
                       onRemove={onRemove}
                       isVisible={isVisible}
+                      onRenameOrIconUpdate={onRenameOrIconUpdate} // Hier die korrekte Weitergabe
                   />
               ))}
             </div>
