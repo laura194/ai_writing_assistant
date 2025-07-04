@@ -7,7 +7,7 @@ import { getIcon } from "../utils/icons";
 
 interface FolderProps {
   node: Node;
-  onMove: (draggedNodeId: string, targetNodeId: string) => void;
+  onMove: (draggedNodeId: string, targetNodeId: string, asSibling?: boolean) => void;
   onNodeClick: (node: Node) => void;
   onAdd: (parentId: string | null, newNode: Node) => void;
   onRemove: (nodeId: string) => void;
@@ -48,7 +48,7 @@ function Folder({
   const [{ isDragging }, dragRef] = useDrag({
     type: "node",
     item: { id: node.id },
-    canDrag: node.name !== "Kapitel hinzufügen", // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
+    canDrag: node.name !== "Chapter structure", // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -56,9 +56,25 @@ function Folder({
 
   const [, dropRef] = useDrop({
     accept: "node",
-    hover: (draggedItem: { id: string }) => {
-      if (draggedItem.id !== node.id && node.name !== "Kapitel hinzufügen") {
-        onMove(draggedItem.id, node.id); // Bewege den Knoten
+    hover: (draggedItem: { id: string }, monitor) => {
+      if (draggedItem.id !== node.id && node.name !== "Chapter structure") {
+        if (!ref.current) return;
+
+        // Bestimme die Position des Mauszeigers relativ zum Drop-Target
+        const hoverBoundingRect = ref.current.getBoundingClientRect();
+        const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+        const clientOffset = monitor.getClientOffset();
+
+        if (!clientOffset) return;
+
+        const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+        // Wenn der Mauszeiger in der oberen Hälfte ist, als Sibling behandeln
+        // Wenn in der unteren Hälfte, als Kind behandeln
+        const isSibling = hoverClientY < hoverMiddleY;
+
+        // Rufe onMove mit zusätzlichem Parameter auf
+        onMove(draggedItem.id, node.id, isSibling);
       }
     },
   });
@@ -98,53 +114,73 @@ function Folder({
       style={{ opacity: isDragging ? 0.5 : 1 }}
     >
       <div className="flex items-center gap-2">
+
         {/* Icon-Anzeige */}
         <div
-          className="cursor-pointer"
-          onClick={() => setShowIconPicker(!showIconPicker)} // Picker ein-/ausblenden
-          title="Klicke, um ein Icon auszuwählen"
+            className={`${
+                node.name !== "Chapter structure" ? "cursor-pointer" : "cursor-default"
+            }`}
+            onClick={() => {
+              if (node.name !== "Chapter structure") {
+                setShowIconPicker(!showIconPicker); // IconPicker nur umschalten, wenn nicht "Chapter structure"
+              }
+            }}
+            title={
+              node.name !== "Chapter structure"
+                  ? "Klicke, um ein Icon auszuwählen"
+                  : "Das Icon dieses Kapitels kann nicht geändert werden"
+            }
         >
-          {getIcon(node, "size-6")}
+          {getIcon(node, "size-6", node.icon)}
         </div>
 
-        {/* IconPicker nur anzeigen, wenn geöffnet */}
-        {showIconPicker && (
-          <IconPicker
-            currentIcon={node.icon} // Das aktuell selektierte Icon des Nodes
-            onSelect={(newIcon) => {
-              const updatedNode = { ...node, icon: newIcon }; // Icon im Node updaten
-              onNodeClick(updatedNode); // Callback zur Weitergabe der Änderung
-              setShowIconPicker(false); // Picker schließen
-            }}
-          />
+        {/* IconPicker nur anzeigen, wenn geöffnet und nicht "Chapter structure" */}
+        {showIconPicker && node.name !== "Chapter structure" && (
+            <IconPicker
+                currentIcon={node.icon} // Das aktuell ausgewählte Icon des Nodes
+                onSelect={(newIcon) => {
+                  // Verhindere Änderungen am obersten Knoten
+                  if (node.name !== "Chapter structure") {
+                    const updatedNode = { ...node, icon: newIcon }; // Icon im Node updaten
+                    onNodeClick(updatedNode); // Callback zur Weitergabe der Änderung
+                  }
+                  setShowIconPicker(false); // Picker schließen
+                }}
+            />
         )}
 
         {/* Knotenname bearbeiten */}
-        {isEditing ? (
-          <input
-            ref={inputRef}
-            className="border px-2 py-1"
-            value={editableName}
-            onChange={(e) => setEditableName(e.target.value)}
-            onBlur={handleSaveEdit}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSaveEdit();
-              }
-            }}
-            autoFocus
-          />
+        {isEditing && node.name !== "Chapter structure" ? ( // Bearbeiten nur ermöglichen, wenn es sich nicht um "Chapter structure" handelt
+            <input
+                ref={inputRef}
+                className="border px-2 py-1"
+                value={editableName}
+                onChange={(e) => setEditableName(e.target.value)}
+                onBlur={handleSaveEdit}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSaveEdit();
+                  }
+                }}
+                autoFocus
+            />
         ) : (
-          <span
-            className="cursor-pointer"
-            onDoubleClick={() => {
-              setIsEditing(true);
-              setTimeout(() => selectInputText(), 0);
-            }}
-            onClick={() => onNodeClick(node)}
-          >
-            {node.name}
-          </span>
+            <span
+                className={`${
+                    node.name !== "Chapter structure"
+                        ? "cursor-pointer"
+                        : "cursor-default" // Kein Cursor für nicht bearbeitbare Knoten
+                }`}
+                onDoubleClick={() => {
+                  if (node.name !== "Chapter structure") { // Bearbeiten auf Doppelklick verhindern, falls "Chapter structure"
+                    setIsEditing(true);
+                    setTimeout(() => selectInputText(), 0);
+                  }
+                }}
+                onClick={() => onNodeClick(node)}
+            >
+    {node.name}
+  </span>
         )}
 
         {/* Kapitel hinzufügen */}
@@ -162,7 +198,7 @@ function Folder({
         </button>
 
         {/* Kapitel löschen */}
-        {node.name !== "Kapitel hinzufügen" && (
+        {node.name !== "Chapter structure" && (
           <button
             className="text-red-500 hover:text-red-700"
             onClick={() => handleDeleteClick(node.id)} // Popup öffnen
@@ -173,20 +209,31 @@ function Folder({
       </div>
 
       {hasChildren && (
-        <ul className="pl-4">
-          {node.nodes!.map((childNode) => (
-            <Folder
-              key={childNode.id}
-              node={childNode}
-              onMove={onMove}
-              onNodeClick={onNodeClick}
-              onAdd={onAdd}
-              onRemove={onRemove}
-              isVisible={isVisible}
-            />
-          ))}
-        </ul>
+          <ul className={`pl-4 ${
+              node.name === "Chapter structure"
+                  ? "max-h-[500px] overflow-y-auto pr-2 max-w-full overflow-x-auto"
+                  : ""
+          }`}>
+            <div className={`${
+                node.name === "Chapter structure"
+                    ? "min-w-fit"
+                    : ""
+            }`}>
+              {node.nodes!.map((childNode) => (
+                  <Folder
+                      key={childNode.id}
+                      node={childNode}
+                      onMove={onMove}
+                      onNodeClick={onNodeClick}
+                      onAdd={onAdd}
+                      onRemove={onRemove}
+                      isVisible={isVisible}
+                  />
+              ))}
+            </div>
+          </ul>
       )}
+
 
       {/* Bestätigungs-Popup */}
       {showConfirmPopup && (
@@ -194,7 +241,7 @@ function Folder({
           {" "}
           <div className="bg-white rounded-lg shadow-xl p-6 space-y-4">
             <p className="text-center text-lg font-bold">
-              Willst du dieses Kapitel wirklich löschen?
+              Do you really want to delete this chapter?
             </p>
             <div className="flex justify-center gap-4">
               <button

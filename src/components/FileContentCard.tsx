@@ -136,7 +136,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
         >
           <Atom className="w-6 h-6" />
         </button>
-        {getIcon(node, "size-8")}
+        {getIcon(node, "size-6", node.icon)}
       </div>
 
       {isAIComponentShown && (
