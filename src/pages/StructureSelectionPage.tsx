@@ -1,22 +1,35 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
+import Header from "../components/Header";
 import { ProjectService } from "../utils/ProjectService";
+
 import imradJson from "../assets/imrad.json";
 import projectStructureJson from "../assets/projectStructure.json";
 import storyForDesignJson from "../assets/storyForDesign.json";
-import { useUser } from "@clerk/clerk-react";
-import Header from "../components/Header"; // Header importieren
 
 const StructureSelectionPage = () => {
   const { user } = useUser();
   const navigate = useNavigate();
 
-  const [projectName, setProjectName] = useState<string>("");
+  const [projectName, setProjectName] = useState("");
+  const [selectedStructure, setSelectedStructure] = useState<string | null>(
+    null
+  );
 
-  const handleCreateProject = async (projectType: string) => {
+  const handleSave = async () => {
+    if (!projectName.trim()) {
+      alert("Please enter a project name.");
+      return;
+    }
+
+    if (!selectedStructure) {
+      alert("Please select a project structure.");
+      return;
+    }
+
     let projectStructure;
-
-    switch (projectType) {
+    switch (selectedStructure) {
       case "imrad":
         projectStructure = imradJson;
         break;
@@ -27,62 +40,72 @@ const StructureSelectionPage = () => {
         projectStructure = storyForDesignJson;
         break;
       default:
-        alert("Unbekannter Projekttyp!");
+        alert("Invalid structure selected.");
         return;
     }
 
-    if (!projectName.trim()) {
-      alert("Bitte geben Sie einen Projektnamen ein.");
-      return;
-    }
-
     try {
-      const projectData = {
+      const createdProject = await ProjectService.createProject({
         name: projectName,
         username: user?.username || user?.id || "unknown-user",
         projectStructure: projectStructure,
-      };
+      });
 
-      const createdProject = await ProjectService.createProject(projectData);
       navigate(`/edit/${createdProject._id}`);
     } catch (error) {
-      console.error("Fehler beim Erstellen des Projekts:", error);
-      alert("Fehler beim Erstellen des Projekts!");
+      console.error("Failed to create project:", error);
+      alert("Something went wrong while creating the project.");
     }
   };
 
+  const structureOptions = [
+    { id: "imrad", label: "Story-for-Explanation (IMRaD)" },
+    { id: "storyForDesign", label: "Story-for-Design Pattern" },
+    { id: "scratch", label: "Custom Structure (from Scratch)" },
+  ];
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gray-200 text-gray-800">
       <Header />
-      <div className="flex flex-1 justify-center items-center px-4">
-        <div className="flex flex-col space-y-4">
+      <div className="flex flex-1 items-center justify-center px-4 py-12">
+        <div className="w-full max-w-xl bg-white shadow-md rounded-xl p-8 text-center">
+          <h1 className="text-2xl font-semibold mb-4">Create a New Project</h1>
+          <p className="text-gray-600 mb-6">
+            Enter a title and choose a structure to get started
+          </p>
+
           <input
             type="text"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
-            placeholder="Geben Sie den Projektnamen ein"
-            className="p-3 border rounded-lg"
+            placeholder="Enter project title"
+            className="w-full px-4 py-3 mb-6 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
 
-          <button
-            onClick={() => handleCreateProject("imrad")}
-            className="bg-blue-500 text-white font-bold py-4 px-6 rounded-lg shadow-md hover:bg-blue-600"
-          >
-            Story-for-Explanation Pattern (IMRaD)
-          </button>
+          <div className="border rounded-lg p-4 mb-6 text-left">
+            <h2 className="text-lg font-semibold mb-3">Structures</h2>
+            <div className="grid gap-3">
+              {structureOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => setSelectedStructure(option.id)}
+                  className={`w-full text-left px-5 py-3 rounded-md transition shadow-sm ${
+                    selectedStructure === option.id
+                      ? "bg-gray-100 shadow-inner font-semibold"
+                      : "bg-white hover:bg-gray-50"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <button
-            onClick={() => handleCreateProject("storyForDesign")}
-            className="bg-green-500 text-white font-bold py-4 px-6 rounded-lg shadow-md hover:bg-green-600"
+            onClick={handleSave}
+            className="w-full bg-gray-400 hover:bg-gray-500 text-white font-medium py-3 px-4 rounded-md transition"
           >
-            Story-for-Design Pattern
-          </button>
-
-          <button
-            onClick={() => handleCreateProject("scratch")}
-            className="bg-purple-500 text-white font-bold py-4 px-6 rounded-lg shadow-md hover:bg-purple-600"
-          >
-            Create structure from scratch
+            Save and Create Project
           </button>
         </div>
       </div>
