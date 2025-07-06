@@ -10,9 +10,14 @@ import { NodeContentService } from "../utils/NodeContentService";
 export interface FileContentCardProps {
   node: Node;
   onDirtyChange?: (dirty: boolean) => void;
+  onSave?: () => void;
 }
 
-function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
+function FileContentCard({
+  node,
+  onDirtyChange,
+  onSave,
+}: FileContentCardProps) {
   const { projectId } = useParams<{ projectId: string }>();
 
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
@@ -30,6 +35,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
   useEffect(() => {
     setFileContent(node.content || "...");
     setOriginalContent(node.content || "...");
+    setAiNodeName(node.name || ""); // Aktualisiere den Namen
     setIsDirty(false);
   }, [node]);
 
@@ -52,11 +58,12 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
         name: node.name,
         category: node.category,
         content: fileContent,
-        projectId, // 🟢 WICHTIG: projectId übergeben
+        projectId,
       });
 
       setOriginalContent(fileContent);
       setIsDirty(false);
+      onSave?.();
     } catch (error) {
       console.error("Error updating node content:", error);
       alert("Failed to save content. Please try again.");
@@ -142,7 +149,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
         >
           <Atom className="w-6 h-6" />
         </button>
-        {getIcon(node, "size-8")}
+        {getIcon(node, "size-6", node.icon)}
       </div>
 
       {isAIComponentShown && (
