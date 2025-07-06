@@ -13,7 +13,7 @@ export class NodeContentService {
     try {
       const response = await axios.post<Node>(API_BASE_URL, {
         ...data,
-        content: data.content || "Default content",
+        content: data.content || "...",
         category: data.category || "file",
       });
       return response.data;
@@ -112,7 +112,7 @@ export class NodeContentService {
     try {
       const response = await axios.put<Node>(`${API_BASE_URL}/${nodeId}`, {
         ...data,
-        content: data.content || "Default content",
+        content: data.content || "...",
         category: data.category || "file",
       });
       return response.data;

@@ -17,7 +17,34 @@ import { Node } from "./types";
 export function getIcon(
   node: Node,
   size: string = "size-8",
+  customIcon?: string, // Neuer Parameter für benutzerdefiniertes Icon
 ): React.ReactElement {
+  if (customIcon) {
+    switch (customIcon) {
+      case "text":
+        return React.createElement(DocumentTextIcon, {
+          className: `${size} text-gray-500`,
+        });
+      case "list":
+        return React.createElement(ListBulletIcon, {
+          className: `${size} text-gray-500`,
+        });
+      case "code":
+        return React.createElement(CodeBracketIcon, {
+          className: `${size} text-gray-500`,
+        });
+      case "image":
+        return React.createElement(PhotoIcon, {
+          className: `${size} text-gray-500`,
+        });
+      default:
+        return React.createElement(DocumentTextIcon, {
+          className: `${size} text-gray-500`,
+        });
+    }
+  }
+
+  // Fallback auf die Kategorie falls kein benutzerdefiniertes Icon vorhanden ist
   switch (node.category) {
     case "text":
       return React.createElement(DocumentTextIcon, {
