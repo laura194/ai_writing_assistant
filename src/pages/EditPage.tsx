@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "../App.css";
@@ -36,6 +36,17 @@ const EditPage = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [pendingNode, setPendingNode] = useState<Node | null>(null);
   const [pendingView, setPendingView] = useState<string | null>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debounceSave = (updatedNodes: Node[]) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      saveProjectStructure(updatedNodes);
+    }, 500);
+  };
 
   useEffect(() => {
     localStorage.setItem("activeView", activeView);
@@ -288,7 +299,6 @@ const EditPage = () => {
     asSibling: boolean = false
   ) => {
     const newNodes = [...nodes];
-
     let draggedNode: Node | null = null;
 
     const removeNode = (nodes: Node[], id: string): void => {
@@ -298,15 +308,11 @@ const EditPage = () => {
           nodes.splice(i, 1);
           return;
         }
-        if (Array.isArray(nodes[i].nodes)) {
+        if (nodes[i].nodes) {
           removeNode(nodes[i].nodes!, id);
         }
       }
     };
-
-    removeNode(newNodes, draggedNodeId);
-
-    if (!draggedNode) return;
 
     const addNode = (nodes: Node[], targetId: string): void => {
       for (let i = 0; i < nodes.length; i++) {
@@ -319,24 +325,25 @@ const EditPage = () => {
           }
           return;
         }
-        if (Array.isArray(nodes[i].nodes)) {
+        if (nodes[i].nodes) {
           addNode(nodes[i].nodes!, targetId);
         }
       }
     };
 
+    removeNode(newNodes, draggedNodeId);
+    if (!draggedNode) return;
     addNode(newNodes, targetNodeId);
 
     setNodes(newNodes);
-    saveProjectStructure(newNodes);
 
+    // ✅ Jetzt speichern, aber verzögert (siehe unten)
+    debounceSave(newNodes);
+
+    // optional: neu selektieren
     if (selectedNode) {
       const exists = JSON.stringify(newNodes).includes(selectedNode.id);
-      if (exists) {
-        handleNodeClick(selectedNode);
-      } else {
-        setSelectedNode(null);
-      }
+      setSelectedNode(exists ? selectedNode : null);
     }
   };
 

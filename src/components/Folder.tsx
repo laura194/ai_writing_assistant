@@ -68,6 +68,11 @@ function Folder({
 
   const [, dropRef] = useDrop({
     accept: "node",
+    drop: (draggedItem: { id: string }) => {
+      if (draggedItem.id !== node.id && node.name !== "Chapter structure") {
+        onMove(draggedItem.id, node.id); // 🔁 Nur einmal bei Drop
+      }
+    },
     hover: (draggedItem: { id: string }, monitor) => {
       if (draggedItem.id !== node.id && node.name !== "Chapter structure") {
         if (!ref.current) return;
