@@ -37,7 +37,7 @@ export class NodeContentService {
       const params: Record<string, string> = {};
       if (nodeId) params.nodeId = nodeId;
       if (projectId) params.projectId = projectId;
-
+  
       const response = await axios.get<Node[]>(API_BASE_URL, { params });
       return response.data;
     } catch (error) {
@@ -45,7 +45,7 @@ export class NodeContentService {
       throw error;
     }
   }
-
+  
   /**
    * Retrieves a specific node content by nodeId and projectId.
    * @param nodeId The nodeId.

@@ -45,7 +45,7 @@ export const createNodeContent = async (
 };
 
 
-// Get all NodeContent entries, or filter by ?nodeId=...
+// Get all NodeContent entries, or filter by ?nodeId=... and ?projectId=...
 export const getNodeContents = async (
   req: Request,
   res: Response,
@@ -53,21 +53,25 @@ export const getNodeContents = async (
   try {
     const { nodeId, projectId } = req.query;
 
-    if (nodeId && projectId) {
-      const filtered = await NodeContent.find({
-        nodeId: nodeId.toString(),
-        projectId: projectId.toString(),
-      });
-      res.status(200).json(filtered);
-    } else {
-      const contents = await NodeContent.find();
-      res.status(200).json(contents);
+    let filter: Record<string, any> = {};
+    
+    if (nodeId) {
+      filter.nodeId = nodeId.toString();
     }
+
+    if (projectId) {
+      filter.projectId = projectId.toString();
+    }
+
+    const contents = await NodeContent.find(filter);
+
+    res.status(200).json(contents);
   } catch (error) {
     console.error("Error fetching node contents:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 
 // Get a specific NodeContent entry by its nodeId (via URL param)
