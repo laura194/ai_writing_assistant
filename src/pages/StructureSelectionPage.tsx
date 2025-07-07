@@ -29,19 +29,29 @@ const StructureSelectionPage = () => {
     }
 
     let projectStructure;
+    // Deep-Copy der Struktur
     switch (selectedStructure) {
       case "imrad":
-        projectStructure = imradJson;
+        projectStructure = JSON.parse(JSON.stringify(imradJson));
         break;
       case "scratch":
-        projectStructure = projectStructureJson;
+        projectStructure = JSON.parse(JSON.stringify(projectStructureJson));
         break;
       case "storyForDesign":
-        projectStructure = storyForDesignJson;
+        projectStructure = JSON.parse(JSON.stringify(storyForDesignJson));
         break;
       default:
         alert("Invalid structure selected.");
         return;
+    }
+
+    // 🟢 Ersetze "Chapter structure" durch den Projektnamen
+    if (
+      Array.isArray(projectStructure) &&
+      projectStructure.length > 0 &&
+      typeof projectStructure[0].name === "string"
+    ) {
+      projectStructure[0].name = projectName.trim();
     }
 
     try {

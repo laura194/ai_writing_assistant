@@ -54,9 +54,7 @@ function Folder({
   const [{ isDragging }, dragRef] = useDrag({
     type: "node",
     item: { id: node.id },
-    canDrag:
-      node.name !== "Chapter structure" &&
-      (!node.nodes || node.nodes.length === 0), // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
+    canDrag: node.id !== "1" && (!node.nodes || node.nodes.length === 0), // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -64,7 +62,7 @@ function Folder({
   const [, dropRef] = useDrop({
     accept: "node",
     hover: (draggedItem: { id: string }, monitor) => {
-      if (draggedItem.id !== node.id && node.name !== "Chapter structure") {
+      if (draggedItem.id !== node.id && node.id !== "1") {
         if (!ref.current) return;
         // Bestimme die Position des Mauszeigers relativ zum Drop-Target
         const hoverBoundingRect = ref.current.getBoundingClientRect();
@@ -133,18 +131,14 @@ function Folder({
         </span>
         {/* Icon-Anzeige */}
         <div
-          className={`${
-            node.name !== "Chapter structure"
-              ? "cursor-pointer"
-              : "cursor-default"
-          }`}
+          className={`${node.id !== "1" ? "cursor-pointer" : "cursor-default"}`}
           onClick={() => {
-            if (node.name !== "Chapter structure") {
-              setShowIconPicker(!showIconPicker); // IconPicker nur umschalten, wenn nicht "Chapter structure"
+            if (node.id !== "1") {
+              setShowIconPicker(!showIconPicker); // IconPicker nur umschalten, wenn nicht "1"
             }
           }}
           title={
-            node.name !== "Chapter structure"
+            node.id !== "1"
               ? "Klicke, um ein Icon auszuwählen"
               : "Das Icon dieses Kapitels kann nicht geändert werden"
           }
@@ -159,7 +153,7 @@ function Folder({
           />
         )}
         {/* Knotenname bearbeiten */}
-        {isEditing && node.name !== "Chapter structure" ? (
+        {isEditing && node.id !== "1" ? (
           <input
             ref={inputRef}
             className="border px-2 py-1"
@@ -176,13 +170,11 @@ function Folder({
         ) : (
           <span
             className={`${
-              node.name !== "Chapter structure"
-                ? "cursor-pointer"
-                : "cursor-default"
+              node.id !== "1" ? "cursor-pointer" : "cursor-default"
             } max-w-[500px] overflow-hidden text-ellipsis whitespace-nowrap`}
             title={node.name}
             onDoubleClick={() => {
-              if (node.name !== "Chapter structure") {
+              if (node.id !== "1") {
                 setIsEditing(true);
                 setTimeout(() => selectInputText(), 0);
               }
@@ -206,7 +198,7 @@ function Folder({
           +
         </button>
         {/* Kapitel löschen */}
-        {node.name !== "Chapter structure" && (
+        {node.id !== "1" && (
           <button
             className="text-red-500 hover:text-red-700"
             onClick={() => handleDeleteClick(node.id)} // Popup öffnen

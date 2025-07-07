@@ -111,7 +111,7 @@ const EditPage = () => {
     }
   };
   const handleNodeClick = async (node: Node) => {
-    if (node.name === "Chapter structure") {
+    if (node.id === "1") {
       return; // ⛔ prevent click
     }
     const switchNode = async () => {
