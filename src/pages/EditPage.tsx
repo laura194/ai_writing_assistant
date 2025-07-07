@@ -14,44 +14,35 @@ import { NodeContentService } from "../utils/NodeContentService";
 import FullDocumentCard from "../components/FullDocumentCard";
 import { ProjectService } from "../utils/ProjectService";
 import { useParams } from "react-router-dom";
-
 const EditPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
-
   const [nodes, setNodes] = useState<Node[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [project, setProject] = useState<Project | null>(null);
-
   const [menuOpen, setMenuOpen] = useState<boolean>(() => {
     const savedMenuOpen = localStorage.getItem("menuOpen");
     return savedMenuOpen ? JSON.parse(savedMenuOpen) : true;
   });
-
   const [activeView, setActiveView] = useState(() => {
     const savedView = localStorage.getItem("activeView");
     return savedView ? savedView : "file";
   });
-
   const [isDirty, setIsDirty] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [pendingNode, setPendingNode] = useState<Node | null>(null);
   const [pendingView, setPendingView] = useState<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const debounceSave = (updatedNodes: Node[]) => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
-
     saveTimeoutRef.current = setTimeout(() => {
       saveProjectStructure(updatedNodes);
     }, 500);
   };
-
   useEffect(() => {
     localStorage.setItem("activeView", activeView);
   }, [activeView]);
-
   useEffect(() => {
     if (projectId) {
       ProjectService.getProjectById(projectId)
@@ -69,7 +60,6 @@ const EditPage = () => {
     } else {
       console.error("Project ID is not available!");
     }
-
     const savedNodeId = projectId
       ? localStorage.getItem(`selectedNodeId_${projectId}`)
       : null;
@@ -88,11 +78,9 @@ const EditPage = () => {
         .catch((error) => console.error("Error fetching node content:", error));
     }
   }, [projectId]);
-
   useEffect(() => {
     localStorage.setItem("menuOpen", JSON.stringify(menuOpen));
   }, [menuOpen]);
-
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (isDirty) {
@@ -102,24 +90,19 @@ const EditPage = () => {
         return message;
       }
     };
-
     window.addEventListener("beforeunload", handleBeforeUnload);
-
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [isDirty]);
-
   const saveProjectStructure = async (updatedNodes: Node[]) => {
     if (!projectId) return;
-
     // Füge die projectStructure hinzu, wenn sie nicht definiert ist, als leeres Array
     const projectData = {
       name: project?.name || "Untitled Project",
       username: project?.username || "Anonymous",
       projectStructure: updatedNodes || [],
     };
-
     try {
       await ProjectService.updateProject(projectId, projectData);
       console.log("✅ Project structure updated.");
@@ -127,7 +110,6 @@ const EditPage = () => {
       console.error("❌ Failed to update project structure:", error);
     }
   };
-
   const handleNodeClick = async (node: Node) => {
     if (node.name === "Chapter structure") {
       return; // ⛔ prevent click
@@ -147,7 +129,6 @@ const EditPage = () => {
         console.error("Error loading node content:", error);
       }
     };
-
     if (isDirty) {
       setPendingNode(node);
       setPendingView("file");
@@ -156,15 +137,12 @@ const EditPage = () => {
       switchNode();
     }
   };
-
   const reloadProjectStructure = () => {
     setNodes([...nodes]); // shallow copy → triggers re-render
   };
-
   const handleNodeSave = () => {
     reloadProjectStructure();
   };
-
   const handleViewChange = (newView: string) => {
     if (isDirty) {
       setPendingView(newView);
@@ -173,7 +151,6 @@ const EditPage = () => {
       setActiveView(newView);
     }
   };
-
   const handleDialogConfirm = async () => {
     if (pendingNode && projectId) {
       try {
@@ -189,22 +166,18 @@ const EditPage = () => {
       }
       setPendingNode(null);
     }
-
     if (pendingView) {
       setActiveView(pendingView);
       setPendingView(null);
     }
-
     setIsDirty(false);
     setShowDialog(false);
   };
-
   const handleDialogCancel = () => {
     setShowDialog(false);
     setPendingNode(null);
     setPendingView(null);
   };
-
   const addChapter = (parentId: string | null, newNode: Node) => {
     const recursiveUpdate = (
       nodes: Node[],
@@ -220,16 +193,13 @@ const EditPage = () => {
         return node;
       });
     };
-
     const updatedNodes = recursiveUpdate(nodes, parentId);
     setNodes(updatedNodes);
     saveProjectStructure(updatedNodes);
-
     if (selectedNode) {
       handleNodeClick(selectedNode);
     }
   };
-
   const deleteChapter = (nodeId: string) => {
     const recursiveDelete = (nodes: Node[], nodeId: string): Node[] => {
       return nodes.filter((node) => {
@@ -238,11 +208,9 @@ const EditPage = () => {
         return true;
       });
     };
-
     const updatedNodes = recursiveDelete(nodes, nodeId);
     setNodes(updatedNodes);
     saveProjectStructure(updatedNodes);
-
     if (selectedNode) {
       const exists = JSON.stringify(updatedNodes).includes(selectedNode.id);
       if (exists) {
@@ -252,7 +220,6 @@ const EditPage = () => {
       }
     }
   };
-
   const handleRenameOrIconUpdate = (updatedNode: Node) => {
     const updateNodes = (nodes: Node[], updatedNode: Node): Node[] => {
       return nodes.map((node) => {
@@ -265,11 +232,9 @@ const EditPage = () => {
         return node;
       });
     };
-
     const updatedNodes = updateNodes(nodes, updatedNode);
     setNodes(updatedNodes);
     saveProjectStructure(updatedNodes);
-
     if (selectedNode?.id === updatedNode.id) {
       setSelectedNode((prev) =>
         prev
@@ -277,7 +242,6 @@ const EditPage = () => {
           : prev
       );
     }
-
     // 🟦 Jetzt wie in FileContentCard: NodeContent aktualisieren
     if (projectId) {
       NodeContentService.updateNodeContent(updatedNode.id, {
@@ -292,7 +256,6 @@ const EditPage = () => {
       });
     }
   };
-
   const handleMoveNode = (
     draggedNodeId: string,
     targetNodeId: string,
@@ -300,7 +263,6 @@ const EditPage = () => {
   ) => {
     const newNodes = [...nodes];
     let draggedNode: Node | null = null;
-
     const removeNode = (nodes: Node[], id: string): void => {
       for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].id === id) {
@@ -313,7 +275,6 @@ const EditPage = () => {
         }
       }
     };
-
     const addNode = (nodes: Node[], targetId: string): void => {
       for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].id === targetId) {
@@ -330,23 +291,18 @@ const EditPage = () => {
         }
       }
     };
-
     removeNode(newNodes, draggedNodeId);
     if (!draggedNode) return;
     addNode(newNodes, targetNodeId);
-
     setNodes(newNodes);
-
     // ✅ Jetzt speichern, aber verzögert (siehe unten)
     debounceSave(newNodes);
-
     // optional: neu selektieren
     if (selectedNode) {
       const exists = JSON.stringify(newNodes).includes(selectedNode.id);
       setSelectedNode(exists ? selectedNode : null);
     }
   };
-
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex flex-col h-screen">
@@ -358,35 +314,39 @@ const EditPage = () => {
           >
             <Bars3Icon className="h-5 w-5 text-white" />
           </button>
-
           <div
             className={`${
               menuOpen ? "w-1/4" : "w-12"
-            } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
+            } transition-all duration-300 bg-gray-200 text-black p-4 flex flex-col`}
+            style={{ maxHeight: "calc(100vh - 45px)" }}
           >
-            {menuOpen && (
-              <ul className="mt-8">
-                {nodes.map((node) => (
-                  <Folder
-                    key={node.id}
-                    node={node}
-                    onMove={handleMoveNode}
-                    onNodeClick={handleNodeClick}
-                    onAdd={addChapter}
-                    onRemove={deleteChapter}
-                    onRenameOrIconUpdate={handleRenameOrIconUpdate}
-                  />
-                ))}
-              </ul>
-            )}
-
-            <BottomNavigationBar
-              activeView={activeView}
-              onChangeView={handleViewChange}
-              menuOpen={menuOpen}
-            />
+            <div className="flex-1 overflow-auto">
+              <div className="min-w-0 w-full">
+                {menuOpen && (
+                  <ul className="mt-8">
+                    {nodes.map((node) => (
+                      <Folder
+                        key={node.id}
+                        node={node}
+                        onMove={handleMoveNode}
+                        onNodeClick={handleNodeClick}
+                        onAdd={addChapter}
+                        onRemove={deleteChapter}
+                        onRenameOrIconUpdate={handleRenameOrIconUpdate}
+                      />
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+            <div className="flex-shrink-0">
+              <BottomNavigationBar
+                activeView={activeView}
+                onChangeView={handleViewChange}
+                menuOpen={menuOpen}
+              />
+            </div>
           </div>
-
           <div
             className={`${
               menuOpen ? "w-3/4" : "w-full"
@@ -411,7 +371,6 @@ const EditPage = () => {
             )}
           </div>
         </div>
-
         <UnsavedChangesDialog
           isOpen={showDialog}
           onCancel={handleDialogCancel}
@@ -421,5 +380,4 @@ const EditPage = () => {
     </DndProvider>
   );
 };
-
 export default EditPage;
