@@ -52,7 +52,15 @@ const FullDocumentCard = () => {
   useEffect(() => {
     const fetchNodeContents = async () => {
       try {
-        const data = await NodeContentService.getNodeContents();
+        if (!projectId) {
+          setError("Projekt-ID not found.");
+          return;
+        }
+
+        const data = await NodeContentService.getNodeContents(
+          undefined,
+          projectId
+        );
         const mappedData = data.map((node) => ({
           nodeId: node.nodeId || "",
           name: node.name,
@@ -67,7 +75,7 @@ const FullDocumentCard = () => {
     };
 
     fetchNodeContents();
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
     if (
