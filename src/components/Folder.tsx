@@ -68,11 +68,6 @@ function Folder({
 
   const [, dropRef] = useDrop({
     accept: "node",
-    drop: (draggedItem: { id: string }) => {
-      if (draggedItem.id !== node.id && node.name !== "Chapter structure") {
-        onMove(draggedItem.id, node.id); // 🔁 Nur einmal bei Drop
-      }
-    },
     hover: (draggedItem: { id: string }, monitor) => {
       if (draggedItem.id !== node.id && node.name !== "Chapter structure") {
         if (!ref.current) return;
@@ -256,7 +251,7 @@ function Folder({
           {" "}
           <div className="bg-white rounded-lg shadow-xl p-6 space-y-4">
             <p className="text-center text-lg font-bold">
-              Do you really want to delete this chapter
+              Do you really want to delete this chapter?
             </p>
             <div className="flex justify-center gap-4">
               <button
