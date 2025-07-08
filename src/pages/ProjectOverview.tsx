@@ -22,7 +22,7 @@ const ProjectOverview = () => {
       if (user?.username) {
         try {
           const userProjects = await ProjectService.getProjectsByUsername(
-            user.username,
+            user.username
           );
           setProjects(userProjects);
         } catch (error) {
@@ -65,6 +65,38 @@ const ProjectOverview = () => {
     }
   };
 
+  // Methode zum Aktualisieren des Projekts
+  const updateProjectName = async (project: Project) => {
+    try {
+      // Kopiere die projectStructure, um den Namen des ersten Nodes zu aktualisieren
+      const updatedProjectStructure = [...project.projectStructure];
+      const firstNode = updatedProjectStructure.find(
+        (structure) => structure.id === "1"
+      );
+      if (firstNode) {
+        firstNode.name = editedName; // Setze den neuen Projektnamen
+      }
+
+      // Projekt aktualisieren
+      const updated = await ProjectService.updateProject(project._id!, {
+        name: editedName,
+        username: user?.username || "",
+        projectStructure: updatedProjectStructure, // Sende die aktualisierte Struktur
+      });
+
+      // Projekte im Zustand aktualisieren
+      setProjects((prev) =>
+        prev.map((p) => (p._id === project._id ? updated : p))
+      );
+    } catch (e) {
+      alert("Failed to update project");
+      console.error(e);
+    } finally {
+      setEditingProjectId(null);
+      setEditedName("");
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-200 text-gray-800">
       <Header />
@@ -92,7 +124,7 @@ const ProjectOverview = () => {
                       <div className="flex items-center gap-3 text-gray-800 font-medium text-lg max-w-[60%] overflow-hidden">
                         <FolderOpen className="w-5 h-5 shrink-0" />
 
-                        {/* 🔁 Edit mode or normal name */}
+                        {/* Edit mode or normal name */}
                         {isEditing ? (
                           <input
                             className="border rounded px-2 py-1 text-sm w-full max-w-[200px]"
@@ -112,36 +144,11 @@ const ProjectOverview = () => {
                           </span>
                         )}
 
-                        {/* 🛠 Action Buttons */}
+                        {/* Action Buttons */}
                         {isEditing ? (
                           <>
                             <button
-                              onClick={async () => {
-                                try {
-                                  const updated =
-                                    await ProjectService.updateProject(
-                                      project._id!,
-                                      {
-                                        name: editedName,
-                                        username: user?.username || "",
-                                        projectStructure:
-                                          project.projectStructure || [],
-                                      },
-                                    );
-
-                                  setProjects((prev) =>
-                                    prev.map((p) =>
-                                      p._id === project._id ? updated : p,
-                                    ),
-                                  );
-                                } catch (e) {
-                                  alert("Failed to update project");
-                                  console.error(e);
-                                } finally {
-                                  setEditingProjectId(null);
-                                  setEditedName("");
-                                }
-                              }}
+                              onClick={() => updateProjectName(project)} // Hier wird die Methode aufgerufen
                               disabled={
                                 editedName.trim() === "" ||
                                 editedName.trim() === project.name.trim()
