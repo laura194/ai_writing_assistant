@@ -10,7 +10,7 @@ interface FolderProps {
   onMove: (
     draggedNodeId: string,
     targetNodeId: string,
-    asSibling?: boolean,
+    asSibling?: boolean
   ) => void;
   onNodeClick: (node: Node) => void;
   onAdd: (parentId: string | null, newNode: Node) => void;
@@ -60,7 +60,7 @@ function Folder({
   const [{ isDragging }, dragRef] = useDrag({
     type: "node",
     item: { id: node.id },
-    canDrag: node.name !== "Chapter structure", // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
+    canDrag: node.id !== "1", // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -69,7 +69,7 @@ function Folder({
   const [, dropRef] = useDrop({
     accept: "node",
     hover: (draggedItem: { id: string }, monitor) => {
-      if (draggedItem.id !== node.id && node.name !== "Chapter structure") {
+      if (draggedItem.id !== node.id && node.id !== "1") {
         if (!ref.current) return;
 
         // Bestimme die Position des Mauszeigers relativ zum Drop-Target
@@ -129,18 +129,14 @@ function Folder({
       <div className="flex items-center gap-2">
         {/* Icon-Anzeige */}
         <div
-          className={`${
-            node.name !== "Chapter structure"
-              ? "cursor-pointer"
-              : "cursor-default"
-          }`}
+          className={`${node.id !== "1" ? "cursor-pointer" : "cursor-default"}`}
           onClick={() => {
-            if (node.name !== "Chapter structure") {
-              setShowIconPicker(!showIconPicker); // IconPicker nur umschalten, wenn nicht "Chapter structure"
+            if (node.id !== "1") {
+              setShowIconPicker(!showIconPicker); // IconPicker nur umschalten, wenn nicht "1"
             }
           }}
           title={
-            node.name !== "Chapter structure"
+            node.id !== "1"
               ? "Klicke, um ein Icon auszuwählen"
               : "Das Icon dieses Kapitels kann nicht geändert werden"
           }
@@ -148,8 +144,8 @@ function Folder({
           {getIcon(node, "size-6", node.icon)}
         </div>
 
-        {/* IconPicker nur anzeigen, wenn geöffnet und nicht "Chapter structure" */}
-        {showIconPicker && node.name !== "Chapter structure" && (
+        {/* IconPicker nur anzeigen, wenn geöffnet und nicht "1" */}
+        {showIconPicker && node.id !== "1" && (
           <IconPicker
             currentIcon={node.icon} // Das aktuell ausgewählte Icon des Nodes
             onSelect={handleIconChange}
@@ -157,7 +153,7 @@ function Folder({
         )}
 
         {/* Knotenname bearbeiten */}
-        {isEditing && node.name !== "Chapter structure" ? ( // Bearbeiten nur ermöglichen, wenn es sich nicht um "Chapter structure" handelt
+        {isEditing && node.id !== "1" ? ( // Bearbeiten nur ermöglichen, wenn es sich nicht um "1" handelt
           <input
             ref={inputRef}
             className="border px-2 py-1"
@@ -174,13 +170,11 @@ function Folder({
         ) : (
           <span
             className={`${
-              node.name !== "Chapter structure"
-                ? "cursor-pointer"
-                : "cursor-default" // Kein Cursor für nicht bearbeitbare Knoten
+              node.id !== "1" ? "cursor-pointer" : "cursor-default" // Kein Cursor für nicht bearbeitbare Knoten
             }`}
             onDoubleClick={() => {
-              if (node.name !== "Chapter structure") {
-                // Bearbeiten auf Doppelklick verhindern, falls "Chapter structure"
+              if (node.id !== "1") {
+                // Bearbeiten auf Doppelklick verhindern, falls "1"
                 setIsEditing(true);
                 setTimeout(() => selectInputText(), 0);
               }
@@ -206,7 +200,7 @@ function Folder({
         </button>
 
         {/* Kapitel löschen */}
-        {node.name !== "Chapter structure" && (
+        {node.id !== "1" && (
           <button
             className="text-red-500 hover:text-red-700"
             onClick={() => handleDeleteClick(node.id)} // Popup öffnen
@@ -219,16 +213,12 @@ function Folder({
       {hasChildren && (
         <ul
           className={`pl-4 ${
-            node.name === "Chapter structure"
+            node.id !== "1"
               ? "max-h-[500px] overflow-y-auto pr-2 max-w-full overflow-x-auto"
               : ""
           }`}
         >
-          <div
-            className={`${
-              node.name === "Chapter structure" ? "min-w-fit" : ""
-            }`}
-          >
+          <div className={`${node.id !== "1" ? "min-w-fit" : ""}`}>
             {node.nodes!.map((childNode) => (
               <Folder
                 key={childNode.id}
