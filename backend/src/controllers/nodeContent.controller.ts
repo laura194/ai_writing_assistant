@@ -6,29 +6,36 @@ export const createNodeContent = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { nodeId, name, category, content } = req.body;
+  const { nodeId, name, category, content, projectId } = req.body;
 
   if (!content) {
     res.status(400).json({ error: "Content cannot be empty" });
     return;
   }
 
-  if (!nodeId || !name || !category) {
+  if (!nodeId || !name || !category || !projectId) {
     res.status(400).json({ error: "All fields are required" });
     return;
   }
 
   try {
-    const existing = await NodeContent.findOne({ nodeId });
+    const existing = await NodeContent.findOne({ nodeId, projectId });
     if (existing) {
       res.status(409).json({
-        error: "NodeContent with this nodeId already exists",
+        error: "NodeContent with this nodeId and projectId already exists",
         existing,
       });
       return;
     }
 
-    const newNodeContent = new NodeContent({ nodeId, name, category, content });
+    const newNodeContent = new NodeContent({
+      nodeId,
+      name,
+      category,
+      content,
+      projectId,
+    });
+
     const savedNodeContent = await newNodeContent.save();
     res.status(201).json(savedNodeContent);
   } catch (error) {
@@ -37,21 +44,27 @@ export const createNodeContent = async (
   }
 };
 
-// Get all NodeContent entries, or filter by ?nodeId=...
+// Get all NodeContent entries, or filter by ?nodeId=... and ?projectId=...
 export const getNodeContents = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
   try {
-    const { nodeId } = req.query;
+    const { nodeId, projectId } = req.query;
+
+    const filter: Partial<{ nodeId: string; projectId: string }> = {};
 
     if (nodeId) {
-      const filtered = await NodeContent.find({ nodeId: nodeId.toString() });
-      res.status(200).json(filtered);
-    } else {
-      const contents = await NodeContent.find();
-      res.status(200).json(contents);
+      filter.nodeId = nodeId.toString();
     }
+
+    if (projectId) {
+      filter.projectId = projectId.toString();
+    }
+
+    const contents = await NodeContent.find(filter);
+
+    res.status(200).json(contents);
   } catch (error) {
     console.error("Error fetching node contents:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -64,14 +77,23 @@ export const getNodeContentById = async (
   res: Response,
 ): Promise<void> => {
   const { id } = req.params;
+  const { projectId } = req.query;
+
+  if (!projectId) {
+    res.status(400).json({ error: "projectId is required" });
+    return;
+  }
 
   try {
-    const nodeContent = await NodeContent.findOne({ nodeId: id });
+    const nodeContent = await NodeContent.findOne({
+      nodeId: id,
+      projectId: projectId.toString(),
+    });
 
     if (!nodeContent) {
-      res
-        .status(404)
-        .json({ error: "NodeContent with the given nodeId not found" });
+      res.status(404).json({
+        error: "NodeContent with the given nodeId and projectId not found",
+      });
       return;
     }
 
@@ -88,27 +110,31 @@ export const updateNodeContent = async (
   res: Response,
 ): Promise<void> => {
   const { nodeId } = req.params;
-  const { name, category, content } = req.body;
+  const { name, category, content, projectId } = req.body;
 
   if (!content) {
     res.status(400).json({ error: "Content cannot be empty" });
     return;
   }
 
-  if (!nodeId || !name || !category) {
+  if (!nodeId || !name || !category || !projectId) {
     res.status(400).json({ error: "All fields are required" });
     return;
   }
 
   try {
     const updatedNodeContent = await NodeContent.findOneAndUpdate(
-      { nodeId },
+      { nodeId, projectId },
       { name, category, content },
       { new: true },
     );
 
     if (!updatedNodeContent) {
-      console.log("No content found with the given nodeId:", nodeId);
+      console.log(
+        "No content found with the given nodeId and projectId:",
+        nodeId,
+        projectId,
+      );
       res.status(404).json({ error: "NodeContent not found" });
       return;
     }
