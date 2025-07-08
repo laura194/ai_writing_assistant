@@ -23,7 +23,7 @@ function FileContentCard({
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [originalContent, setOriginalContent] = useState<string>(
-    node.content || "..."
+    node.content || "...",
   );
   const [selectedText, setSelectedText] = useState("");
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
@@ -75,7 +75,7 @@ function FileContentCard({
     setFileContent((prev) =>
       prev.includes(selectedText)
         ? prev.replace(selectedText, newContent)
-        : prev
+        : prev,
     );
   };
 

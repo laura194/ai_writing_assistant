@@ -18,7 +18,10 @@ export class NodeContentService {
       });
       return response.data;
     } catch (error) {
-      console.error("❌ [createNodeContent] Error creating node content:", error);
+      console.error(
+        "❌ [createNodeContent] Error creating node content:",
+        error,
+      );
       throw error;
     }
   }
@@ -31,21 +34,24 @@ export class NodeContentService {
    */
   static async getNodeContents(
     nodeId?: string,
-    projectId?: string
+    projectId?: string,
   ): Promise<Node[]> {
     try {
       const params: Record<string, string> = {};
       if (nodeId) params.nodeId = nodeId;
       if (projectId) params.projectId = projectId;
-  
+
       const response = await axios.get<Node[]>(API_BASE_URL, { params });
       return response.data;
     } catch (error) {
-      console.error("❌ [getNodeContents] Error fetching node contents:", error);
+      console.error(
+        "❌ [getNodeContents] Error fetching node contents:",
+        error,
+      );
       throw error;
     }
   }
-  
+
   /**
    * Retrieves a specific node content by nodeId and projectId.
    * @param nodeId The nodeId.
@@ -54,17 +60,17 @@ export class NodeContentService {
    */
   static async getNodeContentById(
     nodeId: string,
-    projectId: string
+    projectId: string,
   ): Promise<Node> {
     try {
       const response = await axios.get<Node>(
-        `${API_BASE_URL}/${nodeId}?projectId=${projectId}`
+        `${API_BASE_URL}/${nodeId}?projectId=${projectId}`,
       );
       return response.data;
     } catch (error) {
       console.error(
         `❌ [getNodeContentById] Error fetching node content for nodeId ${nodeId} and projectId ${projectId}:`,
-        error
+        error,
       );
       throw error;
     }
@@ -94,7 +100,10 @@ export class NodeContentService {
 
       return created;
     } catch (error) {
-      console.error("❌ [getOrCreateNodeContent] Error during get/create:", error);
+      console.error(
+        "❌ [getOrCreateNodeContent] Error during get/create:",
+        error,
+      );
       throw error;
     }
   }
@@ -107,7 +116,7 @@ export class NodeContentService {
    */
   static async updateNodeContent(
     nodeId: string,
-    data: Partial<Node> & { projectId: string }
+    data: Partial<Node> & { projectId: string },
   ): Promise<Node> {
     try {
       const response = await axios.put<Node>(`${API_BASE_URL}/${nodeId}`, {
@@ -119,7 +128,7 @@ export class NodeContentService {
     } catch (error) {
       console.error(
         `❌ [updateNodeContent] Error updating node content with nodeId ${nodeId} and projectId ${data.projectId}:`,
-        error
+        error,
       );
       throw error;
     }

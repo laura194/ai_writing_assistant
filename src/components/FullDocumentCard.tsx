@@ -59,7 +59,7 @@ const FullDocumentCard = () => {
 
         const data = await NodeContentService.getNodeContents(
           undefined,
-          projectId
+          projectId,
         );
         const mappedData = data.map((node) => ({
           nodeId: node.nodeId || "",

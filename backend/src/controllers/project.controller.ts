@@ -134,7 +134,7 @@ export const getProjectsByUsername = async (
 // Delete a project by its ID
 export const deleteProject = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { id } = req.params;
 

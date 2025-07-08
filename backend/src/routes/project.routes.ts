@@ -5,7 +5,7 @@ import {
   getProjectById,
   updateProject,
   getProjectsByUsername,
-  deleteProject, 
+  deleteProject,
 } from "../controllers/project.controller";
 
 const router = express.Router();
@@ -14,8 +14,8 @@ const router = express.Router();
 router.post("/", createProject);
 router.get("/", getAllProjects);
 router.get("/by-username", getProjectsByUsername);
-router.get("/:id", getProjectById); 
-router.put("/:id", updateProject); 
+router.get("/:id", getProjectById);
+router.put("/:id", updateProject);
 router.delete("/:id", deleteProject);
 
 export default router;
