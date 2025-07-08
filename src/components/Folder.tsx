@@ -7,7 +7,11 @@ import { getIcon } from "../utils/icons";
 
 interface FolderProps {
   node: Node;
-  onMove: (draggedNodeId: string, targetNodeId: string) => void;
+  onMove: (
+    draggedNodeId: string,
+    targetNodeId: string,
+    asSibling?: boolean,
+  ) => void;
   onNodeClick: (node: Node) => void;
   onAdd: (parentId: string | null, newNode: Node) => void;
   onRemove: (nodeId: string) => void;
@@ -21,7 +25,8 @@ function Folder({
   onAdd,
   onRemove,
   isVisible = true,
-}: FolderProps) {
+  onRenameOrIconUpdate, // Neuer Callback für Änderungen
+}: FolderProps & { onRenameOrIconUpdate: (updatedNode: Node) => void }) {
   const ref = useRef<HTMLLIElement>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -34,8 +39,15 @@ function Folder({
   const [nodeToDelete, setNodeToDelete] = useState<string | null>(null); // Speichert den zu löschenden Node
 
   const handleSaveEdit = () => {
-    onNodeClick({ ...node, name: editableName });
-    setIsEditing(false);
+    const updatedNode = { ...node, name: editableName }; // Aktuellen Node mit geändertem Namen erstellen
+    onRenameOrIconUpdate(updatedNode); // Callback mit aktualisiertem Node aufrufen
+    setIsEditing(false); // Bearbeitungsmodus beenden
+  };
+
+  const handleIconChange = (newIcon: string) => {
+    const updatedNode = { ...node, icon: newIcon };
+    onRenameOrIconUpdate(updatedNode); // Aktualisierte Node zurückgeben
+    setShowIconPicker(false);
   };
 
   const selectInputText = () => {
@@ -48,7 +60,7 @@ function Folder({
   const [{ isDragging }, dragRef] = useDrag({
     type: "node",
     item: { id: node.id },
-    canDrag: node.name !== "Kapitel hinzufügen", // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
+    canDrag: node.id !== "1", // Deaktiviert Dragging, wenn der Name "Kapitel hinzufügen" ist
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -56,9 +68,26 @@ function Folder({
 
   const [, dropRef] = useDrop({
     accept: "node",
-    hover: (draggedItem: { id: string }) => {
-      if (draggedItem.id !== node.id && node.name !== "Kapitel hinzufügen") {
-        onMove(draggedItem.id, node.id); // Bewege den Knoten
+    hover: (draggedItem: { id: string }, monitor) => {
+      if (draggedItem.id !== node.id && node.id !== "1") {
+        if (!ref.current) return;
+
+        // Bestimme die Position des Mauszeigers relativ zum Drop-Target
+        const hoverBoundingRect = ref.current.getBoundingClientRect();
+        const hoverMiddleY =
+          (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+        const clientOffset = monitor.getClientOffset();
+
+        if (!clientOffset) return;
+
+        const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+        // Wenn der Mauszeiger in der oberen Hälfte ist, als Sibling behandeln
+        // Wenn in der unteren Hälfte, als Kind behandeln
+        const isSibling = hoverClientY < hoverMiddleY;
+
+        // Rufe onMove mit zusätzlichem Parameter auf
+        onMove(draggedItem.id, node.id, isSibling);
       }
     },
   });
@@ -100,27 +129,31 @@ function Folder({
       <div className="flex items-center gap-2">
         {/* Icon-Anzeige */}
         <div
-          className="cursor-pointer"
-          onClick={() => setShowIconPicker(!showIconPicker)} // Picker ein-/ausblenden
-          title="Klicke, um ein Icon auszuwählen"
+          className={`${node.id !== "1" ? "cursor-pointer" : "cursor-default"}`}
+          onClick={() => {
+            if (node.id !== "1") {
+              setShowIconPicker(!showIconPicker); // IconPicker nur umschalten, wenn nicht "1"
+            }
+          }}
+          title={
+            node.id !== "1"
+              ? "Klicke, um ein Icon auszuwählen"
+              : "Das Icon dieses Kapitels kann nicht geändert werden"
+          }
         >
-          {getIcon(node, "size-6")}
+          {getIcon(node, "size-6", node.icon)}
         </div>
 
-        {/* IconPicker nur anzeigen, wenn geöffnet */}
-        {showIconPicker && (
+        {/* IconPicker nur anzeigen, wenn geöffnet und nicht "1" */}
+        {showIconPicker && node.id !== "1" && (
           <IconPicker
-            currentIcon={node.icon} // Das aktuell selektierte Icon des Nodes
-            onSelect={(newIcon) => {
-              const updatedNode = { ...node, icon: newIcon }; // Icon im Node updaten
-              onNodeClick(updatedNode); // Callback zur Weitergabe der Änderung
-              setShowIconPicker(false); // Picker schließen
-            }}
+            currentIcon={node.icon} // Das aktuell ausgewählte Icon des Nodes
+            onSelect={handleIconChange}
           />
         )}
 
         {/* Knotenname bearbeiten */}
-        {isEditing ? (
+        {isEditing && node.id !== "1" ? ( // Bearbeiten nur ermöglichen, wenn es sich nicht um "1" handelt
           <input
             ref={inputRef}
             className="border px-2 py-1"
@@ -136,10 +169,15 @@ function Folder({
           />
         ) : (
           <span
-            className="cursor-pointer"
+            className={`${
+              node.id !== "1" ? "cursor-pointer" : "cursor-default" // Kein Cursor für nicht bearbeitbare Knoten
+            }`}
             onDoubleClick={() => {
-              setIsEditing(true);
-              setTimeout(() => selectInputText(), 0);
+              if (node.id !== "1") {
+                // Bearbeiten auf Doppelklick verhindern, falls "1"
+                setIsEditing(true);
+                setTimeout(() => selectInputText(), 0);
+              }
             }}
             onClick={() => onNodeClick(node)}
           >
@@ -162,7 +200,7 @@ function Folder({
         </button>
 
         {/* Kapitel löschen */}
-        {node.name !== "Kapitel hinzufügen" && (
+        {node.id !== "1" && (
           <button
             className="text-red-500 hover:text-red-700"
             onClick={() => handleDeleteClick(node.id)} // Popup öffnen
@@ -173,18 +211,27 @@ function Folder({
       </div>
 
       {hasChildren && (
-        <ul className="pl-4">
-          {node.nodes!.map((childNode) => (
-            <Folder
-              key={childNode.id}
-              node={childNode}
-              onMove={onMove}
-              onNodeClick={onNodeClick}
-              onAdd={onAdd}
-              onRemove={onRemove}
-              isVisible={isVisible}
-            />
-          ))}
+        <ul
+          className={`pl-4 ${
+            node.id !== "1"
+              ? "max-h-[500px] overflow-y-auto pr-2 max-w-full overflow-x-auto"
+              : ""
+          }`}
+        >
+          <div className={`${node.id !== "1" ? "min-w-fit" : ""}`}>
+            {node.nodes!.map((childNode) => (
+              <Folder
+                key={childNode.id}
+                node={childNode}
+                onMove={onMove}
+                onNodeClick={onNodeClick}
+                onAdd={onAdd}
+                onRemove={onRemove}
+                isVisible={isVisible}
+                onRenameOrIconUpdate={onRenameOrIconUpdate} // Hier die korrekte Weitergabe
+              />
+            ))}
+          </div>
         </ul>
       )}
 
@@ -194,7 +241,7 @@ function Folder({
           {" "}
           <div className="bg-white rounded-lg shadow-xl p-6 space-y-4">
             <p className="text-center text-lg font-bold">
-              Willst du dieses Kapitel wirklich löschen?
+              Do you really want to delete this chapter?
             </p>
             <div className="flex justify-center gap-4">
               <button

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "../App.css";
@@ -36,6 +36,17 @@ const EditPage = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [pendingNode, setPendingNode] = useState<Node | null>(null);
   const [pendingView, setPendingView] = useState<string | null>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debounceSave = (updatedNodes: Node[]) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      saveProjectStructure(updatedNodes);
+    }, 500);
+  };
 
   useEffect(() => {
     localStorage.setItem("activeView", activeView);
@@ -59,9 +70,11 @@ const EditPage = () => {
       console.error("Project ID is not available!");
     }
 
-    const savedNodeId = localStorage.getItem("selectedNodeId");
-    if (savedNodeId) {
-      NodeContentService.getNodeContentById(savedNodeId)
+    const savedNodeId = projectId
+      ? localStorage.getItem(`selectedNodeId_${projectId}`)
+      : null;
+    if (savedNodeId && projectId) {
+      NodeContentService.getNodeContentById(savedNodeId, projectId)
         .then((nodeContent) => {
           if (nodeContent) {
             setSelectedNode({
@@ -116,13 +129,19 @@ const EditPage = () => {
   };
 
   const handleNodeClick = async (node: Node) => {
+    if (node.name === "Chapter structure") {
+      return; // ⛔ prevent click
+    }
     const switchNode = async () => {
       try {
-        const nodeContent =
-          await NodeContentService.getOrCreateNodeContent(node);
+        if (!projectId) return;
+        const nodeContent = await NodeContentService.getOrCreateNodeContent({
+          ...node,
+          projectId,
+        });
         const fullNode = { ...node, content: nodeContent.content };
         setSelectedNode(fullNode);
-        localStorage.setItem("selectedNodeId", node.id);
+        localStorage.setItem(`selectedNodeId_${projectId}`, node.id);
         setActiveView("file");
       } catch (error) {
         console.error("Error loading node content:", error);
@@ -138,6 +157,14 @@ const EditPage = () => {
     }
   };
 
+  const reloadProjectStructure = () => {
+    setNodes([...nodes]); // shallow copy → triggers re-render
+  };
+
+  const handleNodeSave = () => {
+    reloadProjectStructure();
+  };
+
   const handleViewChange = (newView: string) => {
     if (isDirty) {
       setPendingView(newView);
@@ -148,10 +175,12 @@ const EditPage = () => {
   };
 
   const handleDialogConfirm = async () => {
-    if (pendingNode) {
+    if (pendingNode && projectId) {
       try {
-        const nodeContent =
-          await NodeContentService.getOrCreateNodeContent(pendingNode);
+        const nodeContent = await NodeContentService.getOrCreateNodeContent({
+          ...pendingNode,
+          projectId,
+        });
         const fullNode = { ...pendingNode, content: nodeContent.content };
         setSelectedNode(fullNode);
         localStorage.setItem("selectedNodeId", pendingNode.id);
@@ -195,6 +224,10 @@ const EditPage = () => {
     const updatedNodes = recursiveUpdate(nodes, parentId);
     setNodes(updatedNodes);
     saveProjectStructure(updatedNodes);
+
+    if (selectedNode) {
+      handleNodeClick(selectedNode);
+    }
   };
 
   const deleteChapter = (nodeId: string) => {
@@ -209,50 +242,109 @@ const EditPage = () => {
     const updatedNodes = recursiveDelete(nodes, nodeId);
     setNodes(updatedNodes);
     saveProjectStructure(updatedNodes);
+
+    if (selectedNode) {
+      const exists = JSON.stringify(updatedNodes).includes(selectedNode.id);
+      if (exists) {
+        handleNodeClick(selectedNode);
+      } else {
+        setSelectedNode(null);
+      }
+    }
+  };
+
+  const handleRenameOrIconUpdate = (updatedNode: Node) => {
+    const updateNodes = (nodes: Node[], updatedNode: Node): Node[] => {
+      return nodes.map((node) => {
+        if (node.id === updatedNode.id) {
+          return updatedNode;
+        }
+        if (node.nodes) {
+          return { ...node, nodes: updateNodes(node.nodes, updatedNode) };
+        }
+        return node;
+      });
+    };
+
+    const updatedNodes = updateNodes(nodes, updatedNode);
+    setNodes(updatedNodes);
+    saveProjectStructure(updatedNodes);
+
+    if (selectedNode?.id === updatedNode.id) {
+      setSelectedNode((prev) =>
+        prev
+          ? { ...prev, name: updatedNode.name, icon: updatedNode.icon }
+          : prev,
+      );
+    }
+
+    // 🟦 Jetzt wie in FileContentCard: NodeContent aktualisieren
+    if (projectId) {
+      NodeContentService.updateNodeContent(updatedNode.id, {
+        projectId,
+        nodeId: updatedNode.id,
+        name: updatedNode.name,
+        icon: updatedNode.icon,
+        content: selectedNode?.content || "", // Content bleibt gleich
+        category: updatedNode.category,
+      }).catch((error) => {
+        console.error("❌ Failed to update node content metadata:", error);
+      });
+    }
   };
 
   const handleMoveNode = (
     draggedNodeId: string,
-    targetNodeId: string | null = null,
+    targetNodeId: string,
+    //asSibling: boolean = false
   ) => {
+    const newNodes = [...nodes];
     let draggedNode: Node | null = null;
 
-    const recursiveRemove = (nodes: Node[]): Node[] => {
-      return nodes
-        .filter((node) => {
-          if (node.id === draggedNodeId) {
-            draggedNode = node;
-            return false;
-          }
-          return true;
-        })
-        .map((node) => ({ ...node, nodes: recursiveRemove(node.nodes || []) }));
-    };
-
-    const recursiveAdd = (nodes: Node[]): Node[] => {
-      return nodes.map((node) => {
-        if (node.id === targetNodeId) {
-          return {
-            ...node,
-            nodes: [...(node.nodes || []), draggedNode!],
-          };
+    const removeNode = (nodes: Node[], id: string): void => {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].id === id) {
+          draggedNode = nodes[i];
+          nodes.splice(i, 1);
+          return;
         }
-        return { ...node, nodes: recursiveAdd(node.nodes || []) };
-      });
+        if (nodes[i].nodes) {
+          removeNode(nodes[i].nodes!, id);
+        }
+      }
     };
 
-    setNodes((prevNodes) => {
-      const withoutDraggedNode = recursiveRemove(prevNodes); // Entfernen
-
-      // Fallback: Wenn kein Ziel gefunden, füge das Kapitel in die Wurzelebene ein
-      if (!draggedNode || !targetNodeId) {
-        return [...withoutDraggedNode, draggedNode!];
+    const addNode = (nodes: Node[], targetId: string): void => {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].id === targetId) {
+          if (!Array.isArray(nodes[i].nodes)) {
+            nodes[i].nodes = [];
+          }
+          if (draggedNode) {
+            nodes[i].nodes!.push(draggedNode);
+          }
+          return;
+        }
+        if (nodes[i].nodes) {
+          addNode(nodes[i].nodes!, targetId);
+        }
       }
+    };
 
-      // Hinzufügen: Konstante updatedStructure kann für Speicherung in DB genutzt werden
-      const updatedStructure = recursiveAdd(withoutDraggedNode);
-      return updatedStructure;
-    });
+    removeNode(newNodes, draggedNodeId);
+    if (!draggedNode) return;
+    addNode(newNodes, targetNodeId);
+
+    setNodes(newNodes);
+
+    // ✅ Jetzt speichern, aber verzögert (siehe unten)
+    debounceSave(newNodes);
+
+    // optional: neu selektieren
+    if (selectedNode) {
+      const exists = JSON.stringify(newNodes).includes(selectedNode.id);
+      setSelectedNode(exists ? selectedNode : null);
+    }
   };
 
   return (
@@ -274,8 +366,6 @@ const EditPage = () => {
           >
             {menuOpen && (
               <ul className="mt-8">
-                {" "}
-                {/* margin-top nur auf die Liste anwenden */}
                 {nodes.map((node) => (
                   <Folder
                     key={node.id}
@@ -284,6 +374,7 @@ const EditPage = () => {
                     onNodeClick={handleNodeClick}
                     onAdd={addChapter}
                     onRemove={deleteChapter}
+                    onRenameOrIconUpdate={handleRenameOrIconUpdate}
                   />
                 ))}
               </ul>
@@ -306,6 +397,7 @@ const EditPage = () => {
                 <FileContentCard
                   node={selectedNode}
                   onDirtyChange={(dirty: boolean) => setIsDirty(dirty)}
+                  onSave={handleNodeSave}
                 />
               ) : activeView === "ai" ? (
                 <AIProtocolCard />
