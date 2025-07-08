@@ -16,6 +16,7 @@ import {
   github,
   teamImg,
   questionmark,
+  studiproject,
 } from "../assets/images/landing-page";
 
 export const navLinks = [
@@ -131,7 +132,7 @@ const projects = [
         color: "pink-text-gradient",
       },
     ],
-    image: questionmark,
+    image: studiproject,
     source_code_link: "https://github.com/laura194/ai_writing_assistant/",
   },
   {
