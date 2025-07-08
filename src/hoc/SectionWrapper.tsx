@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { FC } from "react";
 
-import { styles } from "../constants/styles/LandingPageStyles";
+import { LandingPageStyles } from "../constants/styles/LandingPageStyles";
 import { staggerContainer } from "../utils/motion";
 
 const StarWrapper = (Component: FC, idName: string) =>
@@ -12,7 +12,7 @@ const StarWrapper = (Component: FC, idName: string) =>
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.25 }}
-        className={`${styles.padding} max-w-7xl mx-auto relative z-0`}
+        className={`${LandingPageStyles.padding} max-w-7xl mx-auto relative z-0`}
       >
         <span className="hash-span" id={idName}>
           &nbsp;
