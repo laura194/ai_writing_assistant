@@ -3,90 +3,67 @@ import {
   backend,
   creator,
   web,
-  javascript,
   typescript,
-  html,
-  css,
   reactjs,
-  redux,
   tailwind,
   nodejs,
   mongodb,
-  git,
-  figma,
   docker,
-  meta,
-  starbucks,
-  tesla,
-  shopify,
-  carrent,
-  jobit,
-  tripguide,
   threejs,
+  nextjs,
+  gemini,
+  clerk,
+  github,
+  teamImg,
+  questionmark,
 } from "../assets/images/landing-page";
 
 export const navLinks = [
   {
     id: "about",
-    title: "About",
+    title: "Overview",
   },
   {
     id: "work",
-    title: "Work",
+    title: "Our Journey",
+  },
+  {
+    id: "team",
+    title: "The Team",
   },
   {
     id: "contact",
-    title: "Contact",
+    title: "Contact Us",
   },
 ];
 
 const services = [
   {
-    title: "Web Developer",
+    title: "Smarter Writing",
     icon: web,
   },
   {
-    title: "React Native Developer",
+    title: "AI Transparency",
     icon: mobile,
   },
   {
-    title: "Backend Developer",
+    title: "Full Control",
     icon: backend,
   },
   {
-    title: "Content Creator",
+    title: "Work Efficiently",
     icon: creator,
   },
 ];
 
 const technologies = [
   {
-    name: "HTML 5",
-    icon: html,
-  },
-  {
-    name: "CSS 3",
-    icon: css,
-  },
-  {
-    name: "JavaScript",
-    icon: javascript,
-  },
-  {
-    name: "TypeScript",
-    icon: typescript,
-  },
-  {
     name: "React JS",
     icon: reactjs,
   },
   {
-    name: "Redux Toolkit",
-    icon: redux,
-  },
-  {
-    name: "Tailwind CSS",
-    icon: tailwind,
+    name: "Next JS",
+    icon: nextjs,
   },
   {
     name: "Node JS",
@@ -97,169 +74,87 @@ const technologies = [
     icon: mongodb,
   },
   {
+    name: "TypeScript",
+    icon: typescript,
+  },
+  {
+    name: "Tailwind CSS",
+    icon: tailwind,
+  },
+  {
     name: "Three JS",
     icon: threejs,
   },
   {
-    name: "git",
-    icon: git,
-  },
-  {
-    name: "figma",
-    icon: figma,
+    name: "Github",
+    icon: github,
   },
   {
     name: "docker",
     icon: docker,
   },
-];
-
-const experiences = [
   {
-    title: "React.js Developer",
-    company_name: "Starbucks",
-    icon: starbucks,
-    iconBg: "#383E56",
-    date: "March 2020 - April 2021",
-    points: [
-      "Developing and maintaining web applications using React.js and other related technologies.",
-      "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-      "Implementing responsive design and ensuring cross-browser compatibility.",
-      "Participating in code reviews and providing constructive feedback to other developers.",
-    ],
+    name: "Clerk",
+    icon: clerk,
   },
   {
-    title: "React Native Developer",
-    company_name: "Tesla",
-    icon: tesla,
-    iconBg: "#E6DEDD",
-    date: "Jan 2021 - Feb 2022",
-    points: [
-      "Developing and maintaining web applications using React.js and other related technologies.",
-      "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-      "Implementing responsive design and ensuring cross-browser compatibility.",
-      "Participating in code reviews and providing constructive feedback to other developers.",
-    ],
-  },
-  {
-    title: "Web Developer",
-    company_name: "Shopify",
-    icon: shopify,
-    iconBg: "#383E56",
-    date: "Jan 2022 - Jan 2023",
-    points: [
-      "Developing and maintaining web applications using React.js and other related technologies.",
-      "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-      "Implementing responsive design and ensuring cross-browser compatibility.",
-      "Participating in code reviews and providing constructive feedback to other developers.",
-    ],
-  },
-  {
-    title: "Full stack Developer",
-    company_name: "Meta",
-    icon: meta,
-    iconBg: "#E6DEDD",
-    date: "Jan 2023 - Present",
-    points: [
-      "Developing and maintaining web applications using React.js and other related technologies.",
-      "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-      "Implementing responsive design and ensuring cross-browser compatibility.",
-      "Participating in code reviews and providing constructive feedback to other developers.",
-    ],
+    name: "Gemini",
+    icon: gemini,
   },
 ];
 
-const testimonials = [
+const team = [
   {
-    testimonial:
-      "I thought it was impossible to make a website as beautiful as our product, but Rick proved me wrong.",
-    name: "Sara Lee",
-    designation: "CFO",
-    company: "Acme Co",
-    image: "https://randomuser.me/api/portraits/women/4.jpg",
-  },
-  {
-    testimonial:
-      "I've never met a web developer who truly cares about their clients' success like Rick does.",
-    name: "Chris Brown",
-    designation: "COO",
-    company: "DEF Corp",
-    image: "https://randomuser.me/api/portraits/men/5.jpg",
-  },
-  {
-    testimonial:
-      "After Rick optimized our website, our traffic increased by 50%. We can't thank them enough!",
-    name: "Lisa Wang",
-    designation: "CTO",
-    company: "456 Enterprises",
-    image: "https://randomuser.me/api/portraits/women/6.jpg",
+    teamQuote:
+      "We didn't just want to build another AI tool—we wanted to build one that respects the writing process and makes every AI step transparent.",
+    name: "Gero Stöwe, Lisa Kütemeier, Laura Voß und Aylin Oymak",
+    image: teamImg,
   },
 ];
 
 const projects = [
   {
-    name: "Car Rent",
+    name: "Student Project I",
     description:
-      "Web-based platform that allows users to search, book, and manage car rentals from various providers, providing a convenient and efficient solution for transportation needs.",
+      "In this project, we integrated Gemini to enable AI-powered editing and rewriting of academic texts—either as a whole or at selected sections. All AI-generated content is automatically tracked and documented through a custom-built protocol, ensuring full transparency. Users can also structure their work using common academic formats like IMRaD or create custom templates to fit their individual research needs.",
     tags: [
       {
-        name: "react",
+        name: "writing-assistant",
         color: "blue-text-gradient",
       },
       {
-        name: "mongodb",
+        name: "ai-doc-protocol",
         color: "green-text-gradient",
       },
       {
-        name: "tailwind",
+        name: "flexible-structure",
         color: "pink-text-gradient",
       },
     ],
-    image: carrent,
-    source_code_link: "https://github.com/",
+    image: questionmark,
+    source_code_link: "https://github.com/laura194/ai_writing_assistant/",
   },
   {
-    name: "Job IT",
+    name: "Student Project II",
     description:
-      "Web application that enables users to search for job openings, view estimated salary ranges for positions, and locate available jobs based on their current location.",
+      "The second project focuses on collaboration. Users can create, share, and reuse writing structures and work together on academic texts in a transparent, AI-supported environment. More information will be available soon.",
     tags: [
       {
-        name: "react",
+        name: "community-driven",
         color: "blue-text-gradient",
       },
       {
-        name: "restapi",
+        name: "share-structure",
         color: "green-text-gradient",
       },
       {
-        name: "scss",
+        name: "write-together",
         color: "pink-text-gradient",
       },
     ],
-    image: jobit,
-    source_code_link: "https://github.com/",
-  },
-  {
-    name: "Trip Guide",
-    description:
-      "A comprehensive travel booking platform that allows users to book flights, hotels, and rental cars, and offers curated recommendations for popular destinations.",
-    tags: [
-      {
-        name: "nextjs",
-        color: "blue-text-gradient",
-      },
-      {
-        name: "supabase",
-        color: "green-text-gradient",
-      },
-      {
-        name: "css",
-        color: "pink-text-gradient",
-      },
-    ],
-    image: tripguide,
+    image: questionmark,
     source_code_link: "https://github.com/",
   },
 ];
 
-export { services, technologies, experiences, testimonials, projects };
+export { services, technologies, team, projects };

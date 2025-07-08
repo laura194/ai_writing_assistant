@@ -1,120 +1,187 @@
 import "boxicons/css/boxicons.min.css";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { LandingPageStyles } from "../../constants/styles/LandingPageStyles";
+import { navLinks } from "../../constants/LandingPageText";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const LandingHeader = () => {
-  // Toggle the mobile menu
-  const toggleMobileMenu = () => {
-    const mobileMenu = document.getElementById("mobileMenu");
+  const logo = "/logo.svg";
 
-    // If it has the "hidden" class, remove it, otherwise add it
-    if (mobileMenu?.classList.contains("hidden")) {
-      mobileMenu.classList.remove("hidden");
-    } else {
-      mobileMenu?.classList.add("hidden");
-    }
-  };
+  const [active, setActive] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+  const [toggle, setToggle] = useState(false);
+
+  // Handle scroll event to change header style
+  useEffect(() => {
+    AOS.init({ duration: 600, once: true, mirror: false });
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      if (scrollTop > 100) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className="flex justify-between items-center py-4 px-4 lg:px-20">
-      <h1
-        data-aos="fade-down"
-        data-aos-easing="linear"
-        data-aos-duration="1500"
-        className="text-3xl md:text-4xl lg:text-5xl font-light m-0 text-white"
-      >
-        AI WRITING ASSISTANT
-      </h1>
-
-      {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center gap-12">
-        <a
-          data-aos="fade-down"
-          data-aos-easing="linear"
-          data-aos-duration="1000"
-          className="text-base tracking-wider transition-colors hover:text-gray-300 z-50 text-white"
-          href="#"
-        >
-          Test1
-        </a>
-
-        <a
+    <nav
+      className={`${
+        LandingPageStyles.paddingX
+      } w-full flex items-center py-5 fixed top-0 z-20 transition-colors duration-750 ease-in-out ${
+        scrolled ? "bg-[#050816]" : "bg-transparent"
+      }`}
+    >
+      <div className="w-full flex justify-between items-center max-w-5xl 2xl:max-w-7xl mx-auto">
+        <Link
+          to="/"
           data-aos="fade-down"
           data-aos-easing="linear"
           data-aos-duration="1500"
-          className="text-base tracking-wider transition-colors hover:text-gray-300 z-50 text-white"
-          href="#"
+          data-aos-delay="1500"
+          className="flex items-center gap-4 transform transition-transform duration-200 hover:translate-y-[-2px]"
+          onClick={(e) => {
+            e.preventDefault();
+            setActive("");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
         >
-          Test2
-        </a>
+          <img src={logo} alt="logo" className="w-9 h-9 object-contain" />
+          <p className="text-white text-[20px] font-bold cursor-pointer flex">
+            AI WRITING ASSISTANT &nbsp;
+          </p>
+        </Link>
 
-        <a
-          data-aos="fade-down"
-          data-aos-easing="linear"
-          data-aos-duration="2000"
-          className="text-base tracking-wider transition-colors hover:text-gray-300 z-50 text-white"
-          href="#"
-        >
-          Test3
-        </a>
+        <ul className="list-none hidden sm:flex flex-row gap-10">
+          {navLinks.map((nav, idx) => (
+            <li
+              key={nav.id}
+              data-aos="fade-down"
+              data-aos-easing="linear"
+              data-aos-delay={`${(idx + 26) * 100}`}
+              data-aos-duration="600"
+              className="text-[#aaa6c3] hover:text-white text-[18px] font-medium"
+              onClick={() => setActive(nav.title)}
+            >
+              <button
+                className="cursor-pointer transform transition-transform duration-300 hover:scale-108"
+                onClick={() => {
+                  setActive(nav.title);
+                  setToggle(false);
+                  const section = document.getElementById(nav.id);
+                  if (section) {
+                    section.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }
+                }}
+              >
+                {nav.title}
+              </button>
+            </li>
+          ))}
+        </ul>
 
-        <a
-          data-aos="fade-down"
-          data-aos-easing="linear"
-          data-aos-duration="2500"
-          className="text-base tracking-wider transition-colors hover:text-gray-300 z-50 text-white"
-          href="#"
-        >
-          Test4
-        </a>
-      </nav>
-
-      <button className="hidden md:block bg-[#a7a7a7] text-black py-3 px-8 rounded-full border-none font-medium transition-all duration-500 hover:bg-white cursor-pointer z-50">
-        SIGNIN
-      </button>
-
-      {/* Mobile Menu Button - Visible only on Mobile */}
-      <button
-        onClick={toggleMobileMenu}
-        className="md:hidden text-3xl p-2 z-50"
-      >
-        <i className="bx bx-menu text-white"></i>
-      </button>
-
-      {/* Mobile Menu - Hidden by default */}
-      <div
-        id="mobileMenu"
-        className="hidden fixed top-16 bottom-0 right-0 left-0 p-5 md:hidden z-40 bg-black bg-opacity-70 backdrop-blur- md"
-      >
-        <nav className="flex flex-col gap-6 items-center">
-          <a
-            className="text-base tracking-wider transition-colors hover:text-gray-300 z-50 text-white"
-            href="#"
+        <div className="sm:hidden flex flex-1 justify-end items-center">
+          <button
+            onClick={() => setToggle((t) => !t)}
+            className="p-2 z-50"
+            aria-label={toggle ? "Close menu" : "Open menu"}
+            aria-expanded={toggle}
           >
-            Test1
-          </a>
+            <i
+              className={`bx ${toggle ? "bx-x" : "bx-menu"} text-white text-3xl`}
+            />
+          </button>
 
-          <a
-            className="text-base tracking-wider transition-colors hover:text-gray-300 z-50 text-white"
-            href="#"
+          <div
+            className={`${
+              !toggle ? "hidden" : "flex"
+            } p-6 black-gradient absolute top-20 right-0 mx-4 my-2 min-w-[140px] z-10 rounded-xl`}
           >
-            Test2
-          </a>
-
-          <a
-            className="text-base tracking-wider transition-colors hover:text-gray-300 z-50 text-white"
-            href="#"
-          >
-            Test3
-          </a>
-
-          <a
-            className="text-base tracking-wider transition-colors hover:text-gray-300 z-50 text-white"
-            href="#"
-          >
-            Test4
-          </a>
-        </nav>
+            <ul className="list-none flex justify-end items-start flex-1 flex-col gap-4">
+              {navLinks.map((nav, idx) => (
+                <li
+                  key={nav.id}
+                  data-aos="fade-down"
+                  data-aos-easing="linear"
+                  data-aos-delay={`${idx * 100}`}
+                  data-aos-duration="600"
+                  className={`font-medium text-[16px]`}
+                >
+                  <button
+                    className={`cursor-pointer w-full text-left ${
+                      active === nav.title ? "text-white" : "text-[#aaa6c3]"
+                    }`}
+                    onClick={() => {
+                      setActive(nav.title);
+                      setToggle(false);
+                      const section = document.getElementById(nav.id);
+                      if (section) {
+                        section.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                      }
+                    }}
+                  >
+                    {nav.title}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
-    </header>
+      <Link
+        to="/signIn"
+        data-aos="fade-down"
+        data-aos-easing="linear"
+        data-aos-delay="3000"
+        data-aos-duration="600"
+        className="
+            hidden md:block
+            group relative overflow-hidden
+            py-2.5 px-6 rounded-full font-semibold text-sm sm:text-base tracking-wider
+            text-black bg-white border border-[#2d2d4e] backdrop-blur-md
+            shadow-[0_0_10px_rgba(5,8,22,0.3)]
+            transform hover:scale-105 hover:shadow-[0_0_20px_rgba(5,8,22,0.5)]
+            transition-all duration-500 ease-in-out
+            z-50 cursor-pointer
+          "
+      >
+        {/* Hover-Overlay als animierbarer Gradient */}
+        <span
+          className="
+              absolute inset-0
+              bg-gradient-to-r from-[#8675da] to-[#221755]
+              opacity-0 group-hover:opacity-100
+              transition-opacity duration-300
+              z-0
+            "
+        />
+
+        {/* Text mit Gradient im Normalzustand, weiß beim Hover */}
+        <span
+          className="
+              relative z-10
+              transition-colors duration-300
+              bg-clip-text text-transparent
+              bg-gradient-to-r from-[#2f2467] to-[#6653c3]
+              group-hover:bg-none group-hover:text-white
+            "
+        >
+          SIGN IN
+        </span>
+      </Link>
+    </nav>
   );
 };
 
