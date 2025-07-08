@@ -22,7 +22,7 @@ const ProjectOverview = () => {
       if (user?.username) {
         try {
           const userProjects = await ProjectService.getProjectsByUsername(
-            user.username
+            user.username,
           );
           setProjects(userProjects);
         } catch (error) {
@@ -126,13 +126,13 @@ const ProjectOverview = () => {
                                         username: user?.username || "",
                                         projectStructure:
                                           project.projectStructure || [],
-                                      }
+                                      },
                                     );
 
                                   setProjects((prev) =>
                                     prev.map((p) =>
-                                      p._id === project._id ? updated : p
-                                    )
+                                      p._id === project._id ? updated : p,
+                                    ),
                                   );
                                 } catch (e) {
                                   alert("Failed to update project");

@@ -44,7 +44,6 @@ export const createNodeContent = async (
   }
 };
 
-
 // Get all NodeContent entries, or filter by ?nodeId=... and ?projectId=...
 export const getNodeContents = async (
   req: Request,
@@ -53,8 +52,8 @@ export const getNodeContents = async (
   try {
     const { nodeId, projectId } = req.query;
 
-    let filter: Record<string, any> = {};
-    
+    const filter: Partial<{ nodeId: string; projectId: string }> = {};
+
     if (nodeId) {
       filter.nodeId = nodeId.toString();
     }
@@ -71,8 +70,6 @@ export const getNodeContents = async (
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
 
 // Get a specific NodeContent entry by its nodeId (via URL param)
 export const getNodeContentById = async (
@@ -96,7 +93,9 @@ export const getNodeContentById = async (
     if (!nodeContent) {
       res
         .status(404)
-        .json({ error: "NodeContent with the given nodeId and projectId not found" });
+        .json({
+          error: "NodeContent with the given nodeId and projectId not found",
+        });
       return;
     }
 
@@ -106,7 +105,6 @@ export const getNodeContentById = async (
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 // Update a specific NodeContent entry by nodeId
 export const updateNodeContent = async (
@@ -149,4 +147,3 @@ export const updateNodeContent = async (
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
