@@ -91,11 +91,9 @@ export const getNodeContentById = async (
     });
 
     if (!nodeContent) {
-      res
-        .status(404)
-        .json({
-          error: "NodeContent with the given nodeId and projectId not found",
-        });
+      res.status(404).json({
+        error: "NodeContent with the given nodeId and projectId not found",
+      });
       return;
     }
 
