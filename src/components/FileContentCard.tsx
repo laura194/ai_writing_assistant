@@ -1,17 +1,25 @@
 import { useEffect, useState, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { Node } from "../utils/types";
 import { getIcon } from "../utils/icons";
 import { Atom } from "lucide-react";
 import AIBubble from "./ai/AIBubble";
 import AIComponent from "./ai/AIComponent";
-import { NodeContentService } from "../utils/NodeContentService"; // Import the service
+import { NodeContentService } from "../utils/NodeContentService";
 
 export interface FileContentCardProps {
   node: Node;
   onDirtyChange?: (dirty: boolean) => void;
+  onSave?: () => void;
 }
 
-function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
+function FileContentCard({
+  node,
+  onDirtyChange,
+  onSave,
+}: FileContentCardProps) {
+  const { projectId } = useParams<{ projectId: string }>();
+
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [originalContent, setOriginalContent] = useState<string>(
@@ -27,6 +35,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
   useEffect(() => {
     setFileContent(node.content || "...");
     setOriginalContent(node.content || "...");
+    setAiNodeName(node.name || ""); // Aktualisiere den Namen
     setIsDirty(false);
   }, [node]);
 
@@ -36,34 +45,38 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
     onDirtyChange?.(dirty);
   }, [fileContent, originalContent, onDirtyChange]);
 
-  // Updated save function
   const handleSave = async () => {
+    if (!projectId) {
+      console.error("❌ Cannot save node content: projectId is missing");
+      alert("Project ID missing. Cannot save.");
+      return;
+    }
+
     try {
-      // Call the update function from NodeContentService to update the content
       await NodeContentService.updateNodeContent(node.id, {
         nodeId: node.id,
         name: node.name,
         category: node.category,
-        content: fileContent, // Send the updated content
+        content: fileContent,
+        projectId,
       });
 
-      // On success, update the original content and mark as no longer dirty
       setOriginalContent(fileContent);
       setIsDirty(false);
+      onSave?.();
     } catch (error) {
       console.error("Error updating node content:", error);
-      // Optionally show an error message to the user
       alert("Failed to save content. Please try again.");
     }
   };
 
   const handleReplace = (newContent: string) => {
     if (!selectedText) return;
-
-    setFileContent((prev) => {
-      if (!prev.includes(selectedText)) return prev;
-      return prev.replace(selectedText, newContent);
-    });
+    setFileContent((prev) =>
+      prev.includes(selectedText)
+        ? prev.replace(selectedText, newContent)
+        : prev,
+    );
   };
 
   const handleAppend = (additionalContent: string) => {
@@ -77,16 +90,11 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
     const selection = textarea.value
       .substring(textarea.selectionStart, textarea.selectionEnd)
       .trim();
+
     if (!selection) return;
 
     setSelectedText(selection);
     setIsAIBubbleOpen(true);
-  };
-
-  const handleAIBubbleClick = () => {
-    setIsAIBubbleOpen(false);
-    setAiNodeName(`${node.name} (Selection)`);
-    setIsAIComponentShown(true);
   };
 
   useEffect(() => {
@@ -107,10 +115,15 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
     };
 
     document.addEventListener("selectionchange", handleSelectionChange);
-    return () => {
+    return () =>
       document.removeEventListener("selectionchange", handleSelectionChange);
-    };
   }, []);
+
+  const handleAIBubbleClick = () => {
+    setIsAIBubbleOpen(false);
+    setAiNodeName(`${node.name} (Selection)`);
+    setIsAIComponentShown(true);
+  };
 
   return (
     <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
@@ -136,7 +149,7 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
         >
           <Atom className="w-6 h-6" />
         </button>
-        {getIcon(node, "size-8")}
+        {getIcon(node, "size-6", node.icon)}
       </div>
 
       {isAIComponentShown && (
@@ -160,7 +173,6 @@ function FileContentCard({ node, onDirtyChange }: FileContentCardProps) {
         spellCheck={false}
       />
 
-      {/* Save Button */}
       <div className="mt-4 mb-2 flex justify-end">
         <button
           onClick={handleSave}
