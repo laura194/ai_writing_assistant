@@ -21,7 +21,7 @@ export const fadeIn = (
   direction: string = "",
   type: string = "spring",
   delay = 0,
-  duration = 0.5
+  duration = 0.5,
 ): Variants => {
   // lenke alle unbekannten Richtungen auf 0
   const x = direction === "left" ? 100 : direction === "right" ? -100 : 0;
@@ -61,7 +61,7 @@ export const slideIn = (
   direction: "left" | "right" | "up" | "down" = "left",
   animType: string = "tween",
   delay = 0,
-  duration = 0.5
+  duration = 0.5,
 ): Variants => {
   const x =
     direction === "left" ? "-100%" : direction === "right" ? "100%" : "0%";
@@ -82,7 +82,7 @@ export const slideIn = (
 
 export const staggerContainer = (
   staggerChildren: number = 0,
-  delayChildren: number = 0
+  delayChildren: number = 0,
 ): Variants => ({
   hidden: {},
   show: {
