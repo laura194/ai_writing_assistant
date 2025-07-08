@@ -14,7 +14,7 @@ const StructureSelectionPage = () => {
 
   const [projectName, setProjectName] = useState("");
   const [selectedStructure, setSelectedStructure] = useState<string | null>(
-    null
+    null,
   );
 
   const handleSave = async () => {
