@@ -108,7 +108,7 @@ const team = [
   {
     teamQuote:
       "We didn't just want to build another AI tool—we wanted to build one that respects the writing process and makes every AI step transparent.",
-    name: "Gero Stöwe, Lisa Kütemeier, Laura Voß und Aylin Oymak",
+    name: "Gero S.\u00A0\u00A0\u00A0|\u00A0\u00A0\u00A0Lisa K.\u00A0\u00A0\u00A0|\u00A0\u00A0\u00A0Laura V.\u00A0\u00A0\u00A0|\u00A0\u00A0\u00A0Aylin O.",
     image: teamImg,
   },
 ];
