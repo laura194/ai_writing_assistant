@@ -8,12 +8,26 @@
  */
 
 import AppRoutes from "./AppRoutes";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return (
     <>
       <main>
         <AppRoutes />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: "#1a1333",
+              color: "#fff",
+              fontSize: "16px",
+              padding: "14px 20px",
+              borderRadius: "12px",
+            },
+          }}
+        />
       </main>
     </>
   );

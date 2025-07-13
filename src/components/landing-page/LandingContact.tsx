@@ -5,6 +5,7 @@ import { LandingPageStyles } from "../../constants/styles/LandingPageStyles";
 import EarthCanvas from "./canvas/EarthCanvas";
 import { SectionWrapper } from "../../hoc";
 import { slideIn } from "../../utils/motion";
+import toast from "react-hot-toast";
 
 const Contact = () => {
   const formRef = useRef<HTMLFormElement>(null);
@@ -53,7 +54,23 @@ const Contact = () => {
       .then(
         () => {
           setLoading(false);
-          alert("Thank you. I will get back to you as soon as possible.");
+          toast.success(
+            "Thank you for your message. We will get back to you as soon as possible.",
+            {
+              duration: 5000,
+              icon: "✅",
+              style: {
+                background: "#1e2b2d",
+                color: "#d1fae5",
+                padding: "16px 20px",
+                borderRadius: "12px",
+                fontSize: "15px",
+                fontWeight: "500",
+                boxShadow: "0 4px 12px rgba(0, 255, 170, 0.1)",
+                border: "1px solid #10b981",
+              },
+            },
+          );
 
           setForm({
             name: "",
@@ -65,7 +82,23 @@ const Contact = () => {
           setLoading(false);
           console.error(error);
 
-          alert("Ahh, something went wrong. Please try again.");
+          toast.error(
+            "Something went wrong. Please try again or contact: plantfriends@gmail.com",
+            {
+              duration: 10000,
+              icon: "❌",
+              style: {
+                background: "#2a1b1e",
+                color: "#ffe4e6",
+                padding: "16px 20px",
+                borderRadius: "12px",
+                fontSize: "15px",
+                fontWeight: "500",
+                boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
+                border: "1px solid #ef4444",
+              },
+            },
+          );
         },
       );
   };
@@ -93,7 +126,7 @@ const Contact = () => {
               name="name"
               value={form.name}
               onChange={handleChange}
-              placeholder="What's your name?"
+              placeholder="What should we call you?"
               className="bg-[#151030] py-4 px-6 placeholder:text-[#aaa6c3] text-white rounded-lg outline-none border-none font-medium"
             />
           </label>
@@ -115,7 +148,7 @@ const Contact = () => {
               name="message"
               value={form.message}
               onChange={handleChange}
-              placeholder="What you want to say?"
+              placeholder="What do you want to tell us?"
               className="bg-[#151030] py-4 px-6 placeholder:text-[#aaa6c3] text-white rounded-lg outline-none border-none font-medium"
             />
           </label>
@@ -123,7 +156,7 @@ const Contact = () => {
           <button
             type="submit"
             disabled={!isFormValid || loading}
-            className={`bg-[#151030] py-3 px-8 rounded-xl outline-none w-fit text-white font-bold transition-colors duration-200 ${
+            className={`bg-[#151030] py-3 px-8 rounded-xl outline-none w-fit text-white font-bold transition-colors duration-200 mx-auto ${
               isFormValid
                 ? "bg-[#151030] hover:bg-[#a199cb] hover:text-[#151030] cursor-pointer"
                 : "bg-[#151030] opacity-50 cursor-not-allowed"
