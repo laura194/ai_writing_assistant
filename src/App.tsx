@@ -9,8 +9,18 @@
 
 import AppRoutes from "./AppRoutes";
 import { Toaster } from "react-hot-toast";
+import { useEffect } from "react";
+import AOS from "aos";
 
 const App = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 1500,
+      once: true,
+      delay: 1200,
+    });
+  }, []);
+
   return (
     <>
       <main>
