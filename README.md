@@ -15,7 +15,7 @@
 Members: Laura, Lisa, Gero, and Aylin
 
 This repository contains a student project created for the ongoing course
-on Study Project I & II at HWR Berlin, spanning the summmer term 2025 through 
+on Study Project I & II at HWR Berlin, spanning the summmer term 2025 through
 the winter term 2026.
 
 ## 📖 Abstract
@@ -35,18 +35,19 @@ The goal of this project is to develop a web-based application that supports use
 To build and run the app locally, follow these steps:
 
 1. Clone the repository:
-    ```bash
-    gh repo clone laura194/ai_writing_assistant
+
+   ```bash
+   gh repo clone laura194/ai_writing_assistant
    ```
 
 2. Fetch dependencies:
-    ```bash
-     npm install
-     ```
+   ```bash
+    npm install
+   ```
 3. Run the app:
-     ```bash
-     npm start
-     ```
+   ```bash
+   npm start
+   ```
 
 ## 🏗️ Project Structure
 
