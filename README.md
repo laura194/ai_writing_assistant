@@ -65,7 +65,7 @@ To build and run the app locally, follow these steps:
 ├── node_modules
 ├── public
 ├── server
-|   └── node_modules
+│    └── node_modules
 ├── src
 │   ├── assets
 │   ├── components
