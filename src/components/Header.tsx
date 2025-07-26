@@ -4,7 +4,7 @@ import logo from "/logo.svg";
 
 const Header = () => {
   return (
-    <header className="w-full bg-gray-300 border-b border-gray-300 px-4 py-1.5 shadow-sm flex items-center justify-between h-12">
+    <header className="w-full bg-gray-300 border-b border-gray-300 px-4 py-1.5 shadow-sm flex items-center justify-between h-12 z-100">
       {/* Logo und Titel als Link */}
       <Link
         to="/home"
