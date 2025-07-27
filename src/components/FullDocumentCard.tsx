@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom"; // Importiere useParams
 import { ProjectService } from "../utils/ProjectService"; // Importiere den ProjectService
 import { NodeContentService } from "../utils/NodeContentService";
+import { Document, Packer, Paragraph, HeadingLevel } from "docx"; // Importiere docx für Word-Dokumente
+import { saveAs } from "file-saver"; // Importiere file-saver für das Herunterladen von Dateien
+import word from "/src/assets/images/full-document-page/word.png";
 
 interface StructureNode {
   id: string;
@@ -122,17 +125,63 @@ const FullDocumentCard = () => {
       .replace(/'/g, "&#039;");
   };
 
+    const buildDocxDocument = (structure: StructureNode[], nodeContents: NodeContent[]) => {
+    const children: Paragraph[] = [];
+
+    structure.forEach((node) => {
+      children.push(
+        new Paragraph({
+          text: node.name,
+          heading: HeadingLevel.HEADING_1,
+        })
+      );
+
+      const content = nodeContents.find((n) => n.nodeId === node.id)?.content;
+      if (content) {
+        children.push(new Paragraph(content));
+      }
+
+      if (node.nodes) {
+        node.nodes.forEach((childNode) => {
+          children.push(
+            new Paragraph({
+              text: childNode.name,
+              heading: HeadingLevel.HEADING_2,
+            })
+          );
+          const childContent = nodeContents.find((n) => n.nodeId === childNode.id)?.content;
+          if (childContent) {
+            children.push(new Paragraph(childContent));
+          }
+        });
+      }
+    });
+
+    return new Document({
+      sections: [
+        {
+          children,
+        },
+      ],
+    });
+  };
+
+  const handleExportWord = async () => {
+    const doc = buildDocxDocument(structure, nodeContents);
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "document.docx");
+  };
+
   return (
     <div className="p-4 shadow-lg rounded-lg bg-gray-100 relative">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Full Document</h2>
         <button
-          onClick={() =>
-            alert("Here you could export the document as a Word file.")
-          }
+          onClick={handleExportWord}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Word // TODO Export as word and PDF and LaTeX functions with buttons
+          <img src={word} alt="Export as Word" className="h-5 w-5" />
+          <span>Word</span>
         </button>
       </div>
 
@@ -151,3 +200,4 @@ const FullDocumentCard = () => {
 };
 
 export default FullDocumentCard;
+//TODO: Add buttons for exporting as LaTeX and PDF
