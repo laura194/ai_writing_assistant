@@ -7,6 +7,8 @@ import { saveAs } from "file-saver"; // Importiere file-saver für das Herunterl
 import word from "/src/assets/images/full-document-page/word.jpg";
 import pdf from "/src/assets/images/full-document-page/pdf.jpg";
 import jsPDF from "jspdf";
+import latex from "/src/assets/images/full-document-page/latex.png";
+
 
 interface StructureNode {
   id: string;
@@ -168,12 +170,14 @@ const FullDocumentCard = () => {
     });
   };
 
+  // Function to handle Word export
   const handleExportWord = async () => {
     const doc = buildDocxDocument(structure, nodeContents);
     const blob = await Packer.toBlob(doc);
     saveAs(blob, "full_document.docx");
   };
 
+  // Function to handle PDF export
   const handleExportPDF = () => {
   const doc = new jsPDF();
   const pageHeight = doc.internal.pageSize.height; // Get page height
@@ -244,9 +248,116 @@ const FullDocumentCard = () => {
   doc.save("full_document.pdf");
 };
 
+  // Function to handle LaTeX export
+  const handleExportLATEX = () => {
+    let latexContent = `
+\\documentclass{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage{graphicx}
+\\usepackage{amsmath}
+\\usepackage{booktabs}
+\\usepackage{hyperref}
+\\usepackage{caption}
+\\usepackage{longtable}
+\\usepackage{biblatex}
+\\addbibresource{references.bib}
+
+\\title{${escapeLatex(structure[0]?.name || "Untitled")}}
+\\date{\\today}
+
+\\begin{document}
+\\maketitle
+`;
+
+    structure.forEach((node) => {
+      latexContent += `\\section{${escapeLatex(node.name)}}\n`;
+
+      const content = nodeContents.find((n) => n.nodeId === node.id)?.content;
+      if (content) {
+        latexContent += `${parseRichContent(content)}\n\n`;
+      }
+
+      if (node.nodes) {
+        node.nodes.forEach((childNode) => {
+          latexContent += `\\subsection{${escapeLatex(childNode.name)}}\n`;
+          const childContent = nodeContents.find((n) => n.nodeId === childNode.id)?.content;
+          if (childContent) {
+            latexContent += `${parseRichContent(childContent)}\n\n`;
+          }
+        });
+      }
+    });
+
+    latexContent += `
+\\newpage
+\\printbibliography
+\\end{document}
+`;
+
+  const blob = new Blob([latexContent], { type: "text/plain;charset=utf-8" });
+  saveAs(blob, "full_document.tex");
+};
+
+const escapeLatex = (unsafe: string) => {
+  return unsafe
+    .replace(/\\/g, "\\textbackslash{}")
+    .replace(/_/g, "\\_")
+    .replace(/%/g, "\\%")
+    .replace(/&/g, "\\&")
+    .replace(/#/g, "\\#")
+    .replace(/\$/g, "\\$")
+    .replace(/{/g, "\\{")
+    .replace(/}/g, "\\}")
+    .replace(/\^/g, "\\^{}")
+    .replace(/~/g, "\\~{}");
+};
+
+const parseRichContent = (content: string): string => {
+  let processed = escapeLatex(content);
+
+  // Handle figures: [FIGURE:caption:img_url]
+  processed = processed.replace(
+    /\[FIGURE:([^:]+):([^\]]+)\]/g,
+    (_, caption, url) =>
+      `\\begin{figure}[h]\n\\centering\n\\includegraphics[width=0.8\\textwidth]{${url}}\n\\caption{${escapeLatex(caption)}}\n\\end{figure}`
+  );
+
+  // Handle tables: [TABLE:caption:<table>...</table>]
+  processed = processed.replace(
+    /\[TABLE:([^:]+):([\s\S]*?)\]/g,
+    (_, caption, tableHtml) => {
+      const tableRows = tableHtml
+        .replace(/<table>|<\/table>/g, "")
+        .split(/<\/tr>/)
+        .map((row: string) =>
+          row
+            .replace(/<tr>|<\/tr>/g, "")
+            .split(/<\/td>/)
+            .map((cell) => cell.replace(/<td>|<\/td>/g, "").trim())
+            .filter(Boolean)
+        )
+        .filter((row: string | unknown[]) => row.length > 0);
+
+      const tableBody = tableRows
+        .map((row: unknown[]) => row.join(" & ") + " \\\\ \\hline")
+        .join("\n");
+
+      return `\\begin{table}[h]\n\\centering\n\\caption{${escapeLatex(caption)}}\n\\begin{tabular}{|${"c|".repeat(tableRows[0]?.length || 1)}}\n\\hline\n${tableBody}\n\\end{tabular}\n\\end{table}`;
+    }
+  );
+
+  // Restore inline math $...$ and display math $$...$$ (already valid LaTeX)
+  processed = processed.replace(/\\textbackslash\{\}\$/g, "$"); // recover $ if escaped
+
+  // Handle bibliography citations: [CITE:key]
+  processed = processed.replace(/\[CITE:([^\]]+)\]/g, (_, key) => `\\cite{${key}}`);
+
+  return processed;
+};
+
   return (
     <div className="p-4 shadow-lg rounded-lg bg-gray-100 relative">
-      <div className="flex items-center gap-170 mb-4">
+      <div className="flex items-center gap-150 mb-4">
         <h2 className="text-2xl font-bold mr-6">Full Document</h2>
           <div className="flex space-x-4">
           {/* Word Export Button */}
@@ -263,6 +374,14 @@ const FullDocumentCard = () => {
             //className="p-3 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md flex items-center justify-center"
           >
             <img src={pdf} className="h-14 w-14" />
+          </button>
+          {/* LaTeX Export Button */}
+          <button
+            onClick={handleExportLATEX}
+            title="Download it as a LaTeX document"
+            //className="p-3 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md flex items-center justify-center"
+          >
+            <img src={latex} className="h-14 w-14" />
           </button>
         </div>
       </div>
@@ -282,4 +401,3 @@ const FullDocumentCard = () => {
 };
 
 export default FullDocumentCard;
-//TODO: Add buttons for exporting as LaTeX and PDF
