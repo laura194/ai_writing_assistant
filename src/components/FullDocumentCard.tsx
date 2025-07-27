@@ -4,7 +4,7 @@ import { ProjectService } from "../utils/ProjectService"; // Importiere den Proj
 import { NodeContentService } from "../utils/NodeContentService";
 import { Document, Packer, Paragraph, HeadingLevel } from "docx"; // Importiere docx für Word-Dokumente
 import { saveAs } from "file-saver"; // Importiere file-saver für das Herunterladen von Dateien
-import word from "/src/assets/images/full-document-page/word.png";
+import word from "/src/assets/images/full-document-page/word.jpg";
 
 interface StructureNode {
   id: string;
@@ -169,7 +169,7 @@ const FullDocumentCard = () => {
   const handleExportWord = async () => {
     const doc = buildDocxDocument(structure, nodeContents);
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, "document.docx");
+    saveAs(blob, "full_document.docx");
   };
 
   return (
@@ -178,10 +178,9 @@ const FullDocumentCard = () => {
         <h2 className="text-2xl font-bold">Full Document</h2>
         <button
           onClick={handleExportWord}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          title="Download it as a Word document"
         >
-          <img src={word} alt="Export as Word" className="h-5 w-5" />
-          <span>Word</span>
+          <img src={word} className="h-14 w-14" />
         </button>
       </div>
 
