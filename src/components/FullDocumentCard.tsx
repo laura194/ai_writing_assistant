@@ -5,6 +5,8 @@ import { NodeContentService } from "../utils/NodeContentService";
 import { Document, Packer, Paragraph, HeadingLevel } from "docx"; // Importiere docx für Word-Dokumente
 import { saveAs } from "file-saver"; // Importiere file-saver für das Herunterladen von Dateien
 import word from "/src/assets/images/full-document-page/word.jpg";
+import pdf from "/src/assets/images/full-document-page/pdf.jpg";
+import jsPDF from "jspdf";
 
 interface StructureNode {
   id: string;
@@ -172,16 +174,70 @@ const FullDocumentCard = () => {
     saveAs(blob, "full_document.docx");
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+
+    // Add title
+    doc.setFontSize(16);
+    doc.text("Full Document", 10, 10);
+
+    // Add content
+    let y = 20; // Vertical position
+    structure.forEach((node) => {
+      doc.setFontSize(14);
+      doc.text(node.name, 10, y); // Add node name as a heading
+      y += 10;
+
+      const content = nodeContents.find((n) => n.nodeId === node.id)?.content;
+      if (content) {
+        doc.setFontSize(12);
+        doc.text(content, 10, y); // Add node content
+        y += 10;
+      }
+
+      // Handle child nodes
+      if (node.nodes) {
+        node.nodes.forEach((childNode) => {
+          doc.setFontSize(12);
+          doc.text(`- ${childNode.name}`, 15, y); // Indent child nodes
+          y += 10;
+
+          const childContent = nodeContents.find(
+            (n) => n.nodeId === childNode.id
+          )?.content;
+          if (childContent) {
+            doc.setFontSize(10);
+            doc.text(childContent, 20, y); // Add child content
+            y += 10;
+          }
+        });
+      }
+    });
+
+    doc.save("full_document.pdf");
+  };
+
   return (
     <div className="p-4 shadow-lg rounded-lg bg-gray-100 relative">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Full Document</h2>
-        <button
-          onClick={handleExportWord}
-          title="Download it as a Word document"
-        >
-          <img src={word} className="h-14 w-14" />
-        </button>
+      <div className="flex items-center gap-170 mb-4">
+        <h2 className="text-2xl font-bold mr-6">Full Document</h2>
+          <div className="flex space-x-4">
+          {/* Word Export Button */}
+          <button
+            onClick={handleExportWord}
+            title="Download it as a Word document"
+          >
+            <img src={word} className="h-14 w-14" />
+          </button>
+          {/* PDF Export Button */}
+          <button
+            onClick={handleExportPDF}
+            title="Download it as a PDF file"
+            //className="p-3 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md flex items-center justify-center"
+          >
+            <img src={pdf} className="h-14 w-14" />
+          </button>
+        </div>
       </div>
 
       {loading ? (
