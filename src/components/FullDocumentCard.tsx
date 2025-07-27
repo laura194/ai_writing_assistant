@@ -175,47 +175,74 @@ const FullDocumentCard = () => {
   };
 
   const handleExportPDF = () => {
-    const doc = new jsPDF();
+  const doc = new jsPDF();
+  const pageHeight = doc.internal.pageSize.height; // Get page height
+  let y = 10; // Initial vertical position
 
-    // Add title
-    doc.setFontSize(16);
-    doc.text("Full Document", 10, 10);
+  // Add content
+  structure.forEach((node) => {
+    // Check if there is enough space for the chapter title
+    if (y + 10 > pageHeight) {
+      doc.addPage(); // Add a new page if content exceeds page height
+      y = 10; // Reset vertical position
+    }
 
-    // Add content
-    let y = 20; // Vertical position
-    structure.forEach((node) => {
-      doc.setFontSize(14);
-      doc.text(node.name, 10, y); // Add node name as a heading
-      y += 10;
+    // Add chapter title
+    doc.setFontSize(14);
+    doc.text(node.name, 10, y);
+    y += 10;
 
-      const content = nodeContents.find((n) => n.nodeId === node.id)?.content;
-      if (content) {
+    // Add chapter content
+    const content = nodeContents.find((n) => n.nodeId === node.id)?.content;
+    if (content) {
+      const splitContent = doc.splitTextToSize(content, 180); // Split long text into multiple lines
+      splitContent.forEach((line: string | string[]) => {
+        if (y + 10 > pageHeight) {
+          doc.addPage();
+          y = 10;
+        }
         doc.setFontSize(12);
-        doc.text(content, 10, y); // Add node content
+        doc.text(line, 10, y);
         y += 10;
-      }
+      });
+    }
 
-      // Handle child nodes
-      if (node.nodes) {
-        node.nodes.forEach((childNode) => {
-          doc.setFontSize(12);
-          doc.text(`- ${childNode.name}`, 15, y); // Indent child nodes
-          y += 10;
+    // Handle child nodes
+    if (node.nodes) {
+      node.nodes.forEach((childNode) => {
+        // Check if there iss enough space for the child node title
+        if (y + 10 > pageHeight) {
+          doc.addPage();
+          y = 10;
+        }
 
-          const childContent = nodeContents.find(
-            (n) => n.nodeId === childNode.id
-          )?.content;
-          if (childContent) {
+        // Add child node title
+        doc.setFontSize(12);
+        doc.text(`- ${childNode.name}`, 15, y);
+        y += 10;
+
+        // Add child node content
+        const childContent = nodeContents.find(
+          (n) => n.nodeId === childNode.id
+        )?.content;
+        if (childContent) {
+          const splitChildContent = doc.splitTextToSize(childContent, 180);
+          splitChildContent.forEach((line: string | string[]) => {
+            if (y + 10 > pageHeight) {
+              doc.addPage();
+              y = 10;
+            }
             doc.setFontSize(10);
-            doc.text(childContent, 20, y); // Add child content
+            doc.text(line, 20, y);
             y += 10;
-          }
-        });
-      }
-    });
+          });
+        }
+      });
+    }
+  });
 
-    doc.save("full_document.pdf");
-  };
+  doc.save("full_document.pdf");
+};
 
   return (
     <div className="p-4 shadow-lg rounded-lg bg-gray-100 relative">
