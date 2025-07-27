@@ -6,7 +6,7 @@ import AiProtocol from "../models/AIProtocol";
 // Create a new Project entry
 export const createProject = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { name, username, projectStructure } = req.body;
 
@@ -34,7 +34,7 @@ export const createProject = async (
 // Get a project by its ID
 export const getProjectById = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   try {
     const { id } = req.params; // ID aus den URL-Parametern holen
@@ -61,7 +61,7 @@ export const getProjectById = async (
 // Get all projects
 export const getAllProjects = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   try {
     const projects = await Project.find();
@@ -75,7 +75,7 @@ export const getAllProjects = async (
 // Update a specific project entry by ID
 export const updateProject = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { id } = req.params;
   const { name, username, projectStructure } = req.body;
@@ -89,7 +89,7 @@ export const updateProject = async (
     const updatedProject = await Project.findOneAndUpdate(
       { _id: id }, // Verwende _id statt id als Mongoose ID
       { name, username, projectStructure: projectStructure || [] }, // Falls projectStructure nicht übergeben wurde, leer lassen
-      { new: true },
+      { new: true }
     );
 
     if (!updatedProject) {
@@ -107,7 +107,7 @@ export const updateProject = async (
 // Get all projects by username
 export const getProjectsByUsername = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { username } = req.query;
 
@@ -117,7 +117,9 @@ export const getProjectsByUsername = async (
   }
 
   try {
-    const projects = await Project.find({ username: username.toString() });
+    const projects = await Project.find({ username: username.toString() }).sort(
+      { createdAt: -1 }
+    );
 
     if (projects.length === 0) {
       res.status(404).json({ error: "No projects found for this username" });
@@ -131,10 +133,34 @@ export const getProjectsByUsername = async (
   }
 };
 
+// Get the last 3 recent created projects by username
+export const getRecentProjectsByUsername = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { username } = req.query;
+
+  if (!username) {
+    res.status(400).json({ error: "Username is required" });
+    return;
+  }
+
+  try {
+    const projects = await Project.find({ username: username.toString() })
+      .sort({ createdAt: -1 })
+      .limit(3);
+
+    res.status(200).json(projects);
+  } catch (error) {
+    console.error("Error fetching recent projects:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 // Delete a project by its ID
 export const deleteProject = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { id } = req.params;
 
