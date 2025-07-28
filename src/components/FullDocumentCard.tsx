@@ -11,6 +11,21 @@ import {
   handleExportLATEX,
 } from "../utils/DocumentExporters";
 
+/**
+ * Generates the whole project content in one single page and exports it as Word, PDF, or LaTeX format.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered full document export UI.
+ *
+ * @description
+ * - Fetches a hierarchical project structure and content from backend services.
+ * - Renders the document structure dynamically in HTML format.
+ * - Allows exporting the full document in multiple formats via buttons:
+ *   - Word (.docx) using `docx`
+ *   - PDF (.pdf) using `jsPDF`
+ *   - LaTeX (.tex) with support for figures, tables, math equations, and citations
+ */
+
 interface StructureNode {
   id: string;
   name: string;
