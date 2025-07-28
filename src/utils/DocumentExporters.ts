@@ -32,12 +32,14 @@ interface NodeContent {
 
 export const handleExportWord = async (
   structure: StructureNode[],
-  nodeContents: NodeContent[]
+  nodeContents: NodeContent[],
 ) => {
   const children: Paragraph[] = [];
 
   structure.forEach((node) => {
-    children.push(new Paragraph({ text: node.name, heading: HeadingLevel.HEADING_1 }));
+    children.push(
+      new Paragraph({ text: node.name, heading: HeadingLevel.HEADING_1 }),
+    );
 
     const content = nodeContents.find((n) => n.nodeId === node.id)?.content;
     if (content) {
@@ -46,8 +48,15 @@ export const handleExportWord = async (
 
     if (node.nodes) {
       node.nodes.forEach((childNode) => {
-        children.push(new Paragraph({ text: childNode.name, heading: HeadingLevel.HEADING_2 }));
-        const childContent = nodeContents.find((n) => n.nodeId === childNode.id)?.content;
+        children.push(
+          new Paragraph({
+            text: childNode.name,
+            heading: HeadingLevel.HEADING_2,
+          }),
+        );
+        const childContent = nodeContents.find(
+          (n) => n.nodeId === childNode.id,
+        )?.content;
         if (childContent) {
           children.push(new Paragraph(childContent));
         }
@@ -62,7 +71,7 @@ export const handleExportWord = async (
 
 export const handleExportPDF = (
   structure: StructureNode[],
-  nodeContents: NodeContent[]
+  nodeContents: NodeContent[],
 ) => {
   const doc = new jsPDF();
   const pageHeight = doc.internal.pageSize.height;
@@ -103,7 +112,9 @@ export const handleExportPDF = (
         doc.text(`- ${childNode.name}`, 15, y);
         y += 10;
 
-        const childContent = nodeContents.find((n) => n.nodeId === childNode.id)?.content;
+        const childContent = nodeContents.find(
+          (n) => n.nodeId === childNode.id,
+        )?.content;
         if (childContent) {
           const splitChildContent = doc.splitTextToSize(childContent, 180);
           splitChildContent.forEach((line: string | string[]) => {
@@ -125,7 +136,7 @@ export const handleExportPDF = (
 
 export const handleExportLATEX = (
   structure: StructureNode[],
-  nodeContents: NodeContent[]
+  nodeContents: NodeContent[],
 ) => {
   let latexContent = `
 \\documentclass{article}
@@ -157,7 +168,9 @@ export const handleExportLATEX = (
     if (node.nodes) {
       node.nodes.forEach((childNode) => {
         latexContent += `\\subsection{${escapeLatex(childNode.name)}}\n`;
-        const childContent = nodeContents.find((n) => n.nodeId === childNode.id)?.content;
+        const childContent = nodeContents.find(
+          (n) => n.nodeId === childNode.id,
+        )?.content;
         if (childContent) {
           latexContent += `${parseRichContent(childContent)}\n\n`;
         }
@@ -196,8 +209,8 @@ const parseRichContent = (content: string): string => {
     /\[FIGURE:([^:]+):([^\]]+)\]/g,
     (_, caption, url) =>
       `\\begin{figure}[h]\n\\centering\n\\includegraphics[width=0.8\\textwidth]{${url}}\n\\caption{${escapeLatex(
-        caption
-      )}}\n\\end{figure}`
+        caption,
+      )}}\n\\end{figure}`,
   );
 
   processed = processed.replace(
@@ -211,7 +224,7 @@ const parseRichContent = (content: string): string => {
             .replace(/<tr>|<\/tr>/g, "")
             .split(/<\/td>/)
             .map((cell) => cell.replace(/<td>|<\/td>/g, "").trim())
-            .filter(Boolean)
+            .filter(Boolean),
         )
         .filter((row: string[]) => row.length > 0);
 
@@ -220,14 +233,17 @@ const parseRichContent = (content: string): string => {
         .join("\n");
 
       return `\\begin{table}[h]\n\\centering\n\\caption{${escapeLatex(
-        caption
+        caption,
       )}}\n\\begin{tabular}{|${"c|".repeat(tableRows[0]?.length || 1)}}\n\\hline\n${tableBody}\n\\end{tabular}\n\\end{table}`;
-    }
+    },
   );
 
   processed = processed.replace(/\\textbackslash\{\}\$/g, "$");
 
-  processed = processed.replace(/\[CITE:([^\]]+)\]/g, (_, key) => `\\cite{${key}}`);
+  processed = processed.replace(
+    /\[CITE:([^\]]+)\]/g,
+    (_, key) => `\\cite{${key}}`,
+  );
 
   return processed;
 };

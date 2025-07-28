@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom"; 
-import { ProjectService } from "../utils/ProjectService"; 
+import { useParams } from "react-router-dom";
+import { ProjectService } from "../utils/ProjectService";
 import { NodeContentService } from "../utils/NodeContentService";
 import word from "/src/assets/images/full-document-page/word.jpg";
 import pdf from "/src/assets/images/full-document-page/pdf.jpg";
@@ -8,7 +8,7 @@ import latex from "/src/assets/images/full-document-page/latex.png";
 import {
   handleExportWord,
   handleExportPDF,
-  handleExportLATEX
+  handleExportLATEX,
 } from "../utils/DocumentExporters";
 
 interface StructureNode {
@@ -134,18 +134,15 @@ const FullDocumentCard = () => {
     <div className="p-4 shadow-lg rounded-lg bg-gray-100 relative">
       <div className="flex items-center gap-150 mb-4">
         <h2 className="text-2xl font-bold mr-6">Full Document</h2>
-          <div className="flex space-x-4">
+        <div className="flex space-x-4">
           {/* Word Export Button */}
-          <button
-            onClick={() => handleExportWord(structure, nodeContents)}
-          >
+          <button onClick={() => handleExportWord(structure, nodeContents)}>
             <img src={word} className="h-14 w-14" />
           </button>
           {/* PDF Export Button */}
           <button
             onClick={() => handleExportPDF(structure, nodeContents)}
             title="Download it as a PDF file"
-            //className="p-3 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md flex items-center justify-center"
           >
             <img src={pdf} className="h-14 w-14" />
           </button>
@@ -153,7 +150,6 @@ const FullDocumentCard = () => {
           <button
             onClick={() => handleExportLATEX(structure, nodeContents)}
             title="Download it as a LaTeX document"
-            //className="p-3 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md flex items-center justify-center"
           >
             <img src={latex} className="h-14 w-14" />
           </button>
