@@ -2,14 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ProjectService } from "../utils/ProjectService";
 import { NodeContentService } from "../utils/NodeContentService";
-import word from "/src/assets/images/full-document-page/word.jpg";
-import pdf from "/src/assets/images/full-document-page/pdf.jpg";
-import latex from "/src/assets/images/full-document-page/latex.png";
+import ExportButton from "./full-document-page/ExportButton";
 import {
   handleExportWord,
   handleExportPDF,
   handleExportLATEX,
 } from "../utils/DocumentExporters";
+import word from "/src/assets/images/full-document-page/word.jpg";
+import pdf from "/src/assets/images/full-document-page/pdf.jpg";
+import latex from "/src/assets/images/full-document-page/latex.png";
 
 /**
  * Generates the whole project content in one single page and exports it as Word, PDF, or LaTeX format.
@@ -147,42 +148,30 @@ const FullDocumentCard = () => {
 
   return (
     <div className="p-4 shadow-lg rounded-lg bg-gray-100 relative">
-      <div className="flex items-center gap-150 mb-4">
+      <div className="flex items-center gap-140 mb-4">
         <h2 className="text-2xl font-bold mr-6">Full Document</h2>
         <div className="flex space-x-1">
           {/* Word Export Button */}
-          <button
+          <ExportButton
             onClick={() => handleExportWord(structure, nodeContents)}
-            className="group p-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
+            imageSrc={word}
             title="Download it as a Word document"
-          >
-            <img
-              src={word}
-              className="h-14 w-14 transform transition-transform duration-200 group-hover:scale-105"
-            />
-          </button>
+            altText="Word Export"
+          />
           {/* PDF Export Button */}
-          <button
+          <ExportButton
             onClick={() => handleExportPDF(structure, nodeContents)}
-            className="group p-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
+            imageSrc={pdf}
             title="Download it as a PDF file"
-          >
-            <img
-              src={pdf}
-              className="h-14 w-14 transform transition-transform duration-200 group-hover:scale-105"
-            />
-          </button>
+            altText="PDF Export"
+          />
           {/* LaTeX Export Button */}
-          <button
+          <ExportButton
             onClick={() => handleExportLATEX(structure, nodeContents)}
-            className="group p-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
+            imageSrc={latex}
             title="Download it as a LaTeX document"
-          >
-            <img
-              src={latex}
-              className="h-14 w-14 transform transition-transform duration-200 group-hover:scale-105"
-            />
-          </button>
+            altText="LaTeX Export"
+          />
         </div>
       </div>
 
