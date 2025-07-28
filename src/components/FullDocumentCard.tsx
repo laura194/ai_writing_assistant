@@ -134,24 +134,39 @@ const FullDocumentCard = () => {
     <div className="p-4 shadow-lg rounded-lg bg-gray-100 relative">
       <div className="flex items-center gap-150 mb-4">
         <h2 className="text-2xl font-bold mr-6">Full Document</h2>
-        <div className="flex space-x-4">
+        <div className="flex space-x-1">
           {/* Word Export Button */}
-          <button onClick={() => handleExportWord(structure, nodeContents)}>
-            <img src={word} className="h-14 w-14" />
+          <button
+            onClick={() => handleExportWord(structure, nodeContents)}
+            className="group p-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
+            title="Download it as a Word document"
+          >
+            <img
+              src={word}
+              className="h-14 w-14 transform transition-transform duration-200 group-hover:scale-105"
+            />
           </button>
           {/* PDF Export Button */}
           <button
             onClick={() => handleExportPDF(structure, nodeContents)}
+            className="group p-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
             title="Download it as a PDF file"
           >
-            <img src={pdf} className="h-14 w-14" />
+            <img
+              src={pdf}
+              className="h-14 w-14 transform transition-transform duration-200 group-hover:scale-105"
+            />
           </button>
           {/* LaTeX Export Button */}
           <button
             onClick={() => handleExportLATEX(structure, nodeContents)}
+            className="group p-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
             title="Download it as a LaTeX document"
           >
-            <img src={latex} className="h-14 w-14" />
+            <img
+              src={latex}
+              className="h-14 w-14 transform transition-transform duration-200 group-hover:scale-105"
+            />
           </button>
         </div>
       </div>
