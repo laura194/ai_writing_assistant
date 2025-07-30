@@ -40,7 +40,7 @@ export const RecentProjectsDropdown = () => {
             </Link>
           ))
         ) : (
-          <p className="text-xs text-[#dfdaf1]">No recent projects.</p>
+          <p className="text-xs text-[#dfdaf1] mb-3">No recent projects.</p>
         )}
       </div>
     </div>
