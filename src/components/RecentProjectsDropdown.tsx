@@ -27,14 +27,14 @@ export const RecentProjectsDropdown = () => {
 
   return (
     <div className="relative group">
-      <button className="text-sm text-[#dfdaf1]">Recent Projects</button>
+      <button className="text-sm text-[#afa6c5]">Recent Projects</button>
       <div className="absolute top-full mt-2 w-max whitespace-nowrap bg-[#1e1538] border border-[#32265b] rounded-xl shadow-[0_2px_50px_rgba(0,0,0,0.3)] px-4 pt-2 pb-0 opacity-0 group-hover:opacity-100 transition-all duration-300 z-50">
         {recentProjects.length > 0 ? (
           recentProjects.map((p) => (
             <Link
               key={p._id}
               to={`/edit/${p._id}`}
-              className="block text-sm text-[#dfdaf1] hover:text-white mb-2"
+              className="block text-sm text-[#c2bad8] hover:text-white mb-2"
             >
               {p.name}
             </Link>
