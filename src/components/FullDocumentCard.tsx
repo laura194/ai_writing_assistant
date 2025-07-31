@@ -1,7 +1,31 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom"; // Importiere useParams
-import { ProjectService } from "../utils/ProjectService"; // Importiere den ProjectService
+import { useParams } from "react-router-dom";
+import { ProjectService } from "../utils/ProjectService";
 import { NodeContentService } from "../utils/NodeContentService";
+import ExportButton from "./full-document-page/ExportButton";
+import {
+  handleExportWord,
+  handleExportPDF,
+  handleExportLATEX,
+} from "../utils/DocumentExporters";
+import word from "/src/assets/images/full-document-page/word.jpg";
+import pdf from "/src/assets/images/full-document-page/pdf.jpg";
+import latex from "/src/assets/images/full-document-page/latex.png";
+
+/**
+ * Generates the whole project content in one single page and exports it as Word, PDF, or LaTeX format.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered full document export UI.
+ *
+ * @description
+ * - Fetches a hierarchical project structure and content from backend services.
+ * - Renders the document structure dynamically in HTML format.
+ * - Allows exporting the full document in multiple formats via buttons:
+ *   - Word (.docx) using `docx`
+ *   - PDF (.pdf) using `jsPDF`
+ *   - LaTeX (.tex) with support for figures, tables, math equations, and citations
+ */
 
 interface StructureNode {
   id: string;
@@ -17,7 +41,7 @@ interface NodeContent {
 }
 
 const FullDocumentCard = () => {
-  const { projectId } = useParams<{ projectId: string }>(); // Hole die projectId aus der URL
+  const { projectId } = useParams<{ projectId: string }>(); // Get the projectId from the URL
   const containerRef = useRef<HTMLDivElement>(null);
   const [structure, setStructure] = useState<StructureNode[]>([]);
   const [nodeContents, setNodeContents] = useState<NodeContent[]>([]);
@@ -26,28 +50,28 @@ const FullDocumentCard = () => {
 
   useEffect(() => {
     if (!projectId) {
-      setError("Projekt-ID nicht gefunden.");
+      setError("Projekt-ID not found.");
       setLoading(false);
       return;
     }
 
     const fetchStructure = async () => {
       try {
-        const data = await ProjectService.getProjectById(projectId); // Verwende die projectId aus der URL
+        const data = await ProjectService.getProjectById(projectId); // Use the projectId from URL
         if (data && data.projectStructure) {
           setStructure(data.projectStructure);
         } else {
-          setError("Projektstruktur ist leer oder nicht verfügbar.");
+          setError("Project structure is empty or unavailable.”");
         }
       } catch {
-        setError("Fehler beim Laden der Projektstruktur.");
+        setError("Error loading the project structure.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchStructure();
-  }, [projectId]); // Abhängigkeit hinzufügen, damit die Anfrage bei Änderung der projectId neu ausgeführt wird
+  }, [projectId]); // Add dependency so the request runs again when projectId changes
 
   useEffect(() => {
     const fetchNodeContents = async () => {
@@ -68,7 +92,7 @@ const FullDocumentCard = () => {
         }));
         setNodeContents(mappedData);
       } catch {
-        setError("Fehler beim Laden der Inhalte.");
+        setError("Error loading the contents.");
       } finally {
         setLoading(false);
       }
@@ -124,16 +148,31 @@ const FullDocumentCard = () => {
 
   return (
     <div className="p-4 shadow-lg rounded-lg bg-gray-100 relative">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Full Document</h2>
-        <button
-          onClick={() =>
-            alert("Here you could export the document as a Word file.")
-          }
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Word //TODO: Export function + Latex Button
-        </button>
+      <div className="flex items-center gap-140 mb-4">
+        <h2 className="text-2xl font-bold mr-6">Full Document</h2>
+        <div className="flex space-x-1">
+          {/* Word Export Button */}
+          <ExportButton
+            onClick={() => handleExportWord(structure, nodeContents)}
+            imageSrc={word}
+            title="Download it as a Word document"
+            altText="Word Export"
+          />
+          {/* PDF Export Button */}
+          <ExportButton
+            onClick={() => handleExportPDF(structure, nodeContents)}
+            imageSrc={pdf}
+            title="Download it as a PDF file"
+            altText="PDF Export"
+          />
+          {/* LaTeX Export Button */}
+          <ExportButton
+            onClick={() => handleExportLATEX(structure, nodeContents)}
+            imageSrc={latex}
+            title="Download it as a LaTeX document"
+            altText="LaTeX Export"
+          />
+        </div>
       </div>
 
       {loading ? (
