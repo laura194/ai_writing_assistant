@@ -8,3 +8,11 @@
  *
  * But like the global styles inside the index.css, be careful with the selectors you use.
  */
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
