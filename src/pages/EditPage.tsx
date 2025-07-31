@@ -14,6 +14,7 @@ import { NodeContentService } from "../utils/NodeContentService";
 import FullDocumentCard from "../components/FullDocumentCard";
 import { ProjectService } from "../utils/ProjectService";
 import { useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const EditPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -349,67 +350,89 @@ const EditPage = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen bg-[#090325] text-white relative overflow-hidden overflow-x-hidden">
         <Header />
+
         <div className="flex flex-1 relative pt-14">
-          <button
-            className="absolute top-1 left-1 bg-gray-600 hover:bg-gray-500 p-2 rounded"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            <Bars3Icon className="h-5 w-5 text-white" />
-          </button>
-
           <div
-            className={`${
-              menuOpen ? "w-1/4" : "w-12"
-            } transition-all duration-300 overflow-hidden bg-gray-200 text-black p-4 flex flex-col justify-between`}
+            className={`${menuOpen ? "w-1/5" : "w-19"} transition-all duration-500 flex flex-col"`}
           >
-            {menuOpen && (
-              <ul className="mt-8">
-                {nodes.map((node) => (
-                  <Folder
-                    key={node.id}
-                    node={node}
-                    onMove={handleMoveNode}
-                    onNodeClick={handleNodeClick}
-                    onAdd={addChapter}
-                    onRemove={deleteChapter}
-                    onRenameOrIconUpdate={handleRenameOrIconUpdate}
-                  />
-                ))}
-              </ul>
-            )}
+            <div className="bg-[#1e1538] py-2 px-4 flex flex-1 flex-col justify-between shadow-[inset_0_0_30px_rgba(120,69,239,0.25)]">
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="mb-2 py-1 mt-2 px-2 rounded-full hover:bg-[#373254] transition cursor-pointer"
+              >
+                <Bars3Icon className="h-6 w-6 text-[#c4b5fd]" />
+              </button>
 
-            <BottomNavigationBar
-              activeView={activeView}
-              onChangeView={handleViewChange}
-              menuOpen={menuOpen}
-            />
-          </div>
-
-          <div
-            className={`${
-              menuOpen ? "w-3/4" : "w-full"
-            } transition-all duration-300 p-4 bg-gray-400`}
-          >
-            {selectedNode ? (
-              activeView === "file" ? (
-                <FileContentCard
-                  node={selectedNode}
-                  onDirtyChange={(dirty: boolean) => setIsDirty(dirty)}
-                  onSave={handleNodeSave}
+              {menuOpen && (
+                <ul className="space-y-2 overflow-y-scroll no-scrollbar flex-1 px-2">
+                  {nodes.map((node) => (
+                    <Folder
+                      key={node.id}
+                      node={node}
+                      onMove={handleMoveNode}
+                      onNodeClick={handleNodeClick}
+                      onAdd={addChapter}
+                      onRemove={deleteChapter}
+                      onRenameOrIconUpdate={handleRenameOrIconUpdate}
+                    />
+                  ))}
+                </ul>
+              )}
+              <div>
+                <BottomNavigationBar
+                  activeView={activeView}
+                  onChangeView={handleViewChange}
+                  menuOpen={menuOpen}
                 />
-              ) : activeView === "ai" ? (
-                <AIProtocolCard />
-              ) : activeView === "fullDocument" ? (
-                <FullDocumentCard />
-              ) : (
-                <p>Settings</p>
-              )
-            ) : (
-              <p>Select an element.</p>
-            )}
+              </div>
+            </div>
           </div>
+
+          <main
+            className={`${menuOpen ? "w-4/5" : "w-full"} transition-all duration-300 p-6`}
+          >
+            <motion.div
+              initial={{ backgroundPosition: "0% 0%" }}
+              animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
+              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(120,69,239,0.25)]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(180deg, #7c3aed, #db2777, #facc15)",
+                backgroundSize: "200% 200%",
+              }}
+            >
+              <div className="bg-[#1e1538] rounded-3xl p-6 h-full shadow-[0_0_40px_rgba(120,69,239,0.2)]">
+                {selectedNode ? (
+                  activeView === "file" ? (
+                    <FileContentCard
+                      node={selectedNode}
+                      onDirtyChange={(dirty: boolean) => setIsDirty(dirty)}
+                      onSave={handleNodeSave}
+                    />
+                  ) : activeView === "ai" ? (
+                    <AIProtocolCard />
+                  ) : activeView === "fullDocument" ? (
+                    <FullDocumentCard />
+                  ) : (
+                    <div className="flex h-full items-center justify-center">
+                      <p className="text-xl text-[#aaa6c3] leading-relaxed">
+                        Unknown view selected.
+                      </p>
+                    </div>
+                  )
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <p className="text-xl text-[#aaa6c3] leading-relaxed">
+                      Select an element on the left to begin editing.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </main>
         </div>
 
         <UnsavedChangesDialog
