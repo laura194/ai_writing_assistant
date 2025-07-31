@@ -28,6 +28,8 @@ The goal of this project is to develop a web-based application that supports use
 - **AI Assistance:** AI-powered suggestions and help during writing,
 - **Protocol with filter:** Automatic documentation of all AI interactions for transparency,
 - **Word Export:** Export the entire document as a Word file,
+- **PDF Export:** Download the document as a PDF file,
+- **LaTeX Export:** Download the document in LaTeX format,
 - **User-Friendly Interface:** Intuitive operation and modern design.
 
 ## 💻 Local Development
@@ -111,7 +113,9 @@ To build and run the app locally, follow these steps:
 - **Vite** for fast development and HMR
 - **Tailwind CSS** for styling
 - **Clerk** for authentication
-- **docx** and **file-saver** for Word export
+- **docx** and **file-saver** for Word
+- **jspdf** for PDF
+- **latex.js** for LaTeX
 - **ESLint** for code quality
 
 ## 🧪 Testing
