@@ -40,11 +40,15 @@ To build and run the app locally, follow these steps:
    gh repo clone laura194/ai_writing_assistant
    ```
 
-2. Fetch dependencies:
+2. Download Docker (Desktop App) and set up MongoDB
+
+3. Open the repository in your choice of IDE (e.g. VS Code or WebStorm)
+
+4. Fetch dependencies:
    ```bash
     npm install
    ```
-3. Run the app:
+5. Run the app:
    ```bash
    npm start
    ```
@@ -69,22 +73,35 @@ To build and run the app locally, follow these steps:
 │    └── node_modules
 ├── src
 │   ├── assets
+│   │     └── images
+│   │          └── full-document-page
+│   │          └── landing-page
 │   ├── components
-│   │   ├── ai
+│   │   └── ai
+│   │   └── full-document-page
+│   │   └── landing-page
+│   ├── constants
+│   ├── hoc
 │   ├── models
 │   ├── pages
 │   ├── tests
+│   ├── types
 │   └── utils
-├── .gitignore
-├── eslint.config.js
-├── index.html
-├── package-lock.json
-├── package.json
-├── README.md
-├── tsconfig.app.json
-├── tsconfig.json
-├── tsconfig.node.json
-├── vite.config.ts
+│   ├── App.css
+│   ├── App.tsx
+│   ├── AppRoutes.tsx
+│   ├── index.css
+│   ├── main.tsx
+│ .gitignore
+│ eslint.config.js
+│ index.html
+│ package-lock.json
+│ package.json
+│ README.md
+│ tsconfig.app.json
+│ tsconfig.json
+│ tsconfig.node.json
+│ vite.config.ts
 ```
 
 ## 🛠️ Dependencies Overview
