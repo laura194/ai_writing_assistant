@@ -350,12 +350,12 @@ const EditPage = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="flex flex-col h-screen bg-[#090325] text-white relative overflow-hidden overflow-x-hidden">
+      <div className="flex flex-col h-screen bg-[#090325] text-white relative overflow-x-hidden">
         <Header />
 
         <div className="flex flex-1 relative pt-14">
           <div
-            className={`${menuOpen ? "w-1/5" : "w-19"} transition-all duration-500 flex flex-col"`}
+            className={`${menuOpen ? "w-[24%]" : "w-19"} transition-all duration-500 flex flex-col overflow-visible relative`}
           >
             <div className="bg-[#1e1538] py-2 px-4 flex flex-1 flex-col justify-between shadow-[inset_0_0_30px_rgba(120,69,239,0.25)]">
               <button
@@ -376,6 +376,7 @@ const EditPage = () => {
                       onAdd={addChapter}
                       onRemove={deleteChapter}
                       onRenameOrIconUpdate={handleRenameOrIconUpdate}
+                      selectedNodeId={selectedNode?.id}
                     />
                   ))}
                 </ul>
@@ -391,7 +392,7 @@ const EditPage = () => {
           </div>
 
           <main
-            className={`${menuOpen ? "w-4/5" : "w-full"} transition-all duration-300 p-6`}
+            className={`${menuOpen ? "w-[76%]" : "w-full"} transition-all duration-300 p-6`}
           >
             <motion.div
               initial={{ backgroundPosition: "0% 0%" }}

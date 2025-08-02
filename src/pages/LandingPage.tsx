@@ -23,7 +23,7 @@ export default function LandingPage() {
     >
       <section className="relative min-h-screen flex flex-col">
         <div
-          className="bg-hero-pattern bg-cover bg-no-repeat bg-cente absolute inset-0 z-0 bg-[#050816]"
+          className="bg-hero-pattern bg-cover bg-no-repeat bg-center absolute inset-0 z-0 bg-[#050816]"
           style={{ backgroundImage: `url(${heroBg})` }}
         />
         <LandingHeader />
