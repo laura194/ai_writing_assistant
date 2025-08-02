@@ -34,7 +34,7 @@ const BottomNavigationBar = ({
         py-3
         bg-[#1e1538]/80 backdrop-blur-md
         border border-[#361e7c]
-        shadow-[0_0_50px_rgba(120,69,239,0.175)]
+        shadow-[0_0_60px_rgba(120,69,239,0.2)]
         rounded-full
         transition
         mb-1
@@ -43,9 +43,8 @@ const BottomNavigationBar = ({
       {buttons.map((btn) => {
         const isActive = activeView === btn.view;
         return (
-          <motion.div whileHover={{ scale: 1.125 }}>
+          <motion.div whileHover={{ scale: 1.125 }} key={btn.view}>
             <button
-              key={btn.view}
               onClick={() => onChangeView(btn.view)}
               className={`
               cursor-pointer
