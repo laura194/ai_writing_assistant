@@ -31,7 +31,7 @@ const ProjectOverview = () => {
       if (user?.username) {
         try {
           const userProjects = await ProjectService.getProjectsByUsername(
-            user.username
+            user.username,
           );
           setProjects(userProjects);
         } catch (error) {
@@ -84,7 +84,7 @@ const ProjectOverview = () => {
               boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
               border: "1px solid #ef4444",
             },
-          }
+          },
         );
       }
     }
@@ -96,7 +96,7 @@ const ProjectOverview = () => {
       // Kopiere die projectStructure, um den Namen des ersten Nodes zu aktualisieren
       const updatedProjectStructure = [...project.projectStructure];
       const firstNode = updatedProjectStructure.find(
-        (structure) => structure.id === "1"
+        (structure) => structure.id === "1",
       );
       if (firstNode) {
         firstNode.name = editedName; // Setze den neuen Projektnamen
@@ -111,7 +111,7 @@ const ProjectOverview = () => {
 
       // Projekte im Zustand aktualisieren
       setProjects((prev) =>
-        prev.map((p) => (p._id === project._id ? updated : p))
+        prev.map((p) => (p._id === project._id ? updated : p)),
       );
     } catch (e) {
       toast.error(
@@ -129,7 +129,7 @@ const ProjectOverview = () => {
             boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
             border: "1px solid #ef4444",
           },
-        }
+        },
       );
       console.error(e);
     } finally {
