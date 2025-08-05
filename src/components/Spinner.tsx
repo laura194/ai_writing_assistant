@@ -1,6 +1,6 @@
 export default function Spinner() {
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-60">
       <svg
         className="animate-spin"
         width="100"
@@ -9,9 +9,9 @@ export default function Spinner() {
       >
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#a855f7" />
-            <stop offset="50%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#ef4444" />
+            <stop offset="0%" stopColor="#7c3aed" />
+            <stop offset="50%" stopColor="#db2777" />
+            <stop offset="100%" stopColor="#facc15" />
           </linearGradient>
         </defs>
         <circle

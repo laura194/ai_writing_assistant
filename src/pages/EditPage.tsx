@@ -355,7 +355,7 @@ const EditPage = () => {
 
         <div className="flex flex-1 relative pt-14">
           <div
-            className={`${menuOpen ? "w-[24%]" : "w-19"} transition-all duration-500 flex flex-col overflow-visible relative`}
+            className={`${menuOpen ? "w-1/4" : "w-19"} transition-all duration-500 flex flex-col overflow-visible relative`}
           >
             <div className="bg-[#1e1538] py-2 px-4 flex flex-1 flex-col justify-between shadow-[inset_0_0_30px_rgba(120,69,239,0.25)]">
               <button
@@ -392,20 +392,20 @@ const EditPage = () => {
           </div>
 
           <main
-            className={`${menuOpen ? "w-[76%]" : "w-full"} transition-all duration-300 p-6`}
+            className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-6`}
           >
             <motion.div
               initial={{ backgroundPosition: "0% 0%" }}
               animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
               transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(120,69,239,0.25)]"
+              className="p-[4px] rounded-3xl shadow-[0_0_30px_rgba(120,69,239,0.25)] h-full"
               style={{
                 backgroundImage:
                   "linear-gradient(180deg, #7c3aed, #db2777, #facc15)",
                 backgroundSize: "200% 200%",
               }}
             >
-              <div className="bg-[#1e1538] rounded-3xl p-6 h-full shadow-[0_0_40px_rgba(120,69,239,0.2)]">
+              <div className="bg-[#1e1538] rounded-3xl h-full shadow-[0_0_40px_rgba(120,69,239,0.3)] flex flex-col">
                 {selectedNode ? (
                   activeView === "file" ? (
                     <FileContentCard

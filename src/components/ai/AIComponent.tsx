@@ -1,10 +1,12 @@
 import { Dialog } from "@headlessui/react";
 import { useState, useEffect, useRef } from "react";
-import { Lightbulb, X, Check, Plus } from "lucide-react";
+import { Lightbulb, X, Check, Plus, SendHorizonal } from "lucide-react";
 import { fetchAIResponse, createAIProtocolEntry } from "../../utils/AIHandler";
 import { AIResult } from "../../models/IAITypes";
 import MarkdownContent from "../MarkdownContent";
 import { useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import Spinner from "../Spinner";
 
 interface AIComponentProps {
   selectedText: string;
@@ -37,6 +39,7 @@ function AIComponent({
   const dialogRef = useRef<HTMLDivElement>(null);
   const suggestionsMenuRef = useRef<HTMLDivElement>(null);
   const { projectId } = useParams<{ projectId: string }>();
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -48,22 +51,20 @@ function AIComponent({
   }, [isOpen]);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    function onClickOutside(e: MouseEvent) {
+      if (!showSuggestions) return;
+      const target = e.target as Node;
       if (
         suggestionsMenuRef.current &&
-        !suggestionsMenuRef.current.contains(event.target as Node)
+        !suggestionsMenuRef.current.contains(target) &&
+        toggleRef.current &&
+        !toggleRef.current.contains(target)
       ) {
         setShowSuggestions(false);
       }
-    };
-
-    if (showSuggestions) {
-      document.addEventListener("mousedown", handleClickOutside);
     }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
   }, [showSuggestions]);
 
   const createProtocolAt = (index: number, action: "Replace" | "Append") => {
@@ -121,119 +122,189 @@ function AIComponent({
   };
 
   return (
-    <Dialog
-      open={isOpen}
-      onClose={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center"
-    >
-      <div className="fixed inset-0 bg-transparent" aria-hidden="true" />
+    <>
+      {loading && <Spinner />}
 
-      <div
-        ref={dialogRef}
-        className="absolute top-[63px] bg-white p-6 rounded-lg shadow-xl border border-gray-300 transition-all duration-300 w-[1200px]"
+      <Dialog
+        open={isOpen}
+        onClose={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center"
       >
-        <div className="flex justify-between items-center mb-4 cursor-move">
-          <h2 className="text-lg font-semibold">AI Assistant</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-800"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+          aria-hidden="true"
+        />
 
-        {/* Scrollbarer Bereich für Originaltext + Verlauf */}
-        <div className="mt-2 space-y-4 max-h-[50vh] overflow-y-auto pr-2">
-          {/* Original Text */}
-          <div>
-            <h4 className="text-xs text-gray-500 mb-1">Original Text</h4>
-            <div className="bg-gray-100 p-2 rounded text-sm max-w-[1100px]">
-              <MarkdownContent content={selectedText} />
+        {/* animierter Außen-Rahmen */}
+        <motion.div
+          ref={dialogRef}
+          initial={{ backgroundPosition: "0% 50%" }}
+          animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+          transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
+          className="relative p-[3px] rounded-3xl"
+          style={{
+            backgroundImage:
+              "linear-gradient(90deg, #7c3aed, #db2777, #facc15)",
+            backgroundSize: "200% 200%",
+          }}
+        >
+          {/* Inneres Panel */}
+          <div className="flex flex-col h-full max-h-[90vh] w-[90vw] max-w-[1200px] rounded-3xl bg-[#1e1538] shadow-2xl overflow-hidden">
+            {/* Dein Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b-2 border-[#3e316e]">
+              <h2 className="text-4xl font-semibold text-[#ffffff] uppercase">
+                AI Assistant
+              </h2>
+              <motion.button
+                whileHover={{
+                  scale: 1.1,
+                }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onClose}
+                className="p-2 rounded cursor-pointer transition duration-100"
+              >
+                <X className="w-6 h-6 text-[#afa6c5] hover:text-[#ffffff] transition duration-300" />
+              </motion.button>
             </div>
-          </div>
 
-          {/* AI Response History */}
-          {history.map((item, index) => (
-            <div key={index} className="border-t pt-2 flex flex-col gap-1">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-xs text-gray-500 mb-1">
-                    Prompt: {item.prompt || "–"}
+            {/* Scrollbarer Bereich für Originaltext + Verlauf */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 max-h-[60vh] pr-6">
+              {/* Original Text */}
+              <div>
+                <h4 className="text-m text-[#afa6c5] mb-1.5 ml-4">
+                  Original Text
+                </h4>
+                <div className="bg-[#2c2544] px-4 py-1 pb-3 rounded-lg text-[#e8e8ff]">
+                  <MarkdownContent content={selectedText} />
+                </div>
+              </div>
+              {/* AI Response History */}
+              {history.map((item, index) => (
+                <div
+                  key={index}
+                  className="border-t-2 border-[#34285e] pt-3 flex flex-col gap-1.5"
+                >
+                  <h4 className="text-m text-[#c5b4f4] mb-1.5 ml-4">
+                    Your Prompt: {item.prompt}
                   </h4>
-                  <div className="bg-gray-100 p-2 rounded text-sm max-w-[1100px]">
-                    <MarkdownContent content={item.text} />
+                  <div className="flex">
+                    <div className="flex-1 bg-[#2c2544] px-4 py-1 pb-3 rounded-lg text-[#e8e8ff]">
+                      <MarkdownContent content={item.text} />
+                    </div>
+
+                    <div className="ml-3 flex flex-col gap-2">
+                      <motion.button
+                        whileHover={{
+                          scale: 1.1,
+                          boxShadow: "0 0 16px rgba(120,69,239,0.3)",
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        title="Replace with this text"
+                        onClick={() => handleReplaceAt(index)}
+                        className="p-1 rounded-full bg-[#2e214b] hover:bg-[#443764] shadow-[0_0_10px_rgba(120,69,239,0.2)] transition-colors duration-200 cursor-pointer text-green-400 hover:text-green-300"
+                      >
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#20173b]">
+                          <Check className="w-5.5 h-5.5 " />
+                        </div>
+                      </motion.button>
+                      <motion.button
+                        whileHover={{
+                          scale: 1.1,
+                          boxShadow: "0 0 16px rgba(120,69,239,0.3)",
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        title="Append this text"
+                        onClick={() => handleAppendAt(index)}
+                        className="p-1 rounded-full bg-[#2e214b] hover:bg-[#443764] shadow-[0_0_10px_rgba(120,69,239,0.2)] transition-colors duration-200 cursor-pointer text-cyan-400 hover:text-cyan-300"
+                      >
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#20173b]">
+                          <Plus className="w-5.5 h-5.5" />
+                        </div>
+                      </motion.button>
+                    </div>
                   </div>
                 </div>
-                <div className="flex flex-col gap-1 ml-4">
-                  <button
-                    title="Replace with this text"
-                    onClick={() => handleReplaceAt(index)}
-                    className="p-1 rounded hover:bg-gray-200"
+              ))}
+            </div>
+
+            {/* Prompt Input & Suggestions */}
+            <div className="px-6 py-4 border-t-2 border-[#3e316e] relative">
+              <h4 className="text-m text-[#afa6c5] mb-1.5 ml-4">
+                Refine or continue with a new prompt
+              </h4>
+              <textarea
+                className="w-full bg-[#2c2544] text-[#e8e8ff] placeholder-[#787086]
+                         rounded-lg border-2 border-[#35285f]
+                         resize-none mb-3 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-700 transition duration-200"
+                placeholder="Note: This AI has no memory. Your prompt will only refer to the most recent version of the text."
+                value={additionalPrompt}
+                onChange={(e) => setAdditionalPrompt(e.target.value)}
+                key={history.length}
+              />
+
+              <div className="flex items-center justify-between">
+                <div className="relative">
+                  {showSuggestions && (
+                    <div
+                      ref={suggestionsMenuRef}
+                      className="absolute left-full bottom-0 bg-[#2c2544] border-1 border-[#3e316e]
+                     rounded-xl shadow-[0_0_10px_rgba(120,69,239,0.1)] py-1.5 space-y-0.5 max-h-50 overflow-y-auto z-50 w-67"
+                    >
+                      {suggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          className="block w-full text-center px-4 py-2 text-[#e8e8ff]
+                               hover:bg-[#3a2e5a] transition duration-200 cursor-pointer"
+                          onClick={() => {
+                            setAdditionalPrompt(suggestion);
+                            setShowSuggestions(false);
+                          }}
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <motion.button
+                    ref={toggleRef}
+                    whileHover={{
+                      scale: 1.1,
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() =>
+                      setShowSuggestions((suggestion) => !suggestion)
+                    }
+                    className="p-2 rounded cursor-pointer transition duration-100"
+                    title="Show suggestions"
                   >
-                    <Check className="w-5 h-5 text-green-600" />
-                  </button>
-                  <button
-                    title="Append this text"
-                    onClick={() => handleAppendAt(index)}
-                    className="p-1 rounded hover:bg-gray-200"
-                  >
-                    <Plus className="w-5 h-5 text-blue-600" />
-                  </button>
+                    <Lightbulb className="w-6 h-6 ml-4 text-yellow-400 hover:text-yellow-200 transition duration-300" />
+                  </motion.button>
                 </div>
+                <motion.button
+                  title={"Ask AI"}
+                  onClick={
+                    history.length === 0 ? handleFetchResponse : handleFollowUp
+                  }
+                  whileHover={{
+                    scale: 1.05,
+                    boxShadow: "0 0 20px rgba(120,69,239,0.4)",
+                  }}
+                  className="p-[2px] rounded-xl w-[140px] transform transition-colors duration-250 bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-400 cursor-pointer"
+                >
+                  <div className="group flex items-center justify-center bg-[#1e1538] bg-opacity-90 backdrop-blur-md p-2 rounded-xl border transform transition-all duration-250 border-[#32265b] shadow-inner shadow-cyan-800/40">
+                    <SendHorizonal className="w-6 h-6 stroke-[#bea2ff]" />
+                    <span className="ml-3 text-xl font-semibold transition-colors duration-250 relative text-[#bea2ff] group-hover:text-[#e7dcff] before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-[2px] before:bg-[#bea2ff] group-hover:before:w-full before:transition-all before:duration-300">
+                      {loading ? "Loading..." : "Ask AI"}
+                    </span>
+                  </div>
+                </motion.button>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Prompt Input & Suggestions */}
-        <div className="mt-6 border-t pt-4">
-          <h3 className="text-sm font-semibold text-gray-600 mb-1">
-            Refine or continue with a new prompt
-          </h3>
-          <textarea
-            className="w-full p-2 border rounded bg-gray-100 text-gray-700 mb-2"
-            placeholder="Note: This AI has no memory. Your prompt will only refer to the most recent version of the text."
-            value={additionalPrompt}
-            onChange={(e) => setAdditionalPrompt(e.target.value)}
-            key={history.length}
-          />
-
-          <div className="flex justify-between items-center relative">
-            <button onClick={() => setShowSuggestions(!showSuggestions)}>
-              <Lightbulb className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
-              onClick={
-                history.length === 0 ? handleFetchResponse : handleFollowUp
-              }
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-              {loading ? "Loading..." : "Ask AI"}
-            </button>
-
-            {showSuggestions && (
-              <div
-                ref={suggestionsMenuRef}
-                className="absolute left-0 ml-4 mt-2 w-64 bg-white border rounded shadow-lg z-10"
-              >
-                {suggestions.map((suggestion, index) => (
-                  <button
-                    key={index}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-                    onClick={() => {
-                      setAdditionalPrompt(suggestion);
-                      setShowSuggestions(false);
-                    }}
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
-        </div>
-      </div>
-    </Dialog>
+        </motion.div>
+      </Dialog>
+    </>
   );
 }
 
