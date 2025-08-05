@@ -21,7 +21,7 @@ export class ProjectService {
     } catch (error) {
       console.error(
         `❌ [getProjectById] Error fetching project with ID ${id}:`,
-        error
+        error,
       );
       throw error;
     }
@@ -29,7 +29,7 @@ export class ProjectService {
 
   static async updateProject(
     id: string,
-    data: Partial<Project>
+    data: Partial<Project>,
   ): Promise<Project> {
     try {
       const response = await axios.put<Project>(`${API_BASE_URL}/${id}`, data);
@@ -37,7 +37,7 @@ export class ProjectService {
     } catch (error) {
       console.error(
         `❌ [updateProject] Error updating project with ID ${id}:`,
-        error
+        error,
       );
       throw error;
     }
@@ -47,7 +47,7 @@ export class ProjectService {
     try {
       const response = await axios.get<Project[]>(
         `${API_BASE_URL}/by-username`,
-        { params: { username } }
+        { params: { username } },
       );
       return response.data;
     } catch (error: unknown) {
@@ -58,19 +58,19 @@ export class ProjectService {
 
       console.error(
         `❌ [getProjectsByUsername] Error fetching projects for username ${username}:`,
-        error
+        error,
       );
       throw error;
     }
   }
 
   static async getRecentProjectsByUsername(
-    username: string
+    username: string,
   ): Promise<Project[]> {
     try {
       const response = await axios.get<Project[]>(
         `${API_BASE_URL}/by-username/recent`,
-        { params: { username } }
+        { params: { username } },
       );
       return response.data;
     } catch (error: unknown) {
@@ -79,7 +79,7 @@ export class ProjectService {
       }
       console.error(
         `❌ [getRecentProjectsByUsername] Error fetching recent projects for ${username}:`,
-        error
+        error,
       );
       throw error;
     }
@@ -91,7 +91,7 @@ export class ProjectService {
     } catch (error) {
       console.error(
         `❌ [deleteProject] Error deleting project with ID ${id}:`,
-        error
+        error,
       );
       throw error;
     }

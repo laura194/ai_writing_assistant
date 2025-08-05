@@ -17,7 +17,7 @@ import { Node } from "./types";
 export function getIcon(
   node: Node,
   size: string = "size-8",
-  customIcon?: string // Neuer Parameter für benutzerdefiniertes Icon
+  customIcon?: string, // Neuer Parameter für benutzerdefiniertes Icon
 ): React.ReactElement {
   const common = { className: `${size} fill-current` };
 
