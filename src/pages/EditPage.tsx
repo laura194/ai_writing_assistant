@@ -353,11 +353,11 @@ const EditPage = () => {
       <div className="flex flex-col h-screen bg-[#090325] text-white relative overflow-x-hidden">
         <Header />
 
-        <div className="flex flex-1 relative pt-14">
+        <div className="flex flex-1 relative">
           <div
-            className={`${menuOpen ? "w-1/4" : "w-19"} transition-all duration-500 flex flex-col overflow-visible relative`}
+            className={`sticky top-0 left-0 h-screen ${menuOpen ? "w-1/4" : "w-19"} transition-all duration-500 flex flex-col relative`}
           >
-            <div className="bg-[#1e1538] py-2 px-4 flex flex-1 flex-col justify-between shadow-[inset_0_0_30px_rgba(120,69,239,0.25)]">
+            <div className="bg-[#1e1538] py-2 px-4 flex h-full flex-col justify-between shadow-[inset_0_0_30px_rgba(120,69,239,0.25)] pt-14">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="mb-2 py-1 mt-2 px-2 rounded-full hover:bg-[#373254] transition cursor-pointer"
@@ -366,7 +366,7 @@ const EditPage = () => {
               </button>
 
               {menuOpen && (
-                <ul className="space-y-2 overflow-y-scroll no-scrollbar flex-1 px-2">
+                <ul className="flex-1 space-y-2 overflow-y-auto no-scrollbar px-2">
                   {nodes.map((node) => (
                     <Folder
                       key={node.id}
@@ -392,7 +392,7 @@ const EditPage = () => {
           </div>
 
           <main
-            className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-6`}
+            className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-6 pt-20`}
           >
             <motion.div
               initial={{ backgroundPosition: "0% 0%" }}
