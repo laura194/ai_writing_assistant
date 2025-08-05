@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ProjectService } from "../utils/ProjectService";
 import { NodeContentService } from "../utils/NodeContentService";
-import ExportButton from "./full-document-page/ExportButton";
 import {
   handleExportWord,
   handleExportPDF,
@@ -11,6 +10,7 @@ import {
 import word from "/src/assets/images/full-document-page/word.jpg";
 import pdf from "/src/assets/images/full-document-page/pdf.jpg";
 import latex from "/src/assets/images/full-document-page/latex.png";
+import { motion } from "framer-motion";
 
 /**
  * Generates the whole project content in one single page and exports it as Word, PDF, or LaTeX format.
@@ -83,7 +83,7 @@ const FullDocumentCard = () => {
 
         const data = await NodeContentService.getNodeContents(
           undefined,
-          projectId,
+          projectId
         );
         const mappedData = data.map((node) => ({
           nodeId: node.nodeId || "",
@@ -116,14 +116,14 @@ const FullDocumentCard = () => {
           const headingTag = `h${Math.min(depth + 1, 6)}`;
           const headingClass =
             depth === 1
-              ? "text-2xl font-bold mt-6"
+              ? "text-2xl font-bold mt-6 text-white"
               : depth === 2
-                ? "text-xl font-semibold mt-4"
-                : "text-lg font-medium mt-3";
+                ? "text-xl font-semibold mt-4 text-white"
+                : "text-lg mt-3 text-white";
 
           const heading = `<${headingTag} class="${headingClass}">${node.name}</${headingTag}>`;
           const content = contentEntry?.content
-            ? `<p class="whitespace-pre-line mt-2 mb-4">${escapeHtml(contentEntry.content)}</p>`
+            ? `<p class="whitespace-pre-line mt-2 mb-4 text-gray-200">${escapeHtml(contentEntry.content)}</p>`
             : "";
 
           const children = node.nodes ? buildHtml(node.nodes, depth + 1) : "";
@@ -147,43 +147,62 @@ const FullDocumentCard = () => {
   };
 
   return (
-    <div className="p-4 shadow-lg rounded-lg bg-gray-100 relative">
-      <div className="flex items-center gap-140 mb-4">
-        <h2 className="text-2xl font-bold mr-6">Full Document</h2>
-        <div className="flex space-x-1">
-          {/* Word Export Button */}
-          <ExportButton
-            onClick={() => handleExportWord(structure, nodeContents)}
-            imageSrc={word}
-            title="Download it as a Word document"
-            altText="Word Export"
-          />
-          {/* PDF Export Button */}
-          <ExportButton
-            onClick={() => handleExportPDF(structure, nodeContents)}
-            imageSrc={pdf}
-            title="Download it as a PDF file"
-            altText="PDF Export"
-          />
-          {/* LaTeX Export Button */}
-          <ExportButton
-            onClick={() => handleExportLATEX(structure, nodeContents)}
-            imageSrc={latex}
-            title="Download it as a LaTeX document"
-            altText="LaTeX Export"
-          />
+    <div className="relative flex flex-col h-full p-6 rounded-3xl bg-[#1e1538]">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-3xl font-bold inline-block tracking-wide">
+          {/* Gradient-Text */}
+          <span className="text-[#ffffff]">Full Document Overview</span>
+          <span className="block h-1 w-full mt-1.5 bg-gradient-to-r from-purple-500 via-pink-400 to-yellow-300 rounded-full" />
+        </h2>
+        <div className="flex space-x-5">
+          {/** Gradient-Border um die Buttons wie im FileContentCard **/}
+          {[
+            {
+              onClick: () => handleExportWord(structure, nodeContents),
+              src: word,
+              alt: "Word",
+            },
+            {
+              onClick: () => handleExportPDF(structure, nodeContents),
+              src: pdf,
+              alt: "PDF",
+            },
+            {
+              onClick: () => handleExportLATEX(structure, nodeContents),
+              src: latex,
+              alt: "LaTeX",
+            },
+          ].map((btn, i) => (
+            <motion.div
+              whileHover={{
+                scale: 1.075,
+                boxShadow: "0 0 20px rgba(120,69,239,0.4)",
+              }}
+              whileTap={{ scale: 0.95 }}
+              key={i}
+              className="p-[3px] rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-yellow-300 transition-transform duration-200"
+            >
+              <button
+                onClick={btn.onClick}
+                className="bg-[#2f214d] p-2 rounded-lg shadow-inner shadow-purple-700/70 hover:shadow-purple-500/75 transition cursor-pointer"
+                title={`Export as ${btn.alt}`}
+              >
+                <img src={btn.src} alt={btn.alt} className="w-12 h-12" />
+              </button>
+            </motion.div>
+          ))}
         </div>
       </div>
 
       {loading ? (
-        <div>Loading...</div>
+        <div className="text-center text-gray-400">Loading…</div>
       ) : error ? (
-        <div className="text-red-500">{error}</div>
+        <div className="text-red-400">{error}</div>
       ) : (
         <div
           ref={containerRef}
-          className="relative max-h-150 overflow-y-auto"
-        ></div>
+          className="overflow-y-auto border-t-2 border-[#3e316e]"
+        />
       )}
     </div>
   );
