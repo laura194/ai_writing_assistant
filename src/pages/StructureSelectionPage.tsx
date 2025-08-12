@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
+import { motion } from "framer-motion";
 import Header from "../components/Header";
 import { ProjectService } from "../utils/ProjectService";
+import { FolderPlus } from "lucide-react";
 
 import imradJson from "../assets/imrad.json";
 import projectStructureJson from "../assets/projectStructure.json";
 import storyForDesignJson from "../assets/storyForDesign.json";
+import toast from "react-hot-toast";
 
 const StructureSelectionPage = () => {
   const { user } = useUser();
@@ -19,12 +22,38 @@ const StructureSelectionPage = () => {
 
   const handleSave = async () => {
     if (!projectName.trim()) {
-      alert("Please enter a project name.");
+      toast("Please enter a project name.", {
+        duration: 4000,
+        icon: "⚠️",
+        style: {
+          background: "#1e1538",
+          color: "#c4b5fd",
+          padding: "16px 20px",
+          borderRadius: "12px",
+          fontSize: "18px",
+          fontWeight: "600",
+          boxShadow: "0 4px 12px rgba(139, 92, 246, 0.2)",
+          border: "1px solid #7c3aed",
+        },
+      });
       return;
     }
 
     if (!selectedStructure) {
-      alert("Please select a project structure.");
+      toast("Please select a project structure.", {
+        duration: 4000,
+        icon: "⚠️",
+        style: {
+          background: "#1e1538",
+          color: "#c4b5fd",
+          padding: "16px 20px",
+          borderRadius: "12px",
+          fontSize: "18px",
+          fontWeight: "600",
+          boxShadow: "0 4px 12px rgba(139, 92, 246, 0.2)",
+          border: "1px solid #7c3aed",
+        },
+      });
       return;
     }
 
@@ -63,7 +92,23 @@ const StructureSelectionPage = () => {
       navigate(`/edit/${createdProject._id}`);
     } catch (error) {
       console.error("Failed to create project:", error);
-      alert("Something went wrong while creating the project.");
+      toast.error(
+        "Something went wrong while creating the project. Please try again or contact: plantfriends@gmail.com",
+        {
+          duration: 10000,
+          icon: "❌",
+          style: {
+            background: "#2a1b1e",
+            color: "#ffe4e6",
+            padding: "16px 20px",
+            borderRadius: "12px",
+            fontSize: "15px",
+            fontWeight: "500",
+            boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
+            border: "1px solid #ef4444",
+          },
+        },
+      );
     }
   };
 
@@ -74,49 +119,146 @@ const StructureSelectionPage = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-200 text-gray-800">
+    <div className="min-h-screen bg-[#090325] text-white relative overflow-hidden flex flex-col items-center">
       <Header />
-      <div className="flex flex-1 items-center justify-center px-4 py-12">
-        <div className="w-full max-w-xl bg-white shadow-md rounded-xl p-8 text-center">
-          <h1 className="text-2xl font-semibold mb-4">Create a New Project</h1>
-          <p className="text-gray-600 mb-6">
-            Enter a title and choose a structure to get started
-          </p>
 
-          <input
-            type="text"
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-            placeholder="Enter project title"
-            className="w-full px-4 py-3 mb-6 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
-          />
+      {/* Animated Blurred Squares in opposite corners */}
+      <motion.div
+        className="absolute top-[-4rem] right-[-4rem] w-84 h-84 bg-[#16abf6] opacity-20 blur-3xl rotate-12 rounded-[1.25rem]"
+        animate={{ scale: [1, 0.85, 1] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+      />
 
-          <div className="border rounded-lg p-4 mb-6 text-left">
-            <h2 className="text-lg font-semibold mb-3">Structures</h2>
-            <div className="grid gap-3">
-              {structureOptions.map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => setSelectedStructure(option.id)}
-                  className={`w-full text-left px-5 py-3 rounded-md transition shadow-sm ${
-                    selectedStructure === option.id
-                      ? "bg-gray-100 shadow-inner font-semibold"
-                      : "bg-white hover:bg-gray-50"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
+      <motion.div
+        className="absolute bottom-[-6rem] left-[-4rem] w-80 h-80 bg-[#37f5a2] opacity-20 blur-3xl -rotate-12 rounded-[1.25rem]"
+        animate={{ scale: [1, 1.25, 1] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      />
 
-          <button
-            onClick={handleSave}
-            className="w-full bg-gray-400 hover:bg-gray-500 text-white font-medium py-3 px-4 rounded-md transition"
-          >
-            Save and Create Project
-          </button>
+      <div className="flex-1 flex items-center justify-center relative pt-14">
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
+          <div className="w-[900px] h-[900px] bg-[#3adec8] opacity-10 blur-3xl rounded-full mix-blend-screen" />
         </div>
+        <main className="flex-1 w-full flex items-center justify-center py-10 z-10">
+          <motion.div
+            initial={{ opacity: 0, x: -200 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1.4 }}
+          >
+            <motion.div
+              initial={{ backgroundPosition: "0% 50%" }}
+              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+              transition={{
+                ease: "linear",
+                duration: 4,
+                repeat: Infinity,
+              }}
+              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(48,240,178,0.25)] w-full max-w-3xl"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, #45f5cf, #05d1f5, #244fed)",
+                backgroundSize: "200% 200%",
+              }}
+            >
+              <div className="w-full max-w-3xl bg-[#1e1538] rounded-3xl px-10 py-10 shadow-[0_0_40px_rgba(14,165,233,0.15)]">
+                <h1
+                  data-aos="fade-down"
+                  data-aos-duration="800"
+                  data-aos-delay="1400"
+                  className="text-5xl font-bold text-center mb-6 uppercase"
+                >
+                  Create New Project
+                </h1>
+                <p
+                  data-aos="fade-up"
+                  data-aos-duration="500"
+                  data-aos-delay="1800"
+                  className="text-[#aaa6c3] max-w-[600px] leading-relaxed mb-8 mx-auto text-center"
+                >
+                  Give your project a name and choose a structure to begin.
+                </p>
+
+                <input
+                  data-aos="fade-up"
+                  data-aos-duration="700"
+                  data-aos-delay="2000"
+                  type="text"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="Enter project title"
+                  className="w-full px-4 py-3 mb-10 rounded-md bg-[#2a1e44] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                />
+
+                <div className="mb-12">
+                  <h2
+                    data-aos="fade-right"
+                    data-aos-duration="600"
+                    data-aos-delay="2400"
+                    className="text-xl font-semibold mb-4"
+                  >
+                    Select Structure
+                  </h2>
+                  <div
+                    data-aos="fade-left"
+                    data-aos-duration="800"
+                    data-aos-delay="2600"
+                    className="grid gap-4 sm:grid-cols-1 md:grid-cols-2"
+                  >
+                    {structureOptions.map((option) => {
+                      const isSelected = selectedStructure === option.id;
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => setSelectedStructure(option.id)}
+                          className={`relative group rounded-xl p-[2px] transition-all duration-300 ${
+                            isSelected
+                              ? "bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-500"
+                              : "bg-[#403071]"
+                          }`}
+                        >
+                          <div
+                            className={`w-full h-full px-5 py-4 rounded-[10px] backdrop-blur-md transition duration-300 cursor-pointer
+                                          ${
+                                            isSelected
+                                              ? "bg-[#1e1538] text-teal-100 shadow-[0_0_15px_rgba(34,211,238,0.15)]"
+                                              : "bg-[#1e1538] text-[#aaa6c3] hover:bg-[#2c204a]"
+                                          }`}
+                          >
+                            <span className="text-lg font-semibold block group-hover:text-teal-100 transition-colors duration-300">
+                              {option.label}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div
+                  data-aos="fade-up"
+                  data-aos-duration="1000"
+                  data-aos-delay="3000"
+                >
+                  <motion.div
+                    onClick={handleSave}
+                    whileHover={{
+                      scale: 1.05,
+                      boxShadow: "0 0 20px rgba(0,255,163,0.5)",
+                    }}
+                    className="cursor-pointer p-[2px] rounded-xl bg-teal-400 w-[300px] mx-auto"
+                  >
+                    <div className="group flex items-center justify-center bg-[#1e1538] bg-opacity-90 backdrop-blur-md p-4 rounded-xl shadow-inner shadow-cyan-800/40 border border-[#32265b]">
+                      <FolderPlus className="w-8 h-8 stroke-[#00FFD1]" />
+                      <span className="ml-4 text-xl text-[#00FFD1] font-semibold transition-colors duration-300 group-hover:text-[#d7faf3] relative before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-[2px] before:bg-[#00FFD1] group-hover:before:w-full before:transition-all before:duration-300">
+                        Create Project
+                      </span>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </main>
       </div>
     </div>
   );

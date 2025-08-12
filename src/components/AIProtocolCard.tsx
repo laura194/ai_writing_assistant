@@ -69,55 +69,71 @@ const AIProtocolCard: React.FC = () => {
   });
 
   return (
-    <div className="relative p-4 shadow-lg rounded-lg bg-gray-200">
-      <h2 className="text-lg font-bold mb-4">AI Protocol</h2>
+    <div className="relative flex flex-col h-full p-6 rounded-3xl bg-[#1e1538]">
+      <h2 className="text-3xl font-bold inline-block tracking-wide mb-6">
+        AI Protocol
+        <div className="h-1 mt-1.5 w-[166px] bg-gradient-to-r from-purple-500 via-pink-400 to-yellow-300 rounded-full" />
+      </h2>
+
       <div className="relative mb-4">
-        <span className="absolute top-3 left-0 flex items-center pl-3 pointer-events-none">
-          <FunnelIcon className="h-5 w-5 text-gray-400" />
+        <span className="absolute top-3 left-0 flex items-center pl-3 pointer-events-none text-[#787086]">
+          <FunnelIcon className="h-5 w-5" />
         </span>
         <input
           type="text"
           placeholder="Filter the protocol by typing a keyword"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="mb-4 px-3 py-2 pl-10 border rounded w-full"
+          className="w-full pl-10 pr-6 py-2 rounded-lg bg-[#2f214d] text-white placeholder-[#787086] border-2 border-[#3e316e] focus:outline-none focus:ring-2 focus:ring-purple-700 transition duration-200"
         />
       </div>
+
       {loading ? (
-        <p>Loading Protocols...</p>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-400 text-center text-3xl">
+            Loading Protocols...
+          </p>
+        </div>
       ) : error ? (
-        <p className="text-red-500">{error}</p>
-      ) : protocols.length === 0 ? (
-        <p className="text-gray-600">
-          No entries have been created in the AI protocol yet.
-        </p>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-red-400 text-center text-3xl">{error}</p>{" "}
+        </div>
+      ) : filteredProtocols.length === 0 ? (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-[#787086] text-center text-3xl">
+            No entries have been created in the AI protocol yet.
+          </p>
+        </div>
       ) : (
-        <div className="relative max-h-150 overflow-y-auto">
-          <table className="min-w-full bg-white shadow-md rounded-xl">
-            <thead className="sticky top-0 z-10 bg-gray-100">
+        <div className="relative overflow-x-auto rounded-xl border-2 border-[#3e316e]">
+          <table className="min-w-full text-m text-center text-[#d4d4f2]">
+            <thead className="sticky top-0 bg-[#2f214d] text-[#ffffff] z-10 text-m">
               <tr>
-                <th className="text-left px-4 py-2">Name</th>
-                <th className="text-left px-4 py-2">Usage</th>
-                <th className="text-left px-4 py-2">Affected sections</th>
-                <th className="text-left px-4 py-2">Notes</th>
-                <th className="text-left px-4 py-2">Created at</th>
-                <th className="text-left px-4 py-2">Updated at</th>
+                <th className="px-3 py-3 font-semibold">Name</th>
+                <th className="px-3 py-3 font-semibold">Usage</th>
+                <th className="px-3 py-3 font-semibold">Affected sections</th>
+                <th className="px-3 py-3 font-semibold">Notes</th>
+                <th className="px-3 py-3 font-semibold">Created at</th>
+                <th className="px-3 py-3 font-semibold">Updated at</th>
               </tr>
             </thead>
             <tbody>
               {filteredProtocols.map((protocol) => (
-                <tr key={protocol._id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2">{truncateText(protocol.aiName)}</td>
-                  <td className="px-4 py-2">
+                <tr
+                  key={protocol._id}
+                  className="hover:bg-[#3b2a5e]/60 transition border-b border-[#3e316e]"
+                >
+                  <td className="px-3 py-3">{truncateText(protocol.aiName)}</td>
+                  <td className="px-3 py-3">
                     {truncateText(protocol.usageForm)}
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-3 py-3">
                     {truncateText(protocol.affectedParts)}
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-3 py-3">
                     {truncateText(protocol.remarks)}
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-3 py-3">
                     {protocol.createdAt
                       ? new Date(protocol.createdAt).toLocaleString("en-US", {
                           dateStyle: "medium",
@@ -125,7 +141,7 @@ const AIProtocolCard: React.FC = () => {
                         })
                       : "N/A"}
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-3 py-3">
                     {protocol.updatedAt
                       ? new Date(protocol.updatedAt).toLocaleString("en-US", {
                           dateStyle: "medium",
