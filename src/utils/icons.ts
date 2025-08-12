@@ -19,52 +19,34 @@ export function getIcon(
   size: string = "size-8",
   customIcon?: string, // Neuer Parameter für benutzerdefiniertes Icon
 ): React.ReactElement {
+  const common = { className: `${size} fill-current` };
+
   if (customIcon) {
     switch (customIcon) {
       case "text":
-        return React.createElement(DocumentTextIcon, {
-          className: `${size} text-gray-500`,
-        });
+        return React.createElement(DocumentTextIcon, common);
       case "list":
-        return React.createElement(ListBulletIcon, {
-          className: `${size} text-gray-500`,
-        });
+        return React.createElement(ListBulletIcon, common);
       case "code":
-        return React.createElement(CodeBracketIcon, {
-          className: `${size} text-gray-500`,
-        });
+        return React.createElement(CodeBracketIcon, common);
       case "image":
-        return React.createElement(PhotoIcon, {
-          className: `${size} text-gray-500`,
-        });
+        return React.createElement(PhotoIcon, common);
       default:
-        return React.createElement(DocumentTextIcon, {
-          className: `${size} text-gray-500`,
-        });
+        return React.createElement(DocumentTextIcon, common);
     }
   }
 
   // Fallback auf die Kategorie falls kein benutzerdefiniertes Icon vorhanden ist
   switch (node.category) {
     case "text":
-      return React.createElement(DocumentTextIcon, {
-        className: `${size} text-gray-500`,
-      });
+      return React.createElement(DocumentTextIcon, common);
     case "list":
-      return React.createElement(ListBulletIcon, {
-        className: `${size} text-gray-500`,
-      });
+      return React.createElement(ListBulletIcon, common);
     case "code":
-      return React.createElement(CodeBracketIcon, {
-        className: `${size} text-gray-500`,
-      });
+      return React.createElement(CodeBracketIcon, common);
     case "image":
-      return React.createElement(PhotoIcon, {
-        className: `${size} text-gray-500`,
-      });
+      return React.createElement(PhotoIcon, common);
     default:
-      return React.createElement(DocumentTextIcon, {
-        className: `${size} text-gray-500`,
-      });
+      return React.createElement(DocumentTextIcon, common);
   }
 }

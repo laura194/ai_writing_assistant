@@ -64,6 +64,27 @@ export class ProjectService {
     }
   }
 
+  static async getRecentProjectsByUsername(
+    username: string,
+  ): Promise<Project[]> {
+    try {
+      const response = await axios.get<Project[]>(
+        `${API_BASE_URL}/by-username/recent`,
+        { params: { username } },
+      );
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        return [];
+      }
+      console.error(
+        `❌ [getRecentProjectsByUsername] Error fetching recent projects for ${username}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
   static async deleteProject(id: string): Promise<void> {
     try {
       await axios.delete(`${API_BASE_URL}/${id}`);

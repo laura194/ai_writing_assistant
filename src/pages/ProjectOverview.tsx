@@ -4,7 +4,16 @@ import { ProjectService } from "../utils/ProjectService";
 import { useUser } from "@clerk/clerk-react";
 import { Project } from "../utils/types";
 import Header from "../components/Header";
-import { FolderOpen, Trash2, Pencil, FolderPlus } from "lucide-react";
+import {
+  FolderOpen,
+  Trash2,
+  FolderPlus,
+  Edit,
+  CircleCheckBig,
+  CircleX,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 
 const ProjectOverview = () => {
   const { user, isLoaded } = useUser();
@@ -60,7 +69,23 @@ const ProjectOverview = () => {
         setProjects((prev) => prev.filter((p) => p._id !== id));
       } catch (error) {
         console.error("Failed to delete project:", error);
-        alert("Failed to delete project.");
+        toast.error(
+          "Failed to delete project. Please try again or contact: plantfriends@gmail.com",
+          {
+            duration: 10000,
+            icon: "❌",
+            style: {
+              background: "#2a1b1e",
+              color: "#ffe4e6",
+              padding: "16px 20px",
+              borderRadius: "12px",
+              fontSize: "15px",
+              fontWeight: "500",
+              boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
+              border: "1px solid #ef4444",
+            },
+          },
+        );
       }
     }
   };
@@ -89,7 +114,23 @@ const ProjectOverview = () => {
         prev.map((p) => (p._id === project._id ? updated : p)),
       );
     } catch (e) {
-      alert("Failed to update project");
+      toast.error(
+        "Failed to update project. Please try again or contact: plantfriends@gmail.com",
+        {
+          duration: 10000,
+          icon: "❌",
+          style: {
+            background: "#2a1b1e",
+            color: "#ffe4e6",
+            padding: "16px 20px",
+            borderRadius: "12px",
+            fontSize: "15px",
+            fontWeight: "500",
+            boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
+            border: "1px solid #ef4444",
+          },
+        },
+      );
       console.error(e);
     } finally {
       setEditingProjectId(null);
@@ -98,137 +139,267 @@ const ProjectOverview = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-200 text-gray-800">
+    <div className="min-h-screen bg-[#090325] text-white relative overflow-hidden flex flex-col items-center">
       <Header />
-      <div className="flex flex-1 items-center justify-center px-4 py-12">
-        <div className="w-full max-w-3xl bg-white shadow-md rounded-xl p-8 text-center">
-          <h1 className="text-2xl font-semibold mb-6 text-left">
-            Your Projects
-          </h1>
 
-          {loading ? (
-            <div className="text-gray-600">Loading...</div>
-          ) : error ? (
-            <div className="text-red-600">{error}</div>
-          ) : projects.length > 0 ? (
-            <ul className="space-y-4 text-left">
-              {projects.map((project) => {
-                const isEditing = editingProjectId === project._id;
+      <motion.div
+        className="absolute top-[-4rem] right-[-4rem] w-84 h-84 bg-[#fce009] opacity-20 blur-3xl rotate-12 rounded-[1.25rem]"
+        animate={{ scale: [1, 0.85, 1] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+      />
 
-                return (
-                  <li
-                    key={project._id}
-                    className="bg-gray-100 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-gray-800 font-medium text-lg max-w-[60%] overflow-hidden">
-                        <FolderOpen className="w-5 h-5 shrink-0" />
+      <motion.div
+        className="absolute bottom-[-6rem] left-[-4rem] w-80 h-80 bg-[#f97a30] opacity-20 blur-3xl -rotate-12 rounded-[1.25rem]"
+        animate={{ scale: [1, 1.25, 1] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      />
 
-                        {/* Edit mode or normal name */}
-                        {isEditing ? (
-                          <input
-                            className="border rounded px-2 py-1 text-sm w-full max-w-[200px]"
-                            value={editedName}
-                            onChange={(e) => setEditedName(e.target.value)}
-                            autoFocus
-                          />
-                        ) : (
-                          <span
-                            onClick={() =>
-                              handleProjectClick(project._id ?? "")
-                            }
-                            className="cursor-pointer hover:text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis"
-                            title={project.name}
-                          >
-                            {project.name}
-                          </span>
-                        )}
-
-                        {/* Action Buttons */}
-                        {isEditing ? (
-                          <>
-                            <button
-                              onClick={() => updateProjectName(project)} // Hier wird die Methode aufgerufen
-                              disabled={
-                                editedName.trim() === "" ||
-                                editedName.trim() === project.name.trim()
-                              }
-                              className={`p-1 transition ${
-                                editedName.trim() === "" ||
-                                editedName.trim() === project.name.trim()
-                                  ? "text-blue-300 cursor-not-allowed"
-                                  : "text-blue-600 hover:text-blue-800"
-                              }`}
-                              title="Save"
-                            >
-                              ✓
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                setEditingProjectId(null);
-                                setEditedName("");
-                              }}
-                              className="text-blue-600 hover:text-blue-800 p-1 transition"
-                              title="Cancel"
-                            >
-                              ✕
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => {
-                                setEditingProjectId(project._id ?? null);
-                                setEditedName(project.name);
-                              }}
-                              className="text-gray-500 hover:text-blue-600 p-1"
-                              title="Edit project"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(project._id ?? "")}
-                              className="text-gray-500 hover:text-red-600 p-1"
-                              title="Delete project"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col text-sm text-gray-600 text-right min-w-[120px]">
-                        <div>
-                          <span className="font-medium text-gray-700">
-                            Created:
-                          </span>{" "}
-                          {formatDate(project.createdAt ?? "")}
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-700">
-                            Updated:
-                          </span>{" "}
-                          {formatDate(project.updatedAt ?? "")}
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <div className="text-gray-600 text-center flex flex-col items-center gap-4">
-              <button
-                onClick={() => navigate("/structureSelection")}
-                className="flex items-center justify-center gap-2 bg-gray-400 hover:bg-gray-500 text-white font-medium py-3 px-4 rounded-md transition"
-              >
-                <FolderPlus className="w-5 h-5" />
-                Create First Project
-              </button>
-            </div>
-          )}
+      <div className="flex-1 flex items-center justify-center relative pt-14">
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
+          <div className="w-[900px] h-[900px] bg-[#f79635] opacity-10 blur-3xl rounded-full mix-blend-screen" />
         </div>
+        <main className="flex-1 w-full flex items-center justify-center py-10 z-10">
+          <motion.div
+            initial={{ opacity: 0, x: 200 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1.4 }}
+          >
+            <motion.div
+              initial={{ backgroundPosition: "0% 50%" }}
+              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+              transition={{
+                ease: "linear",
+                duration: 4,
+                repeat: Infinity,
+              }}
+              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(251,146,60,0.25)] w-full max-w-3xl"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, #9e1d0b, #f77d19, #fcf10f)",
+                backgroundSize: "200% 200%",
+              }}
+            >
+              <div className="w-full max-w-3xl bg-[#1e1538] rounded-3xl px-10 py-10 shadow-[0_0_40px_rgba(251,146,60,0.15)]">
+                <h1
+                  data-aos="fade-down"
+                  data-aos-duration="800"
+                  data-aos-delay="1400"
+                  className="text-5xl font-bold text-center mb-6 uppercase"
+                >
+                  Your Projects
+                </h1>
+                <p
+                  data-aos="fade-up"
+                  data-aos-duration="500"
+                  data-aos-delay="1800"
+                  className="text-[#aaa6c3] max-w-[600px] leading-relaxed mb-8 mx-auto text-center"
+                >
+                  This is an overview of all your created projects. You can
+                  open, edit and delete projects as needed.
+                </p>
+                {loading ? (
+                  <div className="flex justify-center">
+                    <div className="animate-pulse px-6 py-4 bg-[#090325] bg-opacity-30 rounded-full text-[#fee2e2] font-medium">
+                      Loading your projects…
+                    </div>
+                  </div>
+                ) : error ? (
+                  <div className="flex justify-center">
+                    <div className="px-6 py-4 bg-[#a50f0f] bg-opacity-30 rounded-full text-[#fee2e2] font-medium">
+                      {error}
+                    </div>
+                  </div>
+                ) : projects.length === 0 ? (
+                  <div className="flex flex-col items-center gap-4">
+                    <div
+                      data-aos="fade-left"
+                      data-aos-duration="800"
+                      data-aos-delay="2400"
+                      className="font-bold text-xl text-center mb-6"
+                    >
+                      <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 bg-clip-text text-transparent">
+                        No projects yet. Let's create one!
+                      </span>
+                    </div>
+                    <div
+                      data-aos="fade-up"
+                      data-aos-duration="800"
+                      data-aos-delay="2800"
+                    >
+                      <motion.div
+                        onClick={() => navigate("/structureSelection")}
+                        whileHover={{
+                          scale: 1.075,
+                          boxShadow: "0 0 20px rgba(0,255,163,0.5)",
+                        }}
+                        className="cursor-pointer p-[2px] rounded-xl bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-500"
+                      >
+                        <div className="group flex items-center justify-center w-full bg-[#1e1538] bg-opacity-90 backdrop-blur-md p-6 rounded-xl shadow-inner shadow-cyan-800/40 border border-[#32265b]">
+                          <FolderPlus className="w-8 h-8 stroke-[#00FFD1]" />
+                          <span className="ml-4 text-xl text-[#00FFD1] font-semibold transition-colors duration-300 group-hover:text-[#d7faf3] relative before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-[2px] before:bg-[#00FFD1] group-hover:before:w-full before:transition-all before:duration-300">
+                            Create New Project
+                          </span>
+                        </div>
+                      </motion.div>
+                    </div>
+                  </div>
+                ) : (
+                  <ul className="space-y-6">
+                    {projects.map((project) => {
+                      const isEditing = editingProjectId === project._id;
+
+                      return (
+                        <li key={project._id}>
+                          <div
+                            data-aos="zoom-in"
+                            data-aos-duration="800"
+                            data-aos-delay="2100"
+                          >
+                            <motion.div
+                              whileHover={{
+                                scale: 1.05,
+                                boxShadow: "0 2px 24px rgba(251,146,60,0.35)",
+                              }}
+                              onClick={() => handleProjectClick(project._id!)}
+                              className="group flex items-center justify-between px-6 py-4 bg-[#2a1e44] rounded-xl shadow-[0_2px_12px_rgba(139,92,246,0.15)] transition cursor-pointer relative group"
+                            >
+                              {/* Title & Actions */}
+                              <div className="flex items-center gap-3 max-w-[60%] overflow-hidden">
+                                <FolderOpen className="w-6 h-6 stroke-[#fb923c]" />
+                                {isEditing ? (
+                                  <input
+                                    className="bg-[#1e1538] border border-[#fb923c] rounded px-2 py-1.5 text-sm text-white outline-none flex-1 focus:bg-[#3a2e54] focus:border-2 focus:border-[#ffa200] transition"
+                                    value={editedName}
+                                    onChange={(e) =>
+                                      setEditedName(e.target.value)
+                                    }
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                ) : (
+                                  <span
+                                    className="text-lg font-semibold truncate transition-colors duration-300 group-hover:text-[#fb923c]"
+                                    title={project.name}
+                                  >
+                                    {project.name}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Meta & Controls */}
+                              <div className="flex items-center gap-4">
+                                <div className="text-sm text-right text-[#aaa6c3] min-w-[120px]">
+                                  <div>
+                                    <span className="font-medium text-[#ff662f]">
+                                      Created:
+                                    </span>{" "}
+                                    {formatDate(project.createdAt!)}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-[#fcc141]">
+                                      Updated:
+                                    </span>{" "}
+                                    {formatDate(project.updatedAt!)}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  {isEditing ? (
+                                    <>
+                                      <motion.div
+                                        whileHover={{
+                                          scale: 1.2,
+                                        }}
+                                      >
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            updateProjectName(project);
+                                          }}
+                                          disabled={
+                                            !editedName.trim() ||
+                                            editedName.trim() ===
+                                              project.name.trim()
+                                          }
+                                          className={`p-1 rounded transition ${
+                                            !editedName.trim() ||
+                                            editedName.trim() ===
+                                              project.name.trim()
+                                              ? "text-[#39d646] opacity-40 cursor-not-allowed"
+                                              : "text-[#39d646] cursor-pointer hover:text-[#52f629] transition"
+                                          }`}
+                                          title="Save"
+                                        >
+                                          <CircleCheckBig className="w-5 h-5" />
+                                        </button>
+                                      </motion.div>
+                                      <motion.div
+                                        whileHover={{
+                                          scale: 1.2,
+                                        }}
+                                      >
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingProjectId(null);
+                                            setEditedName("");
+                                          }}
+                                          className="p-1 text-[#aaa6c3] hover:text-[#f5662d] transition cursor-pointer"
+                                          title="Cancel"
+                                        >
+                                          <CircleX className="w-5 h-5" />
+                                        </button>
+                                      </motion.div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <motion.div
+                                        whileHover={{
+                                          scale: 1.2,
+                                        }}
+                                      >
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingProjectId(project._id!);
+                                            setEditedName(project.name);
+                                          }}
+                                          className="p-1 text-[#aaa6c3] hover:text-[#fba53c] transition cursor-pointer"
+                                          title="Edit"
+                                        >
+                                          <Edit className="w-5 h-5" />
+                                        </button>
+                                      </motion.div>
+                                      <motion.div
+                                        whileHover={{
+                                          scale: 1.2,
+                                        }}
+                                      >
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete(project._id!);
+                                          }}
+                                          className="p-1 text-[#aaa6c3] hover:text-[#f42f2f] transition cursor-pointer"
+                                          title="Delete"
+                                        >
+                                          <Trash2 className="w-5 h-5" />
+                                        </button>
+                                      </motion.div>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        </main>
       </div>
     </div>
   );
