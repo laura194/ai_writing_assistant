@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import logo from "/logo.svg";
 import { RecentProjectsDropdown } from "./RecentProjectsDropdown";
+import ThemeToggleButton from "./ThemeToggleButton";
 
 const Header = () => {
   const { user } = useUser();
@@ -46,6 +47,7 @@ const Header = () => {
 
       {/* Right: User */}
       <div className="flex items-center space-x-4">
+        <ThemeToggleButton />
         {/* Username */}
         {user && (
           <span className="text-sm text-[#afa6c5] whitespace-nowrap">

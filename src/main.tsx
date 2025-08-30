@@ -14,6 +14,7 @@ import logger from "loglevel";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
+import { ThemeProvider } from "./providers/ThemeProvider.tsx";
 
 logger.info("[main.tsx] Application started 🥳");
 
@@ -26,11 +27,13 @@ if (!CLERK_PUBLISHABLE_KEY) {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* URL AFTER SIGN OUT */}
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ClerkProvider>
-  </StrictMode>,
+    <ThemeProvider>
+      {/* URL AFTER SIGN OUT */}
+      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ClerkProvider>
+    </ThemeProvider>
+  </StrictMode>
 );
