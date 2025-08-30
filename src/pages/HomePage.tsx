@@ -9,7 +9,7 @@ const HomePage = () => {
   const { user } = useUser();
 
   return (
-    <div className="min-h-screen bg-[#090325] text-white relative overflow-hidden flex flex-col items-center">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-[#090325] dark:text-white relative overflow-hidden flex flex-col items-center">
       <Header />
 
       {/* Background Gradient Blobs */}
