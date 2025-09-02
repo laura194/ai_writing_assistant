@@ -12,10 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Save frontend version
-        id: frontend_version
+      - name: Save version
+        id: version
         run: |
-          VERSION=$(node -p -e "require('./frontend/package.json').version")
+          VERSION=$(node -p -e "require('./package.json').version")
+          if [ "$VERSION" = "0.0.0" ] || [ -z "$VERSION" ]; then VERSION="latest"; fi
           echo "tag=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Login to DockerHub
@@ -23,9 +24,9 @@ jobs:
 
       - name: Build & Push Frontend
         run: |
-          docker build ./frontend \
-            --file frontend/Dockerfile \
-            --tag laura194/frontend:${{ steps.frontend_version.outputs.tag }} \
+          docker build . \
+            --file docker-files/Dockerfile.frontend \
+            --tag laura194/frontend:${{ steps.version.outputs.tag }} \
             --build-arg VITE_GOOGLE_API_KEY=${{ secrets.VITE_GOOGLE_API_KEY }} \
             --build-arg VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }} \
             --build-arg VITE_CLERK_SIGN_IN_FORCE_REDIRECT_URL=${{ secrets.VITE_CLERK_SIGN_IN_FORCE_REDIRECT_URL }} \
@@ -33,5 +34,11 @@ jobs:
             --build-arg VITE_APP_EMAILJS_SERVICE_ID=${{ secrets.VITE_APP_EMAILJS_SERVICE_ID }} \
             --build-arg VITE_APP_EMAILJS_TEMPLATE_ID=${{ secrets.VITE_APP_EMAILJS_TEMPLATE_ID }} \
             --build-arg VITE_APP_EMAILJS_PUBLIC_KEY=${{ secrets.VITE_APP_EMAILJS_PUBLIC_KEY }}
-          docker push laura194/frontend:${{ steps.frontend_version.outputs.tag }}
+          docker push laura194/frontend:${{ steps.version.outputs.tag }}
 
+      - name: Build & Push Backend
+        run: |
+          docker build . \
+            --file docker-files/Dockerfile.backend \
+            --tag laura194/backend:${{ steps.version.outputs.tag }}
+          docker push laura194/backend:${{ steps.version.outputs.tag }}
