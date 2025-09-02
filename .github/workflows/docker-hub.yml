@@ -33,7 +33,7 @@ jobs:
             --build-arg VITE_CLERK_SIGN_UP_FORCE_REDIRECT_URL=${{ secrets.VITE_CLERK_SIGN_UP_FORCE_REDIRECT_URL }} \
             --build-arg VITE_APP_EMAILJS_SERVICE_ID=${{ secrets.VITE_APP_EMAILJS_SERVICE_ID }} \
             --build-arg VITE_APP_EMAILJS_TEMPLATE_ID=${{ secrets.VITE_APP_EMAILJS_TEMPLATE_ID }} \
-            --build-arg VITE_APP_EMAILJS_PUBLIC_KEY=${{ secrets.VITE_APP_EMAILJS_PUBLIC_KEY }}
+            --build-arg VITE_APP_EMAILJS_PUBLIC_KEY=${{ secrets.VSSITE_APP_EMAILJS_PUBLIC_KEY }}
           docker push laura194/frontend:${{ steps.version.outputs.tag }}
 
       - name: Build & Push Backend
