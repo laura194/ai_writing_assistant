@@ -14,7 +14,9 @@ jobs:
 
       - name: Save frontend version
         id: frontend_version
-        run: echo "tag=$(node -p -e "require('./frontend/package.json').version")" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=$(node -p -e "require('./frontend/package.json').version")
+          echo "tag=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Login to DockerHub
         run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
