@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Node } from "./types";
 
-const API_BASE_URL = "/api/nodeContent";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001" + "/api/nodeContent";
 
 export class NodeContentService {
   /**
