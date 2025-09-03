@@ -40,5 +40,6 @@ jobs:
         run: |
           docker build . \
             --file docker-files/Dockerfile.backend \
-            --tag laura194/backend:${{ steps.version.outputs.tag }}
+            --tag laura194/backend:${{ steps.version.outputs.tag }} \
+            --build-arg VITE_APP_EMAILJS_PUBLIC_KEY=${{ secrets.MONGO_URI }}
           docker push laura194/backend:${{ steps.version.outputs.tag }}
