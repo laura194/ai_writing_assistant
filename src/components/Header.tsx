@@ -30,13 +30,13 @@ const Header = () => {
           to="/structureSelection"
           className="relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-[#00FFD1] after:transition-all after:duration-250 hover:text-[#e1fffa] hover:after:w-full"
         >
-          Create Project ._.
+          Create Project
         </Link>
         <Link
           to="/myProjects"
           className="relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-[#eeae38] after:transition-all after:duration-250 hover:text-[#fff6e4] hover:after:w-full"
         >
-          Open Project ._.
+          Open Project
         </Link>
         {/* Recent Dropdown */}
         <div className="hidden lg:block ml-28">
