@@ -14,7 +14,7 @@ export default function ThemeToggleButton({
   useEffect(() => {
     try {
       let meta = document.querySelector(
-        'meta[name="theme-color"]'
+        'meta[name="theme-color"]',
       ) as HTMLMetaElement | null;
       if (!meta) {
         meta = document.createElement("meta");

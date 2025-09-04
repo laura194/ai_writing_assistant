@@ -27,7 +27,7 @@ function FileContentCard({
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [originalContent, setOriginalContent] = useState<string>(
-    node.content || "..."
+    node.content || "...",
   );
   const [selectedText, setSelectedText] = useState("");
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
@@ -70,7 +70,7 @@ function FileContentCard({
             boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
             border: "1px solid #ef4444",
           },
-        }
+        },
       );
       return;
     }
@@ -104,7 +104,7 @@ function FileContentCard({
             boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
             border: "1px solid #ef4444",
           },
-        }
+        },
       );
     }
   }, [projectId, fileContent, node, onSave]);
@@ -114,7 +114,7 @@ function FileContentCard({
     setFileContent((prev) =>
       prev.includes(selectedText)
         ? prev.replace(selectedText, newContent)
-        : prev
+        : prev,
     );
   };
 
