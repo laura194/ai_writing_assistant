@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
+import { useTheme } from "../providers/ThemeProvider";
 
 const ProjectOverview = () => {
   const { user, isLoaded } = useUser();
@@ -23,6 +24,8 @@ const ProjectOverview = () => {
   const [error, setError] = useState<string | null>(null);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState<string>("");
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -31,7 +34,7 @@ const ProjectOverview = () => {
       if (user?.username) {
         try {
           const userProjects = await ProjectService.getProjectsByUsername(
-            user.username,
+            user.username
           );
           setProjects(userProjects);
         } catch (error) {
@@ -84,7 +87,7 @@ const ProjectOverview = () => {
               boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
               border: "1px solid #ef4444",
             },
-          },
+          }
         );
       }
     }
@@ -96,7 +99,7 @@ const ProjectOverview = () => {
       // Kopiere die projectStructure, um den Namen des ersten Nodes zu aktualisieren
       const updatedProjectStructure = [...project.projectStructure];
       const firstNode = updatedProjectStructure.find(
-        (structure) => structure.id === "1",
+        (structure) => structure.id === "1"
       );
       if (firstNode) {
         firstNode.name = editedName; // Setze den neuen Projektnamen
@@ -111,7 +114,7 @@ const ProjectOverview = () => {
 
       // Projekte im Zustand aktualisieren
       setProjects((prev) =>
-        prev.map((p) => (p._id === project._id ? updated : p)),
+        prev.map((p) => (p._id === project._id ? updated : p))
       );
     } catch (e) {
       toast.error(
@@ -129,7 +132,7 @@ const ProjectOverview = () => {
             boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
             border: "1px solid #ef4444",
           },
-        },
+        }
       );
       console.error(e);
     } finally {
@@ -139,24 +142,24 @@ const ProjectOverview = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#090325] text-white relative overflow-hidden flex flex-col items-center">
+    <div className="min-h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-hidden flex flex-col items-center">
       <Header />
 
       <motion.div
-        className="absolute top-[-4rem] right-[-4rem] w-84 h-84 bg-[#fce009] opacity-20 blur-3xl rotate-12 rounded-[1.25rem]"
+        className="absolute top-[-4rem] right-[-4rem] w-84 h-84 bg-[#f1d818] opacity-35 dark:bg-[#fce009] dark:opacity-20 blur-3xl rotate-12 rounded-[1.25rem]"
         animate={{ scale: [1, 0.85, 1] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <motion.div
-        className="absolute bottom-[-6rem] left-[-4rem] w-80 h-80 bg-[#f97a30] opacity-20 blur-3xl -rotate-12 rounded-[1.25rem]"
+        className="absolute bottom-[-6rem] left-[-4rem] w-80 h-80 bg-[#e16015] opacity-30 dark:bg-[#f97a30] dark:opacity-20 blur-3xl -rotate-12 rounded-[1.25rem]"
         animate={{ scale: [1, 1.25, 1] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <div className="flex-1 flex items-center justify-center relative pt-14">
         <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
-          <div className="w-[900px] h-[900px] bg-[#f79635] opacity-10 blur-3xl rounded-full mix-blend-screen" />
+          <div className="w-[900px] h-[900px] bg-[#bb6108] opacity-20 dark:bg-[#f79635] dark:opacity-10 blur-3xl rounded-full mix-blend-screen" />
         </div>
         <main className="flex-1 w-full flex items-center justify-center py-10 z-10">
           <motion.div
@@ -172,14 +175,14 @@ const ProjectOverview = () => {
                 duration: 4,
                 repeat: Infinity,
               }}
-              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(251,146,60,0.25)] w-full max-w-3xl"
+              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(251,146,60,0.7)] dark:shadow-[0_0_30px_rgba(251,146,60,0.25)] w-full max-w-3xl"
               style={{
                 backgroundImage:
                   "linear-gradient(90deg, #9e1d0b, #f77d19, #fcf10f)",
                 backgroundSize: "200% 200%",
               }}
             >
-              <div className="w-full max-w-3xl bg-[#1e1538] rounded-3xl px-10 py-10 shadow-[0_0_40px_rgba(251,146,60,0.15)]">
+              <div className="w-full max-w-3xl bg-[#e9e5f8] dark:bg-[#1e1538] rounded-3xl px-10 py-10 shadow-[0_0_40px_rgba(251,146,60,0.2)]">
                 <h1
                   data-aos="fade-down"
                   data-aos-duration="800"
@@ -192,14 +195,14 @@ const ProjectOverview = () => {
                   data-aos="fade-up"
                   data-aos-duration="500"
                   data-aos-delay="1800"
-                  className="text-[#aaa6c3] max-w-[600px] leading-relaxed mb-8 mx-auto text-center"
+                  className="text-[#261e3b] dark:text-[#aaa6c3] max-w-[600px] leading-relaxed mb-8 mx-auto text-center"
                 >
                   This is an overview of all your created projects. You can
                   open, edit and delete projects as needed.
                 </p>
                 {loading ? (
                   <div className="flex justify-center">
-                    <div className="animate-pulse px-6 py-4 bg-[#090325] bg-opacity-30 rounded-full text-[#fee2e2] font-medium">
+                    <div className="animate-pulse px-6 py-4 bg-[#e0dbf4] dark:bg-[#090325] bg-opacity-30 rounded-full text-[#362466] dark:text-[#fee2e2] font-medium">
                       Loading your projects…
                     </div>
                   </div>
@@ -230,13 +233,15 @@ const ProjectOverview = () => {
                         onClick={() => navigate("/structureSelection")}
                         whileHover={{
                           scale: 1.075,
-                          boxShadow: "0 0 20px rgba(0,255,163,0.5)",
+                          boxShadow: isDark
+                            ? "0 0 20px rgba(0,255,163,0.5)"
+                            : "0 0 20px rgba(0,255,163,0.7)",
                         }}
                         className="cursor-pointer p-[2px] rounded-xl bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-500"
                       >
-                        <div className="group flex items-center justify-center w-full bg-[#1e1538] bg-opacity-90 backdrop-blur-md p-6 rounded-xl shadow-inner shadow-cyan-800/40 border border-[#32265b]">
-                          <FolderPlus className="w-8 h-8 stroke-[#00FFD1]" />
-                          <span className="ml-4 text-xl text-[#00FFD1] font-semibold transition-colors duration-300 group-hover:text-[#d7faf3] relative before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-[2px] before:bg-[#00FFD1] group-hover:before:w-full before:transition-all before:duration-300">
+                        <div className="group flex items-center justify-center w-full bg-[#e9e5f8] dark:bg-[#1e1538] dark:bg-opacity-90 backdrop-blur-md p-6 rounded-xl shadow-inner/10 dark:shadow-inner shadow-cyan-800/40 border border-[#dad1f5] dark:border-[#32265b]">
+                          <FolderPlus className="w-8 h-8 stroke-[#14ab94] dark:stroke-[#00FFD1]" />
+                          <span className="ml-4 text-xl text-[#14ab94] dark:text-[#00FFD1] font-semibold transition-colors duration-300 group-hover:text-[#0d6e60] dark:group-hover:text-[#d7faf3] relative before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-[2px] before:bg-[#00FFD1] group-hover:before:w-full before:transition-all before:duration-300">
                             Create New Project
                           </span>
                         </div>
@@ -258,17 +263,19 @@ const ProjectOverview = () => {
                             <motion.div
                               whileHover={{
                                 scale: 1.05,
-                                boxShadow: "0 2px 24px rgba(251,146,60,0.35)",
+                                boxShadow: isDark
+                                  ? "0 2px 24px rgba(251,146,60,0.35)"
+                                  : "0 2px 24px rgba(251,146,60,0.6)",
                               }}
                               onClick={() => handleProjectClick(project._id!)}
-                              className="group flex items-center justify-between px-6 py-4 bg-[#2a1e44] rounded-xl shadow-[0_2px_12px_rgba(139,92,246,0.15)] transition cursor-pointer relative group"
+                              className="group flex items-center justify-between px-6 py-4 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-xl shadow-[0_2px_12px_rgba(139,92,246,0.15)] transition cursor-pointer relative group"
                             >
                               {/* Title & Actions */}
                               <div className="flex items-center gap-3 max-w-[60%] overflow-hidden">
-                                <FolderOpen className="w-6 h-6 stroke-[#fb923c]" />
+                                <FolderOpen className="w-6 h-6 stroke-[#cb8a07] dark:stroke-[#fb923c]" />
                                 {isEditing ? (
                                   <input
-                                    className="bg-[#1e1538] border border-[#fb923c] rounded px-2 py-1.5 text-sm text-white outline-none flex-1 focus:bg-[#3a2e54] focus:border-2 focus:border-[#ffa200] transition"
+                                    className="bg-[#e0dbf4] dark:bg-[#1e1538] border border-[#cb8a07] dark:border-[#fb923c] rounded px-2 py-1.5 text-sm text-[#362466] dark:text-white outline-none flex-1 focus:bg-[#e7e4f4] dark:focus:bg-[#3a2e54] focus:border-2 focus:border-[#cb8a07] dark:focus:border-[#ffa200] transition"
                                     value={editedName}
                                     onChange={(e) =>
                                       setEditedName(e.target.value)
@@ -277,7 +284,7 @@ const ProjectOverview = () => {
                                   />
                                 ) : (
                                   <span
-                                    className="text-lg font-semibold truncate transition-colors duration-300 group-hover:text-[#fb923c]"
+                                    className="text-lg font-semibold truncate transition-colors duration-300 group-hover:text-[#cb8a07] dark:group-hover:text-[#fb923c]"
                                     title={project.name}
                                   >
                                     {project.name}
@@ -287,15 +294,15 @@ const ProjectOverview = () => {
 
                               {/* Meta & Controls */}
                               <div className="flex items-center gap-4">
-                                <div className="text-sm text-right text-[#aaa6c3] min-w-[120px]">
+                                <div className="text-sm text-right text-[#261e3b] dark:text-[#aaa6c3] min-w-[120px]">
                                   <div>
-                                    <span className="font-medium text-[#ff662f]">
+                                    <span className="font-medium text-[#c54516] dark:text-[#ff662f]">
                                       Created:
                                     </span>{" "}
                                     {formatDate(project.createdAt!)}
                                   </div>
                                   <div>
-                                    <span className="font-medium text-[#fcc141]">
+                                    <span className="font-medium text-[#d49307] dark:text-[#fcc141]">
                                       Updated:
                                     </span>{" "}
                                     {formatDate(project.updatedAt!)}
@@ -324,8 +331,8 @@ const ProjectOverview = () => {
                                             !editedName.trim() ||
                                             editedName.trim() ===
                                               project.name.trim()
-                                              ? "text-[#39d646] opacity-40 cursor-not-allowed"
-                                              : "text-[#39d646] cursor-pointer hover:text-[#52f629] transition"
+                                              ? "text-[#0e9c1a] dark:text-[#39d646] opacity-40 cursor-not-allowed"
+                                              : "text-[#0e9c1a] dark:text-[#39d646] cursor-pointer hover:text-[#32d00a] dark:hover:text-[#52f629] transition"
                                           }`}
                                           title="Save"
                                         >
@@ -343,7 +350,7 @@ const ProjectOverview = () => {
                                             setEditingProjectId(null);
                                             setEditedName("");
                                           }}
-                                          className="p-1 text-[#aaa6c3] hover:text-[#f5662d] transition cursor-pointer"
+                                          className="p-1 text-[#261e3b] dark:text-[#aaa6c3] hover:text-[#e0551e] dark:hover:text-[#f5662d] transition cursor-pointer"
                                           title="Cancel"
                                         >
                                           <CircleX className="w-5 h-5" />
@@ -363,7 +370,7 @@ const ProjectOverview = () => {
                                             setEditingProjectId(project._id!);
                                             setEditedName(project.name);
                                           }}
-                                          className="p-1 text-[#aaa6c3] hover:text-[#fba53c] transition cursor-pointer"
+                                          className="p-1 text-[#261e3b] dark:text-[#aaa6c3] hover:text-[#dc8317] dark:hover:text-[#fba53c] transition cursor-pointer"
                                           title="Edit"
                                         >
                                           <Edit className="w-5 h-5" />
@@ -379,7 +386,7 @@ const ProjectOverview = () => {
                                             e.stopPropagation();
                                             handleDelete(project._id!);
                                           }}
-                                          className="p-1 text-[#aaa6c3] hover:text-[#f42f2f] transition cursor-pointer"
+                                          className="p-1 text-[#261e3b] dark:text-[#aaa6c3] hover:text-[#f42f2f] transition cursor-pointer"
                                           title="Delete"
                                         >
                                           <Trash2 className="w-5 h-5" />

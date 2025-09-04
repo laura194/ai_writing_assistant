@@ -11,6 +11,7 @@ import word from "/src/assets/images/full-document-page/word.jpg";
 import pdf from "/src/assets/images/full-document-page/pdf.jpg";
 import latex from "/src/assets/images/full-document-page/latex.png";
 import { motion } from "framer-motion";
+import { useTheme } from "../providers/ThemeProvider";
 
 /**
  * Generates the whole project content in one single page and exports it as Word, PDF, or LaTeX format.
@@ -47,6 +48,8 @@ const FullDocumentCard = () => {
   const [nodeContents, setNodeContents] = useState<NodeContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   useEffect(() => {
     if (!projectId) {
@@ -83,7 +86,7 @@ const FullDocumentCard = () => {
 
         const data = await NodeContentService.getNodeContents(
           undefined,
-          projectId,
+          projectId
         );
         const mappedData = data.map((node) => ({
           nodeId: node.nodeId || "",
@@ -116,14 +119,14 @@ const FullDocumentCard = () => {
           const headingTag = `h${Math.min(depth + 1, 6)}`;
           const headingClass =
             depth === 1
-              ? "text-2xl font-bold mt-6 text-white"
+              ? "text-2xl font-bold mt-6 text-[#261e3b] dark:text-white"
               : depth === 2
-                ? "text-xl font-semibold mt-4 text-white"
-                : "text-lg mt-3 text-white";
+                ? "text-xl font-semibold mt-4 text-[#261e3b] dark:text-white"
+                : "text-lg mt-3 text-[#261e3b] dark:text-white";
 
           const heading = `<${headingTag} class="${headingClass}">${node.name}</${headingTag}>`;
           const content = contentEntry?.content
-            ? `<p class="whitespace-pre-line mt-2 mb-4 text-gray-200">${escapeHtml(contentEntry.content)}</p>`
+            ? `<p class="whitespace-pre-line mt-2 mb-4 text-gray-600 dark:text-gray-200">${escapeHtml(contentEntry.content)}</p>`
             : "";
 
           const children = node.nodes ? buildHtml(node.nodes, depth + 1) : "";
@@ -147,11 +150,13 @@ const FullDocumentCard = () => {
   };
 
   return (
-    <div className="relative flex flex-col h-full p-6 rounded-3xl bg-[#1e1538]">
+    <div className="relative flex flex-col h-full p-6 rounded-3xl bg-[#e9e5f8] dark:bg-[#1e1538]">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-3xl font-bold inline-block tracking-wide">
           {/* Gradient-Text */}
-          <span className="text-[#ffffff]">Full Document Overview</span>
+          <span className="text-[#261e3b] dark:text-[#ffffff]">
+            Full Document Overview
+          </span>
           <span className="block h-1 w-full mt-1.5 bg-gradient-to-r from-purple-500 via-pink-400 to-yellow-300 rounded-full" />
         </h2>
         <div className="flex space-x-5">
@@ -176,15 +181,18 @@ const FullDocumentCard = () => {
             <motion.div
               whileHover={{
                 scale: 1.075,
-                boxShadow: "0 0 20px rgba(120,69,239,0.4)",
+                boxShadow: isDark
+                  ? "0 0 20px rgba(120,69,239,0.4)"
+                  : "0 0 14px rgba(120,69,239,0.6)",
+                transition: { duration: 0.2 },
               }}
               whileTap={{ scale: 0.95 }}
               key={i}
-              className="p-[3px] rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-yellow-300 transition-transform duration-200"
+              className="p-[3px] rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-yellow-300 transition-shadow duration-20"
             >
               <button
                 onClick={btn.onClick}
-                className="bg-[#2f214d] p-2 rounded-lg shadow-inner shadow-purple-700/70 hover:shadow-purple-500/75 transition cursor-pointer"
+                className="bg-[#e1dcf8] dark:bg-[#2f214d] p-2 rounded-lg shadow-inner shadow-purple-600/50 dark:shadow-purple-700/70 hover:shadow-purple-600/60 dark:hover:shadow-purple-500/75 transition cursor-pointer"
                 title={`Export as ${btn.alt}`}
               >
                 <img src={btn.src} alt={btn.alt} className="w-12 h-12" />
@@ -195,13 +203,15 @@ const FullDocumentCard = () => {
       </div>
 
       {loading ? (
-        <div className="text-center text-gray-400">Loading…</div>
+        <div className="text-center text-gray-700 dark:text-gray-400">
+          Loading…
+        </div>
       ) : error ? (
-        <div className="text-red-400">{error}</div>
+        <div className="text-red-500 dark:text-red-400">{error}</div>
       ) : (
         <div
           ref={containerRef}
-          className="overflow-y-auto border-t-2 border-[#3e316e]"
+          className="overflow-y-auto border-t-2 border-[#beb5e4] dark:border-[#3e316e]"
         />
       )}
     </div>

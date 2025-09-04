@@ -27,7 +27,7 @@ const AIProtocolCard: React.FC = () => {
           "/api/ai/aiProtocol",
           {
             params: { projectId },
-          },
+          }
         );
 
         setProtocols(response.data);
@@ -69,14 +69,14 @@ const AIProtocolCard: React.FC = () => {
   });
 
   return (
-    <div className="relative flex flex-col h-full p-6 rounded-3xl bg-[#1e1538]">
+    <div className="relative flex flex-col h-full p-6 rounded-3xl bg-[#e9e5f8] dark:bg-[#1e1538]">
       <h2 className="text-3xl font-bold inline-block tracking-wide mb-6">
         AI Protocol
         <div className="h-1 mt-1.5 w-[166px] bg-gradient-to-r from-purple-500 via-pink-400 to-yellow-300 rounded-full" />
       </h2>
 
       <div className="relative mb-4">
-        <span className="absolute top-3 left-0 flex items-center pl-3 pointer-events-none text-[#787086]">
+        <span className="absolute top-3 left-0 flex items-center pl-3 pointer-events-none text-[#9a8db1] dark:text-[#787086]">
           <FunnelIcon className="h-5 w-5" />
         </span>
         <input
@@ -84,30 +84,32 @@ const AIProtocolCard: React.FC = () => {
           placeholder="Filter the protocol by typing a keyword"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="w-full pl-10 pr-6 py-2 rounded-lg bg-[#2f214d] text-white placeholder-[#787086] border-2 border-[#3e316e] focus:outline-none focus:ring-2 focus:ring-purple-700 transition duration-200"
+          className="w-full pl-10 pr-6 py-2 rounded-lg bg-[#e1dcf8] dark:bg-[#2f214d] text-[#261e3b] dark:text-white placeholder-[#9a8db1] dark:placeholder-[#787086] border-2 border-[#beb5e4] dark:border-[#3e316e] focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-700 transition duration-200"
         />
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center h-full">
-          <p className="text-gray-400 text-center text-3xl">
+          <p className="text-gray-700 dark:text-gray-400 text-center text-3xl">
             Loading Protocols...
           </p>
         </div>
       ) : error ? (
         <div className="flex items-center justify-center h-full">
-          <p className="text-red-400 text-center text-3xl">{error}</p>{" "}
+          <p className="text-red-500 dark:text-red-400 text-center text-3xl">
+            {error}
+          </p>{" "}
         </div>
       ) : filteredProtocols.length === 0 ? (
         <div className="flex items-center justify-center h-full">
-          <p className="text-[#787086] text-center text-3xl">
+          <p className="text-[#9a8db1] dark:text-[#787086] text-center text-3xl">
             No entries have been created in the AI protocol yet.
           </p>
         </div>
       ) : (
-        <div className="relative overflow-x-auto rounded-xl border-2 border-[#3e316e]">
-          <table className="min-w-full text-m text-center text-[#d4d4f2]">
-            <thead className="sticky top-0 bg-[#2f214d] text-[#ffffff] z-10 text-m">
+        <div className="relative overflow-x-auto rounded-xl border-2 border-[#beb5e4] dark:border-[#3e316e]">
+          <table className="min-w-full text-m text-center text-[#595996] dark:text-[#d4d4f2]">
+            <thead className="sticky top-0 bg-[#e1dcf8] dark:bg-[#2f214d] text-[#261e3b] dark:text-[#ffffff] z-10 text-m">
               <tr>
                 <th className="px-3 py-3 font-semibold">Name</th>
                 <th className="px-3 py-3 font-semibold">Usage</th>
@@ -121,7 +123,7 @@ const AIProtocolCard: React.FC = () => {
               {filteredProtocols.map((protocol) => (
                 <tr
                   key={protocol._id}
-                  className="hover:bg-[#3b2a5e]/60 transition border-b border-[#3e316e]"
+                  className="hover:bg-[#d3ccf4]/40 dark:hover:bg-[#3b2a5e]/60 transition border-b border-[#beb5e4] dark:border-[#3e316e]"
                 >
                   <td className="px-3 py-3">{truncateText(protocol.aiName)}</td>
                   <td className="px-3 py-3">
