@@ -69,7 +69,7 @@ export const createAIProtocolEntry = async (
   entry: IAiProtocolEntry,
 ): Promise<void> => {
   try {
-    const response = await fetch(API_BASE_URL + "/api/ai/aiProtocol", {
+    const response = await fetch(API_BASE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
