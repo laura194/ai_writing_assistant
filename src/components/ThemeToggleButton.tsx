@@ -68,8 +68,8 @@ export default function ThemeToggleButton({
           className={`absolute top-1 left-1 h-7 w-7 rounded-full bg-white dark:bg-[#0b0a17] shadow-[0_2px_18px_rgba(2,6,23,0.2)] flex items-center justify-center`}
           style={{
             boxShadow: isDark
-              ? "0 4px 20px rgba(0,0,0,0.6), 0 0 20px rgba(0,255,209,0.4)"
-              : undefined,
+              ? "0 2px 20px rgba(0,255,209,0.5)"
+              : "0 4px 20px rgba(0,0,0,0.35)",
           }}
         >
           <motion.span
