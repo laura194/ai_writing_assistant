@@ -14,7 +14,7 @@ const HelloMessage = () => {
         console.error("Fehler beim Laden der Nachricht:", err);
         setMessage("Fehler beim Abrufen der Nachricht");
       });
-  }, []);
+  }, [API_BASE_URL]);
 
   return (
     <div>
