@@ -20,7 +20,7 @@ interface FileProps {
 function File({ node, onClick }: FileProps) {
   return (
     <div
-      className="flex items-center gap-1.5 cursor-pointer hover:bg-gray-200 p-1 rounded"
+      className="flex items-center gap-1.5 cursor-pointer hover:bg-gray-500 dark:hover:bg-gray-200 p-1 rounded"
       onClick={() => {
         if (onClick) {
           onClick(node);
