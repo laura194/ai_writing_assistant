@@ -3,31 +3,34 @@ import { useUser } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { FolderPlus, FolderOpen } from "lucide-react";
 import Header from "../components/Header";
+import { useTheme } from "../providers/ThemeProvider";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { user } = useUser();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   return (
-    <div className="min-h-screen bg-[#090325] text-white relative overflow-hidden flex flex-col items-center">
+    <div className="min-h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-hidden flex flex-col items-center">
       <Header />
 
       {/* Background Gradient Blobs */}
       <motion.div
-        className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#9469f7] opacity-20 blur-3xl"
+        className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#584585] opacity-30 dark:bg-[#9469f7] dark:opacity-20 blur-3xl"
         animate={{ scale: [1, 1.25, 1] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <motion.div
-        className="absolute -bottom-40 -right-40 w-[30rem] h-[30rem] rounded-full bg-[#7845ef] opacity-20 blur-3xl"
+        className="absolute -bottom-40 -right-40 w-[30rem] h-[30rem] rounded-full bg-[#4b15ca] opacity-25 dark:bg-[#7845ef] dark:opacity-20 blur-3xl"
         animate={{ scale: [1, 0.85, 1] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <div className="flex-1 flex items-center justify-center relative pt-14">
         <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
-          <div className="w-[900px] h-[880px] bg-[#9a58eb] opacity-15 blur-3xl rounded-full mix-blend-screen" />
+          <div className="w-[900px] h-[880px] bg-[#7e35d8] opacity-25 dark:bg-[#9a58eb] dark:opacity-15 blur-3xl rounded-full mix-blend-screen" />
         </div>
         {/* Main Content */}
         <main className="flex flex-1 justify-center items-center z-10 w-full py-10">
@@ -44,14 +47,14 @@ const HomePage = () => {
                 duration: 4,
                 repeat: Infinity,
               }}
-              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(139,92,246,0.25)] w-full max-w-3xl"
+              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(139,92,246,0.6)] dark:shadow-[0_0_30px_rgba(139,92,246,0.25)] w-full max-w-3xl"
               style={{
                 backgroundImage:
                   "linear-gradient(90deg, #7c3aed, #db2777, #facc15)",
                 backgroundSize: "200% 200%",
               }}
             >
-              <div className="bg-[#1e1538] rounded-3xl px-10 py-10 text-center w-full min-h-[720px]">
+              <div className="bg-[#e9e5f8] dark:bg-[#1e1538] rounded-3xl px-10 py-10 text-center w-full min-h-[720px]">
                 <h1
                   data-aos="fade-down"
                   data-aos-duration="1000"
@@ -75,7 +78,7 @@ const HomePage = () => {
                   data-aos="fade-up"
                   data-aos-duration="700"
                   data-aos-delay="2100"
-                  className="text-[#aaa6c3] text-lg max-w-[600px] leading-relaxed mb-12 mx-auto text-center"
+                  className="text-[#261e3b] dark:text-[#aaa6c3] text-lg max-w-[600px] leading-relaxed mb-12 mx-auto text-center"
                 >
                   Ready to turn your next big idea into a structured, focused
                   draft?
@@ -105,13 +108,15 @@ const HomePage = () => {
                     whileHover={{
                       scale: 1.05,
                       rotate: 1.5,
-                      boxShadow: "0 0 20px rgba(0,255,163,0.5)",
+                      boxShadow: isDark
+                        ? "0 0 20px rgba(0,255,163,0.5)"
+                        : "0 0 20px rgba(0,255,163,0.3)",
                     }}
                     className="cursor-pointer mb-8 p-[2px] rounded-xl bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-500"
                   >
-                    <div className="group flex items-center justify-center w-full bg-[#1e1538] bg-opacity-90 backdrop-blur-md p-6 rounded-xl shadow-inner shadow-cyan-800/40 border border-[#32265b]">
-                      <FolderPlus className="w-8 h-8 stroke-[#00FFD1]" />
-                      <span className="ml-4 text-xl text-[#00FFD1] font-semibold transition-colors duration-300 group-hover:text-[#d7faf3] relative before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-[2px] before:bg-[#00FFD1] group-hover:before:w-full before:transition-all before:duration-300">
+                    <div className="group flex items-center justify-center w-full bg-[#e9e5f8] dark:bg-[#1e1538] dark:bg-opacity-90 backdrop-blur-md p-6 rounded-xl shadow-inner/30 dark:shadow-inner shadow-cyan-800/40 border border-[#c5b6f7] dark:border-[#32265b]">
+                      <FolderPlus className="w-8 h-8 stroke-[#14ab94] dark:stroke-[#00FFD1]" />
+                      <span className="ml-4 text-xl text-[#14ab94] dark:text-[#00FFD1] font-semibold transition-colors duration-300 group-hover:text-[#0d6e60] dark:group-hover:text-[#d7faf3] relative before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-[2px] before:bg-[#00FFD1] group-hover:before:w-full before:transition-all before:duration-300">
                         Create New Project
                       </span>
                     </div>
@@ -129,13 +134,15 @@ const HomePage = () => {
                     whileHover={{
                       scale: 1.05,
                       rotate: -1.5,
-                      boxShadow: "0 0 20px rgba(251,146,60,0.5)",
+                      boxShadow: isDark
+                        ? "0 0 20px rgba(251,146,60,0.5)"
+                        : "0 0 20px rgba(251,146,60,0.3)",
                     }}
                     className="cursor-pointer p-[2px] rounded-xl bg-gradient-to-r from-red-500 via-orange-400 to-yellow-500"
                   >
-                    <div className="group flex items-center justify-center w-full bg-[#1e1538] bg-opacity-90 backdrop-blur-md p-6 rounded-xl shadow-inner shadow-orange-800/40 border border-[#32265b]">
-                      <FolderOpen className="w-8 h-8 stroke-[#eeae38]" />
-                      <span className="ml-4 text-xl text-[#eeae38] font-semibold transition-colors duration-300 group-hover:text-[#faebcf] relative before:absolute before:-bottom-1 before:right-0 before:w-0 before:h-[2px] before:bg-[#eeae38] group-hover:before:w-full before:transition-all before:duration-300">
+                    <div className="group flex items-center justify-center w-full bg-[#e9e5f8] dark:bg-[#1e1538] bg-opacity-90 backdrop-blur-md p-6 rounded-xl shadow-inner/30 dark:shadow-inner shadow-orange-800/40 border-[#c5b6f7] dark:border-[#32265b]">
+                      <FolderOpen className="w-8 h-8 stroke-[#cb8a07] dark:stroke-[#eeae38]" />
+                      <span className="ml-4 text-xl text-[#cb8a07] dark:text-[#eeae38] font-semibold transition-colors duration-300 group-hover:text-[#815c11] dark:group-hover:text-[#faebcf] relative before:absolute before:-bottom-1 before:right-0 before:w-0 before:h-[2px] before:bg-[#eeae38] group-hover:before:w-full before:transition-all before:duration-300">
                         Open Existing Project
                       </span>
                     </div>
