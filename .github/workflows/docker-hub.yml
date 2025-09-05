@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["65-automatically-create-docker-image-of-application-and-upload-to-docker-hub"]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
