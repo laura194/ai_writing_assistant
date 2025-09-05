@@ -28,7 +28,7 @@ const AIProtocolCard: React.FC = () => {
           API_BASE_URL + "/api/ai/aiProtocol",
           {
             params: { projectId },
-          }
+          },
         );
 
         setProtocols(response.data);
@@ -46,7 +46,7 @@ const AIProtocolCard: React.FC = () => {
       setError("Project ID is required.");
       setLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, API_BASE_URL]);
 
   // Filter logic
   const filteredProtocols = protocols.filter((protocol) => {

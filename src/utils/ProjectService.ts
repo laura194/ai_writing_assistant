@@ -1,7 +1,9 @@
 import axios from "axios";
 import { Project } from "./types";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5001") + "/api/projects";
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL || "http://localhost:5001") +
+  "/api/projects";
 console.log("API_BASE_URL:", API_BASE_URL);
 export class ProjectService {
   static async createProject(data: Omit<Project, "_id">): Promise<Project> {
