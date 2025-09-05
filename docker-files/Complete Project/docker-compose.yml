@@ -21,8 +21,6 @@ services:
       - mongodb
     ports:
       - "5001:5001"
-    environment:
-      MONGO_URI: mongodb://root:example@ai_writing_assistant_mongodb:27017/ai_writing_assistant
     networks:
       - ai_writing_assistant_network
 
