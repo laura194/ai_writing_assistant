@@ -350,19 +350,19 @@ const EditPage = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="flex flex-col h-screen bg-[#090325] text-white relative overflow-x-hidden">
+      <div className="flex flex-col h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-x-hidden">
         <Header />
 
         <div className="flex flex-1 relative">
           <div
             className={`sticky top-0 left-0 h-screen ${menuOpen ? "w-1/4" : "w-19"} transition-all duration-500 flex flex-col relative`}
           >
-            <div className="bg-[#1e1538] py-2 px-4 flex h-full flex-col justify-between shadow-[inset_0_0_30px_rgba(120,69,239,0.25)] pt-14">
+            <div className="bg-[#f4f2fa] dark:bg-[#1e1538] py-2 px-4 flex h-full flex-col justify-between shadow-[inset_0_0_30px_rgba(120,69,239,0.55)] dark:shadow-[inset_0_0_30px_rgba(120,69,239,0.25)] pt-14">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="mb-2 py-1 mt-2 px-2 rounded-full hover:bg-[#373254] transition cursor-pointer"
+                className="mb-2 py-1 mt-2 px-3 rounded-full hover:bg-[#dedbf0] dark:hover:bg-[#373254] transition cursor-pointer"
               >
-                <Bars3Icon className="h-6 w-6 text-[#c4b5fd]" />
+                <Bars3Icon className="h-6 w-6 text-[#473885] dark:text-[#c4b5fd]" />
               </button>
 
               {menuOpen && (
@@ -398,14 +398,14 @@ const EditPage = () => {
               initial={{ backgroundPosition: "0% 0%" }}
               animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
               transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-              className="p-[4px] rounded-3xl shadow-[0_0_30px_rgba(120,69,239,0.25)] h-full"
+              className="p-[4px] rounded-3xl shadow-[0_0_20px_rgba(120,69,239,0.3)] dark:shadow-[0_0_30px_rgba(120,69,239,0.25)] h-full"
               style={{
                 backgroundImage:
                   "linear-gradient(180deg, #7c3aed, #db2777, #facc15)",
                 backgroundSize: "200% 200%",
               }}
             >
-              <div className="bg-[#1e1538] rounded-3xl h-full shadow-[0_0_40px_rgba(120,69,239,0.3)] flex flex-col">
+              <div className="bg-[#e9e5f8] dark:bg-[#1e1538] rounded-3xl h-full shadow-[0_0_14px_rgba(120,69,239,0.4)] dark:shadow-[0_0_40px_rgba(120,69,239,0.3)] flex flex-col">
                 {selectedNode ? (
                   activeView === "file" ? (
                     <FileContentCard
@@ -419,14 +419,14 @@ const EditPage = () => {
                     <FullDocumentCard />
                   ) : (
                     <div className="flex h-full items-center justify-center">
-                      <p className="text-xl text-[#aaa6c3] leading-relaxed">
+                      <p className="text-xl text-[#261e3b] dark:text-[#aaa6c3] leading-relaxed">
                         Unknown view selected.
                       </p>
                     </div>
                   )
                 ) : (
                   <div className="flex h-full items-center justify-center">
-                    <p className="text-xl text-[#aaa6c3] leading-relaxed">
+                    <p className="text-xl text-[#261e3b] dark:text-[#aaa6c3] leading-relaxed">
                       Select an element on the left to begin editing.
                     </p>
                   </div>
