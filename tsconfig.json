@@ -6,6 +6,8 @@
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
   "include": ["src", "test"],
