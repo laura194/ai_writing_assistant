@@ -1,0 +1,17 @@
+{
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "./vitest.config.ts",
+    "related": false
+  },
+  "reporters": ["html", "clear-text", "progress"],
+  "coverageAnalysis": "off",
+  "checkers": ["typescript"],
+  "tsconfigFile": "tsconfig.json",
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 50
+  },
+  "mutate": ["src/components/IconPicker/**/*.{ts,tsx}", "!**/*.test.tsx"]
+}

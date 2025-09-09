@@ -1,5 +1,4 @@
 // src/components/IconPicker/IconPicker.test.tsx
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import IconPicker from "./IconPicker";
@@ -46,24 +45,17 @@ describe("IconPicker", () => {
   });
 
   test("markiert korrekt das aktuell ausgewählte Icon (currentIcon)", () => {
-    // wir setzen currentIcon auf "image"
     render(<IconPicker currentIcon="image" onSelect={() => {}} />);
 
-    // das aktive Icon rendert das motion.div mit layoutId "activeIconBackground",
-    // unser mock legt das als data-layout-id ins DOM
-    const activeBg = screen.getByTestId ? screen.queryByTestId("active") : null;
-    // Statt testid: wir suchen das Element mit data-layout-id="activeIconBackground"
+    // aktive Markierung finden
     const activeDiv = document.querySelector(
       '[data-layout-id="activeIconBackground"]'
     );
     expect(activeDiv).toBeInTheDocument();
 
-    // zusätzlich: der Button mit title "Image Section" existiert
+    // zusätzlich sicherstellen, dass das "Image"-Icon vorhanden ist
     const imageButton = screen.getByTitle(/Category: Image Section/i);
     expect(imageButton).toBeInTheDocument();
-    // activeDiv sollte sich innerhalb des imageButton (oder im DOM) befinden
-    // (konkrete Struktur hängt von Mock, aber zumindest haben wir activeDiv)
-    expect(activeDiv).toBeTruthy();
   });
 
   test('wenn kein currentIcon übergeben, ist "text" standardmäßig aktiv', () => {
