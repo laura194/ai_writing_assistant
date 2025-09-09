@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import Header from "../components/Header";
 import { ProjectService } from "../utils/ProjectService";
 import { FolderPlus } from "lucide-react";
+import { useTheme } from "../providers/ThemeProvider";
+import { getToastOptions } from "../utils/ToastOptionsSSP";
 
 import imradJson from "../assets/imrad.json";
 import projectStructureJson from "../assets/projectStructure.json";
@@ -14,6 +16,8 @@ import toast from "react-hot-toast";
 const StructureSelectionPage = () => {
   const { user } = useUser();
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const [projectName, setProjectName] = useState("");
   const [selectedStructure, setSelectedStructure] = useState<string | null>(
@@ -22,38 +26,12 @@ const StructureSelectionPage = () => {
 
   const handleSave = async () => {
     if (!projectName.trim()) {
-      toast("Please enter a project name.", {
-        duration: 4000,
-        icon: "⚠️",
-        style: {
-          background: "#1e1538",
-          color: "#c4b5fd",
-          padding: "16px 20px",
-          borderRadius: "12px",
-          fontSize: "18px",
-          fontWeight: "600",
-          boxShadow: "0 4px 12px rgba(139, 92, 246, 0.2)",
-          border: "1px solid #7c3aed",
-        },
-      });
+      toast("Please enter a project name.", getToastOptions(theme));
       return;
     }
 
     if (!selectedStructure) {
-      toast("Please select a project structure.", {
-        duration: 4000,
-        icon: "⚠️",
-        style: {
-          background: "#1e1538",
-          color: "#c4b5fd",
-          padding: "16px 20px",
-          borderRadius: "12px",
-          fontSize: "18px",
-          fontWeight: "600",
-          boxShadow: "0 4px 12px rgba(139, 92, 246, 0.2)",
-          border: "1px solid #7c3aed",
-        },
-      });
+      toast("Please select a project structure.", getToastOptions(theme));
       return;
     }
 
@@ -119,25 +97,25 @@ const StructureSelectionPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#090325] text-white relative overflow-hidden flex flex-col items-center">
+    <div className="min-h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-hidden flex flex-col items-center">
       <Header />
 
       {/* Animated Blurred Squares in opposite corners */}
       <motion.div
-        className="absolute top-[-4rem] right-[-4rem] w-84 h-84 bg-[#16abf6] opacity-20 blur-3xl rotate-12 rounded-[1.25rem]"
+        className="absolute top-[-4rem] right-[-4rem] w-84 h-84 bg-[#088fd3] opacity-35 dark:bg-[#16abf6] dark:opacity-20 blur-3xl rotate-12 rounded-[1.25rem]"
         animate={{ scale: [1, 0.85, 1] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <motion.div
-        className="absolute bottom-[-6rem] left-[-4rem] w-80 h-80 bg-[#37f5a2] opacity-20 blur-3xl -rotate-12 rounded-[1.25rem]"
+        className="absolute bottom-[-6rem] left-[-4rem] w-80 h-80 bg-[#3bdb96] opacity-40 dark:bg-[#37f5a2] dark:opacity-20 blur-3xl -rotate-12 rounded-[1.25rem]"
         animate={{ scale: [1, 1.25, 1] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <div className="flex-1 flex items-center justify-center relative pt-14">
         <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
-          <div className="w-[900px] h-[900px] bg-[#3adec8] opacity-10 blur-3xl rounded-full mix-blend-screen" />
+          <div className="w-[900px] h-[900px] bg-[#2fc1ae] dark:bg-[#3adec8] opacity-20 dark:opacity-10 blur-3xl rounded-full mix-blend-screen" />
         </div>
         <main className="flex-1 w-full flex items-center justify-center py-10 z-10">
           <motion.div
@@ -153,14 +131,14 @@ const StructureSelectionPage = () => {
                 duration: 4,
                 repeat: Infinity,
               }}
-              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(48,240,178,0.25)] w-full max-w-3xl"
+              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(48,240,178,0.4)] dark:shadow-[0_0_30px_rgba(48,240,178,0.25)] w-full max-w-3xl"
               style={{
                 backgroundImage:
                   "linear-gradient(90deg, #45f5cf, #05d1f5, #244fed)",
                 backgroundSize: "200% 200%",
               }}
             >
-              <div className="w-full max-w-3xl bg-[#1e1538] rounded-3xl px-10 py-10 shadow-[0_0_40px_rgba(14,165,233,0.15)]">
+              <div className="w-full max-w-3xl bg-[#e9e5f8] dark:bg-[#1e1538] rounded-3xl px-10 py-10 shadow-[0_0_40px_rgba(14,165,233,0.2)]">
                 <h1
                   data-aos="fade-down"
                   data-aos-duration="800"
@@ -173,7 +151,7 @@ const StructureSelectionPage = () => {
                   data-aos="fade-up"
                   data-aos-duration="500"
                   data-aos-delay="1800"
-                  className="text-[#aaa6c3] max-w-[600px] leading-relaxed mb-8 mx-auto text-center"
+                  className="text-[#261e3b] dark:text-[#aaa6c3] max-w-[600px] leading-relaxed mb-8 mx-auto text-center"
                 >
                   Give your project a name and choose a structure to begin.
                 </p>
@@ -186,7 +164,7 @@ const StructureSelectionPage = () => {
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                   placeholder="Enter project title"
-                  className="w-full px-4 py-3 mb-10 rounded-md bg-[#2a1e44] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="w-full px-4 py-3 mb-10 rounded-md bg-[#dad5ee] text-[#261e3b] dark:bg-[#2a1e44] dark:text-white placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
                 />
 
                 <div className="mb-12">
@@ -213,18 +191,20 @@ const StructureSelectionPage = () => {
                           className={`relative group rounded-xl p-[2px] transition-all duration-300 ${
                             isSelected
                               ? "bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-500"
-                              : "bg-[#403071]"
+                              : isDark
+                                ? "bg-[#403071]"
+                                : "bg-[#8b75cb]"
                           }`}
                         >
                           <div
                             className={`w-full h-full px-5 py-4 rounded-[10px] backdrop-blur-md transition duration-300 cursor-pointer
                                           ${
                                             isSelected
-                                              ? "bg-[#1e1538] text-teal-100 shadow-[0_0_15px_rgba(34,211,238,0.15)]"
-                                              : "bg-[#1e1538] text-[#aaa6c3] hover:bg-[#2c204a]"
+                                              ? "bg-[#e9e5f8] dark:bg-[#1e1538] text-[#14ab94] dark:text-teal-100 shadow-[0_0_15px_rgba(34,211,238,0.5)] dark:shadow-[0_0_15px_rgba(34,211,238,0.15)]"
+                                              : "bg-[#e9e5f8] dark:bg-[#1e1538] text-[#261e3b] dark:text-[#aaa6c3] hover:bg-[#e4ddf6] dark:hover:bg-[#2c204a]"
                                           }`}
                           >
-                            <span className="text-lg font-semibold block group-hover:text-teal-100 transition-colors duration-300">
+                            <span className="text-lg font-semibold block group-hover:text-[#14ab94] dark:group-hover:text-teal-100 transition-colors duration-300">
                               {option.label}
                             </span>
                           </div>
@@ -243,13 +223,15 @@ const StructureSelectionPage = () => {
                     onClick={handleSave}
                     whileHover={{
                       scale: 1.05,
-                      boxShadow: "0 0 20px rgba(0,255,163,0.5)",
+                      boxShadow: isDark
+                        ? "0 0 20px rgba(0,255,163,0.3)"
+                        : "0 0 20px rgba(0,255,163,0.5)",
                     }}
-                    className="cursor-pointer p-[2px] rounded-xl bg-teal-400 w-[300px] mx-auto"
+                    className="cursor-pointer p-[2px] rounded-xl bg-teal-400 dark:bg-teal-400 w-[300px] mx-auto"
                   >
-                    <div className="group flex items-center justify-center bg-[#1e1538] bg-opacity-90 backdrop-blur-md p-4 rounded-xl shadow-inner shadow-cyan-800/40 border border-[#32265b]">
-                      <FolderPlus className="w-8 h-8 stroke-[#00FFD1]" />
-                      <span className="ml-4 text-xl text-[#00FFD1] font-semibold transition-colors duration-300 group-hover:text-[#d7faf3] relative before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-[2px] before:bg-[#00FFD1] group-hover:before:w-full before:transition-all before:duration-300">
+                    <div className="group flex items-center justify-center bg-[#e9e5f8] dark:bg-[#1e1538] dark:bg-opacity-90 backdrop-blur-md p-4 rounded-xl shadow-inner/10 dark:shadow-inner shadow-cyan-800/40 border border-[#dad1f5] dark:border-[#32265b]">
+                      <FolderPlus className="w-8 h-8 stroke-[#14ab94] dark:stroke-[#00FFD1]" />
+                      <span className="ml-4 text-xl text-[#14ab94] dark:text-[#00FFD1] font-semibold transition-colors duration-300 group-hover:text-[#0d6e60] dark:group-hover:text-[#d7faf3] relative before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-[2px] before:bg-[#00FFD1] group-hover:before:w-full before:transition-all before:duration-300">
                         Create Project
                       </span>
                     </div>
