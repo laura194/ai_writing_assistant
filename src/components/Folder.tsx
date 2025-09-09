@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { Node } from "../utils/types";
-import IconPicker from "../components/IconPicker";
+import IconPicker from "./IconPicker/IconPicker";
 import { getIcon } from "../utils/icons";
 import { motion } from "framer-motion";
 import { PlusCircle, Trash2, CircleX } from "lucide-react";
@@ -13,7 +13,7 @@ interface FolderProps {
   onMove: (
     draggedNodeId: string,
     targetNodeId: string,
-    asSibling?: boolean,
+    asSibling?: boolean
   ) => void;
   onNodeClick: (node: Node) => void;
   onAdd: (parentId: string | null, newNode: Node) => void;
