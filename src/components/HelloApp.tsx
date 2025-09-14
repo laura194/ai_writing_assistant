@@ -7,6 +7,9 @@ interface Plant {
   type: string;
 }
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+
 const HelloApp: React.FC = () => {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
@@ -15,7 +18,7 @@ const HelloApp: React.FC = () => {
   // Funktion zum Abrufen der Pflanzen von der API
   const fetchPlants = async () => {
     try {
-      const response = await axios.get("/api/hello/plants");
+      const response = await axios.get(API_BASE_URL + "/api/hello/plants");
       setPlants(response.data);
     } catch (error) {
       console.error("Fehler beim Abrufen der Pflanzen:", error);
@@ -27,7 +30,7 @@ const HelloApp: React.FC = () => {
     e.preventDefault();
 
     try {
-      await axios.post("/api/hello/plant", { name, type });
+      await axios.post(API_BASE_URL + "/api/hello/plant", { name, type });
       setName("");
       setType("");
       fetchPlants(); // Pflanzen nach dem Hinzufügen erneut abrufen
