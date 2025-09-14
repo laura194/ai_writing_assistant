@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo
+    container_name: ai_writing_assistant_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - ai_writing_assistant_network
+
+  backend:
+    image: laura194/backend:latest
+    container_name: ai_writing_assistant_backend
+    depends_on:
+      - mongodb
+    ports:
+      - "5001:5001"
+    networks:
+      - ai_writing_assistant_network
+
+  frontend:
+    image: laura194/frontend:latest
+    container_name: ai_writing_assistant_frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    networks:
+      - ai_writing_assistant_network
+
+volumes:
+  mongo-data:
+
+networks:
+  ai_writing_assistant_network:
+    driver: bridge
