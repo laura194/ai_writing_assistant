@@ -30,20 +30,74 @@ interface NodeContent {
   content: string;
 }
 
+const generateLaTeXContent = (
+  structure: StructureNode[],
+  nodeContents: NodeContent[],
+): string => {
+  let latexContent = `
+\\documentclass{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage{graphicx}
+\\usepackage{amsmath}
+\\usepackage{booktabs}
+\\usepackage{hyperref}
+\\usepackage{caption}
+\\usepackage{longtable}
+\\usepackage{biblatex}
+\\addbibresource{references.bib}
+
+\\title{${escapeLatex(structure[0]?.name || "Untitled")}}
+\\date{\\today}
+
+\\begin{document}
+\\maketitle
+`;
+
+  structure.forEach((node) => {
+    latexContent += `\\section{${escapeLatex(node.name)}}\n`;
+
+    const content = nodeContents.find((n) => n.nodeId === node.id)?.content;
+    if (content) {
+      latexContent += `${parseRichContent(content)}\n\n`;
+    }
+
+    if (node.nodes) {
+      node.nodes.forEach((childNode) => {
+        latexContent += `\\subsection{${escapeLatex(childNode.name)}}\n`;
+        const childContent = nodeContents.find(
+          (n) => n.nodeId === childNode.id,
+        )?.content;
+        if (childContent) {
+          latexContent += `${parseRichContent(childContent)}\n\n`;
+        }
+      });
+    }
+  });
+
+  latexContent += `
+\\newpage
+\\printbibliography
+\\end{document}
+`;
+
+  return latexContent;
+};
+
 export const handleExportWord = async (
   structure: StructureNode[],
   nodeContents: NodeContent[],
 ) => {
   try {
-    // Get LaTeX content using existing function
-    const latexContent = handleExportLATEX(structure, nodeContents, false);
-    console.log('Generated LaTeX content:', latexContent.substring(0, 100)); // Debug log
+    const latexContent = generateLaTeXContent(structure, nodeContents);
+    console.log('Generated LaTeX content:', latexContent.substring(0, 100));
 
-    const response = await fetch('http://localhost:5001/api/export/word', {
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+    console.log('API Base URL:', apiBaseUrl);
+
+    const response = await fetch(`${apiBaseUrl}/api/export/word`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       },
       body: JSON.stringify({ latexContent })
     });
@@ -60,7 +114,7 @@ export const handleExportWord = async (
     }
 
     console.log('Conversion successful, saving Word document...');
-    saveAs(blob, 'document.docx');
+    saveAs(blob, 'full_document.docx');
   } catch (error) {
     console.error('Error exporting to Word:', error);
     throw error;
@@ -137,52 +191,8 @@ export const handleExportLATEX = (
   nodeContents: NodeContent[],
   saveFile: boolean = true,
 ) => {
-  let latexContent = `
-\\documentclass{article}
-\\usepackage[utf8]{inputenc}
-\\usepackage{graphicx}
-\\usepackage{amsmath}
-\\usepackage{booktabs}
-\\usepackage{hyperref}
-\\usepackage{caption}
-\\usepackage{longtable}
-\\usepackage{biblatex}
-\\addbibresource{references.bib}
-
-\\title{${escapeLatex(structure[0]?.name || "Untitled")}}
-\\date{\\today}
-
-\\begin{document}
-\\maketitle
-`;
-
-  structure.forEach((node) => {
-    latexContent += `\\section{${escapeLatex(node.name)}}\n`;
-
-    const content = nodeContents.find((n) => n.nodeId === node.id)?.content;
-    if (content) {
-      latexContent += `${parseRichContent(content)}\n\n`;
-    }
-
-    if (node.nodes) {
-      node.nodes.forEach((childNode) => {
-        latexContent += `\\subsection{${escapeLatex(childNode.name)}}\n`;
-        const childContent = nodeContents.find(
-          (n) => n.nodeId === childNode.id,
-        )?.content;
-        if (childContent) {
-          latexContent += `${parseRichContent(childContent)}\n\n`;
-        }
-      });
-    }
-  });
-
-  latexContent += `
-\\newpage
-\\printbibliography
-\\end{document}
-`;
-
+  const latexContent = generateLaTeXContent(structure, nodeContents);
+  
   if (saveFile) {
     const blob = new Blob([latexContent], { type: "text/plain;charset=utf-8" });
     saveAs(blob, "full_document.tex");
