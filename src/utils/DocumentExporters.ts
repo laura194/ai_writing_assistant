@@ -1,4 +1,4 @@
-import { Document, Packer, Paragraph, HeadingLevel } from "docx";
+//import { Document, Packer, Paragraph, HeadingLevel } from "docx";
 import jsPDF from "jspdf";
 import { saveAs } from "file-saver";
 
@@ -34,39 +34,37 @@ export const handleExportWord = async (
   structure: StructureNode[],
   nodeContents: NodeContent[],
 ) => {
-  const children: Paragraph[] = [];
+  try {
+    // Get LaTeX content using existing function
+    const latexContent = handleExportLATEX(structure, nodeContents, false);
+    console.log('Generated LaTeX content:', latexContent.substring(0, 100)); // Debug log
 
-  structure.forEach((node) => {
-    children.push(
-      new Paragraph({ text: node.name, heading: HeadingLevel.HEADING_1 }),
-    );
+    const response = await fetch('http://localhost:5001/api/export/word', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      },
+      body: JSON.stringify({ latexContent })
+    });
 
-    const content = nodeContents.find((n) => n.nodeId === node.id)?.content;
-    if (content) {
-      children.push(new Paragraph(content));
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Server response:', errorText);
+      throw new Error(`Server returned ${response.status}: ${errorText}`);
     }
 
-    if (node.nodes) {
-      node.nodes.forEach((childNode) => {
-        children.push(
-          new Paragraph({
-            text: childNode.name,
-            heading: HeadingLevel.HEADING_2,
-          }),
-        );
-        const childContent = nodeContents.find(
-          (n) => n.nodeId === childNode.id,
-        )?.content;
-        if (childContent) {
-          children.push(new Paragraph(childContent));
-        }
-      });
+    const blob = await response.blob();
+    if (blob.size === 0) {
+      throw new Error('Received empty file from server');
     }
-  });
 
-  const doc = new Document({ sections: [{ children }] });
-  const blob = await Packer.toBlob(doc);
-  saveAs(blob, "full_document.docx");
+    console.log('Conversion successful, saving Word document...');
+    saveAs(blob, 'document.docx');
+  } catch (error) {
+    console.error('Error exporting to Word:', error);
+    throw error;
+  }
 };
 
 export const handleExportPDF = (
@@ -137,6 +135,7 @@ export const handleExportPDF = (
 export const handleExportLATEX = (
   structure: StructureNode[],
   nodeContents: NodeContent[],
+  saveFile: boolean = true,
 ) => {
   let latexContent = `
 \\documentclass{article}
@@ -184,8 +183,12 @@ export const handleExportLATEX = (
 \\end{document}
 `;
 
-  const blob = new Blob([latexContent], { type: "text/plain;charset=utf-8" });
-  saveAs(blob, "full_document.tex");
+  if (saveFile) {
+    const blob = new Blob([latexContent], { type: "text/plain;charset=utf-8" });
+    saveAs(blob, "full_document.tex");
+  }
+  
+  return latexContent;
 };
 
 const escapeLatex = (unsafe: string) => {
