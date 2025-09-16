@@ -1,17 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import "../App.css";
-import Folder from "../components/Folder";
-import FileContentCard from "../components/FileContentCard";
+import "../App/App.css";
+import Folder from "../components/Folder/Folder";
+import FileContentCard from "../components/FileContentCard/FileContentCard";
 import { Bars3Icon } from "@heroicons/react/24/solid";
 import { Node, Project } from "../utils/types";
-import BottomNavigationBar from "../components/BottomNavigationBar";
-import Header from "../components/Header";
-import AIProtocolCard from "../components/AIProtocolCard";
-import UnsavedChangesDialog from "../components/UnsavedChangesDialog";
+import BottomNavigationBar from "../components/BottomNavigationBar/BottomNavigationBar";
+import Header from "../components/Header/Header";
+import AIProtocolCard from "../components/AIProtocolCard/AIProtocolCard";
+import UnsavedChangesDialog from "../components/UnsavedChangesDialog/UnsavedChangesDialog";
 import { NodeContentService } from "../utils/NodeContentService";
-import FullDocumentCard from "../components/FullDocumentCard";
+import FullDocumentCard from "../components/FullDocumentCard/FullDocumentCard";
 import { ProjectService } from "../utils/ProjectService";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -209,7 +209,7 @@ const EditPage = () => {
   const addChapter = (parentId: string | null, newNode: Node) => {
     const recursiveUpdate = (
       nodes: Node[],
-      parentId: string | null,
+      parentId: string | null
     ): Node[] => {
       return nodes.map((node) => {
         if (node.id === parentId) {
@@ -275,7 +275,7 @@ const EditPage = () => {
       setSelectedNode((prev) =>
         prev
           ? { ...prev, name: updatedNode.name, icon: updatedNode.icon }
-          : prev,
+          : prev
       );
     }
 
@@ -296,7 +296,7 @@ const EditPage = () => {
 
   const handleMoveNode = (
     draggedNodeId: string,
-    targetNodeId: string,
+    targetNodeId: string
     //asSibling: boolean = false
   ) => {
     const newNodes = [...nodes];

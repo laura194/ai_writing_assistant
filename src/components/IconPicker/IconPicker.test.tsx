@@ -1,14 +1,8 @@
-// src/components/IconPicker/IconPicker.test.tsx
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import IconPicker from "./IconPicker";
 import { vi } from "vitest";
 
-/**
- * Wir mocken 'framer-motion' so, dass motion.button -> plain <button>
- * und motion.div -> <div data-layout-id="..."> damit wir verlässlich
- * DOM-Prüfungen machen können (keine echte Animation im Test).
- */
 vi.mock("framer-motion", async () => {
   const ReactPkg = await import("react");
   return {
@@ -24,19 +18,17 @@ vi.mock("framer-motion", async () => {
 });
 
 describe("IconPicker", () => {
-  test("rendert vier Icon-Buttons", () => {
+  test("rendert 4 Icon-Buttons", () => {
     render(<IconPicker onSelect={() => {}} />);
-    // es sollten genau 4 buttons gerendert werden
     const buttons = screen.getAllByRole("button");
     expect(buttons).toHaveLength(4);
   });
 
-  test("ruft onSelect mit dem richtigen icon-name auf, wenn geklickt wird", async () => {
+  test("when is clicked, 'onSelect' will be called with icon-name ", async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
     render(<IconPicker onSelect={onSelect} />);
 
-    // wir nutzen die title-attribute der buttons: "Category: Code Section"
     const codeButton = screen.getByTitle(/Category: Code Section/i);
     await user.click(codeButton);
 
@@ -44,30 +36,94 @@ describe("IconPicker", () => {
     expect(onSelect).toHaveBeenCalledWith("code");
   });
 
-  test("markiert korrekt das aktuell ausgewählte Icon (currentIcon)", () => {
+  test("correctly marking the current selected Icon (currentIcon)", () => {
     render(<IconPicker currentIcon="image" onSelect={() => {}} />);
 
-    // aktive Markierung finden
     const activeDiv = document.querySelector(
       '[data-layout-id="activeIconBackground"]'
     );
     expect(activeDiv).toBeInTheDocument();
 
-    // zusätzlich sicherstellen, dass das "Image"-Icon vorhanden ist
     const imageButton = screen.getByTitle(/Category: Image Section/i);
     expect(imageButton).toBeInTheDocument();
   });
 
-  test('wenn kein currentIcon übergeben, ist "text" standardmäßig aktiv', () => {
+  test('when no currentIcon given, then "text" is active', () => {
     render(<IconPicker onSelect={() => {}} />);
-    // active bg sollte vorhanden sein (wir erwarten default 'text')
     const activeDiv = document.querySelector(
       '[data-layout-id="activeIconBackground"]'
     );
     expect(activeDiv).toBeInTheDocument();
 
-    // und der Button mit Label "Text Section" sollte existieren
     const textButton = screen.getByTitle(/Category: Text Section/i);
     expect(textButton).toBeInTheDocument();
+  });
+});
+
+describe("IconPicker Additional Mutation Coverage", () => {
+  const icons = ["text", "list", "code", "image"] as const;
+
+  icons.forEach((iconName) => {
+    test(`active icon "${iconName}" renders correctly`, () => {
+      render(<IconPicker currentIcon={iconName} onSelect={() => {}} />);
+
+      const activeDiv = document.querySelector(
+        '[data-layout-id="activeIconBackground"]'
+      );
+      expect(activeDiv).toBeInTheDocument();
+
+      const button = screen.getByTitle(
+        new RegExp(`Category: ${iconName}`, "i")
+      );
+      expect(button).toBeInTheDocument();
+
+      // Check that only this button is "active"
+      const buttons = screen.getAllByRole("button");
+      buttons.forEach((btn) => {
+        if (btn === button) {
+          expect(btn.className).toMatch(/border-2 border-white/);
+        } else {
+          expect(btn.className).toMatch(/border border-transparent/);
+        }
+      });
+    });
+  });
+
+  test("click through all icons and verify currentIcon", async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    render(<IconPicker onSelect={onSelect} />);
+
+    const buttons = screen.getAllByRole("button");
+    for (const button of buttons) {
+      await user.click(button);
+    }
+
+    expect(onSelect).toHaveBeenCalledTimes(4);
+    expect(onSelect).toHaveBeenCalledWith("text");
+    expect(onSelect).toHaveBeenCalledWith("list");
+    expect(onSelect).toHaveBeenCalledWith("code");
+    expect(onSelect).toHaveBeenCalledWith("image");
+  });
+
+  test("explicitly undefined currentIcon defaults to 'text'", () => {
+    render(<IconPicker currentIcon={undefined} onSelect={() => {}} />);
+    const activeDiv = document.querySelector(
+      '[data-layout-id="activeIconBackground"]'
+    );
+    expect(activeDiv).toBeInTheDocument();
+    const textButton = screen.getByTitle(/Category: Text Section/i);
+    expect(textButton).toBeInTheDocument();
+  });
+
+  test("clicking a button without currentIcon triggers onSelect", async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    render(<IconPicker onSelect={onSelect} />);
+
+    const firstButton = screen.getAllByRole("button")[0];
+    await user.click(firstButton);
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(onSelect).toHaveBeenCalledWith("text");
   });
 });

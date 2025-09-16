@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import { FolderPlus, FolderOpen } from "lucide-react";
-import Header from "../components/Header";
+import Header from "../components/Header/Header";
 import { useTheme } from "../providers/ThemeProvider";
 
 const HomePage = () => {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
-import Header from "../components/Header";
+import Header from "../components/Header/Header";
 import { ProjectService } from "../utils/ProjectService";
 import { FolderPlus } from "lucide-react";
 import { useTheme } from "../providers/ThemeProvider";
@@ -21,7 +21,7 @@ const StructureSelectionPage = () => {
 
   const [projectName, setProjectName] = useState("");
   const [selectedStructure, setSelectedStructure] = useState<string | null>(
-    null,
+    null
   );
 
   const handleSave = async () => {
@@ -85,7 +85,7 @@ const StructureSelectionPage = () => {
             boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
             border: "1px solid #ef4444",
           },
-        },
+        }
       );
     }
   };
