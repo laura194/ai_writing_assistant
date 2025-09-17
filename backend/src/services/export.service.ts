@@ -1,9 +1,6 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import pandoc from 'pandoc';
 import fs from 'fs/promises';
 import path from 'path';
-
-const execAsync = promisify(exec);
 
 export class ExportService {
   static async latexToDocx(latexContent: string): Promise<Buffer> {
@@ -18,20 +15,23 @@ export class ExportService {
       // Write LaTeX content to file
       await fs.writeFile(texFile, latexContent);
 
-      // Use pandoc 3.8 features:
-      // --pdf-engine=xelatex for better Unicode support
-      // --wrap=none to prevent line wrapping
-      // --reference-doc for Word styling (optional)
-      const { stderr } = await execAsync(
-        `pandoc "${texFile}" -f latex -t docx -s \
-         --pdf-engine=xelatex \
-         --wrap=none \
-         -o "${docxFile}"`
-      );
-
-      if (stderr) {
-        console.error('Pandoc stderr:', stderr);
-      }
+      // Use the pandoc npm package directly
+      await new Promise((resolve, reject) => {
+        pandoc(texFile, [
+          '-f', 'latex',
+          '-t', 'docx',
+          '-s',
+          '--pdf-engine=xelatex',
+          '--wrap=none',
+          '-o', docxFile
+        ], (err: Error | null) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(null);
+          }
+        });
+      });
 
       // Verify the output file exists and has content
       const stats = await fs.stat(docxFile);
