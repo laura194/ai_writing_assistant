@@ -1,99 +1,160 @@
 import { describe, it, expect } from "vitest";
-import { textVariant, fadeIn, zoomIn, slideIn, staggerContainer } from "./motion";
-
-// Helper to assert object (variants) has required keys/shape without strict equality on object identity
-const hasKeys = (obj: any, keys: string[]) => keys.every((k) => Object.prototype.hasOwnProperty.call(obj, k));
+import {
+  textVariant,
+  fadeIn,
+  zoomIn,
+  slideIn,
+  staggerContainer,
+} from "./motion";
 
 describe("utils/motion", () => {
   describe("textVariant", () => {
-    it("returns hidden/show variants with default delay 0", () => {
+    it("returns correct default hidden and show states with default delay", () => {
       const v = textVariant();
-      expect(hasKeys(v, ["hidden", "show"])) .toBe(true);
+      expect(v).toHaveProperty("hidden");
       expect(v.hidden).toEqual({ y: -50, opacity: 0 });
-      expect(v.show.y).toBe(0);
-      expect(v.show.opacity).toBe(1);
-      expect(v.show.transition).toEqual(expect.objectContaining({ type: "spring", duration: 1.25, delay: 0 }));
+
+      expect(v).toHaveProperty("show");
+      expect(v.show).toHaveProperty("y", 0);
+      expect(v.show).toHaveProperty("opacity", 1);
+      // transition object exact values
+      expect(v.show).toHaveProperty("transition");
+      expect((v.show as any).transition).toMatchObject({
+        type: "spring",
+        duration: 1.25,
+        delay: 0,
+      });
     });
 
-    it("applies provided delay", () => {
-      const v = textVariant(0.35);
-      expect(v.show.transition).toEqual(expect.objectContaining({ delay: 0.35 }));
+    it("applies provided delay to the show.transition.delay", () => {
+      const v = textVariant(0.7);
+      expect((v.show as any).transition.delay).toBe(0.7);
     });
   });
 
   describe("fadeIn", () => {
-    it("maps left/right/up/down directions to correct x/y offsets", () => {
-      const L = fadeIn("left");
-      const R = fadeIn("right");
-      const U = fadeIn("up");
-      const D = fadeIn("down");
-      const N = fadeIn("");
-
-      expect(L.hidden).toEqual(expect.objectContaining({ x: 100, y: 0, opacity: 0 }));
-      expect(R.hidden).toEqual(expect.objectContaining({ x: -100, y: 0, opacity: 0 }));
-      expect(U.hidden).toEqual(expect.objectContaining({ x: 0, y: 100, opacity: 0 }));
-      expect(D.hidden).toEqual(expect.objectContaining({ x: 0, y: -100, opacity: 0 }));
-      expect(N.hidden).toEqual(expect.objectContaining({ x: 0, y: 0, opacity: 0 }));
+    it("fadeIn from left yields x=100, y=0", () => {
+      const v = fadeIn("left");
+      expect(v.hidden).toEqual({ x: 100, y: 0, opacity: 0 });
+      expect(v.show).toHaveProperty("x", 0);
+      expect(v.show).toHaveProperty("y", 0);
+      expect((v.show as any).transition).toMatchObject({
+        type: "spring",
+        delay: 0,
+        duration: 0.5,
+        ease: "easeOut",
+      });
     });
 
-    it("uses provided transition type, delay, and duration with ease 'easeOut'", () => {
-      const v = fadeIn("left", "tween", 0.4, 2);
-      expect(v.show).toEqual(
-        expect.objectContaining({ x: 0, y: 0, opacity: 1, transition: expect.objectContaining({ type: "tween", delay: 0.4, duration: 2, ease: "easeOut" }) })
-      );
+    it("fadeIn from right yields x=-100", () => {
+      const v = fadeIn("right");
+      expect(v.hidden).toEqual({ x: -100, y: 0, opacity: 0 });
     });
 
-    it("unknown direction falls back to zero offsets", () => {
-      const v = fadeIn("diagonal", "spring", 0, 1);
-      expect(v.hidden.x).toBe(0);
-      expect(v.hidden.y).toBe(0);
+    it("fadeIn from up yields y=100", () => {
+      const v = fadeIn("up");
+      expect(v.hidden).toEqual({ x: 0, y: 100, opacity: 0 });
+    });
+
+    it("fadeIn from down yields y=-100", () => {
+      const v = fadeIn("down");
+      expect(v.hidden).toEqual({ x: 0, y: -100, opacity: 0 });
+    });
+
+    it("fadeIn with unknown direction falls back to center (x=0,y=0)", () => {
+      const v = fadeIn("diagonal");
+      expect(v.hidden).toEqual({ x: 0, y: 0, opacity: 0 });
+    });
+
+    it("fadeIn accepts custom type, delay and duration", () => {
+      const v = fadeIn("left", "tween", 0.2, 2);
+      expect((v.show as any).transition).toMatchObject({
+        type: "tween",
+        delay: 0.2,
+        duration: 2,
+        ease: "easeOut",
+      });
     });
   });
 
   describe("zoomIn", () => {
-    it("returns scale/opacity variants with tween transition and provided delay/duration", () => {
-      const v = zoomIn(0.2, 0.75);
+    it("default zoomIn returns expected hidden and show", () => {
+      const v = zoomIn();
       expect(v.hidden).toEqual({ scale: 0, opacity: 0 });
-      expect(v.show.scale).toBe(1);
-      expect(v.show.opacity).toBe(1);
-      expect(v.show.transition).toEqual(expect.objectContaining({ type: "tween", delay: 0.2, duration: 0.75, ease: "easeOut" }));
+      expect(v.show).toHaveProperty("scale", 1);
+      expect(v.show).toHaveProperty("opacity", 1);
+      expect((v.show as any).transition).toMatchObject({
+        type: "tween",
+        delay: 0,
+        duration: 0.5,
+        ease: "easeOut",
+      });
+    });
+
+    it("zoomIn accepts custom delay and duration", () => {
+      const v = zoomIn(0.3, 1.2);
+      expect((v.show as any).transition).toMatchObject({
+        type: "tween",
+        delay: 0.3,
+        duration: 1.2,
+      });
     });
   });
 
   describe("slideIn", () => {
-    it("maps direction to percentage x/y and returns show with 0%", () => {
-      const L = slideIn("left", "spring", 0.1, 0.3);
-      const R = slideIn("right", "spring", 0.1, 0.3);
-      const U = slideIn("up", "spring", 0.1, 0.3);
-      const D = slideIn("down", "spring", 0.1, 0.3);
-
-      expect(L.hidden).toEqual({ x: "-100%", y: "0%" });
-      expect(R.hidden).toEqual({ x: "100%", y: "0%" });
-      expect(U.hidden).toEqual({ x: "0%", y: "100%" });
-      expect(D.hidden).toEqual({ x: "0%", y: "100%" });
-
-      for (const v of [L, R, U, D]) {
-        expect(v.show).toEqual(expect.objectContaining({ x: "0%", y: "0%", transition: expect.objectContaining({ type: "spring", delay: 0.1, duration: 0.3, ease: "easeOut" }) }));
-      }
+    it("slideIn left produces x='-100%' and y='0%'", () => {
+      const v = slideIn("left");
+      expect(v.hidden).toEqual({ x: "-100%", y: "0%" });
+      expect(v.show).toHaveProperty("x", "0%");
+      expect(v.show).toHaveProperty("y", "0%");
+      expect((v.show as any).transition).toMatchObject({
+        type: "tween",
+        delay: 0,
+        duration: 0.5,
+        ease: "easeOut",
+      });
     });
 
-    it("uses default direction 'left' and animType 'tween' when not provided", () => {
-      const v = slideIn();
-      expect(v.hidden).toEqual({ x: "-100%", y: "0%" });
-      expect(v.show.transition).toEqual(expect.objectContaining({ type: "tween" }));
+    it("slideIn right produces x='100%'", () => {
+      const v = slideIn("right");
+      expect(v.hidden).toEqual({ x: "100%", y: "0%" });
+    });
+
+    it("slideIn up and down use y='100%' (keeps original behavior)", () => {
+      const up = slideIn("up");
+      const down = slideIn("down");
+      expect(up.hidden).toEqual({ x: "0%", y: "100%" });
+      expect(down.hidden).toEqual({ x: "0%", y: "100%" });
+    });
+
+    it("slideIn accepts custom animType, delay and duration", () => {
+      const v = slideIn("left", "spring", 0.4, 1.5);
+      expect((v.show as any).transition).toMatchObject({
+        type: "spring",
+        delay: 0.4,
+        duration: 1.5,
+        ease: "easeOut",
+      });
     });
   });
 
   describe("staggerContainer", () => {
-    it("returns variants with staggerChildren and delayChildren", () => {
-      const v = staggerContainer(0.25, 0.5);
-      expect(hasKeys(v, ["hidden", "show"])) .toBe(true);
-      expect(v.show.transition).toEqual(expect.objectContaining({ staggerChildren: 0.25, delayChildren: 0.5 }));
+    it("default returns empty hidden and show.transition with defaults", () => {
+      const v = staggerContainer();
+      expect(v.hidden).toEqual({});
+      expect(v.show).toHaveProperty("transition");
+      expect((v.show as any).transition).toMatchObject({
+        staggerChildren: 0,
+        delayChildren: 0,
+      });
     });
 
-    it("uses default zeros when not provided", () => {
-      const v = staggerContainer();
-      expect(v.show.transition).toEqual(expect.objectContaining({ staggerChildren: 0, delayChildren: 0 }));
+    it("returns provided staggerChildren and delayChildren", () => {
+      const v = staggerContainer(0.2, 0.5);
+      expect((v.show as any).transition).toMatchObject({
+        staggerChildren: 0.2,
+        delayChildren: 0.5,
+      });
     });
   });
 });

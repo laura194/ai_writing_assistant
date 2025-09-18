@@ -1,7 +1,7 @@
 import "boxicons/css/boxicons.min.css";
 import { SignIn } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
-import LoginAnim from "../assets/images/sign-in-animate.svg?react";
+import LoginAnim from "../../assets/images/sign-in-animate.svg?react";
 
 export default function SignInPage() {
   return (

@@ -11,6 +11,7 @@ const StarWrapper = (Component: FC, idName: string) =>
         variants={staggerContainer(0.25, 0)}
         initial="hidden"
         whileInView="show"
+        aria-label={idName}
         viewport={{ once: true, amount: 0.25 }}
         className={`${LandingPageStyles.padding} max-w-7xl mx-auto relative z-0`}
       >

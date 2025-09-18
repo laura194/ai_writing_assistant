@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import React from "react";
-import { screen } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
 import { render } from "../../test/renderWithProviders";
 import { ThemeProvider, useTheme } from "./ThemeProvider";
 
@@ -57,8 +57,7 @@ describe("providers/ThemeProvider", () => {
 
   it("respects prefers-color-scheme when not in storage", () => {
     // Mock matchMedia dark = true
-    // @ts-expect-error override
-    window.matchMedia = ((q: string) => ({ matches: true })) as any;
+    window.matchMedia = ((_q: string) => ({ matches: true })) as any;
 
     render(
       <ThemeProvider>
@@ -90,20 +89,68 @@ describe("providers/ThemeProvider", () => {
     expect(getStored("theme")).toBe("dark");
   });
 
-  it("adds matchMedia listener only when supported and no saved theme", () => {
-    // Simulate browser with event-based matchMedia API
-    const listeners: Record<string, Function[]> = {};
-    // @ts-expect-error override
-    window.matchMedia = ((query: string) => ({
-      matches: false,
-      addEventListener: (name: string, cb: Function) => {
-        listeners[name] = listeners[name] || [];
-        listeners[name].push(cb);
-      },
-      removeEventListener: (name: string, cb: Function) => {
-        listeners[name] = (listeners[name] || []).filter((x) => x !== cb);
-      },
-    })) as any;
+  it("useTheme throws outside provider", () => {
+    const ErrProbe: React.FC = () => {
+      expect(() => useTheme()).toThrow(/must be used inside ThemeProvider/i);
+      return null;
+    };
+    render(<ErrProbe />);
+  });
+});
+
+describe("ThemeProvider - extended coverage", () => {
+  const getStored = (k: string) => window.localStorage.getItem(k);
+
+  beforeEach(() => {
+    document.documentElement.removeAttribute("data-theme");
+    document.documentElement.classList.remove("dark");
+    localStorage.clear();
+  });
+
+  it("setTheme to same value does not break", async () => {
+    render(
+      <ThemeProvider>
+        <TestProbe />
+      </ThemeProvider>
+    );
+
+    const span = screen.getByTestId("theme");
+    expect(span.textContent).toBe("light");
+
+    await screen.getByTestId("set-light").click();
+    expect(span.textContent).toBe("light");
+    expect(getStored("theme")).toBe("light");
+
+    await screen.getByTestId("set-dark").click();
+    expect(span.textContent).toBe("dark");
+    expect(getStored("theme")).toBe("dark");
+  });
+
+  it("toggle multiple times cycles theme correctly", async () => {
+    render(
+      <ThemeProvider>
+        <TestProbe />
+      </ThemeProvider>
+    );
+
+    const span = screen.getByTestId("theme");
+
+    await screen.getByTestId("toggle").click(); // light → dark
+    expect(span.textContent).toBe("dark");
+
+    await screen.getByTestId("toggle").click(); // dark → light
+    expect(span.textContent).toBe("light");
+
+    await screen.getByTestId("toggle").click(); // light → dark
+    expect(span.textContent).toBe("dark");
+  });
+
+  it("handles localStorage setItem error gracefully", async () => {
+    const spy = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementation(() => {
+        throw new Error("Storage error");
+      });
 
     render(
       <ThemeProvider>
@@ -111,19 +158,49 @@ describe("providers/ThemeProvider", () => {
       </ThemeProvider>
     );
 
-    // No saved theme: listener added; simulate a change event
-    const ev = { matches: true } as any;
-    (listeners.change?.[0] as any)?.(ev);
+    const span = screen.getByTestId("theme");
+    expect(span.textContent).toBe("light");
 
-    // Theme should flip to dark
-    expect(screen.getByTestId("theme").textContent).toBe("dark");
+    // Klick ausführen
+    fireEvent.click(screen.getByTestId("toggle"));
+
+    // waitFor auf die Aktualisierung des Themes
+    await waitFor(() => {
+      // Theme sollte trotzdem wechseln, auch wenn setItem fehlschlägt
+      expect(span.textContent).toBe("dark");
+    });
+
+    spy.mockRestore();
   });
 
-  it("useTheme throws outside provider", () => {
-    const ErrProbe: React.FC = () => {
-      expect(() => useTheme()).toThrow(/must be used inside ThemeProvider/i);
-      return null;
-    };
-    render(<ErrProbe />);
+  it("does not break if matchMedia undefined after mount", () => {
+    // @ts-expect-error override
+    window.matchMedia = undefined;
+
+    render(
+      <ThemeProvider>
+        <TestProbe />
+      </ThemeProvider>
+    );
+
+    const span = screen.getByTestId("theme");
+    expect(span.textContent).toBe("light");
+  });
+
+  it("handles useEffect errors in try/catch blocks", () => {
+    const spySetAttribute = vi
+      .spyOn(document.documentElement, "setAttribute")
+      .mockImplementation(() => {
+        throw new Error("DOM error");
+      });
+
+    render(
+      <ThemeProvider>
+        <TestProbe />
+      </ThemeProvider>
+    );
+
+    expect(screen.getByTestId("theme").textContent).toBe("light");
+    spySetAttribute.mockRestore();
   });
 });

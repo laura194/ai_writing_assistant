@@ -2,15 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
-import Header from "../components/Header/Header";
-import { ProjectService } from "../utils/ProjectService";
+import Header from "../../components/Header/Header";
+import { ProjectService } from "../../utils/ProjectService";
 import { FolderPlus } from "lucide-react";
-import { useTheme } from "../providers/ThemeProvider";
-import { getToastOptions } from "../utils/ToastOptionsSSP";
+import { useTheme } from "../../providers/ThemeProvider";
+import { getToastOptions } from "../../utils/ToastOptionsSSP";
 
-import imradJson from "../assets/imrad.json";
-import projectStructureJson from "../assets/projectStructure.json";
-import storyForDesignJson from "../assets/storyForDesign.json";
+import imradJson from "../../assets/imrad.json";
+import projectStructureJson from "../../assets/projectStructure.json";
+import storyForDesignJson from "../../assets/storyForDesign.json";
 import toast from "react-hot-toast";
 
 const StructureSelectionPage = () => {
