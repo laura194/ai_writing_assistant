@@ -5,8 +5,8 @@ import os from 'os';
 
 export class ExportService {
   /**
-   * This class converts LaTeX content to DOCX using Pandoc, with the following improvements:
-   * - Enable citeproc for citations
+   * This class converts LaTeX content to DOCX by calling the pandoc CLI via child_process, which enables us to:
+   * - Use citeproc for citations
    * - Download remote images referenced by \includegraphics to local tmp files
    * - Clean up all temporary files after conversion
    */
