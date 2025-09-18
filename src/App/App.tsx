@@ -11,6 +11,7 @@ import AppRoutes from "../AppRoutes/AppRoutes";
 import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import AOS from "aos";
+console.log("Console Log Test");
 
 const App = () => {
   useEffect(() => {

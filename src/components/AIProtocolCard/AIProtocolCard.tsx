@@ -16,12 +16,13 @@ const AIProtocolCard: React.FC = () => {
 
   // Assuming you have projectId in the user object or you can fetch it from another source
   const { projectId } = useParams<{ projectId: string }>();
-
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
   useEffect(() => {
     const fetchProtocols = async () => {
       try {
         const response = await axios.get<IAiProtocolEntry[]>(
-          "/api/ai/aiProtocol",
+          API_BASE_URL + "/api/ai/aiProtocol",
           {
             params: { projectId },
           }
@@ -42,7 +43,7 @@ const AIProtocolCard: React.FC = () => {
       setError("Project ID is required.");
       setLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, API_BASE_URL]);
 
   // Filter logic
   const filteredProtocols = protocols.filter((protocol) => {
