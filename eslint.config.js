@@ -13,6 +13,12 @@ export default tseslint.config(
       "**/*.spec.ts",
       "**/*.spec.tsx",
     ],
+    parser: "@typescript-eslint/parser",
+    parserOptions: {
+      ecmaVersion: 2025,
+      sourceType: "module",
+      project: "./tsconfig.json",
+    },
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
@@ -32,5 +38,5 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
     },
-  }
+  },
 );

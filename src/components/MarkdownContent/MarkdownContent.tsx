@@ -12,7 +12,7 @@ const MarkdownContent: React.FC<MarkdownContentProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const isDefaultObjectToString = (fn?: any) =>
+  const isDefaultObjectToString = (fn: unknown): boolean =>
     typeof fn === "function" && fn === Object.prototype.toString;
 
   const handleMouseUp = () => {
@@ -25,10 +25,7 @@ const MarkdownContent: React.FC<MarkdownContentProps> = ({
     const text = hasCallableToString ? selection.toString().trim() : "";
     if (!text) return;
 
-    const rangeCount =
-      typeof (selection as any).rangeCount === "number"
-        ? (selection as any).rangeCount
-        : 0;
+    const rangeCount = "rangeCount" in selection ? selection.rangeCount : 0;
     if (rangeCount === 0 || typeof selection.getRangeAt !== "function") return;
 
     const range = selection.getRangeAt(0);
@@ -43,21 +40,21 @@ const MarkdownContent: React.FC<MarkdownContentProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
       const selection = window.getSelection();
-      if (!containerRef.current?.contains(e.target as Node)) {
+
+      if (!containerRef.current?.contains(target) && selection) {
         const hasCallableToString =
-          selection &&
           typeof selection.toString === "function" &&
           !isDefaultObjectToString(selection.toString);
-        const hasText = hasCallableToString
-          ? selection!.toString().trim() !== ""
-          : Boolean(selection && (selection as any).rangeCount);
 
-        if (
-          selection &&
-          hasText &&
-          typeof selection.removeAllRanges === "function"
-        ) {
+        const hasText = hasCallableToString
+          ? selection.toString().trim() !== ""
+          : "rangeCount" in selection
+            ? selection.rangeCount > 0
+            : false;
+
+        if (hasText && typeof selection.removeAllRanges === "function") {
           selection.removeAllRanges();
         }
       }
