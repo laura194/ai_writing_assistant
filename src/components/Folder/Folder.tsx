@@ -13,7 +13,7 @@ interface FolderProps {
   onMove: (
     draggedNodeId: string,
     targetNodeId: string,
-    asSibling?: boolean
+    asSibling?: boolean,
   ) => void;
   onNodeClick: (node: Node) => void;
   onAdd: (parentId: string | null, newNode: Node) => void;

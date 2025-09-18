@@ -5,6 +5,7 @@ import type { IAiProtocolEntry } from "../models/IAITypes";
 describe("AI client helpers", () => {
   const realFetch = globalThis.fetch;
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+  const BASE_URL = "http://localhost:5001";
 
   beforeEach(() => {
     // Mock fetch for each test
@@ -102,7 +103,7 @@ describe("AI client helpers", () => {
 
     expect(fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (fetch as any).mock.calls[0];
-    expect(url).toBe("/api/ai/aiProtocol");
+    expect(url).toBe(`${BASE_URL}/api/ai/aiProtocol`);
     expect(init.method).toBe("POST");
     expect(init.headers["Content-Type"]).toBe("application/json");
     expect(JSON.parse(init.body)).toMatchObject(entry);

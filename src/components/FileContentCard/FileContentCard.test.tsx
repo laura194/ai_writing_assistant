@@ -152,7 +152,7 @@ describe("FileContentCard", () => {
         node={baseNode as any}
         onDirtyChange={vi.fn()}
         onSave={vi.fn()}
-      />
+      />,
     );
 
     expect(screen.getByText(baseNode.name)).toBeInTheDocument();
@@ -168,7 +168,7 @@ describe("FileContentCard", () => {
     const user = userEvent.setup();
 
     render(
-      <FileContentCard node={baseNode as any} onDirtyChange={onDirtyChange} />
+      <FileContentCard node={baseNode as any} onDirtyChange={onDirtyChange} />,
     );
 
     const ta = screen.getByPlaceholderText(/Write your content here\.\.\./i);
@@ -210,7 +210,7 @@ describe("FileContentCard", () => {
         node={baseNode as any}
         onSave={onSave}
         onDirtyChange={vi.fn()}
-      />
+      />,
     );
 
     const ta = screen.getByPlaceholderText(/Write your content here\.\.\./i);
@@ -266,7 +266,7 @@ describe("FileContentCard", () => {
     render(<FileContentCard node={baseNode as any} />);
 
     const ta = screen.getByPlaceholderText(
-      /Write your content here\.\.\./i
+      /Write your content here\.\.\./i,
     ) as HTMLTextAreaElement;
     await user.clear(ta);
     await user.type(ta, "Hello brave new world");
@@ -359,7 +359,7 @@ describe("FileContentCard", () => {
       render(<FileContentCard node={baseNode as any} />);
 
       const ta = screen.getByPlaceholderText(
-        /Write your content here\.\.\./i
+        /Write your content here\.\.\./i,
       ) as HTMLTextAreaElement;
       await userEvent.clear(ta);
       await userEvent.type(ta, "Test selection");
@@ -369,7 +369,7 @@ describe("FileContentCard", () => {
       ta.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
 
       await waitFor(() =>
-        expect(screen.getByTestId("ai-bubble")).toBeInTheDocument()
+        expect(screen.getByTestId("ai-bubble")).toBeInTheDocument(),
       );
 
       // deselect text
@@ -377,7 +377,7 @@ describe("FileContentCard", () => {
       document.dispatchEvent(new Event("selectionchange"));
 
       await waitFor(() =>
-        expect(screen.queryByTestId("ai-bubble")).not.toBeInTheDocument()
+        expect(screen.queryByTestId("ai-bubble")).not.toBeInTheDocument(),
       );
     });
 
@@ -401,11 +401,11 @@ describe("FileContentCard", () => {
       await userEvent.click(aiBtn);
 
       await waitFor(() =>
-        expect(screen.getByTestId("mock-ai-component")).toBeInTheDocument()
+        expect(screen.getByTestId("mock-ai-component")).toBeInTheDocument(),
       );
 
       const ta = screen.getByPlaceholderText(
-        /Write your content here\.\.\./i
+        /Write your content here\.\.\./i,
       ) as HTMLTextAreaElement;
       expect(ta.value).toBe(baseNode.content);
     });

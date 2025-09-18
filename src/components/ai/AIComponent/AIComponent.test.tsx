@@ -57,7 +57,7 @@ describe("AIComponent Unit Tests", () => {
         onClose={mockOnClose}
         onReplace={mockOnReplace}
         onAppend={mockOnAppend}
-      />
+      />,
     );
     expect(screen.queryByText("AI Assistant")).not.toBeInTheDocument();
 
@@ -71,7 +71,7 @@ describe("AIComponent Unit Tests", () => {
           onReplace={mockOnReplace}
           onAppend={mockOnAppend}
         />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
     expect(screen.getByText("AI Assistant")).toBeInTheDocument();
   });
@@ -85,7 +85,7 @@ describe("AIComponent Unit Tests", () => {
         onClose={mockOnClose}
         onReplace={mockOnReplace}
         onAppend={mockOnAppend}
-      />
+      />,
     );
     await user.click(screen.getByRole("button", { name: "" })); // X button
     expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -100,7 +100,7 @@ describe("AIComponent Unit Tests", () => {
         onClose={mockOnClose}
         onReplace={mockOnReplace}
         onAppend={mockOnAppend}
-      />
+      />,
     );
 
     const toggleBtn = screen.getByTitle("Show suggestions");
@@ -118,7 +118,7 @@ describe("AIComponent Unit Tests", () => {
 
     // textarea should now contain the suggestion text
     expect(
-      screen.getByPlaceholderText(/Note: This AI has no memory/i)
+      screen.getByPlaceholderText(/Note: This AI has no memory/i),
     ).toHaveValue(suggestionText);
   });
 
@@ -133,11 +133,11 @@ describe("AIComponent Unit Tests", () => {
         onClose={mockOnClose}
         onReplace={mockOnReplace}
         onAppend={mockOnAppend}
-      />
+      />,
     );
 
     const textarea = screen.getByPlaceholderText(
-      /Note: This AI has no memory/i
+      /Note: This AI has no memory/i,
     );
     await user.type(textarea, "First Prompt");
 
@@ -161,7 +161,7 @@ describe("AIComponent Unit Tests", () => {
         onClose={mockOnClose}
         onReplace={mockOnReplace}
         onAppend={mockOnAppend}
-      />
+      />,
     );
 
     // First Prompt
@@ -183,8 +183,8 @@ describe("AIComponent Unit Tests", () => {
 
     await waitFor(() =>
       expect(fetchAIResponse).toHaveBeenLastCalledWith(
-        expect.stringContaining("Prompt2")
-      )
+        expect.stringContaining("Prompt2"),
+      ),
     );
   });
 
@@ -199,11 +199,11 @@ describe("AIComponent Unit Tests", () => {
         onClose={mockOnClose}
         onReplace={mockOnReplace}
         onAppend={mockOnAppend}
-      />
+      />,
     );
 
     const textarea = screen.getByPlaceholderText(
-      /Note: This AI has no memory/i
+      /Note: This AI has no memory/i,
     );
     await user.type(textarea, "Test Prompt");
     await user.click(screen.getByTitle("Ask AI"));
@@ -233,7 +233,7 @@ describe("AIComponent Unit Tests", () => {
         onClose={mockOnClose}
         onReplace={mockOnReplace}
         onAppend={mockOnAppend}
-      />
+      />,
     );
 
     await user.click(screen.getByTitle("Ask AI"));
@@ -259,11 +259,11 @@ describe("AIComponent Unit Tests", () => {
           onClose={mockOnClose}
           onReplace={mockOnReplace}
           onAppend={mockOnAppend}
-        />
+        />,
       );
 
       const el = document.querySelector(
-        '[style*="0 0 20px rgba(120,69,239,0.55)"]'
+        '[style*="0 0 20px rgba(120,69,239,0.55)"]',
       );
       expect(el).toBeTruthy();
     } finally {
@@ -289,11 +289,11 @@ describe("AIComponent Unit Tests", () => {
         onClose={mockOnClose}
         onReplace={mockOnReplace}
         onAppend={mockOnAppend}
-      />
+      />,
     );
 
     const textarea = screen.getByPlaceholderText(
-      /Note: This AI has no memory/i
+      /Note: This AI has no memory/i,
     );
     await user.type(textarea, "SomePrompt");
     await user.click(screen.getByTitle("Ask AI"));
@@ -312,7 +312,7 @@ describe("AIComponent Unit Tests", () => {
 
       expect(lastCallArg.aiName).toBe("Unknown AI");
       expect(lastCallArg.usageForm).toEqual(
-        expect.stringContaining("Replace: SomePrompt")
+        expect.stringContaining("Replace: SomePrompt"),
       );
       expect(lastCallArg.affectedParts).toBe("Unknown file");
       expect(lastCallArg.remarks).toBe("No remarks");
@@ -336,7 +336,7 @@ describe("AIComponent Unit Tests", () => {
         onClose={mockOnClose}
         onReplace={mockOnReplace}
         onAppend={mockOnAppend}
-      />
+      />,
     );
 
     // send first prompt -> populate history
@@ -372,11 +372,11 @@ describe("AIComponent Unit Tests", () => {
         onClose={vi.fn()}
         onReplace={vi.fn()}
         onAppend={vi.fn()}
-      />
+      />,
     );
 
     const textarea = screen.getByPlaceholderText(
-      /Note: This AI has no memory/i
+      /Note: This AI has no memory/i,
     );
     await user.type(textarea, "Shadow test");
     await user.click(screen.getByTitle("Ask AI"));
@@ -389,7 +389,7 @@ describe("AIComponent Unit Tests", () => {
       expect.objectContaining({
         scale: 1.1,
         boxShadow: "0 0 12px rgba(120,69,239,0.6)",
-      })
+      }),
     );
   });
 
@@ -410,11 +410,11 @@ describe("AIComponent Unit Tests", () => {
         onClose={vi.fn()}
         onReplace={vi.fn()}
         onAppend={vi.fn()}
-      />
+      />,
     );
 
     const textarea = screen.getByPlaceholderText(
-      /Note: This AI has no memory/i
+      /Note: This AI has no memory/i,
     );
     await user.type(textarea, "Shadow test");
     await user.click(screen.getByTitle("Ask AI"));
@@ -426,7 +426,7 @@ describe("AIComponent Unit Tests", () => {
       expect.objectContaining({
         scale: 1.1,
         boxShadow: "0 0 16px rgba(120,69,239,0.3)",
-      })
+      }),
     );
   });
 });

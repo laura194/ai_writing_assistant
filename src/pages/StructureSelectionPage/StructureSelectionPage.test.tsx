@@ -170,7 +170,7 @@ describe("StructureSelectionPage", () => {
     // The class is applied on button wrapper when selected; simulate by clicking specific option
     expect(
       btn?.className.includes("bg-gradient-to-r") ||
-        btn?.className.includes("bg-[#8b75cb]")
+        btn?.className.includes("bg-[#8b75cb]"),
     ).toBe(true);
 
     expect(typeof navHoisted.navigate).toBe("function");

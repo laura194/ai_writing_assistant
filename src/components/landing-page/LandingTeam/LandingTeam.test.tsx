@@ -34,13 +34,13 @@ describe("LandingTeam", () => {
 
     // Team content
     expect(
-      screen.getByText((_, el) => el?.textContent === team[0].name)
+      screen.getByText((_, el) => el?.textContent === team[0].name),
     ).toBeInTheDocument();
     expect(screen.getByAltText(/Team Image/i)).toBeInTheDocument();
 
     // Quotation marks included (allow multiple matches, assert at least one)
     const quoteMatches = screen.getAllByText(
-      (_, el) => el?.textContent?.includes(team[0].teamQuote) ?? false
+      (_, el) => el?.textContent?.includes(team[0].teamQuote) ?? false,
     );
     expect(quoteMatches.length).toBeGreaterThan(0);
   });

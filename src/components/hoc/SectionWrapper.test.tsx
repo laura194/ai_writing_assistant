@@ -8,7 +8,7 @@ if (typeof (globalThis as any).IntersectionObserver === "undefined") {
     thresholds: ReadonlyArray<number> = [];
     constructor(
       _cb?: IntersectionObserverCallback,
-      _opts?: IntersectionObserverInit
+      _opts?: IntersectionObserverInit,
     ) {}
     observe() {}
     unobserve() {}

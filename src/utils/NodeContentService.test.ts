@@ -6,6 +6,7 @@ import type { Node } from "./types";
 
 vi.mock("axios");
 const mockedAxios = axios as Mocked<typeof axios>;
+const BASE_URL = "http://localhost:5001";
 
 function makeAxiosResponse<T>(data: T): AxiosResponse<T> {
   return {
@@ -45,7 +46,10 @@ describe("NodeContentService", () => {
 
     const result = await NodeContentService.createNodeContent(input);
     expect(result).toEqual(created);
-    expect(mockedAxios.post).toHaveBeenCalledWith("/api/nodeContent", input);
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      `${BASE_URL}/api/nodeContent`,
+      input,
+    );
   });
 
   it("uses default content and category if not provided", async () => {
@@ -77,7 +81,7 @@ describe("NodeContentService", () => {
     mockedAxios.post.mockRejectedValueOnce(error);
 
     await expect(NodeContentService.createNodeContent(input)).rejects.toThrow(
-      error
+      error,
     );
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
@@ -100,9 +104,12 @@ describe("NodeContentService", () => {
 
     const result = await NodeContentService.getNodeContents("n1", "p1");
     expect(result).toEqual(nodes);
-    expect(mockedAxios.get).toHaveBeenCalledWith("/api/nodeContent", {
-      params: { nodeId: "n1", projectId: "p1" },
-    });
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      `${BASE_URL}/api/nodeContent`,
+      {
+        params: { nodeId: "n1", projectId: "p1" },
+      },
+    );
   });
 
   it("logs error when getNodeContents fails", async () => {
@@ -130,7 +137,7 @@ describe("NodeContentService", () => {
     const result = await NodeContentService.getNodeContentById("n1", "p1");
     expect(result).toEqual(node);
     expect(mockedAxios.get).toHaveBeenCalledWith(
-      "/api/nodeContent/n1?projectId=p1"
+      `${BASE_URL}/api/nodeContent/n1?projectId=p1`,
     );
   });
 
@@ -139,7 +146,7 @@ describe("NodeContentService", () => {
     mockedAxios.get.mockRejectedValueOnce(error);
 
     await expect(
-      NodeContentService.getNodeContentById("n1", "p1")
+      NodeContentService.getNodeContentById("n1", "p1"),
     ).rejects.toThrow(error);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
@@ -195,7 +202,7 @@ describe("NodeContentService", () => {
         id: "x",
         name: "Y",
         projectId: "p3",
-      })
+      }),
     ).rejects.toThrow(error);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
@@ -220,12 +227,15 @@ describe("NodeContentService", () => {
       name: "Updated",
     });
     expect(result).toEqual(updated);
-    expect(mockedAxios.put).toHaveBeenCalledWith("/api/nodeContent/n1", {
-      projectId: "p1",
-      content: "new",
-      name: "Updated",
-      category: "file",
-    });
+    expect(mockedAxios.put).toHaveBeenCalledWith(
+      `${BASE_URL}/api/nodeContent/n1`,
+      {
+        projectId: "p1",
+        content: "new",
+        name: "Updated",
+        category: "file",
+      },
+    );
   });
 
   it("uses default content/category if not provided when updating", async () => {
@@ -252,7 +262,10 @@ describe("NodeContentService", () => {
     mockedAxios.put.mockRejectedValueOnce(error);
 
     await expect(
-      NodeContentService.updateNodeContent("n1", { projectId: "p1", name: "X" })
+      NodeContentService.updateNodeContent("n1", {
+        projectId: "p1",
+        name: "X",
+      }),
     ).rejects.toThrow(error);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });

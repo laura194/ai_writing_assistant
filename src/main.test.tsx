@@ -46,10 +46,6 @@ describe("main.tsx", () => {
     renderMock.mockClear();
     infoMock.mockClear();
     errorMock.mockClear();
-
-    let envBackup: any;
-
-    envBackup = { ...import.meta.env };
   });
 
   it("logs application start and renders App correctly", async () => {
@@ -61,7 +57,7 @@ describe("main.tsx", () => {
     expect(renderMock).toHaveBeenCalled();
     const rendered = renderMock.mock.calls[0][0];
     expect(
-      rendered.props.children.props.children.props.children.props.children.type
+      rendered.props.children.props.children.props.children.props.children.type,
     ).toBeDefined();
   });
 
@@ -69,10 +65,10 @@ describe("main.tsx", () => {
     import.meta.env.VITE_CLERK_PUBLISHABLE_KEY = "";
 
     await expect(import("./main.tsx")).rejects.toThrow(
-      "Missing Clerk Publishable Key"
+      "Missing Clerk Publishable Key",
     );
     expect(errorMock).toHaveBeenCalledWith(
-      "[main.tsx] Missing Clerk Publishable Key"
+      "[main.tsx] Missing Clerk Publishable Key",
     );
   });
 });

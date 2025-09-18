@@ -109,7 +109,7 @@ describe("MarkdownContent Unit Tests", () => {
         expect.objectContaining({
           x: expect.any(Number),
           y: expect.any(Number),
-        })
+        }),
       );
     } finally {
       restore();
@@ -147,7 +147,7 @@ describe("MarkdownContent Unit Tests", () => {
       const { textNode } = setSelection("Outside");
 
       document.body.dispatchEvent(
-        new MouseEvent("mousedown", { bubbles: true })
+        new MouseEvent("mousedown", { bubbles: true }),
       );
 
       // removeAllRanges should have been called on our stub (and stub's toString should be empty)
@@ -234,7 +234,7 @@ describe("MarkdownContent explicit branch coverage", () => {
       render(<MarkdownContent content={"Hello"} />);
       // simulate a selection existing (no DOM setSelection used because we stubbed window.getSelection)
       document.body.dispatchEvent(
-        new MouseEvent("mousedown", { bubbles: true })
+        new MouseEvent("mousedown", { bubbles: true }),
       );
 
       expect(selectionStub.removeAllRanges).toHaveBeenCalled();

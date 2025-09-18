@@ -127,7 +127,7 @@ const HomePage = () => {
                 <div
                   data-aos="fade-right"
                   data-aos-duration="800"
-                  data-aos-delay="3000"
+                  data-aos-delay="2700"
                 >
                   <motion.div
                     onClick={() => navigate("/myProjects")}

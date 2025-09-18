@@ -37,7 +37,7 @@ vi.mock("../../hoc", () => ({
 }));
 vi.mock(
   "../../constants/LandingPageText",
-  async () => await import("../../../constants/LandingPageText")
+  async () => await import("../../../constants/LandingPageText"),
 );
 
 import About from "./LandingAbout";
@@ -53,7 +53,7 @@ describe("LandingAbout", () => {
 
     for (const s of services) {
       expect(
-        screen.getByRole("heading", { name: s.title })
+        screen.getByRole("heading", { name: s.title }),
       ).toBeInTheDocument();
     }
   });

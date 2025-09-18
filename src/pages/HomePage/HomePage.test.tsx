@@ -31,7 +31,7 @@ vi.mock("framer-motion", () => ({
     {},
     {
       get: () => (props: any) => <div {...props} />,
-    }
+    },
   ),
 }));
 
@@ -59,7 +59,7 @@ describe("HomePage", () => {
 
     // Headline text is present
     expect(
-      screen.getByRole("heading", { name: /Welcome to your/i })
+      screen.getByRole("heading", { name: /Welcome to your/i }),
     ).toBeInTheDocument();
 
     // Buttons' labels are present

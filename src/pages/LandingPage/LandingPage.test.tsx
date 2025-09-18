@@ -52,7 +52,7 @@ vi.mock("framer-motion", () => ({
     {},
     {
       get: () => (props: any) => <div {...props} />,
-    }
+    },
   ),
 }));
 

@@ -9,7 +9,7 @@ describe("Spinner Unit Tests", () => {
       document.querySelector("div");
     expect(overlay).toBeInTheDocument();
     expect(overlay).toHaveClass(
-      "fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-60"
+      "fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-60",
     );
   });
 

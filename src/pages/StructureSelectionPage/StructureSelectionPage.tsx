@@ -21,7 +21,7 @@ const StructureSelectionPage = () => {
 
   const [projectName, setProjectName] = useState("");
   const [selectedStructure, setSelectedStructure] = useState<string | null>(
-    null
+    null,
   );
 
   const handleSave = async () => {
@@ -85,7 +85,7 @@ const StructureSelectionPage = () => {
             boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
             border: "1px solid #ef4444",
           },
-        }
+        },
       );
     }
   };
