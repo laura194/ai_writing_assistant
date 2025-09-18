@@ -1,4 +1,3 @@
-//import { Document, Packer, Paragraph, HeadingLevel } from "docx";
 import jsPDF from "jspdf";
 import { saveAs } from "file-saver";
 
@@ -10,7 +9,7 @@ import { saveAs } from "file-saver";
  * @returns {void}
  *
  * Utilities include:
- * - Word export using `docx`
+ * - Word export using backend conversion of LaTeX
  * - PDF export using `jsPDF`
  * - LaTeX export with support for equations, figures, tables, and citations
  *
@@ -34,6 +33,7 @@ const generateLaTeXContent = (
   structure: StructureNode[],
   nodeContents: NodeContent[],
 ): string => {
+  const latexDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   let latexContent = `
 \\documentclass{article}
 \\usepackage[utf8]{inputenc}
@@ -47,7 +47,7 @@ const generateLaTeXContent = (
 \\addbibresource{references.bib}
 
 \\title{${escapeLatex(structure[0]?.name || "Untitled")}}
-\\date{\\today}
+\\date{${latexDate}}
 
 \\begin{document}
 \\maketitle
@@ -265,8 +265,7 @@ const parseRichContent = (content: string): string => {
 // 2. Although it supports bibtex, it does not show the citations even if it is not existing. Hence, there should be Works Cited chapter, and ai protocol as a table in appendix even if not present in the structure.
 
 // TODO Word Export Improvements: 
-// 1. Word export use latex export first then convert to docx to have a better structured look.
-// 2. It should include Works Cited chapter, and ai protocol as a table in appendix even if not present in the structure.
+// 1. It should include Works Cited chapter, and ai protocol as a table in appendix even if not present in the structure.
 
 // TODO PDF Export Improvements:
 // 1. PDF export use latex export function first then convert to PDF to have a better structured look.
