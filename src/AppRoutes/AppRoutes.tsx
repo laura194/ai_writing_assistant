@@ -75,11 +75,11 @@ export default function AppRoutes() {
 
   // 2)
   const isPublicPath = publicPaths.some((p) =>
-    p === "/" ? pathname === "/" : pathname.startsWith(p)
+    p === "/" ? pathname === "/" : pathname.startsWith(p),
   );
 
   const isProtectedPath = protectedPaths.some((p) =>
-    p === "/" ? pathname === "/" : pathname.startsWith(p)
+    p === "/" ? pathname === "/" : pathname.startsWith(p),
   );
 
   // Wait for Clerk to load before rendering routes
