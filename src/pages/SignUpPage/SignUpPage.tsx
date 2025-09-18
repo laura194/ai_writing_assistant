@@ -1,7 +1,7 @@
 import { SignUp } from "@clerk/clerk-react";
 import "boxicons/css/boxicons.min.css";
 import { motion } from "framer-motion";
-import SignUpAnim from "../assets/images/sign-up-animate.svg?react";
+import SignUpAnim from "../../assets/images/sign-up-animate.svg?react";
 
 export default function SignUpPage() {
   return (

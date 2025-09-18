@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ProjectService } from "../utils/ProjectService";
+import { ProjectService } from "../../utils/ProjectService";
 import { useUser } from "@clerk/clerk-react";
-import { Project } from "../utils/types";
-import Header from "../components/Header/Header";
+import { Project } from "../../utils/types";
+import Header from "../../components/Header/Header";
 import {
   FolderOpen,
   Trash2,
@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
-import { useTheme } from "../providers/ThemeProvider";
+import { useTheme } from "../../providers/ThemeProvider";
 
 const ProjectOverview = () => {
   const { user, isLoaded } = useUser();

@@ -17,13 +17,13 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import Spinner from "../components/Spinner/Spinner";
 
-import LandingPage from "../pages/LandingPage";
-import HomePage from "../pages/HomePage";
-import StructureSelectionPage from "../pages/StructureSelectionPage";
-import EditPage from "../pages/EditPage";
-import SignInPage from "../pages/SignInPage";
-import SignUpPage from "../pages/SignUpPage";
-import ProjectOverview from "../pages/ProjectOverview";
+import LandingPage from "../pages/LandingPage/LandingPage";
+import HomePage from "../pages/HomePage/HomePage";
+import StructureSelectionPage from "../pages/StructureSelectionPage/StructureSelectionPage";
+import EditPage from "../pages/EditPage/EditPage";
+import SignInPage from "../pages/SignInPage/SignInPage";
+import SignUpPage from "../pages/SignUpPage/SignUpPage";
+import ProjectOverview from "../pages/ProjectOverview/ProjectOverview";
 
 /*
  * AllRoutes Component

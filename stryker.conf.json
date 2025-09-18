@@ -13,5 +13,10 @@
     "low": 60,
     "break": 50
   },
-  "mutate": ["src/components/ai/AIBubble/**/*.{ts,tsx}", "!**/*.test.tsx"]
+  "mutate": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx"
+  ]
 }

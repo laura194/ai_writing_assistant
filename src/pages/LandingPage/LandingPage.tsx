@@ -1,15 +1,15 @@
 import { useEffect } from "react";
-import LandingHeader from "../components/landing-page/LandingHeader/LandingHeader";
-import LandingHero from "../components/landing-page/LandingHero/LandingHero";
-import LandingAbout from "../components/landing-page/LandingAbout/LandingAbout";
-import heroBg from "../assets/images/landing-page/herobg.png";
+import LandingHeader from "../../components/landing-page/LandingHeader/LandingHeader";
+import LandingHero from "../../components/landing-page/LandingHero/LandingHero";
+import LandingAbout from "../../components/landing-page/LandingAbout/LandingAbout";
+import heroBg from "../../assets/images/landing-page/herobg.png";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import LandingTech from "../components/landing-page/LandingTech/LandingTech";
-import LandingWorks from "../components/landing-page/LandingWorks/LandingWorks";
-import LandingTeam from "../components/landing-page/LandingTeam/LandingTeam";
-import LandingContact from "../components/landing-page/LandingContact/LandingContact";
-import LandingStarsCanvas from "../components/landing-page/canvas/StarsCanvas/StarsCanvas";
+import LandingTech from "../../components/landing-page/LandingTech/LandingTech";
+import LandingWorks from "../../components/landing-page/LandingWorks/LandingWorks";
+import LandingTeam from "../../components/landing-page/LandingTeam/LandingTeam";
+import LandingContact from "../../components/landing-page/LandingContact/LandingContact";
+import LandingStarsCanvas from "../../components/landing-page/canvas/StarsCanvas/StarsCanvas";
 
 export default function LandingPage() {
   useEffect(() => {

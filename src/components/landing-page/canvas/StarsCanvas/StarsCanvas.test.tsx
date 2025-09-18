@@ -5,7 +5,13 @@ import { render } from "../../../../../test/renderWithProviders";
 vi.mock("@react-three/fiber", () => ({
   __esModule: true,
   Canvas: ({ children }: any) => <div data-testid="canvas">{children}</div>,
+  useFrame: (cb: any) => {
+    if (typeof cb === "function") {
+      cb({}, 0);
+    }
+  },
 }));
+
 vi.mock("@react-three/drei", () => ({
   __esModule: true,
   Points: ({ children, ...rest }: any) => (
