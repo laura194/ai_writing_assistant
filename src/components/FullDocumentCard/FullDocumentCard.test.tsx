@@ -126,7 +126,11 @@ const sampleStructure = [
 ];
 
 const sampleContents = [
-  { nodeId: "1", name: "Introduction", content: "Hello <b>bold</b> & \"quoted\"" },
+  {
+    nodeId: "1",
+    name: "Introduction",
+    content: 'Hello <b>bold</b> & "quoted"',
+  },
   { nodeId: "1-1", name: "Background", content: "Sub section" },
   { nodeId: "2", name: "Methods", content: "Methodology" },
 ];
@@ -155,7 +159,7 @@ describe("FullDocumentCard", () => {
 
     // Component shows the error immediately for missing projectId
     await waitFor(() =>
-      expect(screen.getByText(/Projekt-ID not found\./i)).toBeInTheDocument()
+      expect(screen.getByText(/Projekt-ID not found\./i)).toBeInTheDocument(),
     );
     expect(screen.queryByText(/Loading…/i)).not.toBeInTheDocument();
   });
@@ -165,14 +169,16 @@ describe("FullDocumentCard", () => {
     const svc1 = await getProjectServiceMock();
     const svc2 = await getNodeContentServiceMock();
 
-    svc1.getProjectById.mockResolvedValue({ projectStructure: sampleStructure });
+    svc1.getProjectById.mockResolvedValue({
+      projectStructure: sampleStructure,
+    });
     svc2.getNodeContents.mockResolvedValue(sampleContents);
 
     render(<FullDocumentCard />);
 
     // Header rendered
     expect(
-      screen.getByRole("heading", { name: /Full Document Overview/i })
+      screen.getByRole("heading", { name: /Full Document Overview/i }),
     ).toBeInTheDocument();
 
     // Wait for content (built via innerHTML)
@@ -187,7 +193,7 @@ describe("FullDocumentCard", () => {
     const bTag = document.querySelector("b");
     expect(bTag).toBeNull();
     expect(
-      screen.getByText(/Hello <b>bold<\/b> & \"quoted\"/)
+      screen.getByText(/Hello <b>bold<\/b> & \"quoted\"/),
     ).toBeInTheDocument();
   });
 
@@ -203,8 +209,8 @@ describe("FullDocumentCard", () => {
 
     await waitFor(() =>
       expect(
-        screen.getByText(/Project structure is empty or unavailable/i)
-      ).toBeInTheDocument()
+        screen.getByText(/Project structure is empty or unavailable/i),
+      ).toBeInTheDocument(),
     );
   });
 
@@ -220,8 +226,8 @@ describe("FullDocumentCard", () => {
 
     await waitFor(() =>
       expect(
-        screen.getByText(/Error loading the project structure\./i)
-      ).toBeInTheDocument()
+        screen.getByText(/Error loading the project structure\./i),
+      ).toBeInTheDocument(),
     );
   });
 
@@ -243,9 +249,7 @@ describe("FullDocumentCard", () => {
     await waitFor(() => expect(screen.getByText("Root")).toBeInTheDocument());
 
     // Should not render a <p> for empty content (after mapping -> "")
-    const container = document.querySelector(
-      "div.overflow-y-auto.border-t-2"
-    );
+    const container = document.querySelector("div.overflow-y-auto.border-t-2");
     expect(container?.querySelector("p")).toBeNull();
   });
 
@@ -255,7 +259,9 @@ describe("FullDocumentCard", () => {
     const svc2 = await getNodeContentServiceMock();
     const exp = await getExportersMock();
 
-    svc1.getProjectById.mockResolvedValue({ projectStructure: sampleStructure });
+    svc1.getProjectById.mockResolvedValue({
+      projectStructure: sampleStructure,
+    });
     svc2.getNodeContents.mockResolvedValue(sampleContents);
 
     render(<FullDocumentCard />);
@@ -290,7 +296,9 @@ describe("FullDocumentCard", () => {
     const svc2 = await getNodeContentServiceMock();
 
     // structure present, but contents empty
-    svc1.getProjectById.mockResolvedValue({ projectStructure: sampleStructure });
+    svc1.getProjectById.mockResolvedValue({
+      projectStructure: sampleStructure,
+    });
     svc2.getNodeContents.mockResolvedValue([]);
 
     render(<FullDocumentCard />);
@@ -309,7 +317,9 @@ describe("FullDocumentCard", () => {
     const svc1 = await getProjectServiceMock();
     const svc2 = await getNodeContentServiceMock();
 
-    svc1.getProjectById.mockResolvedValue({ projectStructure: sampleStructure });
+    svc1.getProjectById.mockResolvedValue({
+      projectStructure: sampleStructure,
+    });
     svc2.getNodeContents.mockResolvedValue(sampleContents);
 
     render(<FullDocumentCard />);
@@ -318,7 +328,7 @@ describe("FullDocumentCard", () => {
 
     // Sanity checks
     expect(
-      screen.getByRole("heading", { name: /Full Document Overview/i })
+      screen.getByRole("heading", { name: /Full Document Overview/i }),
     ).toBeInTheDocument();
   });
 
@@ -328,7 +338,9 @@ describe("FullDocumentCard", () => {
     const svc1 = await getProjectServiceMock();
     const svc2 = await getNodeContentServiceMock();
 
-    svc1.getProjectById.mockResolvedValue({ projectStructure: sampleStructure });
+    svc1.getProjectById.mockResolvedValue({
+      projectStructure: sampleStructure,
+    });
     svc2.getNodeContents.mockResolvedValue(sampleContents);
 
     render(<FullDocumentCard />);
@@ -347,15 +359,17 @@ describe("FullDocumentCard", () => {
     const svc1 = await getProjectServiceMock();
     const svc2 = await getNodeContentServiceMock();
 
-    svc1.getProjectById.mockResolvedValue({ projectStructure: sampleStructure });
+    svc1.getProjectById.mockResolvedValue({
+      projectStructure: sampleStructure,
+    });
     svc2.getNodeContents.mockRejectedValue(new Error("fail contents"));
 
     render(<FullDocumentCard />);
 
     await waitFor(() =>
       expect(
-        screen.getByText(/Error loading the contents\./i)
-      ).toBeInTheDocument()
+        screen.getByText(/Error loading the contents\./i),
+      ).toBeInTheDocument(),
     );
   });
 
@@ -376,13 +390,17 @@ describe("FullDocumentCard", () => {
 
     const { rerender } = render(<FullDocumentCard />);
 
-    await waitFor(() => expect(screen.getByText("Intro A")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText("Intro A")).toBeInTheDocument(),
+    );
 
     // Change route param and re-render
     await setProjectId("B");
     rerender(<FullDocumentCard />);
 
-    await waitFor(() => expect(screen.getByText("Intro B")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText("Intro B")).toBeInTheDocument(),
+    );
 
     // Ensure refetch occurred at least twice (A then B)
     expect(svc1.getProjectById).toHaveBeenCalledTimes(2);
@@ -413,9 +431,7 @@ describe("FullDocumentCard", () => {
                     {
                       id: "L5",
                       name: "Level 5",
-                      nodes: [
-                        { id: "L6", name: "Level 6" },
-                      ],
+                      nodes: [{ id: "L6", name: "Level 6" }],
                     },
                   ],
                 },
@@ -438,7 +454,9 @@ describe("FullDocumentCard", () => {
 
     render(<FullDocumentCard />);
 
-    await waitFor(() => expect(screen.getByText("Level 6")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText("Level 6")).toBeInTheDocument(),
+    );
 
     const getTag = (text: string) => screen.getByText(text).tagName;
 

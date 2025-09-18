@@ -23,14 +23,30 @@ vi.mock("../assets/images/landing-page", () => ({
 }));
 
 // Import after mock
-import { navLinks, services, technologies, team, projects } from "./LandingPageText";
+import {
+  navLinks,
+  services,
+  technologies,
+  team,
+  projects,
+} from "./LandingPageText";
 import { LandingPageStyles } from "./styles/LandingPageStyles";
 
 describe("constants/LandingPageText", () => {
   it("navLinks contain the expected ids and titles in order", () => {
     expect(navLinks).toHaveLength(4);
-    expect(navLinks.map((l) => l.id)).toEqual(["about", "work", "team", "contact"]);
-    expect(navLinks.map((l) => l.title)).toEqual(["Overview", "Our Journey", "The Team", "Contact Us"]);
+    expect(navLinks.map((l) => l.id)).toEqual([
+      "about",
+      "work",
+      "team",
+      "contact",
+    ]);
+    expect(navLinks.map((l) => l.title)).toEqual([
+      "Overview",
+      "Our Journey",
+      "The Team",
+      "Contact Us",
+    ]);
   });
 
   it("services have titles and mocked icon references", () => {
@@ -120,7 +136,9 @@ describe("constants/styles/LandingPageStyles", () => {
     ];
 
     for (const k of keys) {
-      expect(Object.prototype.hasOwnProperty.call(LandingPageStyles, k)).toBe(true);
+      expect(Object.prototype.hasOwnProperty.call(LandingPageStyles, k)).toBe(
+        true,
+      );
       const val = (LandingPageStyles as any)[k];
       expect(typeof val).toBe("string");
       expect(val.length).toBeGreaterThan(0);

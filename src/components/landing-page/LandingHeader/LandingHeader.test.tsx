@@ -15,7 +15,7 @@ vi.mock("../../constants/styles/LandingPageStyles", () => ({
 // Bridge constants path
 vi.mock(
   "../../constants/LandingPageText",
-  async () => await import("../../../constants/LandingPageText")
+  async () => await import("../../../constants/LandingPageText"),
 );
 
 // Mock AOS to observe init (use hoisted var to avoid TDZ)
@@ -40,7 +40,7 @@ describe("LandingHeader", () => {
     expect(screen.getByAltText(/logo/i)).toBeInTheDocument();
     for (const link of navLinks) {
       expect(
-        screen.getAllByRole("button", { name: link.title })[0]
+        screen.getAllByRole("button", { name: link.title })[0],
       ).toBeInTheDocument();
     }
   });
@@ -49,7 +49,7 @@ describe("LandingHeader", () => {
     render(<LandingHeader />);
     expect(aosInit).toHaveBeenCalledTimes(1);
     expect(aosInit).toHaveBeenCalledWith(
-      expect.objectContaining({ duration: 600, once: true, mirror: false })
+      expect.objectContaining({ duration: 600, once: true, mirror: false }),
     );
   });
 
@@ -88,7 +88,7 @@ describe("LandingHeader", () => {
     });
 
     await userEvent.click(
-      screen.getAllByRole("button", { name: navLinks[0].title })[0]
+      screen.getAllByRole("button", { name: navLinks[0].title })[0],
     );
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });

@@ -5,12 +5,17 @@ import { render } from "../../test/renderWithProviders";
 
 vi.mock("framer-motion", async () => {
   const ReactPkg = await import("react");
-  const section = (props: any) => ReactPkg.createElement("section", props, props?.children);
+  const section = (props: any) =>
+    ReactPkg.createElement("section", props, props?.children);
   return { motion: { section } };
 });
 
 vi.mock("../utils/motion", () => ({
-  staggerContainer: (stagger: number, delay: number) => ({ _type: "stagger", stagger, delay }),
+  staggerContainer: (stagger: number, delay: number) => ({
+    _type: "stagger",
+    stagger,
+    delay,
+  }),
 }));
 
 vi.mock("../constants/styles/LandingPageStyles", () => ({
@@ -26,12 +31,17 @@ describe("hoc/SectionWrapper", () => {
 
     render(<Wrapped />);
 
-    const section = screen.getByRole("region", { hidden: true }) || document.querySelector("section");
+    const section =
+      screen.getByRole("region", { hidden: true }) ||
+      document.querySelector("section");
     expect(section).toBeInTheDocument();
 
     // Check className includes padding and static classes
     expect(section).toHaveAttribute("class", expect.stringContaining("pad"));
-    expect(section).toHaveAttribute("class", expect.stringContaining("max-w-7xl"));
+    expect(section).toHaveAttribute(
+      "class",
+      expect.stringContaining("max-w-7xl"),
+    );
 
     // Span with id
     const span = document.querySelector("span.hash-span#about");

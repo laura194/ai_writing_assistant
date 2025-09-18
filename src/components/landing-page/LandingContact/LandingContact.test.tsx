@@ -75,7 +75,7 @@ describe("LandingContact", () => {
     await userEvent.type(screen.getByLabelText(/Your Email/i), "a@example.com");
     await userEvent.type(
       screen.getByLabelText(/Your Message/i),
-      "Hello there!"
+      "Hello there!",
     );
 
     const submit = screen.getByRole("button", { name: /send/i });
@@ -101,7 +101,7 @@ describe("LandingContact", () => {
     await userEvent.type(screen.getByLabelText(/Your Email/i), "a@example.com");
     await userEvent.type(
       screen.getByLabelText(/Your Message/i),
-      "Hello there!"
+      "Hello there!",
     );
 
     const submit = screen.getByRole("button", { name: /send/i });

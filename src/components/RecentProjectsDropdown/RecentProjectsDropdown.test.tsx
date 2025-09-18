@@ -35,7 +35,7 @@ describe("RecentProjectsDropdown Unit Tests", () => {
   test("renders the button", () => {
     renderWithRouter(<RecentProjectsDropdown />);
     expect(
-      screen.getByRole("button", { name: /Recent Projects/i })
+      screen.getByRole("button", { name: /Recent Projects/i }),
     ).toBeInTheDocument();
   });
 
@@ -45,13 +45,13 @@ describe("RecentProjectsDropdown Unit Tests", () => {
     renderWithRouter(<RecentProjectsDropdown />);
 
     await waitFor(() =>
-      expect(screen.getByText(/No recent projects/i)).toBeInTheDocument()
+      expect(screen.getByText(/No recent projects/i)).toBeInTheDocument(),
     );
   });
 
   test("renders up to 3 recent projects", async () => {
     (ProjectService.getRecentProjectsByUsername as any).mockResolvedValue(
-      mockProjects
+      mockProjects,
     );
 
     renderWithRouter(<RecentProjectsDropdown />);
@@ -66,7 +66,7 @@ describe("RecentProjectsDropdown Unit Tests", () => {
 
   test("projects links have correct href", async () => {
     (ProjectService.getRecentProjectsByUsername as any).mockResolvedValue(
-      mockProjects
+      mockProjects,
     );
 
     renderWithRouter(<RecentProjectsDropdown />);
@@ -83,7 +83,7 @@ describe("RecentProjectsDropdown Unit Tests", () => {
     renderWithRouter(<RecentProjectsDropdown />);
 
     expect(
-      screen.getByRole("button", { name: /Recent Projects/i })
+      screen.getByRole("button", { name: /Recent Projects/i }),
     ).toBeInTheDocument();
 
     expect(await screen.findByText(/No recent projects/i)).toBeInTheDocument();
@@ -98,17 +98,17 @@ describe("RecentProjectsDropdown Mutation-focused Tests", () => {
 
   test("calls ProjectService.getRecentProjectsByUsername with the correct username", async () => {
     (ProjectService.getRecentProjectsByUsername as any).mockResolvedValue(
-      mockProjects
+      mockProjects,
     );
 
     renderWithRouter(<RecentProjectsDropdown />);
 
     await waitFor(() => {
       expect(
-        (ProjectService.getRecentProjectsByUsername as any).mock.calls.length
+        (ProjectService.getRecentProjectsByUsername as any).mock.calls.length,
       ).toBeGreaterThanOrEqual(1);
       expect(
-        (ProjectService.getRecentProjectsByUsername as any).mock.calls[0][0]
+        (ProjectService.getRecentProjectsByUsername as any).mock.calls[0][0],
       ).toBe("testuser");
     });
   });
@@ -119,17 +119,17 @@ describe("RecentProjectsDropdown Mutation-focused Tests", () => {
     renderWithRouter(<RecentProjectsDropdown />);
 
     expect(
-      (ProjectService.getRecentProjectsByUsername as any).mock.calls.length
+      (ProjectService.getRecentProjectsByUsername as any).mock.calls.length,
     ).toBe(0);
     expect(
-      screen.getByRole("button", { name: /Recent Projects/i })
+      screen.getByRole("button", { name: /Recent Projects/i }),
     ).toBeInTheDocument();
   });
 
   test("handles service error and logs to console", async () => {
     const error = new Error("service-failure");
     (ProjectService.getRecentProjectsByUsername as any).mockRejectedValue(
-      error
+      error,
     );
 
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -139,8 +139,8 @@ describe("RecentProjectsDropdown Mutation-focused Tests", () => {
     await waitFor(() =>
       expect(consoleSpy).toHaveBeenCalledWith(
         "❌ Failed to load recent projects:",
-        expect.any(Error)
-      )
+        expect.any(Error),
+      ),
     );
 
     consoleSpy.mockRestore();
@@ -149,7 +149,7 @@ describe("RecentProjectsDropdown Mutation-focused Tests", () => {
   test("renders correctly when fewer than 3 projects returned", async () => {
     const smallList = [{ _id: "1", name: "Only One" }];
     (ProjectService.getRecentProjectsByUsername as any).mockResolvedValue(
-      smallList
+      smallList,
     );
 
     renderWithRouter(<RecentProjectsDropdown />);

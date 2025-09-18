@@ -14,7 +14,7 @@ class MockIntersectionObserver implements IntersectionObserver {
 
   constructor(
     _callback: IntersectionObserverCallback,
-    _options?: IntersectionObserverInit
+    _options?: IntersectionObserverInit,
   ) {}
 
   observe() {}
@@ -62,7 +62,7 @@ vi.mock("react-router-dom", async () => {
       ReactPkg.createElement(
         "div",
         { "data-testid": "navigate-to" },
-        String(to)
+        String(to),
       ),
     useLocation: () => ({ pathname: _path }),
     useNavigate: () => navigateMock,
@@ -71,7 +71,7 @@ vi.mock("react-router-dom", async () => {
       ReactPkg.createElement(
         "a",
         { "data-testid": "link", href: to, ...rest },
-        children
+        children,
       ),
     __setPath: setPath,
     __navigateMock: navigateMock,
@@ -270,12 +270,11 @@ describe("AppRoutes - routing & redirects", () => {
     expect(screen.getByTestId("home-page")).toBeInTheDocument();
   });
 
-  it("signed-in user trying to access /myProjects is redirected to /home because protectedPaths doesn't include /myProjects", () => {
+  it("renders ProjectOverview for authenticated user on /myProjects", () => {
     setPath("/myProjects");
     setAuth({ isSignedIn: true, isLoaded: true });
 
     render(<AppRoutes />);
-    const nav = screen.getByTestId("navigate-to");
-    expect(nav).toHaveTextContent("/home");
+    expect(screen.getByTestId("projects-page")).toBeInTheDocument();
   });
 });

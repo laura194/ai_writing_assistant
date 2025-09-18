@@ -48,11 +48,11 @@ describe("Header component (unit tests)", () => {
 
     expect(screen.getByText(/Create Project/i).closest("a")).toHaveAttribute(
       "href",
-      "/structureSelection"
+      "/structureSelection",
     );
     expect(screen.getByText(/Open Project/i).closest("a")).toHaveAttribute(
       "href",
-      "/myProjects"
+      "/myProjects",
     );
 
     expect(screen.getByTestId("recent-dropdown")).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe("Header component (unit tests)", () => {
     renderWithRouter(<Header />);
 
     const greeting = screen.getByText((content) =>
-      /Hi,\s*Gerald/i.test(content)
+      /Hi,\s*Gerald/i.test(content),
     );
     expect(greeting).toBeInTheDocument();
   });
@@ -82,7 +82,7 @@ describe("Header component (unit tests)", () => {
     renderWithRouter(<Header />);
 
     const greeting = screen.getByText((content) =>
-      /Hi,\s*geros/i.test(content)
+      /Hi,\s*geros/i.test(content),
     );
     expect(greeting).toBeInTheDocument();
   });
@@ -149,7 +149,7 @@ describe("Header component (mutation-focused tests)", () => {
     });
     rerender(<Header />);
     expect(
-      screen.getByText((t) => /Hi,\s*Gerald/i.test(t))
+      screen.getByText((t) => /Hi,\s*Gerald/i.test(t)),
     ).toBeInTheDocument();
 
     (useUser as any).mockReturnValue({ user: { username: "geros" } });

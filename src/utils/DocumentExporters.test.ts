@@ -191,12 +191,12 @@ describe("export utilities", () => {
     expect(inst).toBeDefined();
 
     const printedRoot = inst.texts.find((t: any) =>
-      (t.txt as string).includes("Root")
+      (t.txt as string).includes("Root"),
     );
     expect(printedRoot).toBeTruthy();
 
     const printedChild = inst.texts.find((t: any) =>
-      (t.txt as string).includes("- Child 1")
+      (t.txt as string).includes("- Child 1"),
     );
     expect(printedChild).toBeTruthy();
 

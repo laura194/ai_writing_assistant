@@ -275,7 +275,7 @@ describe("EditPage", () => {
 
       // File card is shown after the node content is loaded
       await waitFor(() =>
-        expect(getNodeContentById).toHaveBeenCalledWith("2", "p1")
+        expect(getNodeContentById).toHaveBeenCalledWith("2", "p1"),
       );
       expect(await screen.findByTestId("file-card")).toBeInTheDocument();
     });
@@ -299,7 +299,7 @@ describe("EditPage", () => {
       // confirm dialog -> should switch to ai and close dialog
       fireEvent.click(screen.getByTestId("dialog-confirm"));
       await waitFor(() =>
-        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
       );
 
       // AI card should be present
@@ -342,8 +342,8 @@ describe("EditPage", () => {
             projectId: "p1",
             nodeId: "2",
             name: expect.stringContaining("Intro-renamed"),
-          })
-        )
+          }),
+        ),
       );
     });
 
@@ -386,13 +386,13 @@ describe("EditPage", () => {
       await waitFor(() =>
         expect(removeSpy).toHaveBeenCalledWith(
           "beforeunload",
-          expect.any(Function)
-        )
+          expect.any(Function),
+        ),
       );
 
       // Now take the *last* registered beforeunload handler (the fresh one)
       const beforeUnloadCalls = addSpy.mock.calls.filter(
-        (c) => c[0] === "beforeunload"
+        (c) => c[0] === "beforeunload",
       );
       expect(beforeUnloadCalls.length).toBeGreaterThan(0);
       const lastCall = beforeUnloadCalls[beforeUnloadCalls.length - 1];

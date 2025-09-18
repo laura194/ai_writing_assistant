@@ -33,7 +33,7 @@ describe("providers/ThemeProvider", () => {
     render(
       <ThemeProvider>
         <TestProbe />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     expect(screen.getByTestId("theme").textContent).toBe("light");
@@ -47,7 +47,7 @@ describe("providers/ThemeProvider", () => {
     render(
       <ThemeProvider>
         <TestProbe />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     expect(screen.getByTestId("theme").textContent).toBe("dark");
@@ -62,7 +62,7 @@ describe("providers/ThemeProvider", () => {
     render(
       <ThemeProvider>
         <TestProbe />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     expect(screen.getByTestId("theme").textContent).toBe("dark");
@@ -77,7 +77,7 @@ describe("providers/ThemeProvider", () => {
     render(
       <ThemeProvider>
         <TestProbe />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     expect(screen.getByTestId("theme").textContent).toBe("light");
@@ -111,7 +111,7 @@ describe("ThemeProvider - extended coverage", () => {
     render(
       <ThemeProvider>
         <TestProbe />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     const span = screen.getByTestId("theme");
@@ -130,7 +130,7 @@ describe("ThemeProvider - extended coverage", () => {
     render(
       <ThemeProvider>
         <TestProbe />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     const span = screen.getByTestId("theme");
@@ -155,7 +155,7 @@ describe("ThemeProvider - extended coverage", () => {
     render(
       <ThemeProvider>
         <TestProbe />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     const span = screen.getByTestId("theme");
@@ -180,7 +180,7 @@ describe("ThemeProvider - extended coverage", () => {
     render(
       <ThemeProvider>
         <TestProbe />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     const span = screen.getByTestId("theme");
@@ -197,7 +197,7 @@ describe("ThemeProvider - extended coverage", () => {
     render(
       <ThemeProvider>
         <TestProbe />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     expect(screen.getByTestId("theme").textContent).toBe("light");

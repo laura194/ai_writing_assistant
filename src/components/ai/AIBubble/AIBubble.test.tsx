@@ -14,7 +14,7 @@ describe("AIBubble Unit Tests", () => {
     render(<AIBubble position={position} onClick={onClickMock} />);
 
     const bubbleDiv = screen.getByTitle(
-      /Ask the AI about the highlighted selection/i
+      /Ask the AI about the highlighted selection/i,
     );
     expect(bubbleDiv).toBeInTheDocument();
 
@@ -42,7 +42,7 @@ describe("AIBubble Unit Tests", () => {
     render(<AIBubble position={position} onClick={onClickMock} />);
 
     const bubbleDiv = screen.getByTitle(
-      /Ask the AI about the highlighted selection/i
+      /Ask the AI about the highlighted selection/i,
     );
     await user.click(bubbleDiv);
 
@@ -63,7 +63,7 @@ describe("AIBubble Mutation Coverage Tests", () => {
       render(<AIBubble position={pos} onClick={onClickMock} />);
 
       const bubbleDiv = screen.getByTitle(
-        /Ask the AI about the highlighted selection/i
+        /Ask the AI about the highlighted selection/i,
       );
       expect(bubbleDiv).toBeInTheDocument();
       expect(bubbleDiv).toHaveStyle({
@@ -82,7 +82,7 @@ describe("AIBubble Mutation Coverage Tests", () => {
     render(<AIBubble position={{ x: 0, y: 0 }} onClick={onClickMock} />);
 
     const bubbleDiv = screen.getByTitle(
-      /Ask the AI about the highlighted selection/i
+      /Ask the AI about the highlighted selection/i,
     );
     await user.click(bubbleDiv);
     expect(onClickMock).toHaveBeenCalledTimes(1);
@@ -92,7 +92,7 @@ describe("AIBubble Mutation Coverage Tests", () => {
     render(<AIBubble position={{ x: 0, y: 0 }} onClick={() => {}} />);
 
     const innerSpan = screen.getByText(
-      (_, element) => element?.tagName === "SPAN"
+      (_, element) => element?.tagName === "SPAN",
     );
     expect(innerSpan).toBeInTheDocument();
 

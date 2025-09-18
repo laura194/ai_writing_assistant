@@ -24,7 +24,7 @@ describe("UnsavedChangesDialog (unit tests)", () => {
         isOpen={false}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.queryByText(/Unsaved Changes/i)).not.toBeInTheDocument();
@@ -44,7 +44,7 @@ describe("UnsavedChangesDialog (unit tests)", () => {
         isOpen={true}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     const titles = screen.getAllByText(/Unsaved Changes/i);
@@ -71,7 +71,7 @@ describe("UnsavedChangesDialog (unit tests)", () => {
         isOpen={true}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     const user = userEvent.setup();
@@ -101,7 +101,7 @@ describe("UnsavedChangesDialog (unit tests)", () => {
         isOpen={true}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     const titles = screen.getAllByText(/Unsaved Changes/i);
@@ -123,7 +123,7 @@ describe("UnsavedChangesDialog (unit tests)", () => {
         isOpen={true}
         onConfirm={vi.fn()}
         onCancel={vi.fn()}
-      />
+      />,
     );
 
     const leave = screen.getByText(/Leave Page/i);
@@ -147,11 +147,11 @@ describe("UnsavedChangesDialog (mutation-focused tests)", () => {
         isOpen={true}
         onConfirm={vi.fn()}
         onCancel={vi.fn()}
-      />
+      />,
     );
 
     const gradientEl = document.querySelector(
-      '[style*="linear-gradient"]'
+      '[style*="linear-gradient"]',
     ) as HTMLElement | null;
     expect(gradientEl).toBeInTheDocument();
     const bg = gradientEl?.style.backgroundImage ?? "";
@@ -166,11 +166,11 @@ describe("UnsavedChangesDialog (mutation-focused tests)", () => {
         isOpen={true}
         onConfirm={vi.fn()}
         onCancel={onCancel}
-      />
+      />,
     );
 
     const backdrop = document.querySelector(
-      'div[aria-hidden="true"]'
+      'div[aria-hidden="true"]',
     ) as HTMLElement | null;
     expect(backdrop).toBeInTheDocument();
 
@@ -189,7 +189,7 @@ describe("UnsavedChangesDialog (mutation-focused tests)", () => {
         isOpen={true}
         onConfirm={vi.fn()}
         onCancel={onCancel}
-      />
+      />,
     );
 
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
@@ -207,7 +207,7 @@ describe("UnsavedChangesDialog (mutation-focused tests)", () => {
         isOpen={true}
         onConfirm={vi.fn()}
         onCancel={vi.fn()}
-      />
+      />,
     );
 
     const svgs = document.querySelectorAll("svg");
@@ -220,7 +220,7 @@ describe("UnsavedChangesDialog (mutation-focused tests)", () => {
         isOpen={true}
         onConfirm={vi.fn()}
         onCancel={vi.fn()}
-      />
+      />,
     );
 
     const panel = document.querySelector("[class*='max-w-[525px]']");
@@ -238,7 +238,7 @@ describe("UnsavedChangesDialog (mutation-focused tests)", () => {
         isOpen={true}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     const user = userEvent.setup();

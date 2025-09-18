@@ -66,7 +66,12 @@ export default function AppRoutes() {
 
   // 1)
   const publicPaths = ["/", "/signIn", "/signUp"];
-  const protectedPaths = ["/home", "/edit", "/structureSelection"];
+  const protectedPaths = [
+    "/home",
+    "/edit",
+    "/structureSelection",
+    "/myProjects",
+  ];
 
   // 2)
   const isPublicPath = publicPaths.some((p) =>

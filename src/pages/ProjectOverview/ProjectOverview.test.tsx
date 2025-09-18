@@ -207,12 +207,12 @@ describe("ProjectOverview - extra coverage (fixed)", () => {
     await waitFor(() =>
       expect(updateProject).toHaveBeenCalledWith(
         "p1",
-        expect.objectContaining({ name: "Updated Project" })
-      )
+        expect.objectContaining({ name: "Updated Project" }),
+      ),
     );
 
     await waitFor(() =>
-      expect(screen.queryByDisplayValue("Project One")).not.toBeInTheDocument()
+      expect(screen.queryByDisplayValue("Project One")).not.toBeInTheDocument(),
     );
   });
 

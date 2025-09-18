@@ -23,6 +23,8 @@ vi.mock("react-router-dom", async () => {
 
 import AIProtocolCard from "./AIProtocolCard";
 
+const BASE_URL = "http://localhost:5001";
+
 describe("AIProtocolCard", () => {
   // helper to set projectId in the mock
   const setProjectId = async (p: string | undefined) => {
@@ -60,15 +62,15 @@ describe("AIProtocolCard", () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          /No entries have been created in the AI protocol yet\./i
-        )
+          /No entries have been created in the AI protocol yet\./i,
+        ),
       ).toBeInTheDocument();
     });
 
     // axios called with expected URL & params
     expect(AXIOS_GET).toHaveBeenCalledTimes(1);
     const [url, opts] = AXIOS_GET.mock.calls[0];
-    expect(url).toBe("/api/ai/aiProtocol");
+    expect(url).toBe(`${BASE_URL}/api/ai/aiProtocol`);
     expect(opts).toMatchObject({ params: { projectId: "proj-1" } });
   });
 
@@ -114,12 +116,12 @@ describe("AIProtocolCard", () => {
       // other fields present
       expect(screen.getByText(/Replace: Something small/i)).toBeInTheDocument();
       expect(
-        screen.getByText(/Some big affected section/i)
+        screen.getByText(/Some big affected section/i),
       ).toBeInTheDocument();
 
       // createdAt formatting: check substring contains month or year
       const anyDateNode = screen.getAllByText((content) =>
-        /Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|2023/.test(content)
+        /Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|2023/.test(content),
       );
       expect(anyDateNode.length).toBeGreaterThan(0);
 
@@ -164,7 +166,7 @@ describe("AIProtocolCard", () => {
     });
 
     const input = screen.getByPlaceholderText(
-      /Filter the protocol by typing a keyword/i
+      /Filter the protocol by typing a keyword/i,
     );
 
     // filter by aiName "ModelX"
@@ -192,7 +194,7 @@ describe("AIProtocolCard", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Error while fetching protocols\./i)
+        screen.getByText(/Error while fetching protocols\./i),
       ).toBeInTheDocument();
     });
   });
@@ -344,7 +346,7 @@ describe("AIProtocolCard", () => {
       .toLowerCase(); // e.g., "Mar"
 
     const input = screen.getByPlaceholderText(
-      /Filter the protocol by typing a keyword/i
+      /Filter the protocol by typing a keyword/i,
     );
     await user.type(input, monthShort);
 
@@ -391,7 +393,7 @@ describe("AIProtocolCard", () => {
     });
 
     const input = screen.getByPlaceholderText(
-      /Filter the protocol by typing a keyword/i
+      /Filter the protocol by typing a keyword/i,
     );
     await user.type(input, "Alpha");
 

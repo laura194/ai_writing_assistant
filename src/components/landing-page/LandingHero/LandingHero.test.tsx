@@ -47,7 +47,7 @@ describe("LandingHero", () => {
     });
 
     await userEvent.click(
-      screen.getByRole("button", { name: /Scroll to About section/i })
+      screen.getByRole("button", { name: /Scroll to About section/i }),
     );
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });

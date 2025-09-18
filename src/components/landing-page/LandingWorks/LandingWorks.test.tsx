@@ -30,7 +30,7 @@ vi.mock("../../utils/motion", () => ({
 vi.mock("../../assets/images/landing-page", () => ({ github: "github.png" }));
 vi.mock(
   "../../constants/LandingPageText",
-  async () => await import("../../../constants/LandingPageText")
+  async () => await import("../../../constants/LandingPageText"),
 );
 
 import Works from "./LandingWorks";
@@ -70,7 +70,7 @@ describe("LandingWorks", () => {
     await userEvent.click(overlays[0].closest("div")!);
     expect(openSpy).toHaveBeenCalledWith(
       projects[0].source_code_link,
-      "_blank"
+      "_blank",
     );
   });
 });

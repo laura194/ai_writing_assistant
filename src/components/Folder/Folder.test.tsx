@@ -29,12 +29,16 @@ vi.mock("../../providers/ThemeProvider", () => ({
 
 vi.mock("../IconPicker/IconPicker", () => ({
   __esModule: true,
-  default: ({ currentIcon, onSelect }: { currentIcon?: string; onSelect: (icon: string) => void }) => (
+  default: ({
+    currentIcon,
+    onSelect,
+  }: {
+    currentIcon?: string;
+    onSelect: (icon: string) => void;
+  }) => (
     <div data-testid="icon-picker">
       <span data-testid="current-icon">{currentIcon ?? "text"}</span>
-      <button onClick={() => onSelect("code")}>
-        pick-icon
-      </button>
+      <button onClick={() => onSelect("code")}>pick-icon</button>
     </div>
   ),
 }));
@@ -62,7 +66,10 @@ const baseNode = (overrides?: Partial<Node>): Node => ({
   ...overrides,
 });
 
-const setup = (node: Node, props?: Partial<React.ComponentProps<typeof Folder>>) => {
+const setup = (
+  node: Node,
+  props?: Partial<React.ComponentProps<typeof Folder>>,
+) => {
   const onMove = vi.fn();
   const onNodeClick = vi.fn();
   const onAdd = vi.fn();
@@ -81,7 +88,7 @@ const setup = (node: Node, props?: Partial<React.ComponentProps<typeof Folder>>)
         isVisible={true}
         selectedNodeId={props?.selectedNodeId ?? ""}
       />
-    </ul>
+    </ul>,
   );
 
   return {
@@ -124,7 +131,10 @@ describe("Folder", () => {
     await userEvent.keyboard("{Enter}");
 
     expect(onRenameOrIconUpdate).toHaveBeenCalledTimes(1);
-    expect(onRenameOrIconUpdate).toHaveBeenCalledWith({ ...node, name: "New Name" });
+    expect(onRenameOrIconUpdate).toHaveBeenCalledWith({
+      ...node,
+      name: "New Name",
+    });
 
     // Component relies on parent to pass updated node; it exits edit mode but doesn't update its own label.
     // Assert that input closed instead of expecting immediate text change.
@@ -172,7 +182,10 @@ describe("Folder", () => {
 
     await userEvent.click(screen.getByText("pick-icon"));
 
-    expect(onRenameOrIconUpdate).toHaveBeenCalledWith({ ...node, icon: "code" });
+    expect(onRenameOrIconUpdate).toHaveBeenCalledWith({
+      ...node,
+      icon: "code",
+    });
 
     await waitFor(() => {
       expect(screen.queryByTestId("icon-picker")).not.toBeInTheDocument();

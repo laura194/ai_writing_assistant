@@ -40,7 +40,7 @@ describe("IconPicker", () => {
     render(<IconPicker currentIcon="image" onSelect={() => {}} />);
 
     const activeDiv = document.querySelector(
-      '[data-layout-id="activeIconBackground"]'
+      '[data-layout-id="activeIconBackground"]',
     );
     expect(activeDiv).toBeInTheDocument();
 
@@ -51,7 +51,7 @@ describe("IconPicker", () => {
   test('when no currentIcon given, then "text" is active', () => {
     render(<IconPicker onSelect={() => {}} />);
     const activeDiv = document.querySelector(
-      '[data-layout-id="activeIconBackground"]'
+      '[data-layout-id="activeIconBackground"]',
     );
     expect(activeDiv).toBeInTheDocument();
 
@@ -68,12 +68,12 @@ describe("IconPicker Additional Mutation Coverage", () => {
       render(<IconPicker currentIcon={iconName} onSelect={() => {}} />);
 
       const activeDiv = document.querySelector(
-        '[data-layout-id="activeIconBackground"]'
+        '[data-layout-id="activeIconBackground"]',
       );
       expect(activeDiv).toBeInTheDocument();
 
       const button = screen.getByTitle(
-        new RegExp(`Category: ${iconName}`, "i")
+        new RegExp(`Category: ${iconName}`, "i"),
       );
       expect(button).toBeInTheDocument();
 
@@ -109,7 +109,7 @@ describe("IconPicker Additional Mutation Coverage", () => {
   test("explicitly undefined currentIcon defaults to 'text'", () => {
     render(<IconPicker currentIcon={undefined} onSelect={() => {}} />);
     const activeDiv = document.querySelector(
-      '[data-layout-id="activeIconBackground"]'
+      '[data-layout-id="activeIconBackground"]',
     );
     expect(activeDiv).toBeInTheDocument();
     const textButton = screen.getByTitle(/Category: Text Section/i);

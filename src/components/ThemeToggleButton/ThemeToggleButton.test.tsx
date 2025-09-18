@@ -34,7 +34,7 @@ describe("ThemeToggleButton Unit Tests", () => {
     expect(button).toHaveAttribute("aria-pressed", "false");
 
     const meta = document.querySelector(
-      'meta[name="theme-color"]'
+      'meta[name="theme-color"]',
     ) as HTMLMetaElement;
     expect(meta).toBeInTheDocument();
     expect(meta.content).toBe("#ffffff");
@@ -56,7 +56,7 @@ describe("ThemeToggleButton Unit Tests", () => {
     expect(button).toHaveAttribute("aria-pressed", "true");
 
     const meta = document.querySelector(
-      'meta[name="theme-color"]'
+      'meta[name="theme-color"]',
     ) as HTMLMetaElement;
     expect(meta.content).toBe("#090325");
   });
@@ -108,7 +108,7 @@ describe("ThemeToggleButton Unit Tests", () => {
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       "Cant switch Theme Color: ",
-      expect.any(Error)
+      expect.any(Error),
     );
 
     document.querySelector = originalQuerySelector;
@@ -133,13 +133,13 @@ describe("ThemeToggleButton Mutation Tests", () => {
     render(<ThemeToggleButton className="mut-test" />);
 
     const knob = document.querySelector(
-      ".absolute.top-1.left-1.h-7.w-7"
+      ".absolute.top-1.left-1.h-7.w-7",
     ) as HTMLElement | null;
     expect(knob).toBeInTheDocument();
     expect(knob?.style.boxShadow).toBe("0 4px 20px rgba(0,0,0,0.35)");
 
     const overlay = document.querySelector(
-      'span[class*="opacity-0"], span[class*="opacity-80"]'
+      'span[class*="opacity-0"], span[class*="opacity-80"]',
     ) as HTMLElement | null;
     expect(overlay).toBeInTheDocument();
     expect(overlay?.className).toContain("opacity-0");
@@ -155,13 +155,13 @@ describe("ThemeToggleButton Mutation Tests", () => {
     render(<ThemeToggleButton />);
 
     const knob = document.querySelector(
-      ".absolute.top-1.left-1.h-7.w-7"
+      ".absolute.top-1.left-1.h-7.w-7",
     ) as HTMLElement | null;
     expect(knob).toBeInTheDocument();
     expect(knob?.style.boxShadow).toBe("0 2px 20px rgba(0,255,209,0.5)");
 
     const overlay = document.querySelector(
-      'span[class*="opacity-80"]'
+      'span[class*="opacity-80"]',
     ) as HTMLElement | null;
     expect(overlay).toBeInTheDocument();
     expect(overlay?.className).toContain("opacity-80");

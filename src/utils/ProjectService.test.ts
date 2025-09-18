@@ -18,6 +18,8 @@ function makeAxiosResponse<T>(data: T): AxiosResponse<T> {
   } as unknown as AxiosResponse<T>;
 }
 
+const BASE_URL = "http://localhost:5001";
+
 describe("ProjectService", () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
@@ -25,8 +27,6 @@ describe("ProjectService", () => {
     vi.resetAllMocks();
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    // Provide a small isAxiosError stub so service branch detection works in tests.
-    // The real axios.isAxiosError checks more, but for tests it's enough to check the flag.
     (mockedAxios as any).isAxiosError = (err: any) =>
       !!(err && err.isAxiosError);
   });
@@ -52,7 +52,10 @@ describe("ProjectService", () => {
 
       const result = await ProjectService.createProject(input);
       expect(result).toEqual(created);
-      expect(mockedAxios.post).toHaveBeenCalledWith("/api/projects", input);
+      expect(mockedAxios.post).toHaveBeenCalledWith(
+        `${BASE_URL}/api/projects`,
+        input,
+      );
     });
 
     it("logs and rethrows on error", async () => {
@@ -64,7 +67,7 @@ describe("ProjectService", () => {
           name: "X",
           username: "y",
           projectStructure: [],
-        })
+        }),
       ).rejects.toThrow(err);
 
       expect(consoleErrorSpy).toHaveBeenCalled();
@@ -83,7 +86,9 @@ describe("ProjectService", () => {
 
       const result = await ProjectService.getProjectById("42");
       expect(result).toEqual(project);
-      expect(mockedAxios.get).toHaveBeenCalledWith("/api/projects/42");
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        `${BASE_URL}/api/projects/42`,
+      );
     });
 
     it("logs and rethrows on error", async () => {
@@ -109,7 +114,10 @@ describe("ProjectService", () => {
 
       const result = await ProjectService.updateProject("7", update);
       expect(result).toEqual(updated);
-      expect(mockedAxios.put).toHaveBeenCalledWith("/api/projects/7", update);
+      expect(mockedAxios.put).toHaveBeenCalledWith(
+        `${BASE_URL}/api/projects/7`,
+        update,
+      );
     });
 
     it("logs and rethrows on error", async () => {
@@ -117,7 +125,7 @@ describe("ProjectService", () => {
       mockedAxios.put.mockRejectedValueOnce(err);
 
       await expect(
-        ProjectService.updateProject("7", { name: "X" })
+        ProjectService.updateProject("7", { name: "X" }),
       ).rejects.toThrow(err);
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
@@ -134,15 +142,14 @@ describe("ProjectService", () => {
       const result = await ProjectService.getProjectsByUsername("bob");
       expect(result).toEqual(projects);
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "/api/projects/by-username",
+        `${BASE_URL}/api/projects/by-username`,
         {
           params: { username: "bob" },
-        }
+        },
       );
     });
 
     it("returns [] if 404 error is returned", async () => {
-      // simulate an axios-like error that our stub will detect
       const err = {
         isAxiosError: true,
         response: { status: 404 },
@@ -160,9 +167,8 @@ describe("ProjectService", () => {
       } as any;
       mockedAxios.get.mockRejectedValueOnce(err);
 
-      // assert the same object is rethrown (use rejects.toEqual for non-Error objects)
       await expect(ProjectService.getProjectsByUsername("bob")).rejects.toEqual(
-        err
+        err,
       );
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
@@ -178,10 +184,10 @@ describe("ProjectService", () => {
       const result = await ProjectService.getRecentProjectsByUsername("bob");
       expect(result).toEqual(projects);
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "/api/projects/by-username/recent",
+        `${BASE_URL}/api/projects/by-username/recent`,
         {
           params: { username: "bob" },
-        }
+        },
       );
     });
 
@@ -198,7 +204,7 @@ describe("ProjectService", () => {
       mockedAxios.get.mockRejectedValueOnce(err);
 
       await expect(
-        ProjectService.getRecentProjectsByUsername("bob")
+        ProjectService.getRecentProjectsByUsername("bob"),
       ).rejects.toEqual(err);
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
@@ -209,7 +215,9 @@ describe("ProjectService", () => {
       mockedAxios.delete.mockResolvedValueOnce(makeAxiosResponse({}));
 
       await ProjectService.deleteProject("123");
-      expect(mockedAxios.delete).toHaveBeenCalledWith("/api/projects/123");
+      expect(mockedAxios.delete).toHaveBeenCalledWith(
+        `${BASE_URL}/api/projects/123`,
+      );
     });
 
     it("logs and rethrows on error", async () => {
