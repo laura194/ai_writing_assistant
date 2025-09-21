@@ -36,7 +36,11 @@ const generateLaTeXContent = (
   aiProtocols: IAiProtocolEntry[] = [],
   forWord: boolean = false,
 ): string => {
-  const latexDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const latexDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
   let latexContent = `
 \\documentclass{article}
 \\usepackage[utf8]{inputenc}
@@ -78,7 +82,8 @@ const generateLaTeXContent = (
   });
 
   // AI Protocol appendix before bibliography
-  latexContent += `\n\\newpage\n` + buildAiProtocolLatexAppendix(aiProtocols, forWord);
+  latexContent +=
+    `\n\\newpage\n` + buildAiProtocolLatexAppendix(aiProtocols, forWord);
 
   latexContent += `
 \\newpage
@@ -95,35 +100,41 @@ export const handleExportWord = async (
   aiProtocols: IAiProtocolEntry[] = [],
 ) => {
   try {
-    const latexContent = generateLaTeXContent(structure, nodeContents, aiProtocols, true);
-    console.log('Generated LaTeX content:', latexContent.substring(0, 100));
+    const latexContent = generateLaTeXContent(
+      structure,
+      nodeContents,
+      aiProtocols,
+      true,
+    );
+    console.log("Generated LaTeX content:", latexContent.substring(0, 100));
 
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
-    console.log('API Base URL:', apiBaseUrl);
+    const apiBaseUrl =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+    console.log("API Base URL:", apiBaseUrl);
 
     const response = await fetch(`${apiBaseUrl}/api/export/word`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ latexContent })
+      body: JSON.stringify({ latexContent }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Server response:', errorText);
+      console.error("Server response:", errorText);
       throw new Error(`Server returned ${response.status}: ${errorText}`);
     }
 
     const blob = await response.blob();
     if (blob.size === 0) {
-      throw new Error('Received empty file from server');
+      throw new Error("Received empty file from server");
     }
 
-    console.log('Conversion successful, saving Word document...');
-    saveAs(blob, 'full_document.docx');
+    console.log("Conversion successful, saving Word document...");
+    saveAs(blob, "full_document.docx");
   } catch (error) {
-    console.error('Error exporting to Word:', error);
+    console.error("Error exporting to Word:", error);
     throw error;
   }
 };
@@ -263,13 +274,17 @@ export const handleExportLATEX = (
   aiProtocols: IAiProtocolEntry[] = [],
   saveFile: boolean = true,
 ) => {
-  const latexContent = generateLaTeXContent(structure, nodeContents, aiProtocols);
-  
+  const latexContent = generateLaTeXContent(
+    structure,
+    nodeContents,
+    aiProtocols,
+  );
+
   if (saveFile) {
     const blob = new Blob([latexContent], { type: "text/plain;charset=utf-8" });
     saveAs(blob, "full_document.tex");
   }
-  
+
   return latexContent;
 };
 
@@ -361,7 +376,8 @@ function buildAiProtocolLatexAppendix(
     appendix += `\\end{longtable}\n`;
   } else {
     // Longtable with booktabs for LaTeX/PDF quality
-    appendix += `\n` +
+    appendix +=
+      `\n` +
       `\\setlength{\\LTpre}{0pt}\n` +
       `\\setlength{\\LTpost}{0pt}\n` +
       `\\begin{longtable}{p{2.5cm} p{3.2cm} p{3.2cm} p{5cm} p{2.2cm} p{2.2cm}}\n` +
@@ -388,7 +404,10 @@ function formatDate(date?: string | Date): string {
   if (!date) return "N/A";
   try {
     const d = typeof date === "string" ? new Date(date) : date;
-    return d.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+    return d.toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
   } catch {
     return String(date);
   }

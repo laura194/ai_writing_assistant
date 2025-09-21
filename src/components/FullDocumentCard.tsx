@@ -99,13 +99,19 @@ const FullDocumentCard = () => {
 
         // Fetch AI Protocols for Appendix
         try {
-          const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
-          const resp = await fetch(`${apiBaseUrl}/api/ai/aiProtocol?projectId=${projectId}`);
+          const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+          const resp = await fetch(
+            `${apiBaseUrl}/api/ai/aiProtocol?projectId=${projectId}`,
+          );
           if (resp.ok) {
             const protocols: IAiProtocolEntry[] = await resp.json();
             setAiProtocols(protocols || []);
           } else {
-            console.warn("Failed to fetch AI protocols for appendix:", resp.status);
+            console.warn(
+              "Failed to fetch AI protocols for appendix:",
+              resp.status,
+            );
             setAiProtocols([]);
           }
         } catch (e) {
@@ -208,7 +214,10 @@ const FullDocumentCard = () => {
   const formatDate = (date?: string): string => {
     if (!date) return "N/A";
     try {
-      return new Date(date).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+      return new Date(date).toLocaleString("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
     } catch {
       return String(date);
     }
@@ -228,17 +237,20 @@ const FullDocumentCard = () => {
           {/** Gradient-Border um die Buttons wie im FileContentCard **/}
           {[
             {
-              onClick: () => handleExportWord(structure, nodeContents, aiProtocols),
+              onClick: () =>
+                handleExportWord(structure, nodeContents, aiProtocols),
               src: word,
               alt: "Word",
             },
             {
-              onClick: () => handleExportPDF(structure, nodeContents, aiProtocols),
+              onClick: () =>
+                handleExportPDF(structure, nodeContents, aiProtocols),
               src: pdf,
               alt: "PDF",
             },
             {
-              onClick: () => handleExportLATEX(structure, nodeContents, aiProtocols),
+              onClick: () =>
+                handleExportLATEX(structure, nodeContents, aiProtocols),
               src: latex,
               alt: "LaTeX",
             },
