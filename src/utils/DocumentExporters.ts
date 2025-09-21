@@ -333,7 +333,7 @@ const parseRichContent = (content: string): string => {
 };
 
 function buildAiProtocolLatexAppendix(aiProtocols: IAiProtocolEntry[] = []): string {
-  let appendix = `\\appendix\n\\section{AI Protocol}\n`;
+  let appendix = `\\section*{Appendix: AI Protocol}\n`;
   if (!aiProtocols || aiProtocols.length === 0) {
     appendix += `No entries have been created in the AI protocol yet.\\par\n`;
     return appendix;
@@ -369,14 +369,6 @@ function formatDate(date?: string | Date): string {
     return String(date);
   }
 }
-
-// TODO Latex Export Improvements: 
-// 1. Latex export has already a better structured look. Keep refining it.
-// 2. Although it supports bibtex, it does not show the citations even if it is not existing. Hence, there should be Works Cited chapter, and ai protocol as a table in appendix even if not present in the structure.
-
-// TODO Word Export Improvements: 
-// 1. It should include Works Cited chapter, and ai protocol as a table in appendix even if not present in the structure.
-
 // TODO PDF Export Improvements:
 // 1. PDF export use latex export function first then convert to PDF to have a better structured look.
 // 2. It should include Works Cited chapter, and ai protocol as a table in appendix even if not present in the structure.
