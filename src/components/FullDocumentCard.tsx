@@ -12,6 +12,7 @@ import pdf from "/src/assets/images/full-document-page/pdf.jpg";
 import latex from "/src/assets/images/full-document-page/latex.png";
 import { motion } from "framer-motion";
 import { useTheme } from "../providers/ThemeProvider";
+import { IAiProtocolEntry } from "../models/IAITypes";
 
 /**
  * Generates the whole project content in one single page and exports it as Word, PDF, or LaTeX format.
@@ -46,6 +47,7 @@ const FullDocumentCard = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [structure, setStructure] = useState<StructureNode[]>([]);
   const [nodeContents, setNodeContents] = useState<NodeContent[]>([]);
+  const [aiProtocols, setAiProtocols] = useState<IAiProtocolEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { theme } = useTheme();
@@ -94,6 +96,22 @@ const FullDocumentCard = () => {
           content: node.content || "",
         }));
         setNodeContents(mappedData);
+
+        // Fetch AI Protocols for Appendix
+        try {
+          const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+          const resp = await fetch(`${apiBaseUrl}/api/ai/aiProtocol?projectId=${projectId}`);
+          if (resp.ok) {
+            const protocols: IAiProtocolEntry[] = await resp.json();
+            setAiProtocols(protocols || []);
+          } else {
+            console.warn("Failed to fetch AI protocols for appendix:", resp.status);
+            setAiProtocols([]);
+          }
+        } catch (e) {
+          console.warn("Error fetching AI protocols:", e);
+          setAiProtocols([]);
+        }
       } catch {
         setError("Error loading the contents.");
       } finally {
@@ -105,12 +123,7 @@ const FullDocumentCard = () => {
   }, [projectId]);
 
   useEffect(() => {
-    if (
-      !containerRef.current ||
-      structure.length === 0 ||
-      nodeContents.length === 0
-    )
-      return;
+    if (!containerRef.current) return;
 
     const buildHtml = (nodes: StructureNode[], depth = 1): string => {
       return nodes
@@ -136,9 +149,52 @@ const FullDocumentCard = () => {
         .join("");
     };
 
-    const finalHtml = buildHtml(structure);
+    const buildAiProtocolAppendix = (): string => {
+      const heading = `<h2 class="text-2xl font-bold mt-6 text-[#261e3b] dark:text-white">Appendix: AI Protocol</h2>`;
+      if (!aiProtocols || aiProtocols.length === 0) {
+        return (
+          heading +
+          `<p class="whitespace-pre-line mt-2 mb-4 text-gray-600 dark:text-gray-200">No entries have been created in the AI protocol yet.</p>`
+        );
+      }
+
+      const rows = aiProtocols
+        .map(
+          (p) => `
+        <tr class="border-t border-[#beb5e4] dark:border-[#3e316e]">
+          <td class="px-3 py-2 align-top">${escapeHtml(p.aiName || "")}</td>
+          <td class="px-3 py-2 align-top">${escapeHtml(p.usageForm || "")}</td>
+          <td class="px-3 py-2 align-top">${escapeHtml(p.affectedParts || "")}</td>
+          <td class="px-3 py-2 align-top">${escapeHtml(p.remarks || "")}</td>
+          <td class="px-3 py-2 align-top">${escapeHtml(formatDate(p.createdAt))}</td>
+          <td class="px-3 py-2 align-top">${escapeHtml(formatDate(p.updatedAt))}</td>
+        </tr>`,
+        )
+        .join("");
+
+      const table = `
+        <div class="relative overflow-x-auto rounded-xl border-2 border-[#beb5e4] dark:border-[#3e316e] mt-3">
+          <table class="min-w-full text-m text-left text-[#595996] dark:text-[#d4d4f2]">
+            <thead class="bg-[#e1dcf8] dark:bg-[#2f214d] text-[#261e3b] dark:text-[#ffffff]">
+              <tr>
+                <th class="px-3 py-2 font-semibold">Name</th>
+                <th class="px-3 py-2 font-semibold">Usage</th>
+                <th class="px-3 py-2 font-semibold">Affected sections</th>
+                <th class="px-3 py-2 font-semibold">Notes</th>
+                <th class="px-3 py-2 font-semibold">Created at</th>
+                <th class="px-3 py-2 font-semibold">Updated at</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+
+      return heading + table;
+    };
+
+    const finalHtml = buildHtml(structure) + buildAiProtocolAppendix();
     containerRef.current.innerHTML = finalHtml;
-  }, [structure, nodeContents]);
+  }, [structure, nodeContents, aiProtocols]);
 
   const escapeHtml = (unsafe: string) => {
     return unsafe
@@ -147,6 +203,15 @@ const FullDocumentCard = () => {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  };
+
+  const formatDate = (date?: string): string => {
+    if (!date) return "N/A";
+    try {
+      return new Date(date).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+    } catch {
+      return String(date);
+    }
   };
 
   return (
@@ -163,17 +228,17 @@ const FullDocumentCard = () => {
           {/** Gradient-Border um die Buttons wie im FileContentCard **/}
           {[
             {
-              onClick: () => handleExportWord(structure, nodeContents),
+              onClick: () => handleExportWord(structure, nodeContents, aiProtocols),
               src: word,
               alt: "Word",
             },
             {
-              onClick: () => handleExportPDF(structure, nodeContents),
+              onClick: () => handleExportPDF(structure, nodeContents, aiProtocols),
               src: pdf,
               alt: "PDF",
             },
             {
-              onClick: () => handleExportLATEX(structure, nodeContents),
+              onClick: () => handleExportLATEX(structure, nodeContents, aiProtocols),
               src: latex,
               alt: "LaTeX",
             },
