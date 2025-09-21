@@ -34,6 +34,7 @@ const generateLaTeXContent = (
   structure: StructureNode[],
   nodeContents: NodeContent[],
   aiProtocols: IAiProtocolEntry[] = [],
+  forWord: boolean = false,
 ): string => {
   const latexDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   let latexContent = `
@@ -77,7 +78,7 @@ const generateLaTeXContent = (
   });
 
   // Append AI Protocol appendix before bibliography
-  latexContent += `\n\\newpage\n` + buildAiProtocolLatexAppendix(aiProtocols);
+  latexContent += `\n\\newpage\n` + buildAiProtocolLatexAppendix(aiProtocols, forWord);
 
   latexContent += `
 \\newpage
@@ -94,7 +95,7 @@ export const handleExportWord = async (
   aiProtocols: IAiProtocolEntry[] = [],
 ) => {
   try {
-    const latexContent = generateLaTeXContent(structure, nodeContents, aiProtocols);
+    const latexContent = generateLaTeXContent(structure, nodeContents, aiProtocols, true);
     console.log('Generated LaTeX content:', latexContent.substring(0, 100));
 
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
@@ -332,31 +333,55 @@ const parseRichContent = (content: string): string => {
   return processed;
 };
 
-function buildAiProtocolLatexAppendix(aiProtocols: IAiProtocolEntry[] = []): string {
+function buildAiProtocolLatexAppendix(
+  aiProtocols: IAiProtocolEntry[] = [],
+  forWord: boolean = false,
+): string {
+  // Use an unnumbered section to avoid appendix numeration in Word conversions
   let appendix = `\\section*{Appendix: AI Protocol}\n`;
   if (!aiProtocols || aiProtocols.length === 0) {
-    appendix += `No entries have been created in the AI protocol yet.\\par\n`;
+    appendix += `No entries have been created in the AI protocol yet.\n\n`;
     return appendix;
   }
 
-  appendix += `\n` +
-    `\\setlength{\\LTpre}{0pt}\n` +
-    `\\setlength{\\LTpost}{0pt}\n` +
-    `\\begin{longtable}{p{2.5cm} p{3.2cm} p{3.2cm} p{5cm} p{2.2cm} p{2.2cm}}\n` +
-    `\\toprule\n` +
-    `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \n` +
-    `\\midrule\n` +
-    `\\endfirsthead\n` +
-    `\\toprule\n` +
-    `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \n` +
-    `\\midrule\n` +
-    `\\endhead\n`;
+  if (forWord) {
+    // Word path: longtable with header defined for first and subsequent pages
+    appendix +=
+      `\\begin{longtable}{|l|l|l|l|l|l|}\n` +
+      `\\hline\n` +
+      `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \\hline\n` +
+      `\\endfirsthead\n` +
+      `\\hline\n` +
+      `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \\hline\n` +
+      `\\endhead\n`;
 
-  aiProtocols.forEach((p) => {
-    appendix += `${escapeLatex(p.aiName || "")} & ${escapeLatex(p.usageForm || "")} & ${escapeLatex(p.affectedParts || "")} & ${escapeLatex(p.remarks || "")} & ${escapeLatex(formatDate(p.createdAt || ""))} & ${escapeLatex(formatDate(p.updatedAt || ""))} \\\\ \\hline\n`;
-  });
+    aiProtocols.forEach((p) => {
+      appendix += `${escapeLatex(p.aiName || "")} & ${escapeLatex(p.usageForm || "")} & ${escapeLatex(p.affectedParts || "")} & ${escapeLatex(p.remarks || "")} & ${escapeLatex(formatDate(p.createdAt || ""))} & ${escapeLatex(formatDate(p.updatedAt || ""))} \\\\ \\hline\n`;
+    });
 
-  appendix += `\\bottomrule\n\\end{longtable}\n`;
+    appendix += `\\end{longtable}\n`;
+  } else {
+    // Longtable with booktabs for LaTeX/PDF quality
+    appendix += `\n` +
+      `\\setlength{\\LTpre}{0pt}\n` +
+      `\\setlength{\\LTpost}{0pt}\n` +
+      `\\begin{longtable}{p{2.5cm} p{3.2cm} p{3.2cm} p{5cm} p{2.2cm} p{2.2cm}}\n` +
+      `\\toprule\n` +
+      `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \n` +
+      `\\midrule\n` +
+      `\\endfirsthead\n` +
+      `\\toprule\n` +
+      `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \n` +
+      `\\midrule\n` +
+      `\\endhead\n`;
+
+    aiProtocols.forEach((p) => {
+      appendix += `${escapeLatex(p.aiName || "")} & ${escapeLatex(p.usageForm || "")} & ${escapeLatex(p.affectedParts || "")} & ${escapeLatex(p.remarks || "")} & ${escapeLatex(formatDate(p.createdAt || ""))} & ${escapeLatex(formatDate(p.updatedAt || ""))} \\\\ \\hline\n`;
+    });
+
+    appendix += `\\bottomrule\n\\end{longtable}\n`;
+  }
+
   return appendix;
 }
 
@@ -369,6 +394,7 @@ function formatDate(date?: string | Date): string {
     return String(date);
   }
 }
+
 // TODO PDF Export Improvements:
 // 1. PDF export use latex export function first then convert to PDF to have a better structured look.
 // 2. It should include Works Cited chapter, and ai protocol as a table in appendix even if not present in the structure.
