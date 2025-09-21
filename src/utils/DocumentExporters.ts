@@ -77,7 +77,7 @@ const generateLaTeXContent = (
     }
   });
 
-  // Append AI Protocol appendix before bibliography
+  // AI Protocol appendix before bibliography
   latexContent += `\n\\newpage\n` + buildAiProtocolLatexAppendix(aiProtocols, forWord);
 
   latexContent += `
@@ -337,7 +337,6 @@ function buildAiProtocolLatexAppendix(
   aiProtocols: IAiProtocolEntry[] = [],
   forWord: boolean = false,
 ): string {
-  // Use an unnumbered section to avoid appendix numeration in Word conversions
   let appendix = `\\section*{Appendix: AI Protocol}\n`;
   if (!aiProtocols || aiProtocols.length === 0) {
     appendix += `No entries have been created in the AI protocol yet.\n\n`;
