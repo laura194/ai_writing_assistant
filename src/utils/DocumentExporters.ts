@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import { saveAs } from "file-saver";
+import { IAiProtocolEntry } from "../models/IAITypes";
 
 /**
  * Generates and exports project content as Word, PDF, or LaTeX format.
@@ -32,6 +33,7 @@ interface NodeContent {
 const generateLaTeXContent = (
   structure: StructureNode[],
   nodeContents: NodeContent[],
+  aiProtocols: IAiProtocolEntry[] = [],
 ): string => {
   const latexDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   let latexContent = `
@@ -74,6 +76,9 @@ const generateLaTeXContent = (
     }
   });
 
+  // Append AI Protocol appendix before bibliography
+  latexContent += `\n\\newpage\n` + buildAiProtocolLatexAppendix(aiProtocols);
+
   latexContent += `
 \\newpage
 \\printbibliography
@@ -86,9 +91,10 @@ const generateLaTeXContent = (
 export const handleExportWord = async (
   structure: StructureNode[],
   nodeContents: NodeContent[],
+  aiProtocols: IAiProtocolEntry[] = [],
 ) => {
   try {
-    const latexContent = generateLaTeXContent(structure, nodeContents);
+    const latexContent = generateLaTeXContent(structure, nodeContents, aiProtocols);
     console.log('Generated LaTeX content:', latexContent.substring(0, 100));
 
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
@@ -124,6 +130,7 @@ export const handleExportWord = async (
 export const handleExportPDF = (
   structure: StructureNode[],
   nodeContents: NodeContent[],
+  aiProtocols: IAiProtocolEntry[] = [],
 ) => {
   const doc = new jsPDF();
   const pageHeight = doc.internal.pageSize.height;
@@ -183,15 +190,79 @@ export const handleExportPDF = (
     }
   });
 
+  // Appendix: AI Protocol
+  doc.addPage();
+  y = 10;
+  doc.setFontSize(14);
+  doc.text("Appendix: AI Protocol", 10, y);
+  y += 10;
+
+  if (!aiProtocols || aiProtocols.length === 0) {
+    doc.setFontSize(12);
+    doc.text("No entries have been created in the AI protocol yet.", 10, y);
+  } else {
+    const colWidths = [25, 35, 35, 55, 15, 15];
+    const colXs = [10];
+    for (let i = 1; i < colWidths.length; i++) {
+      colXs[i] = colXs[i - 1] + colWidths[i - 1];
+    }
+
+    doc.setFontSize(10);
+    const headers = [
+      "Name",
+      "Usage",
+      "Affected sections",
+      "Notes",
+      "Created at",
+      "Updated at",
+    ];
+    headers.forEach((h, i) => {
+      doc.text(h, colXs[i] + 1, y);
+    });
+    y += 6;
+
+    aiProtocols.forEach((p) => {
+      const cells = [
+        p.aiName || "",
+        p.usageForm || "",
+        p.affectedParts || "",
+        p.remarks || "",
+        formatDate(p.createdAt || ""),
+        formatDate(p.updatedAt || ""),
+      ];
+
+      const linesArray = cells.map((cell, i) =>
+        doc.splitTextToSize(cell, colWidths[i] - 2),
+      );
+      const maxLines = Math.max(...linesArray.map((arr) => arr.length));
+
+      for (let lineIdx = 0; lineIdx < maxLines; lineIdx++) {
+        if (y + 6 > pageHeight) {
+          doc.addPage();
+          y = 10;
+          doc.setFontSize(10);
+        }
+        linesArray.forEach((arr, i) => {
+          const lineText = arr[lineIdx] || "";
+          doc.text(lineText, colXs[i] + 1, y);
+        });
+        y += 6;
+      }
+
+      y += 2; // spacing between rows
+    });
+  }
+
   doc.save("full_document.pdf");
 };
 
 export const handleExportLATEX = (
   structure: StructureNode[],
   nodeContents: NodeContent[],
+  aiProtocols: IAiProtocolEntry[] = [],
   saveFile: boolean = true,
 ) => {
-  const latexContent = generateLaTeXContent(structure, nodeContents);
+  const latexContent = generateLaTeXContent(structure, nodeContents, aiProtocols);
   
   if (saveFile) {
     const blob = new Blob([latexContent], { type: "text/plain;charset=utf-8" });
@@ -260,6 +331,45 @@ const parseRichContent = (content: string): string => {
 
   return processed;
 };
+
+function buildAiProtocolLatexAppendix(aiProtocols: IAiProtocolEntry[] = []): string {
+  let appendix = `\\appendix\n\\section{AI Protocol}\n`;
+  if (!aiProtocols || aiProtocols.length === 0) {
+    appendix += `No entries have been created in the AI protocol yet.\\par\n`;
+    return appendix;
+  }
+
+  appendix += `\n` +
+    `\\setlength{\\LTpre}{0pt}\n` +
+    `\\setlength{\\LTpost}{0pt}\n` +
+    `\\begin{longtable}{p{2.5cm} p{3.2cm} p{3.2cm} p{5cm} p{2.2cm} p{2.2cm}}\n` +
+    `\\toprule\n` +
+    `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \n` +
+    `\\midrule\n` +
+    `\\endfirsthead\n` +
+    `\\toprule\n` +
+    `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \n` +
+    `\\midrule\n` +
+    `\\endhead\n`;
+
+  aiProtocols.forEach((p) => {
+    appendix += `${escapeLatex(p.aiName || "")} & ${escapeLatex(p.usageForm || "")} & ${escapeLatex(p.affectedParts || "")} & ${escapeLatex(p.remarks || "")} & ${escapeLatex(formatDate(p.createdAt || ""))} & ${escapeLatex(formatDate(p.updatedAt || ""))} \\\\ \\hline\n`;
+  });
+
+  appendix += `\\bottomrule\n\\end{longtable}\n`;
+  return appendix;
+}
+
+function formatDate(date?: string | Date): string {
+  if (!date) return "N/A";
+  try {
+    const d = typeof date === "string" ? new Date(date) : date;
+    return d.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+  } catch {
+    return String(date);
+  }
+}
+
 // TODO Latex Export Improvements: 
 // 1. Latex export has already a better structured look. Keep refining it.
 // 2. Although it supports bibtex, it does not show the citations even if it is not existing. Hence, there should be Works Cited chapter, and ai protocol as a table in appendix even if not present in the structure.
