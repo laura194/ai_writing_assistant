@@ -19,6 +19,7 @@ export interface FileContentCardProps {
     prevContent: string,
     nextContent: string
   ) => void;
+  externalVersion?: number;
 }
 
 function FileContentCard({
@@ -26,6 +27,7 @@ function FileContentCard({
   onDirtyChange,
   onSave,
   onContentChangeForHistory,
+  externalVersion,
 }: FileContentCardProps) {
   const { projectId } = useParams<{ projectId: string }>();
 
@@ -44,21 +46,49 @@ function FileContentCard({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const prevContentRef = useRef<string>(node.content || "...");
-  const debounceTimerRef = useRef<number | null>(null);
-  const DEBOUNCE_MS = 800;
+  const prevContentForHistoryRef = useRef<string>(node.content ?? "");
+  const contentChangeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const HISTORY_IDLE_MS = 500;
+  const AUTOSAVE_INTERVAL_MS = 5 * 60 * 1000;
+
+  const prevNodeIdRef = useRef<string | null>(null);
+  const prevExternalVersionRef = useRef<number | undefined>(externalVersion);
 
   useEffect(() => {
-    setFileContent(node.content || "...");
-    setOriginalContent(node.content || "...");
-    setAiNodeName(node.name || ""); // Aktualisiere den Namen
-    setIsDirty(false);
-    prevContentRef.current = node.content || "";
-    if (debounceTimerRef.current) {
-      window.clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
+    setAiNodeName(node.name || "");
+
+    if (prevNodeIdRef.current !== node.id) {
+      setFileContent(node.content ?? "");
+      setOriginalContent(node.content ?? "");
+      setIsDirty(false);
+      prevContentForHistoryRef.current = node.content ?? "";
+      if (contentChangeTimerRef.current) {
+        clearTimeout(contentChangeTimerRef.current);
+        contentChangeTimerRef.current = null;
+      }
+      prevNodeIdRef.current = node.id;
     }
-  }, [node]);
+  }, [node.id, node.name]);
+
+  useEffect(() => {
+    if (prevExternalVersionRef.current !== externalVersion) {
+      prevExternalVersionRef.current = externalVersion;
+      if ((node.content ?? "") !== fileContent) {
+        setFileContent(node.content ?? "");
+        const dirty = (node.content ?? "") !== originalContent;
+        setIsDirty(dirty);
+        onDirtyChange?.(dirty);
+        prevContentForHistoryRef.current = node.content ?? "";
+      }
+    }
+  }, [
+    externalVersion,
+    node.content,
+    fileContent,
+    originalContent,
+    onDirtyChange,
+  ]);
 
   useEffect(() => {
     const dirty = fileContent !== originalContent;
@@ -66,137 +96,127 @@ function FileContentCard({
     onDirtyChange?.(dirty);
   }, [fileContent, originalContent, onDirtyChange]);
 
-  // Helper: schedule history push (debounced)
-  const scheduleHistoryPush = (next: string) => {
-    if (!onContentChangeForHistory) {
-      prevContentRef.current = next;
-      return;
-    }
-
-    if (debounceTimerRef.current) {
-      window.clearTimeout(debounceTimerRef.current);
-    }
-
-    debounceTimerRef.current = window.setTimeout(() => {
-      const prev = prevContentRef.current ?? "";
-      if (prev !== next) {
-        try {
-          onContentChangeForHistory(prev, next);
-        } catch (err) {
-          console.error("onContentChangeForHistory threw:", err);
-        }
-        prevContentRef.current = next;
+  const handleSave = useCallback(
+    async (opts?: { skipVersion?: boolean }) => {
+      if (!projectId) {
+        console.error("❌ Cannot save node content: projectId is missing");
+        toast.error(
+          "Project ID missing. Cannot save. Please try again or contact: plantfriends@gmail.com",
+          {
+            duration: 10000,
+            icon: "❌",
+            style: {
+              background: "#2a1b1e",
+              color: "#ffe4e6",
+              padding: "16px 20px",
+              borderRadius: "12px",
+              fontSize: "15px",
+              fontWeight: "500",
+              boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
+              border: "1px solid #ef4444",
+            },
+          }
+        );
+        return;
       }
-      debounceTimerRef.current = null;
-    }, DEBOUNCE_MS);
-  };
 
-  const handleSave = useCallback(async () => {
-    if (!projectId) {
-      console.error("❌ Cannot save node content: projectId is missing");
-      toast.error(
-        "Project ID missing. Cannot save. Please try again or contact: plantfriends@gmail.com",
-        {
-          duration: 10000,
-          icon: "❌",
+      if (!isDirty && opts?.skipVersion) return;
+
+      if (!isDirty && !opts?.skipVersion) {
+        toast.success("No changes to save.", {
+          duration: 5000,
+          icon: "✅",
           style: {
-            background: "#2a1b1e",
-            color: "#ffe4e6",
+            background: "#1e2b2d",
+            color: "#d1fae5",
             padding: "16px 20px",
             borderRadius: "12px",
             fontSize: "15px",
             fontWeight: "500",
-            boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
-            border: "1px solid #ef4444",
+            boxShadow: "0 4px 12px rgba(0, 255, 170, 0.1)",
+            border: "1px solid #10b981",
           },
-        }
-      );
-      return;
-    }
+        });
+        return;
+      }
 
-    if (onContentChangeForHistory && prevContentRef.current !== fileContent) {
       try {
-        onContentChangeForHistory(prevContentRef.current, fileContent);
-        prevContentRef.current = fileContent;
-      } catch (err) {
-        console.error("onContentChangeForHistory error on save:", err);
-      }
-      if (debounceTimerRef.current) {
-        window.clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
-    }
+        await NodeContentService.updateNodeContent(node.id, {
+          nodeId: node.id,
+          name: node.name,
+          category: node.category,
+          content: fileContent,
+          projectId,
+          skipVersion: opts?.skipVersion,
+        });
 
-    try {
-      await NodeContentService.updateNodeContent(node.id, {
-        nodeId: node.id,
-        name: node.name,
-        category: node.category,
-        content: fileContent,
-        projectId,
-      });
+        setOriginalContent(fileContent);
+        setIsDirty(false);
+        onSave?.();
 
-      setOriginalContent(fileContent);
-      setIsDirty(false);
-      onSave?.();
-      toast.success("Project was saved successfully.", {
-        duration: 5000,
-        icon: "✅",
-        style: {
-          background: "#1e2b2d",
-          color: "#d1fae5",
-          padding: "16px 20px",
-          borderRadius: "12px",
-          fontSize: "15px",
-          fontWeight: "500",
-          boxShadow: "0 4px 12px rgba(0, 255, 170, 0.1)",
-          border: "1px solid #10b981",
-        },
-      });
-    } catch (error) {
-      console.error("Error updating node content:", error);
-      toast.error(
-        "Failed to save content. Please try again or contact: plantfriends@gmail.com",
-        {
-          duration: 10000,
-          icon: "❌",
-          style: {
-            background: "#2a1b1e",
-            color: "#ffe4e6",
-            padding: "16px 20px",
-            borderRadius: "12px",
-            fontSize: "15px",
-            fontWeight: "500",
-            boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
-            border: "1px solid #ef4444",
-          },
+        if (!opts?.skipVersion) {
+          console.info("Porject was saved successfully.");
         }
-      );
-    }
-  }, [projectId, fileContent, node, onSave]);
+      } catch (error) {
+        console.error("Error updating node content:", error);
+        toast.error(
+          "Failed to save content. Please try again or contact: plantfriends@gmail.com",
+          {
+            duration: 10000,
+            icon: "❌",
+            style: {
+              background: "#2a1b1e",
+              color: "#ffe4e6",
+              padding: "16px 20px",
+              borderRadius: "12px",
+              fontSize: "15px",
+              fontWeight: "500",
+              boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
+              border: "1px solid #ef4444",
+            },
+          }
+        );
+      }
+    },
+    [projectId, fileContent, node.id, node.name, node.category, isDirty, onSave]
+  );
 
-  const handleReplace = (newContent: string) => {
-    if (!selectedText) return;
-    setFileContent((prev) => {
-      const next = prev.includes(selectedText)
-        ? prev.replace(selectedText, newContent)
-        : prev;
-      scheduleHistoryPush(next);
-      return next;
-    });
-  };
-
-  const handleAppend = (additionalContent: string) => {
-    setFileContent((prev) => {
-      const next = `${prev}\n${additionalContent}`;
-      scheduleHistoryPush(next);
-      return next;
-    });
-  };
+  const handleSaveClick = useCallback(() => {
+    handleSave();
+  }, [handleSave]);
 
   const handleEditorChange = (value: string) => {
     setFileContent(value);
-    scheduleHistoryPush(value);
+    setIsDirty(true);
+    onDirtyChange?.(true);
+
+    if (contentChangeTimerRef.current) {
+      clearTimeout(contentChangeTimerRef.current);
+      contentChangeTimerRef.current = null;
+    }
+
+    const prevContent = prevContentForHistoryRef.current;
+    contentChangeTimerRef.current = setTimeout(() => {
+      try {
+        onContentChangeForHistory?.(prevContent, value);
+
+        prevContentForHistoryRef.current = value;
+
+        if (projectId) {
+          NodeContentService.createContentVersion(
+            node.id,
+            projectId,
+            value,
+            node.name,
+            node.category
+          ).catch((err) => {
+            console.error("Failed to create background version:", err);
+          });
+        }
+      } catch (err) {
+        console.error("Error in idle commit:", err);
+      }
+    }, HISTORY_IDLE_MS);
   };
 
   const handleTextSelect = () => {
@@ -238,7 +258,6 @@ function FileContentCard({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isCtrlS = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s";
-
       if (isCtrlS && isDirty) {
         e.preventDefault();
         handleSave();
@@ -248,6 +267,13 @@ function FileContentCard({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isDirty, handleSave]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      handleSave({ skipVersion: true });
+    }, AUTOSAVE_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [handleSave]);
 
   const handleAIBubbleClick = () => {
     setIsAIBubbleOpen(false);
@@ -302,8 +328,8 @@ function FileContentCard({
           nodeName={aiNodeName || ""}
           isOpen={isAIComponentShown}
           onClose={() => setIsAIComponentShown(false)}
-          onReplace={handleReplace}
-          onAppend={handleAppend}
+          onReplace={(newText) => setFileContent(newText)}
+          onAppend={(extra) => setFileContent((prev) => prev + "\n" + extra)}
         />
       )}
 
@@ -328,7 +354,7 @@ function FileContentCard({
         <motion.button
           disabled={!isDirty}
           title={!isDirty ? "No changes" : "Save changes"}
-          onClick={handleSave}
+          onClick={handleSaveClick}
           whileHover={
             isDirty
               ? {

@@ -118,14 +118,16 @@ export class NodeContentService {
    */
   static async updateNodeContent(
     nodeId: string,
-    data: Partial<Node> & { projectId: string }
+    data: Partial<Node> & { projectId: string; skipVersion?: boolean }
   ): Promise<Node> {
     try {
-      const response = await axios.put<Node>(`${API_BASE_URL}/${nodeId}`, {
+      const body = {
         ...data,
-        content: data.content || "...",
-        category: data.category || "file",
-      });
+        content: data.content ?? "...",
+        category: data.category ?? "file",
+        skipVersion: data.skipVersion === true ? true : undefined,
+      };
+      const response = await axios.put<Node>(`${API_BASE_URL}/${nodeId}`, body);
       return response.data;
     } catch (error) {
       console.error(

@@ -39,6 +39,8 @@ const EditPage = () => {
   const [pendingView, setPendingView] = useState<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [externalVersionCounter, setExternalVersionCounter] = useState(0);
+
   // History refs
   const undoStackRef = useRef<any[]>([]);
   const redoStackRef = useRef<any[]>([]);
@@ -131,6 +133,18 @@ const EditPage = () => {
     };
   }, [isDirty]);
 
+  useEffect(() => {
+    if (!projectId) return;
+    const id = setInterval(
+      () => {
+        // save current nodes as project structure every 5 minutes
+        saveProjectStructure(nodes);
+      },
+      5 * 60 * 1000
+    );
+    return () => clearInterval(id);
+  }, [nodes, projectId]);
+
   // ---------------------- History helpers ----------------------
   const createSnapshot = () =>
     createSnapshotFromValues(
@@ -167,19 +181,17 @@ const EditPage = () => {
     setNodes(snapshot.nodes || []);
 
     if (snapshot.selectedNodeId) {
-      // try to find the node metadata in nodes
       const found = findNodeById(snapshot.nodes, snapshot.selectedNodeId);
       if (found) {
         setSelectedNode({
           ...found,
-          content: snapshot.selectedNodeContent || "",
+          content: snapshot.selectedNodeContent ?? "",
         });
       } else {
-        // fallback: set minimal selectedNode
         setSelectedNode({
           id: snapshot.selectedNodeId,
           name: "",
-          content: snapshot.selectedNodeContent || "",
+          content: snapshot.selectedNodeContent ?? "",
           category: "",
         });
       }
@@ -192,6 +204,8 @@ const EditPage = () => {
     }
 
     setActiveView(snapshot.activeView || "file");
+
+    setExternalVersionCounter((v) => v + 1);
   };
 
   const handleUndo = () => {
@@ -515,15 +529,17 @@ const EditPage = () => {
   };
 
   const handleContentChangeForHistory = (
-    _prevContent: string,
+    prevContent: string,
     nextContent: string
   ) => {
+    if (prevContent === nextContent) return;
+
     pushToUndo();
-    if (selectedNode) {
-      setSelectedNode((prev) =>
-        prev ? { ...prev, content: nextContent } : prev
-      );
-    }
+
+    setSelectedNode((prev) =>
+      prev ? { ...prev, content: nextContent } : prev
+    );
+
     setIsDirty(true);
   };
 
@@ -592,6 +608,7 @@ const EditPage = () => {
                       onDirtyChange={(dirty: boolean) => setIsDirty(dirty)}
                       onSave={handleNodeSave}
                       onContentChangeForHistory={handleContentChangeForHistory}
+                      externalVersion={externalVersionCounter}
                     />
                   ) : activeView === "ai" ? (
                     <AIProtocolCard />
