@@ -15,19 +15,24 @@ export interface FileContentCardProps {
   node: Node;
   onDirtyChange?: (dirty: boolean) => void;
   onSave?: () => void;
+  onContentChangeForHistory?: (
+    prevContent: string,
+    nextContent: string
+  ) => void;
 }
 
 function FileContentCard({
   node,
   onDirtyChange,
   onSave,
+  onContentChangeForHistory,
 }: FileContentCardProps) {
   const { projectId } = useParams<{ projectId: string }>();
 
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [originalContent, setOriginalContent] = useState<string>(
-    node.content || "...",
+    node.content || "..."
   );
   const [selectedText, setSelectedText] = useState("");
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
@@ -39,11 +44,20 @@ function FileContentCard({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const prevContentRef = useRef<string>(node.content || "...");
+  const debounceTimerRef = useRef<number | null>(null);
+  const DEBOUNCE_MS = 800;
+
   useEffect(() => {
     setFileContent(node.content || "...");
     setOriginalContent(node.content || "...");
     setAiNodeName(node.name || ""); // Aktualisiere den Namen
     setIsDirty(false);
+    prevContentRef.current = node.content || "";
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
   }, [node]);
 
   useEffect(() => {
@@ -51,6 +65,31 @@ function FileContentCard({
     setIsDirty(dirty);
     onDirtyChange?.(dirty);
   }, [fileContent, originalContent, onDirtyChange]);
+
+  // Helper: schedule history push (debounced)
+  const scheduleHistoryPush = (next: string) => {
+    if (!onContentChangeForHistory) {
+      prevContentRef.current = next;
+      return;
+    }
+
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = window.setTimeout(() => {
+      const prev = prevContentRef.current ?? "";
+      if (prev !== next) {
+        try {
+          onContentChangeForHistory(prev, next);
+        } catch (err) {
+          console.error("onContentChangeForHistory threw:", err);
+        }
+        prevContentRef.current = next;
+      }
+      debounceTimerRef.current = null;
+    }, DEBOUNCE_MS);
+  };
 
   const handleSave = useCallback(async () => {
     if (!projectId) {
@@ -70,9 +109,22 @@ function FileContentCard({
             boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
             border: "1px solid #ef4444",
           },
-        },
+        }
       );
       return;
+    }
+
+    if (onContentChangeForHistory && prevContentRef.current !== fileContent) {
+      try {
+        onContentChangeForHistory(prevContentRef.current, fileContent);
+        prevContentRef.current = fileContent;
+      } catch (err) {
+        console.error("onContentChangeForHistory error on save:", err);
+      }
+      if (debounceTimerRef.current) {
+        window.clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
     }
 
     try {
@@ -87,6 +139,20 @@ function FileContentCard({
       setOriginalContent(fileContent);
       setIsDirty(false);
       onSave?.();
+      toast.success("Project was saved successfully.", {
+        duration: 5000,
+        icon: "✅",
+        style: {
+          background: "#1e2b2d",
+          color: "#d1fae5",
+          padding: "16px 20px",
+          borderRadius: "12px",
+          fontSize: "15px",
+          fontWeight: "500",
+          boxShadow: "0 4px 12px rgba(0, 255, 170, 0.1)",
+          border: "1px solid #10b981",
+        },
+      });
     } catch (error) {
       console.error("Error updating node content:", error);
       toast.error(
@@ -104,22 +170,33 @@ function FileContentCard({
             boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
             border: "1px solid #ef4444",
           },
-        },
+        }
       );
     }
   }, [projectId, fileContent, node, onSave]);
 
   const handleReplace = (newContent: string) => {
     if (!selectedText) return;
-    setFileContent((prev) =>
-      prev.includes(selectedText)
+    setFileContent((prev) => {
+      const next = prev.includes(selectedText)
         ? prev.replace(selectedText, newContent)
-        : prev,
-    );
+        : prev;
+      scheduleHistoryPush(next);
+      return next;
+    });
   };
 
   const handleAppend = (additionalContent: string) => {
-    setFileContent((prev) => `${prev}\n${additionalContent}`);
+    setFileContent((prev) => {
+      const next = `${prev}\n${additionalContent}`;
+      scheduleHistoryPush(next);
+      return next;
+    });
+  };
+
+  const handleEditorChange = (value: string) => {
+    setFileContent(value);
+    scheduleHistoryPush(value);
   };
 
   const handleTextSelect = () => {
@@ -233,7 +310,7 @@ function FileContentCard({
       <textarea
         ref={textareaRef}
         value={fileContent}
-        onChange={(e) => setFileContent(e.target.value)}
+        onChange={(e) => handleEditorChange(e.target.value)}
         onMouseUp={handleTextSelect}
         onKeyUp={handleTextSelect}
         className="w-full mt-1 flex-1 p-4 bg-[#eae5fc] dark:bg-[#1b1333] text-[#261e3b] dark:text-[#ffffff] rounded-xl

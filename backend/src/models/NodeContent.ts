@@ -6,14 +6,26 @@ export interface INodeContent extends Document {
   category: string;
   content: string;
   projectId: string;
+  icon?: string;
+  updatedAt?: Date;
+  createdAt?: Date;
 }
 
-const nodeContent: Schema = new Schema({
-  nodeId: { type: String, required: true },
-  name: { type: String, required: true },
-  category: { type: String, required: true },
-  content: { type: String, required: true },
-  projectId: { type: String, required: true },
-});
+const NodeContentSchema: Schema = new Schema(
+  {
+    nodeId: { type: String, required: true },
+    name: { type: String, required: true, default: "" },
+    category: { type: String, required: true, default: "file" },
+    content: { type: String, required: true, default: "" },
+    projectId: { type: String, required: true },
+    icon: { type: String, default: "" },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-export default mongoose.model<INodeContent>("Node Content", nodeContent);
+NodeContentSchema.index({ nodeId: 1, projectId: 1 }, { unique: true });
+
+export default mongoose.models.NodeContent ||
+  mongoose.model<INodeContent>("NodeContent", NodeContentSchema);

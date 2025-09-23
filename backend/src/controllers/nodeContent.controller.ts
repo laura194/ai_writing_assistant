@@ -1,10 +1,18 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import NodeContent from "../models/NodeContent";
+import NodeContentVersion from "../models/NodeContentVersion";
+
+const MAX_VERSIONS = Number(process.env.MAX_VERSIONS_PER_NODE || 50);
+
+function getUserIdFromReq(req: Request): string | null {
+  return (req as any)?.user?.id ?? null;
+}
 
 // Create a new NodeContent entry (prevents duplicates)
 export const createNodeContent = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { nodeId, name, category, content, projectId } = req.body;
 
@@ -18,6 +26,7 @@ export const createNodeContent = async (
     return;
   }
 
+  let session: mongoose.ClientSession | null = null;
   try {
     const existing = await NodeContent.findOne({ nodeId, projectId });
     if (existing) {
@@ -47,7 +56,7 @@ export const createNodeContent = async (
 // Get all NodeContent entries, or filter by ?nodeId=... and ?projectId=...
 export const getNodeContents = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   try {
     const { nodeId, projectId } = req.query;
@@ -74,7 +83,7 @@ export const getNodeContents = async (
 // Get a specific NodeContent entry by its nodeId (via URL param)
 export const getNodeContentById = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { id } = req.params;
   const { projectId } = req.query;
@@ -104,44 +113,361 @@ export const getNodeContentById = async (
   }
 };
 
-// Update a specific NodeContent entry by nodeId
+/**
+ * UPDATE (PUT) — erstellt vor dem Update eine Version des bisherigen Inhalts
+ */
 export const updateNodeContent = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { nodeId } = req.params;
-  const { name, category, content, projectId } = req.body;
+  const { name, category, content, projectId, icon } = req.body;
 
   if (!content) {
     res.status(400).json({ error: "Content cannot be empty" });
     return;
   }
-
   if (!nodeId || !name || !category || !projectId) {
     res.status(400).json({ error: "All fields are required" });
     return;
   }
 
+  // try to use a transaction; if not available in environment, proceed without it
+  let session: mongoose.ClientSession | null = null;
   try {
-    const updatedNodeContent = await NodeContent.findOneAndUpdate(
-      { nodeId, projectId },
-      { name, category, content },
-      { new: true },
+    session = await mongoose.startSession();
+    session.startTransaction();
+
+    const existing = await NodeContent.findOne({ nodeId, projectId }).session(
+      session
     );
 
-    if (!updatedNodeContent) {
-      console.log(
-        "No content found with the given nodeId and projectId:",
-        nodeId,
-        projectId,
+    // create version of existing if exists
+    if (existing) {
+      await NodeContentVersion.create(
+        [
+          {
+            nodeId: existing.nodeId,
+            projectId: existing.projectId,
+            name: existing.name,
+            category: existing.category,
+            content: existing.content,
+            userId: getUserIdFromReq(req),
+            meta: { from: "updateNodeContent" },
+          },
+        ],
+        { session }
       );
-      res.status(404).json({ error: "NodeContent not found" });
-      return;
     }
+
+    const upsertData: any = {
+      name,
+      category,
+      content,
+      projectId,
+    };
+    if (icon !== undefined) upsertData.icon = icon;
+
+    const updatedNodeContent = await NodeContent.findOneAndUpdate(
+      { nodeId, projectId },
+      { $set: upsertData },
+      { new: true, upsert: true, setDefaultsOnInsert: true, session }
+    );
+
+    // trim old versions if exceed MAX_VERSIONS
+    const count = await NodeContentVersion.countDocuments({
+      nodeId,
+      projectId,
+    }).session(session);
+    if (count > MAX_VERSIONS) {
+      const toDelete = count - MAX_VERSIONS;
+      const oldest = await NodeContentVersion.find({ nodeId, projectId })
+        .sort({ createdAt: 1 })
+        .limit(toDelete)
+        .select("_id")
+        .lean()
+        .session(session);
+      const ids = oldest.map((o: any) => o._id);
+      if (ids.length) {
+        await NodeContentVersion.deleteMany({ _id: { $in: ids } }).session(
+          session
+        );
+      }
+    }
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(200).json(updatedNodeContent);
   } catch (error) {
-    console.error("Error updating node content:", error);
+    // abort tx if active
+    if (session) {
+      try {
+        await session.abortTransaction();
+        session.endSession();
+      } catch (e) {
+        // ignore
+      }
+    }
+    console.error("Error updating node content (with versioning):", error);
+
+    // Fallback: if transactions not supported we try a non-transactional approach
+    if (!session) {
+      try {
+        const existing = await NodeContent.findOne({ nodeId, projectId });
+        if (existing) {
+          await NodeContentVersion.create({
+            nodeId: existing.nodeId,
+            projectId: existing.projectId,
+            name: existing.name,
+            category: existing.category,
+            content: existing.content,
+            userId: getUserIdFromReq(req),
+            meta: { from: "updateNodeContent-fallback" },
+          });
+        }
+        const updatedNodeContent = await NodeContent.findOneAndUpdate(
+          { nodeId, projectId },
+          {
+            $set: {
+              name,
+              category,
+              content,
+              projectId,
+              ...(icon !== undefined ? { icon } : {}),
+            },
+          },
+          { new: true, upsert: true, setDefaultsOnInsert: true }
+        );
+        // trim if needed (no session)
+        const count2 = await NodeContentVersion.countDocuments({
+          nodeId,
+          projectId,
+        });
+        if (count2 > MAX_VERSIONS) {
+          const toDelete = count2 - MAX_VERSIONS;
+          const oldest = await NodeContentVersion.find({ nodeId, projectId })
+            .sort({ createdAt: 1 })
+            .limit(toDelete)
+            .select("_id")
+            .lean();
+          const ids = oldest.map((o: any) => o._id);
+          if (ids.length)
+            await NodeContentVersion.deleteMany({ _id: { $in: ids } });
+        }
+        res.status(200).json(updatedNodeContent);
+        return;
+      } catch (err) {
+        console.error("Fallback update failed:", err);
+      }
+    }
+
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+/**
+ * POST /:nodeId/versions  -> manuell Version anlegen
+ */
+export const createVersion = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { nodeId } = req.params;
+  const { projectId, content, name, category, meta } = req.body;
+  if (!nodeId || !projectId) {
+    res.status(400).json({ error: "nodeId & projectId required" });
+    return;
+  }
+  try {
+    const version = await NodeContentVersion.create({
+      nodeId,
+      projectId,
+      name: name ?? "",
+      category: category ?? "file",
+      content: content ?? "",
+      userId: getUserIdFromReq(req),
+      meta: meta ?? {},
+    });
+
+    // trim
+    const count = await NodeContentVersion.countDocuments({
+      nodeId,
+      projectId,
+    });
+    if (count > MAX_VERSIONS) {
+      const toDelete = count - MAX_VERSIONS;
+      const oldest = await NodeContentVersion.find({ nodeId, projectId })
+        .sort({ createdAt: 1 })
+        .limit(toDelete)
+        .select("_id")
+        .lean();
+      const ids = oldest.map((o: any) => o._id);
+      if (ids.length)
+        await NodeContentVersion.deleteMany({ _id: { $in: ids } });
+    }
+
+    res.status(201).json(version);
+  } catch (error) {
+    console.error("createVersion error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+/**
+ * GET /:nodeId/versions?projectId=...&limit=&skip=
+ */
+export const listVersions = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { nodeId } = req.params;
+  const projectId = String(req.query.projectId || "");
+  if (!nodeId || !projectId) {
+    res.status(400).json({ error: "nodeId & projectId required" });
+    return;
+  }
+  try {
+    const limit = Math.min(Number(req.query.limit ?? 50), 200);
+    const skip = Number(req.query.skip ?? 0);
+    const versions = await NodeContentVersion.find({ nodeId, projectId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    res.status(200).json(versions);
+  } catch (error) {
+    console.error("listVersions error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+/**
+ * GET /:nodeId/versions/:versionId
+ */
+export const getVersion = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { nodeId, versionId } = req.params;
+  if (!nodeId || !versionId) {
+    res.status(400).json({ error: "nodeId & versionId required" });
+    return;
+  }
+  try {
+    const version = await NodeContentVersion.findOne({
+      _id: versionId,
+      nodeId,
+    }).lean();
+    if (!version) {
+      res.status(404).json({ error: "version not found" });
+      return;
+    }
+    res.status(200).json(version);
+  } catch (error) {
+    console.error("getVersion error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+/**
+ * POST /:nodeId/versions/:versionId/revert  -> revert: speichere aktuellen state als Version und setze content auf version
+ */
+export const revertToVersion = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { nodeId, versionId } = req.params;
+  const { projectId } = req.body;
+  if (!nodeId || !versionId || !projectId) {
+    res.status(400).json({ error: "nodeId, versionId & projectId required" });
+    return;
+  }
+
+  let session: mongoose.ClientSession | null = null;
+  try {
+    session = await mongoose.startSession();
+    session.startTransaction();
+
+    const version = await NodeContentVersion.findOne({
+      _id: versionId,
+      nodeId,
+      projectId,
+    }).session(session);
+    if (!version) {
+      await session.abortTransaction();
+      session.endSession();
+      res.status(404).json({ error: "version not found" });
+      return;
+    }
+
+    const existing = await NodeContent.findOne({ nodeId, projectId }).session(
+      session
+    );
+    if (existing) {
+      await NodeContentVersion.create(
+        [
+          {
+            nodeId: existing.nodeId,
+            projectId: existing.projectId,
+            name: existing.name,
+            category: existing.category,
+            content: existing.content,
+            userId: getUserIdFromReq(req),
+            meta: { from: "revert" },
+          },
+        ],
+        { session }
+      );
+    }
+
+    const updated = await NodeContent.findOneAndUpdate(
+      { nodeId, projectId },
+      {
+        $set: {
+          name: version.name,
+          category: version.category,
+          content: version.content,
+          projectId,
+          updatedAt: new Date(),
+        },
+      },
+      { new: true, upsert: true, session }
+    );
+
+    // trim versions if exceeded
+    const count = await NodeContentVersion.countDocuments({
+      nodeId,
+      projectId,
+    }).session(session);
+    if (count > MAX_VERSIONS) {
+      const toDelete = count - MAX_VERSIONS;
+      const oldest = await NodeContentVersion.find({ nodeId, projectId })
+        .sort({ createdAt: 1 })
+        .limit(toDelete)
+        .select("_id")
+        .lean()
+        .session(session);
+      const ids = oldest.map((o: any) => o._id);
+      if (ids.length) {
+        await NodeContentVersion.deleteMany({ _id: { $in: ids } }).session(
+          session
+        );
+      }
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json(updated);
+  } catch (error) {
+    if (session) {
+      try {
+        await session.abortTransaction();
+        session.endSession();
+      } catch (e) {}
+    }
+    console.error("revertToVersion error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
