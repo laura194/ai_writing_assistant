@@ -22,7 +22,7 @@ export class NodeContentService {
     } catch (error) {
       console.error(
         "❌ [createNodeContent] Error creating node content:",
-        error,
+        error
       );
       throw error;
     }
@@ -36,7 +36,7 @@ export class NodeContentService {
    */
   static async getNodeContents(
     nodeId?: string,
-    projectId?: string,
+    projectId?: string
   ): Promise<Node[]> {
     try {
       const params: Record<string, string> = {};
@@ -48,7 +48,7 @@ export class NodeContentService {
     } catch (error) {
       console.error(
         "❌ [getNodeContents] Error fetching node contents:",
-        error,
+        error
       );
       throw error;
     }
@@ -62,17 +62,17 @@ export class NodeContentService {
    */
   static async getNodeContentById(
     nodeId: string,
-    projectId: string,
+    projectId: string
   ): Promise<Node> {
     try {
       const response = await axios.get<Node>(
-        `${API_BASE_URL}/${nodeId}?projectId=${projectId}`,
+        `${API_BASE_URL}/${nodeId}?projectId=${projectId}`
       );
       return response.data;
     } catch (error) {
       console.error(
         `❌ [getNodeContentById] Error fetching node content for nodeId ${nodeId} and projectId ${projectId}:`,
-        error,
+        error
       );
       throw error;
     }
@@ -104,7 +104,7 @@ export class NodeContentService {
     } catch (error) {
       console.error(
         "❌ [getOrCreateNodeContent] Error during get/create:",
-        error,
+        error
       );
       throw error;
     }
@@ -118,7 +118,7 @@ export class NodeContentService {
    */
   static async updateNodeContent(
     nodeId: string,
-    data: Partial<Node> & { projectId: string },
+    data: Partial<Node> & { projectId: string }
   ): Promise<Node> {
     try {
       const response = await axios.put<Node>(`${API_BASE_URL}/${nodeId}`, {
@@ -130,9 +130,58 @@ export class NodeContentService {
     } catch (error) {
       console.error(
         `❌ [updateNodeContent] Error updating node content with nodeId ${nodeId} and projectId ${data.projectId}:`,
-        error,
+        error
       );
       throw error;
     }
+  }
+
+  static async createContentVersion(
+    nodeId: string,
+    projectId: string,
+    content: string,
+    name?: string,
+    category?: string
+  ) {
+    const response = await axios.post(`${API_BASE_URL}/${nodeId}/versions`, {
+      projectId,
+      content,
+      name,
+      category,
+    });
+    return response.data;
+  }
+
+  static async getContentVersions(
+    nodeId: string,
+    projectId: string,
+    opts?: { limit?: number; skip?: number }
+  ) {
+    const params: any = { projectId };
+    if (opts?.limit) params.limit = opts.limit;
+    if (opts?.skip) params.skip = opts.skip;
+    const response = await axios.get(`${API_BASE_URL}/${nodeId}/versions`, {
+      params,
+    });
+    return response.data;
+  }
+
+  static async getContentVersion(nodeId: string, versionId: string) {
+    const response = await axios.get(
+      `${API_BASE_URL}/${nodeId}/versions/${versionId}`
+    );
+    return response.data;
+  }
+
+  static async revertToVersion(
+    nodeId: string,
+    versionId: string,
+    projectId: string
+  ) {
+    const response = await axios.post(
+      `${API_BASE_URL}/${nodeId}/versions/${versionId}/revert`,
+      { projectId }
+    );
+    return response.data;
   }
 }
