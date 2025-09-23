@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import logo from "/logo.svg";
 import { RecentProjectsDropdown } from "./RecentProjectsDropdown";
+import { FAQDropdown } from "./FAQDropdown";
 import ThemeToggleButton from "./ThemeToggleButton";
 
 const Header = () => {
@@ -42,6 +43,10 @@ const Header = () => {
         {/* Recent Dropdown */}
         <div className="hidden lg:block ml-28">
           <RecentProjectsDropdown />
+        </div>
+        {/* FAQ Dropdown */}
+        <div className="hidden lg:block ml-8">
+          <FAQDropdown />
         </div>
       </nav>
 
