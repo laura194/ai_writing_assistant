@@ -116,14 +116,15 @@ export const getNodeContentById = async (
 /**
  * UPDATE (PUT) — erstellt vor dem Update eine Version des bisherigen Inhalts
  */
+// replace updateNodeContent in your controller
 export const updateNodeContent = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   const { nodeId } = req.params;
-  const { name, category, content, projectId, icon } = req.body;
+  const { name, category, content, projectId, icon, skipVersion } = req.body;
 
-  if (!content) {
+  if (content === undefined || content === null) {
     res.status(400).json({ error: "Content cannot be empty" });
     return;
   }
@@ -132,137 +133,161 @@ export const updateNodeContent = async (
     return;
   }
 
-  // try to use a transaction; if not available in environment, proceed without it
   let session: mongoose.ClientSession | null = null;
+  let useTransaction = true;
+
   try {
+    // Try to start a session + transaction. If the server does not support it,
+    // this may throw or subsequent .session(...) calls will error — we handle that.
     session = await mongoose.startSession();
-    session.startTransaction();
-
-    const existing = await NodeContent.findOne({ nodeId, projectId }).session(
-      session
-    );
-
-    // create version of existing if exists
-    if (existing) {
-      await NodeContentVersion.create(
-        [
-          {
-            nodeId: existing.nodeId,
-            projectId: existing.projectId,
-            name: existing.name,
-            category: existing.category,
-            content: existing.content,
-            userId: getUserIdFromReq(req),
-            meta: { from: "updateNodeContent" },
-          },
-        ],
-        { session }
+    try {
+      session.startTransaction();
+    } catch (txErr) {
+      // Transactions not supported on this deployment (standalone). We will fall back.
+      console.warn(
+        "Transactions not supported, falling back to non-transactional update:",
+        txErr
       );
-    }
-
-    const upsertData: any = {
-      name,
-      category,
-      content,
-      projectId,
-    };
-    if (icon !== undefined) upsertData.icon = icon;
-
-    const updatedNodeContent = await NodeContent.findOneAndUpdate(
-      { nodeId, projectId },
-      { $set: upsertData },
-      { new: true, upsert: true, setDefaultsOnInsert: true, session }
-    );
-
-    // trim old versions if exceed MAX_VERSIONS
-    const count = await NodeContentVersion.countDocuments({
-      nodeId,
-      projectId,
-    }).session(session);
-    if (count > MAX_VERSIONS) {
-      const toDelete = count - MAX_VERSIONS;
-      const oldest = await NodeContentVersion.find({ nodeId, projectId })
-        .sort({ createdAt: 1 })
-        .limit(toDelete)
-        .select("_id")
-        .lean()
-        .session(session);
-      const ids = oldest.map((o: any) => o._id);
-      if (ids.length) {
-        await NodeContentVersion.deleteMany({ _id: { $in: ids } }).session(
-          session
-        );
-      }
-    }
-
-    await session.commitTransaction();
-    session.endSession();
-
-    res.status(200).json(updatedNodeContent);
-  } catch (error) {
-    // abort tx if active
-    if (session) {
       try {
-        await session.abortTransaction();
-        session.endSession();
-      } catch (e) {
-        // ignore
-      }
+        await session.endSession();
+      } catch (e) {}
+      session = null;
+      useTransaction = false;
     }
-    console.error("Error updating node content (with versioning):", error);
 
-    // Fallback: if transactions not supported we try a non-transactional approach
-    if (!session) {
-      try {
-        const existing = await NodeContent.findOne({ nodeId, projectId });
-        if (existing) {
-          await NodeContentVersion.create({
-            nodeId: existing.nodeId,
-            projectId: existing.projectId,
-            name: existing.name,
-            category: existing.category,
-            content: existing.content,
-            userId: getUserIdFromReq(req),
-            meta: { from: "updateNodeContent-fallback" },
-          });
-        }
-        const updatedNodeContent = await NodeContent.findOneAndUpdate(
-          { nodeId, projectId },
-          {
-            $set: {
-              name,
-              category,
-              content,
-              projectId,
-              ...(icon !== undefined ? { icon } : {}),
+    if (useTransaction && session) {
+      const existing = await NodeContent.findOne({ nodeId, projectId }).session(
+        session
+      );
+
+      if (existing && !skipVersion) {
+        await NodeContentVersion.create(
+          [
+            {
+              nodeId: existing.nodeId,
+              projectId: existing.projectId,
+              name: existing.name,
+              category: existing.category,
+              content: existing.content,
+              userId: getUserIdFromReq(req),
+              meta: { from: "updateNodeContent" },
             },
-          },
-          { new: true, upsert: true, setDefaultsOnInsert: true }
+          ],
+          { session }
         );
-        // trim if needed (no session)
-        const count2 = await NodeContentVersion.countDocuments({
+      }
+
+      const upsertData: any = {
+        name,
+        category,
+        content,
+        projectId,
+      };
+      if (icon !== undefined) upsertData.icon = icon;
+
+      const updatedNodeContent = await NodeContent.findOneAndUpdate(
+        { nodeId, projectId },
+        { $set: upsertData },
+        { new: true, upsert: true, setDefaultsOnInsert: true, session }
+      );
+
+      // trim old versions if exceed MAX_VERSIONS (only when versioning actually used)
+      if (!skipVersion) {
+        const count = await NodeContentVersion.countDocuments({
           nodeId,
           projectId,
-        });
-        if (count2 > MAX_VERSIONS) {
-          const toDelete = count2 - MAX_VERSIONS;
+        }).session(session);
+        if (count > MAX_VERSIONS) {
+          const toDelete = count - MAX_VERSIONS;
           const oldest = await NodeContentVersion.find({ nodeId, projectId })
             .sort({ createdAt: 1 })
             .limit(toDelete)
             .select("_id")
-            .lean();
+            .lean()
+            .session(session);
           const ids = oldest.map((o: any) => o._id);
-          if (ids.length)
-            await NodeContentVersion.deleteMany({ _id: { $in: ids } });
+          if (ids.length) {
+            await NodeContentVersion.deleteMany({ _id: { $in: ids } }).session(
+              session
+            );
+          }
         }
-        res.status(200).json(updatedNodeContent);
-        return;
-      } catch (err) {
-        console.error("Fallback update failed:", err);
+      }
+
+      await session.commitTransaction();
+      await session.endSession();
+
+      res.status(200).json(updatedNodeContent);
+      return;
+    } else {
+      // fallback non-transactional path below
+    }
+  } catch (error) {
+    // if something unexpected happened with session path, we'll try fallback below
+    console.error("Error in transactional path (will try fallback):", error);
+    if (session) {
+      try {
+        await session.abortTransaction();
+        await session.endSession();
+      } catch (e) {}
+      session = null;
+    }
+    // continue to fallback
+  }
+
+  // ------------------------- Non-transactional fallback -------------------------
+  try {
+    const existing = await NodeContent.findOne({ nodeId, projectId });
+    if (existing && !skipVersion) {
+      await NodeContentVersion.create({
+        nodeId: existing.nodeId,
+        projectId: existing.projectId,
+        name: existing.name,
+        category: existing.category,
+        content: existing.content,
+        userId: getUserIdFromReq(req),
+        meta: { from: "updateNodeContent-fallback" },
+      });
+    }
+
+    const updatedNodeContent = await NodeContent.findOneAndUpdate(
+      { nodeId, projectId },
+      {
+        $set: {
+          name,
+          category,
+          content,
+          projectId,
+          ...(icon !== undefined ? { icon } : {}),
+        },
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
+    if (!skipVersion) {
+      const count2 = await NodeContentVersion.countDocuments({
+        nodeId,
+        projectId,
+      });
+      if (count2 > MAX_VERSIONS) {
+        const toDelete = count2 - MAX_VERSIONS;
+        const oldest = await NodeContentVersion.find({ nodeId, projectId })
+          .sort({ createdAt: 1 })
+          .limit(toDelete)
+          .select("_id")
+          .lean();
+        const ids = oldest.map((o: any) => o._id);
+        if (ids.length)
+          await NodeContentVersion.deleteMany({ _id: { $in: ids } });
       }
     }
 
+    res.status(200).json(updatedNodeContent);
+    return;
+  } catch (err) {
+    console.error("Fallback update failed:", err);
     res.status(500).json({ error: "Internal Server Error" });
+    return;
   }
 };
 
@@ -385,40 +410,132 @@ export const revertToVersion = async (
   }
 
   let session: mongoose.ClientSession | null = null;
+  let useTransaction = true;
+
   try {
     session = await mongoose.startSession();
-    session.startTransaction();
+    try {
+      session.startTransaction();
+    } catch (txErr) {
+      console.warn(
+        "Transactions not supported for revert; falling back:",
+        txErr
+      );
+      try {
+        await session.endSession();
+      } catch (e) {}
+      session = null;
+      useTransaction = false;
+    }
 
+    if (useTransaction && session) {
+      const version = await NodeContentVersion.findOne({
+        _id: versionId,
+        nodeId,
+        projectId,
+      }).session(session);
+      if (!version) {
+        await session.abortTransaction();
+        await session.endSession();
+        res.status(404).json({ error: "version not found" });
+        return;
+      }
+
+      const existing = await NodeContent.findOne({ nodeId, projectId }).session(
+        session
+      );
+      if (existing) {
+        await NodeContentVersion.create(
+          [
+            {
+              nodeId: existing.nodeId,
+              projectId: existing.projectId,
+              name: existing.name,
+              category: existing.category,
+              content: existing.content,
+              userId: getUserIdFromReq(req),
+              meta: { from: "revert" },
+            },
+          ],
+          { session }
+        );
+      }
+
+      const updated = await NodeContent.findOneAndUpdate(
+        { nodeId, projectId },
+        {
+          $set: {
+            name: version.name,
+            category: version.category,
+            content: version.content,
+            projectId,
+            updatedAt: new Date(),
+          },
+        },
+        { new: true, upsert: true, session }
+      );
+
+      // trim versions if exceeded
+      const count = await NodeContentVersion.countDocuments({
+        nodeId,
+        projectId,
+      }).session(session);
+      if (count > MAX_VERSIONS) {
+        const toDelete = count - MAX_VERSIONS;
+        const oldest = await NodeContentVersion.find({ nodeId, projectId })
+          .sort({ createdAt: 1 })
+          .limit(toDelete)
+          .select("_id")
+          .lean()
+          .session(session);
+        const ids = oldest.map((o: any) => o._id);
+        if (ids.length)
+          await NodeContentVersion.deleteMany({ _id: { $in: ids } }).session(
+            session
+          );
+      }
+
+      await session.commitTransaction();
+      await session.endSession();
+
+      res.status(200).json(updated);
+      return;
+    }
+  } catch (error) {
+    console.error("Error in transactional revert (will fallback):", error);
+    if (session) {
+      try {
+        await session.abortTransaction();
+        await session.endSession();
+      } catch (e) {}
+      session = null;
+    }
+    // Fallthrough to non-transactional handling below
+  }
+
+  // Non-transactional fallback for revert
+  try {
     const version = await NodeContentVersion.findOne({
       _id: versionId,
       nodeId,
       projectId,
-    }).session(session);
+    });
     if (!version) {
-      await session.abortTransaction();
-      session.endSession();
       res.status(404).json({ error: "version not found" });
       return;
     }
 
-    const existing = await NodeContent.findOne({ nodeId, projectId }).session(
-      session
-    );
+    const existing = await NodeContent.findOne({ nodeId, projectId });
     if (existing) {
-      await NodeContentVersion.create(
-        [
-          {
-            nodeId: existing.nodeId,
-            projectId: existing.projectId,
-            name: existing.name,
-            category: existing.category,
-            content: existing.content,
-            userId: getUserIdFromReq(req),
-            meta: { from: "revert" },
-          },
-        ],
-        { session }
-      );
+      await NodeContentVersion.create({
+        nodeId: existing.nodeId,
+        projectId: existing.projectId,
+        name: existing.name,
+        category: existing.category,
+        content: existing.content,
+        userId: getUserIdFromReq(req),
+        meta: { from: "revert-fallback" },
+      });
     }
 
     const updated = await NodeContent.findOneAndUpdate(
@@ -432,42 +549,30 @@ export const revertToVersion = async (
           updatedAt: new Date(),
         },
       },
-      { new: true, upsert: true, session }
+      { new: true, upsert: true }
     );
 
-    // trim versions if exceeded
     const count = await NodeContentVersion.countDocuments({
       nodeId,
       projectId,
-    }).session(session);
+    });
     if (count > MAX_VERSIONS) {
       const toDelete = count - MAX_VERSIONS;
       const oldest = await NodeContentVersion.find({ nodeId, projectId })
         .sort({ createdAt: 1 })
         .limit(toDelete)
         .select("_id")
-        .lean()
-        .session(session);
+        .lean();
       const ids = oldest.map((o: any) => o._id);
-      if (ids.length) {
-        await NodeContentVersion.deleteMany({ _id: { $in: ids } }).session(
-          session
-        );
-      }
+      if (ids.length)
+        await NodeContentVersion.deleteMany({ _id: { $in: ids } });
     }
-
-    await session.commitTransaction();
-    session.endSession();
 
     res.status(200).json(updated);
-  } catch (error) {
-    if (session) {
-      try {
-        await session.abortTransaction();
-        session.endSession();
-      } catch (e) {}
-    }
-    console.error("revertToVersion error:", error);
+    return;
+  } catch (err) {
+    console.error("Fallback revert failed:", err);
     res.status(500).json({ error: "Internal Server Error" });
+    return;
   }
 };
