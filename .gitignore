@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 .env
+coverage
+.stryker-tmp
+reports
+.qodo
 
 # Editor directories and files
 .vscode/*

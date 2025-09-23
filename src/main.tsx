@@ -13,7 +13,7 @@ import "./index.css";
 import logger from "loglevel";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { BrowserRouter } from "react-router-dom";
-import App from "./App.tsx";
+import App from "./App/App.tsx";
 import { ThemeProvider } from "./providers/ThemeProvider.tsx";
 
 logger.info("[main.tsx] Application started 🥳");
