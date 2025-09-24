@@ -8,7 +8,7 @@ vi.mock("../models/Hello", () => {
   return {
     default: Object.assign(
       vi.fn(() => ({ save: vi.fn() })), // Konstruktor mit save()
-      { find: vi.fn() } // statische Methode
+      { find: vi.fn() }, // statische Methode
     ),
   };
 });
@@ -62,10 +62,13 @@ describe("hello.controller", () => {
       .send({ name: "Rose", type: "Blume" });
 
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error", "Fehler beim Speichern der Pflanze");
+    expect(res.body).toHaveProperty(
+      "error",
+      "Fehler beim Speichern der Pflanze",
+    );
     expect(consoleErrorMock).toHaveBeenCalledWith(
       "Fehler beim Speichern der Pflanze:",
-      error
+      error,
     );
 
     consoleErrorMock.mockRestore();
@@ -97,10 +100,13 @@ describe("hello.controller", () => {
     const res = await request(app).get("/api/hello/plants");
 
     expect(res.status).toBe(500);
-    expect(res.body).toHaveProperty("error", "Fehler beim Abrufen der Pflanzen");
+    expect(res.body).toHaveProperty(
+      "error",
+      "Fehler beim Abrufen der Pflanzen",
+    );
     expect(consoleErrorMock).toHaveBeenCalledWith(
       "Fehler beim Abrufen der Pflanzen:",
-      error
+      error,
     );
 
     consoleErrorMock.mockRestore();

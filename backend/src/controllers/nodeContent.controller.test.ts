@@ -12,7 +12,7 @@ vi.mock("../models/NodeContent", () => {
         find: vi.fn(),
         findOne: vi.fn(),
         findOneAndUpdate: vi.fn(),
-      }
+      },
     ),
   };
 });
@@ -95,19 +95,19 @@ describe("NodeContent Controller", () => {
 
   it("POST /api/nodeContent Fehler beim Speichern gibt 500", async () => {
     const error = new Error("DB Fehler");
-  
+
     // findOne gibt null zurück, damit save() aufgerufen wird
     (NodeContent.findOne as unknown as vi.Mock).mockResolvedValue(null);
-  
+
     const mockSave = vi.fn().mockRejectedValue(error);
     (NodeContent as unknown as vi.Mock).mockImplementation(() => ({
       save: mockSave,
     }));
-  
+
     const consoleErrorMock = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});
-  
+
     const res = await request(app).post("/api/nodeContent").send({
       nodeId: "node1",
       name: "Name",
@@ -115,24 +115,27 @@ describe("NodeContent Controller", () => {
       content: "Text",
       projectId: "proj1",
     });
-  
+
     expect(res.status).toBe(500);
     expect(res.body).toHaveProperty("error", "Internal Server Error");
     expect(consoleErrorMock).toHaveBeenCalledWith(
       "Error saving node content:",
-      error
+      error,
     );
-  
+
     consoleErrorMock.mockRestore();
   });
-  
 
   // --- GET ALL / FILTER ---
   it("GET /api/nodeContent gibt alle Inhalte zurück", async () => {
-    const mockContents = [{ nodeId: "node1", content: "Text", projectId: "proj1" }];
+    const mockContents = [
+      { nodeId: "node1", content: "Text", projectId: "proj1" },
+    ];
     (NodeContent.find as unknown as vi.Mock).mockResolvedValue(mockContents);
 
-    const res = await request(app).get("/api/nodeContent").query({ projectId: "proj1" });
+    const res = await request(app)
+      .get("/api/nodeContent")
+      .query({ projectId: "proj1" });
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(mockContents);
@@ -153,7 +156,7 @@ describe("NodeContent Controller", () => {
     expect(res.body).toHaveProperty("error", "Internal Server Error");
     expect(consoleErrorMock).toHaveBeenCalledWith(
       "Error fetching node contents:",
-      error
+      error,
     );
 
     consoleErrorMock.mockRestore();
@@ -169,7 +172,9 @@ describe("NodeContent Controller", () => {
   it("GET /api/nodeContent/:id nicht gefunden gibt 404", async () => {
     (NodeContent.findOne as unknown as vi.Mock).mockResolvedValue(null);
 
-    const res = await request(app).get("/api/nodeContent/node1").query({ projectId: "proj1" });
+    const res = await request(app)
+      .get("/api/nodeContent/node1")
+      .query({ projectId: "proj1" });
 
     expect(res.status).toBe(404);
     expect(res.body).toHaveProperty("error");
@@ -183,13 +188,15 @@ describe("NodeContent Controller", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    const res = await request(app).get("/api/nodeContent/node1").query({ projectId: "proj1" });
+    const res = await request(app)
+      .get("/api/nodeContent/node1")
+      .query({ projectId: "proj1" });
 
     expect(res.status).toBe(500);
     expect(res.body).toHaveProperty("error", "Internal Server Error");
     expect(consoleErrorMock).toHaveBeenCalledWith(
       "Error fetching node content by ID:",
-      error
+      error,
     );
 
     consoleErrorMock.mockRestore();
@@ -217,7 +224,9 @@ describe("NodeContent Controller", () => {
   });
 
   it("PUT /api/nodeContent/:id nicht gefunden gibt 404", async () => {
-    (NodeContent.findOneAndUpdate as unknown as vi.Mock).mockResolvedValue(null);
+    (NodeContent.findOneAndUpdate as unknown as vi.Mock).mockResolvedValue(
+      null,
+    );
 
     const res = await request(app).put("/api/nodeContent/node1").send({
       name: "Updated",
@@ -232,7 +241,9 @@ describe("NodeContent Controller", () => {
 
   it("PUT /api/nodeContent/:id Fehler beim Aktualisieren gibt 500", async () => {
     const error = new Error("DB Fehler");
-    (NodeContent.findOneAndUpdate as unknown as vi.Mock).mockRejectedValue(error);
+    (NodeContent.findOneAndUpdate as unknown as vi.Mock).mockRejectedValue(
+      error,
+    );
 
     const consoleErrorMock = vi
       .spyOn(console, "error")
@@ -249,7 +260,7 @@ describe("NodeContent Controller", () => {
     expect(res.body).toHaveProperty("error", "Internal Server Error");
     expect(consoleErrorMock).toHaveBeenCalledWith(
       "Error updating node content:",
-      error
+      error,
     );
 
     consoleErrorMock.mockRestore();

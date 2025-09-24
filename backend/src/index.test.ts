@@ -31,7 +31,7 @@ describe("index.ts Serverstart", () => {
     expect(listenMock).toHaveBeenCalledTimes(1);
     expect(listenMock).toHaveBeenCalledWith(5001, expect.any(Function));
     expect(console.log).toHaveBeenCalledWith(
-      "Server is running on http://localhost:5001"
+      "Server is running on http://localhost:5001",
     );
   });
 });
