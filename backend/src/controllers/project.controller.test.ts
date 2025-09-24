@@ -78,13 +78,11 @@ describe("project.controller", () => {
       mockUpdated,
     );
 
-    const res = await request(app)
-      .put("/api/projects/1")
-      .send({
-        name: "UpdatedProject",
-        username: "user1",
-        projectStructure: [],
-      });
+    const res = await request(app).put("/api/projects/1").send({
+      name: "UpdatedProject",
+      username: "user1",
+      projectStructure: [],
+    });
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(mockUpdated);
