@@ -31,14 +31,16 @@ describe("connectDB", () => {
   it("sollte mongoose.connect mit MONGO_URI aufrufen und Erfolg loggen", async () => {
     process.env.MONGO_URI = "mongodb://root:example@localhost:27017/testdb";
 
-    const consoleLogMock = vi.spyOn(console, "log").mockImplementation(() => {});
+    const consoleLogMock = vi
+      .spyOn(console, "log")
+      .mockImplementation(() => {});
 
     await connectDB();
 
     expect(mongoose.connect).toHaveBeenCalledTimes(1);
     expect(mongoose.connect).toHaveBeenCalledWith(
       "mongodb://root:example@localhost:27017/testdb",
-      { authSource: "admin" }
+      { authSource: "admin" },
     );
     expect(consoleLogMock).toHaveBeenCalledWith("MongoDB verbunden");
 

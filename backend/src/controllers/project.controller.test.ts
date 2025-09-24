@@ -24,8 +24,15 @@ beforeEach(() => {
 
 describe("project.controller", () => {
   it("POST /api/projects erstellt ein neues Projekt", async () => {
-    const mockProject = { _id: "1", name: "Project1", username: "user1", projectStructure: [] };
-    (Project.prototype.save as unknown as vi.Mock).mockResolvedValue(mockProject);
+    const mockProject = {
+      _id: "1",
+      name: "Project1",
+      username: "user1",
+      projectStructure: [],
+    };
+    (Project.prototype.save as unknown as vi.Mock).mockResolvedValue(
+      mockProject,
+    );
 
     const res = await request(app).post("/api/projects").send({
       name: "Project1",
@@ -61,12 +68,23 @@ describe("project.controller", () => {
   });
 
   it("PUT /api/projects/:id aktualisiert ein Projekt", async () => {
-    const mockUpdated = { _id: "1", name: "UpdatedProject", username: "user1", projectStructure: [] };
-    (Project.findOneAndUpdate as unknown as vi.Mock).mockResolvedValue(mockUpdated);
+    const mockUpdated = {
+      _id: "1",
+      name: "UpdatedProject",
+      username: "user1",
+      projectStructure: [],
+    };
+    (Project.findOneAndUpdate as unknown as vi.Mock).mockResolvedValue(
+      mockUpdated,
+    );
 
     const res = await request(app)
       .put("/api/projects/1")
-      .send({ name: "UpdatedProject", username: "user1", projectStructure: [] });
+      .send({
+        name: "UpdatedProject",
+        username: "user1",
+        projectStructure: [],
+      });
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(mockUpdated);
@@ -82,7 +100,9 @@ describe("project.controller", () => {
       sort: vi.fn().mockReturnValue(mockProjects),
     });
 
-    const res = await request(app).get("/api/projects/by-username").query({ username: "user1" });
+    const res = await request(app)
+      .get("/api/projects/by-username")
+      .query({ username: "user1" });
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(mockProjects);
@@ -93,7 +113,9 @@ describe("project.controller", () => {
       sort: vi.fn().mockReturnValue([]),
     });
 
-    const res = await request(app).get("/api/projects/by-username").query({ username: "user1" });
+    const res = await request(app)
+      .get("/api/projects/by-username")
+      .query({ username: "user1" });
 
     expect(res.status).toBe(404);
   });
@@ -111,33 +133,37 @@ describe("project.controller", () => {
       }),
     });
 
-    const res = await request(app).get("/api/projects/by-username/recent").query({ username: "user1" });
+    const res = await request(app)
+      .get("/api/projects/by-username/recent")
+      .query({ username: "user1" });
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(mockProjects);
   });
 
-  it(
-    "DELETE /api/projects/:id löscht Projekt und zugehörige Daten",
-    async () => {
-      const deletedProject = { _id: "1", name: "Project1" };
+  it("DELETE /api/projects/:id löscht Projekt und zugehörige Daten", async () => {
+    const deletedProject = { _id: "1", name: "Project1" };
 
-      (Project.findByIdAndDelete as unknown as vi.Mock).mockResolvedValue(deletedProject);
-      (NodeContent.deleteMany as unknown as vi.Mock).mockResolvedValue({ deletedCount: 2 });
-      (AiProtocol.deleteMany as unknown as vi.Mock).mockResolvedValue({ deletedCount: 2 });
+    (Project.findByIdAndDelete as unknown as vi.Mock).mockResolvedValue(
+      deletedProject,
+    );
+    (NodeContent.deleteMany as unknown as vi.Mock).mockResolvedValue({
+      deletedCount: 2,
+    });
+    (AiProtocol.deleteMany as unknown as vi.Mock).mockResolvedValue({
+      deletedCount: 2,
+    });
 
-      const res = await request(app).delete("/api/projects/1");
+    const res = await request(app).delete("/api/projects/1");
 
-      expect(res.status).toBe(200);
-      expect(res.body).toEqual({
-        message: "Project and related data successfully deleted",
-        deletedProject,
-        deletedNodeContents: 2,
-        deletedAiProtocols: 2,
-      });
-    },
-    10000, // erhöhtes Timeout
-  );
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      message: "Project and related data successfully deleted",
+      deletedProject,
+      deletedNodeContents: 2,
+      deletedAiProtocols: 2,
+    });
+  }, 10000); // erhöhtes Timeout
 });
 
 describe("project.controller Fehlerfälle", () => {
@@ -157,7 +183,9 @@ describe("project.controller Fehlerfälle", () => {
     const error = new Error("DB Fehler");
     (Project.prototype.save as unknown as vi.Mock).mockRejectedValue(error);
 
-    const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     const res = await request(app).post("/api/projects").send({
       name: "Project1",
@@ -167,7 +195,10 @@ describe("project.controller Fehlerfälle", () => {
 
     expect(res.status).toBe(500);
     expect(res.body).toHaveProperty("error", "Interner Serverfehler");
-    expect(consoleErrorMock).toHaveBeenCalledWith("Fehler beim Erstellen des Projekts:", error);
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      "Fehler beim Erstellen des Projekts:",
+      error,
+    );
 
     consoleErrorMock.mockRestore();
   });
@@ -186,13 +217,18 @@ describe("project.controller Fehlerfälle", () => {
     const error = new Error("DB Fehler");
     (Project.findById as unknown as vi.Mock).mockRejectedValue(error);
 
-    const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     const res = await request(app).get("/api/projects/1");
 
     expect(res.status).toBe(500);
     expect(res.body).toHaveProperty("error", "Internal Server Error");
-    expect(consoleErrorMock).toHaveBeenCalledWith("Error fetching project by ID:", error);
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      "Error fetching project by ID:",
+      error,
+    );
 
     consoleErrorMock.mockRestore();
   });
@@ -226,7 +262,9 @@ describe("project.controller Fehlerfälle", () => {
     const error = new Error("DB Fehler");
     (Project.findOneAndUpdate as unknown as vi.Mock).mockRejectedValue(error);
 
-    const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     const res = await request(app).put("/api/projects/1").send({
       name: "Project1",
@@ -236,7 +274,10 @@ describe("project.controller Fehlerfälle", () => {
 
     expect(res.status).toBe(500);
     expect(res.body).toHaveProperty("error", "Internal Server Error");
-    expect(consoleErrorMock).toHaveBeenCalledWith("Error updating project:", error);
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      "Error updating project:",
+      error,
+    );
 
     consoleErrorMock.mockRestore();
   });
@@ -256,70 +297,88 @@ describe("project.controller Fehlerfälle", () => {
       sort: vi.fn().mockRejectedValue(error),
     });
 
-    const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
-    const res = await request(app).get("/api/projects/by-username").query({ username: "user1" });
+    const res = await request(app)
+      .get("/api/projects/by-username")
+      .query({ username: "user1" });
 
     expect(res.status).toBe(500);
     expect(res.body).toHaveProperty("error", "Internal Server Error");
-    expect(consoleErrorMock).toHaveBeenCalledWith("Error fetching projects by username:", error);
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      "Error fetching projects by username:",
+      error,
+    );
 
     consoleErrorMock.mockRestore();
   });
 });
 
 describe("project.controller zusätzliche Fehlerfälle", () => {
-    // --- GET RECENT PROJECTS ---
-    it("GET /api/projects/by-username/recent ohne Username gibt 400 zurück", async () => {
-      const res = await request(app).get("/api/projects/by-username/recent");
-      expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty("error", "Username is required");
-    });
-  
-    it("GET /api/projects/by-username/recent Fehler gibt 500 zurück", async () => {
-      const error = new Error("DB Fehler");
-  
-      (Project.find as unknown as vi.Mock).mockReturnValue({
-        sort: vi.fn().mockReturnValue({
-          limit: vi.fn().mockRejectedValue(error),
-        }),
-      });
-  
-      const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
-  
-      const res = await request(app).get("/api/projects/by-username/recent").query({ username: "user1" });
-  
-      expect(res.status).toBe(500);
-      expect(res.body).toHaveProperty("error", "Internal Server Error");
-      expect(consoleErrorMock).toHaveBeenCalledWith("Error fetching recent projects:", error);
-  
-      consoleErrorMock.mockRestore();
-    });
-  
-    // --- DELETE PROJECT ---
-  
-    it("DELETE /api/projects/:id nicht gefunden gibt 404 zurück", async () => {
-      (Project.findByIdAndDelete as unknown as vi.Mock).mockResolvedValue(null);
-  
-      const res = await request(app).delete("/api/projects/invalid-id");
-  
-      expect(res.status).toBe(404);
-      expect(res.body).toHaveProperty("error", "Project not found");
-    });
-  
-    it("DELETE /api/projects/:id Fehler gibt 500 zurück", async () => {
-      const error = new Error("DB Fehler");
-      (Project.findByIdAndDelete as unknown as vi.Mock).mockRejectedValue(error);
-  
-      const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
-  
-      const res = await request(app).delete("/api/projects/1");
-  
-      expect(res.status).toBe(500);
-      expect(res.body).toHaveProperty("error", "Internal Server Error");
-      expect(consoleErrorMock).toHaveBeenCalledWith("Error deleting project:", error);
-  
-      consoleErrorMock.mockRestore();
-    });
+  // --- GET RECENT PROJECTS ---
+  it("GET /api/projects/by-username/recent ohne Username gibt 400 zurück", async () => {
+    const res = await request(app).get("/api/projects/by-username/recent");
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("error", "Username is required");
   });
-  
+
+  it("GET /api/projects/by-username/recent Fehler gibt 500 zurück", async () => {
+    const error = new Error("DB Fehler");
+
+    (Project.find as unknown as vi.Mock).mockReturnValue({
+      sort: vi.fn().mockReturnValue({
+        limit: vi.fn().mockRejectedValue(error),
+      }),
+    });
+
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const res = await request(app)
+      .get("/api/projects/by-username/recent")
+      .query({ username: "user1" });
+
+    expect(res.status).toBe(500);
+    expect(res.body).toHaveProperty("error", "Internal Server Error");
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      "Error fetching recent projects:",
+      error,
+    );
+
+    consoleErrorMock.mockRestore();
+  });
+
+  // --- DELETE PROJECT ---
+
+  it("DELETE /api/projects/:id nicht gefunden gibt 404 zurück", async () => {
+    (Project.findByIdAndDelete as unknown as vi.Mock).mockResolvedValue(null);
+
+    const res = await request(app).delete("/api/projects/invalid-id");
+
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty("error", "Project not found");
+  });
+
+  it("DELETE /api/projects/:id Fehler gibt 500 zurück", async () => {
+    const error = new Error("DB Fehler");
+    (Project.findByIdAndDelete as unknown as vi.Mock).mockRejectedValue(error);
+
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const res = await request(app).delete("/api/projects/1");
+
+    expect(res.status).toBe(500);
+    expect(res.body).toHaveProperty("error", "Internal Server Error");
+    expect(consoleErrorMock).toHaveBeenCalledWith(
+      "Error deleting project:",
+      error,
+    );
+
+    consoleErrorMock.mockRestore();
+  });
+});
