@@ -4,17 +4,17 @@ German spelling dictionary.
 
 ## Contents
 
-*   [What is this?](#what-is-this)
-*   [When should I use this?](#when-should-i-use-this)
-*   [Install](#install)
-*   [Use](#use)
-*   [API](#api)
-    *   [`Dictionary`](#dictionary)
-*   [Examples](#examples)
-*   [Compatibility](#compatibility)
-*   [Security](#security)
-*   [Contribute](#contribute)
-*   [License](#license)
+- [What is this?](#what-is-this)
+- [When should I use this?](#when-should-i-use-this)
+- [Install](#install)
+- [Use](#use)
+- [API](#api)
+  - [`Dictionary`](#dictionary)
+- [Examples](#examples)
+- [Compatibility](#compatibility)
+- [Security](#security)
+- [Contribute](#contribute)
+- [License](#license)
 
 ## What is this?
 
@@ -43,16 +43,18 @@ npm install dictionary-de
 ## Use
 
 ```js
-import de from 'dictionary-de'
+import de from "dictionary-de";
 
-console.log(de)
+console.log(de);
 // To do: use `de` somehow
 ```
 
 Yields:
 
 ```js
-{aff: <Buffer>, dic: <Buffer>}
+const deExample = { aff: "<Buffer>", dic: "<Buffer>" };
+console.log(deExample);
+
 ```
 
 ## API
@@ -69,11 +71,11 @@ It exports the [TypeScript][] type
 
 ###### Fields
 
-*   `aff` ([`Buffer`][node-buffer])
-    — data for the affix file (defines the language, keyboard, flags, and more)
-*   `dic` ([`Buffer`][node-buffer])
-    — data for the dictionary file (contains words and flags applying to those
-    words)
+- `aff` ([`Buffer`][node-buffer])
+  — data for the affix file (defines the language, keyboard, flags, and more)
+- `dic` ([`Buffer`][node-buffer])
+  — data for the dictionary file (contains words and flags applying to those
+  words)
 
 ## Examples
 
@@ -107,25 +109,14 @@ Dictionary and affix file:
 Rest: [MIT][file-license] © [Titus Wormer][wooorm].
 
 [api-dictionary]: #dictionary
-
 [file-license]: https://github.com/wooorm/dictionaries/blob/main/license
-
 [github-dictionaries]: https://github.com/wooorm/dictionaries
-
 [github-gist-esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
-
 [github-nodehun]: https://github.com/nathanjsweet/nodehun
-
 [github-nspell]: https://github.com/wooorm/nspell
-
 [hunspell]: https://hunspell.github.io
-
 [node-buffer]: https://nodejs.org/api/buffer.html#buffer_buffer
-
 [npm-install]: https://docs.npmjs.com/cli/install
-
 [source]: https://www.j3e.de/ispell/igerman98/index_en.html
-
 [typescript]: https://www.typescriptlang.org
-
 [wooorm]: https://wooorm.com
