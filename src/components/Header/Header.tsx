@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import logo from "/logo.svg";
 import { RecentProjectsDropdown } from "../RecentProjectsDropdown/RecentProjectsDropdown";
-import { FAQDropdown } from "../FAQDropdown";
+import { FAQDropdown } from "../FAQDropdown/FAQDropdown.tsx";
 import ThemeToggleButton from "../ThemeToggleButton/ThemeToggleButton";
 
 const Header = () => {
