@@ -2,9 +2,9 @@ import { UserButton } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import logo from "/logo.svg";
-import { RecentProjectsDropdown } from "./RecentProjectsDropdown";
-import { FAQDropdown } from "./FAQDropdown";
-import ThemeToggleButton from "./ThemeToggleButton";
+import { RecentProjectsDropdown } from "../RecentProjectsDropdown/RecentProjectsDropdown";
+import { FAQDropdown } from "../FAQDropdown";
+import ThemeToggleButton from "../ThemeToggleButton/ThemeToggleButton";
 
 const Header = () => {
   const { user } = useUser();

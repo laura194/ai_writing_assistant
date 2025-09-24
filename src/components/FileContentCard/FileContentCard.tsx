@@ -54,10 +54,18 @@ function FileContentCard({
     async function loadDictionaries() {
       try {
         const [affDe, dicDe, affEn, dicEn] = await Promise.all([
-          fetch("/dictionaries/dictionary-de/index.aff").then(res => res.text()),
-          fetch("/dictionaries/dictionary-de/index.dic").then(res => res.text()),
-          fetch("/dictionaries/dictionary-en/index.aff").then(res => res.text()),
-          fetch("/dictionaries/dictionary-en/index.dic").then(res => res.text()),
+          fetch("/dictionaries/dictionary-de/index.aff").then((res) =>
+            res.text(),
+          ),
+          fetch("/dictionaries/dictionary-de/index.dic").then((res) =>
+            res.text(),
+          ),
+          fetch("/dictionaries/dictionary-en/index.aff").then((res) =>
+            res.text(),
+          ),
+          fetch("/dictionaries/dictionary-en/index.dic").then((res) =>
+            res.text(),
+          ),
         ]);
 
         // ✅ nspell erwartet zwei Strings: aff + dic
@@ -89,8 +97,10 @@ function FileContentCard({
   function checkWord(word: string) {
     if (!spellDe || !spellEn) return true;
     if (word.trim() === "") return true;
-    const cleaned = word.replace(/^[.,!?;:"'()[\]{}<>-]+|[.,!?;:"'()[\]{}<>-]+$/g, '').trim();
-    if (cleaned === '') return true; // Was pure punctuation
+    const cleaned = word
+      .replace(/^[.,!?;:"'()[\]{}<>-]+|[.,!?;:"'()[\]{}<>-]+$/g, "")
+      .trim();
+    if (cleaned === "") return true; // Was pure punctuation
     return spellDe.correct(cleaned) || spellEn.correct(cleaned);
   }
 
@@ -101,16 +111,18 @@ function FileContentCard({
     return lines.map((line, lineIdx) => {
       const words = line.split(/(\s+)/); // Bewahrt Leerzeichen als eigene Elemente
       return (
-          <div key={lineIdx} style={{display: 'block'}}>
-            {words.map((word, i) => {
-              const isError = !checkWord(word) && word.trim() !== "";
-              return isError ? (
-                  <span key={i} className="border-b-2 border-red-600">{word}</span>
-              ) : (
-                  <span key={i}>{word}</span>
-              );
-            })}
-          </div>
+        <div key={lineIdx} style={{ display: "block" }}>
+          {words.map((word, i) => {
+            const isError = !checkWord(word) && word.trim() !== "";
+            return isError ? (
+              <span key={i} className="border-b-2 border-red-600">
+                {word}
+              </span>
+            ) : (
+              <span key={i}>{word}</span>
+            );
+          })}
+        </div>
       );
     });
   }
@@ -316,10 +328,10 @@ function FileContentCard({
       <div className="relative flex-1 mt-1 rounded-xl overflow-hidden border-2 border-[#afa4e0] dark:border-[#35285f] focus-within:ring-2 focus-within:ring-purple-400 dark:focus-within:ring-purple-700">
         {/* Spellcheck Overlay */}
         <div
-            ref={overlayRef}
-            aria-hidden="true"
-            className="absolute top-0 left-0 w-full h-full pointer-events-none select-none p-4 whitespace-pre-wrap overflow-y-auto z-10 text-transparent"
-            style={{ fontSize: "1rem", lineHeight: "1.5" }}
+          ref={overlayRef}
+          aria-hidden="true"
+          className="absolute top-0 left-0 w-full h-full pointer-events-none select-none p-4 whitespace-pre-wrap overflow-y-auto z-10 text-transparent"
+          style={{ fontSize: "1rem", lineHeight: "1.5" }}
         >
           <div className="text-inherit font-inherit min-h-full w-full">
             {getHighlightedHtml(fileContent)}
@@ -328,16 +340,16 @@ function FileContentCard({
 
         {/* Das Textarea mit transparentem Hintergrund damit Overlay sichtbar ist */}
         <textarea
-            ref={textareaRef}
-            value={fileContent}
-            onChange={(e) => setFileContent(e.target.value)}
-            onMouseUp={handleTextSelect}
-            onKeyUp={handleTextSelect}
-            onScroll={syncScroll}
-            placeholder="Write your content here..."
-            spellCheck={false}
-            className="relative z-20 w-full h-full p-4 bg-transparent text-[#261e3b] dark:text-[#ffffff] focus:outline-none placeholder:text-[#888] dark:placeholder:text-[#777] resize-none transition whitespace-pre-wrap"
-            style={{ fontSize: "1rem", lineHeight: "1.5" }}
+          ref={textareaRef}
+          value={fileContent}
+          onChange={(e) => setFileContent(e.target.value)}
+          onMouseUp={handleTextSelect}
+          onKeyUp={handleTextSelect}
+          onScroll={syncScroll}
+          placeholder="Write your content here..."
+          spellCheck={false}
+          className="relative z-20 w-full h-full p-4 bg-transparent text-[#261e3b] dark:text-[#ffffff] focus:outline-none placeholder:text-[#888] dark:placeholder:text-[#777] resize-none transition whitespace-pre-wrap"
+          style={{ fontSize: "1rem", lineHeight: "1.5" }}
         />
       </div>
 
