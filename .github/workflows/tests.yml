@@ -20,8 +20,11 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install Dependencies
+      - name: Install Frontend Dependencies
         run: npm ci
+
+      - name: Install Backend Dependencies
+        run: cd backend && npm ci
 
       - name: Run Vitest Tests with Coverage
         run: npx vitest run --coverage
