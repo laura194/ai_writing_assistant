@@ -11,6 +11,11 @@ import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { useTheme } from "../../providers/ThemeProvider";
 
+import nspell from "nspell";
+
+// Typ für Spellchecker
+type Spellchecker = ReturnType<typeof nspell>;
+
 export interface FileContentCardProps {
   node: Node;
   onDirtyChange?: (dirty: boolean) => void;
@@ -38,6 +43,105 @@ function FileContentCard({
   const isDark = theme === "dark";
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  // States für Spellchecker
+  const [spellDe, setSpellDe] = useState<Spellchecker | null>(null);
+  const [spellEn, setSpellEn] = useState<Spellchecker | null>(null);
+
+  // Dictionaries laden und Spellchecker erstellen
+  useEffect(() => {
+    async function loadDictionaries() {
+      try {
+        const [affDe, dicDe, affEn, dicEn] = await Promise.all([
+          fetch("/dictionaries/dictionary-de/index.aff").then((res) =>
+            res.text(),
+          ),
+          fetch("/dictionaries/dictionary-de/index.dic").then((res) =>
+            res.text(),
+          ),
+          fetch("/dictionaries/dictionary-en/index.aff").then((res) =>
+            res.text(),
+          ),
+          fetch("/dictionaries/dictionary-en/index.dic").then((res) =>
+            res.text(),
+          ),
+        ]);
+
+        // ✅ nspell erwartet zwei Strings: aff + dic
+        setSpellDe(nspell(affDe, dicDe));
+        setSpellEn(nspell(affEn, dicEn));
+
+        // Testausgaben
+        const spellDeTest = nspell(affDe, dicDe);
+        console.log("DE korrekt für 'Hallo':", spellDeTest.correct("Hallo"));
+        console.log("DE korrekt für 'Haus':", spellDeTest.correct("Haus"));
+        const spellEnTest = nspell(affEn, dicEn);
+        console.log("EN korrekt für 'Hello':", spellEnTest.correct("Hello"));
+        console.log("EN korrekt für 'World':", spellEnTest.correct("World"));
+      } catch (e) {
+        console.error("Fehler beim Laden der Dictionaries", e);
+      }
+    }
+
+    loadDictionaries();
+  }, []);
+
+  /*function checkWord(word: string) {
+    if (!spellDe || !spellEn) return true;
+    if (word.trim() === "") return true;
+    return spellDe.correct(word) || spellEn.correct(word);
+  }
+  */
+
+  function checkWord(word: string) {
+    if (!spellDe || !spellEn) return true;
+    if (word.trim() === "") return true;
+    const cleaned = word
+      .replace(/^[.,!?;:"'()[\]{}<>-]+|[.,!?;:"'()[\]{}<>-]+$/g, "")
+      .trim();
+    if (cleaned === "") return true; // Was pure punctuation
+    return spellDe.correct(cleaned) || spellEn.correct(cleaned);
+  }
+
+  // Aus dem Text HTML erzeugen: Fehlerwörter markieren
+  function getHighlightedHtml(text: string) {
+    // Splitte Zeilen und Wörter, baue HTML mit Fehler-Underline
+    const lines = text.split("\n");
+    return lines.map((line, lineIdx) => {
+      if (line.trim() === "") {
+        // 🚀 leere Zeile sichtbar machen
+        return (
+          <div key={lineIdx} style={{ display: "block", height: "1.5em" }}>
+            &nbsp;
+          </div>
+        );
+      }
+
+      const words = line.split(/(\s+)/);
+      return (
+        <div key={lineIdx} style={{ display: "block" }}>
+          {words.map((word, i) => {
+            const isError = !checkWord(word) && word.trim() !== "";
+            return isError ? (
+              <span key={i} className="border-b-2 border-red-600">
+                {word}
+              </span>
+            ) : (
+              <span key={i}>{word}</span>
+            );
+          })}
+        </div>
+      );
+    });
+  }
+
+  // Scroll-Synchronisation: Overlay scrollt gleich mit Textarea
+  const syncScroll = () => {
+    if (textareaRef.current && overlayRef.current) {
+      overlayRef.current.scrollTop = textareaRef.current.scrollTop;
+    }
+  };
 
   useEffect(() => {
     setFileContent(node.content || "...");
@@ -230,18 +334,33 @@ function FileContentCard({
         />
       )}
 
-      <textarea
-        ref={textareaRef}
-        value={fileContent}
-        onChange={(e) => setFileContent(e.target.value)}
-        onMouseUp={handleTextSelect}
-        onKeyUp={handleTextSelect}
-        className="w-full mt-1 flex-1 p-4 bg-[#eae5fc] dark:bg-[#1b1333] text-[#261e3b] dark:text-[#ffffff] rounded-xl
-               border-2 border-[#afa4e0] dark:border-[#35285f] focus:outline-none focus:ring-2 focus:ring-purple-400 darK:focus:ring-purple-700
-               placeholder:text-[#888] dark:placeholder:text-[#777] resize-none transition"
-        placeholder="Write your content here..."
-        spellCheck={true}
-      />
+      <div className="relative flex-1 mt-1 rounded-xl overflow-hidden border-2 border-[#afa4e0] dark:border-[#35285f] focus-within:ring-2 focus-within:ring-purple-400 dark:focus-within:ring-purple-700">
+        {/* Spellcheck Overlay */}
+        <div
+          ref={overlayRef}
+          aria-hidden="true"
+          className="absolute top-0 left-0 w-full h-full pointer-events-none select-none p-4 whitespace-pre-wrap overflow-y-auto z-10 text-transparent"
+          style={{ fontSize: "1rem", lineHeight: "1.5" }}
+        >
+          <div className="text-inherit font-inherit min-h-full w-full">
+            {getHighlightedHtml(fileContent)}
+          </div>
+        </div>
+
+        {/* Das Textarea mit transparentem Hintergrund damit Overlay sichtbar ist */}
+        <textarea
+          ref={textareaRef}
+          value={fileContent}
+          onChange={(e) => setFileContent(e.target.value)}
+          onMouseUp={handleTextSelect}
+          onKeyUp={handleTextSelect}
+          onScroll={syncScroll}
+          placeholder="Write your content here..."
+          spellCheck={false}
+          className="relative z-20 w-full h-full p-4 bg-transparent text-[#261e3b] dark:text-[#ffffff] focus:outline-none placeholder:text-[#888] dark:placeholder:text-[#777] resize-none transition whitespace-pre-wrap"
+          style={{ fontSize: "1rem", lineHeight: "1.5" }}
+        />
+      </div>
 
       {isAIBubbleOpen && selectedText && (
         <AIBubble position={{ x: 50, y: 120 }} onClick={handleAIBubbleClick} />
