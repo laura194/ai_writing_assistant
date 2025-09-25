@@ -8,7 +8,11 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: "./test/setupTests.ts",
-    include: ["src/**/*.{test,spec}.{ts,tsx}", "tailwind.config.test.cjs"],
+    include: [
+      "src/**/*.{test,spec}.{ts,tsx}",
+      "backend/src/**/*.{test,spec}.{ts,tsx}",
+      "tailwind.config.test.cjs",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
