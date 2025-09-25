@@ -111,9 +111,9 @@ vi.mock("nspell", () => {
         correct: (word: string) => {
           // Normalize wie im echten Code
           const cleaned = word
-              .replace(/^[.,!?;:"'()[\]{}<>-]+|[.,!?;:"'()[\]{}<>-]+$/g, "")
-              .trim()
-              .toLowerCase();
+            .replace(/^[.,!?;:"'()[\]{}<>-]+|[.,!?;:"'()[\]{}<>-]+$/g, "")
+            .trim()
+            .toLowerCase();
 
           if (!cleaned) return true; // nur Satzzeichen
           const dict = ["hello", "world", "test"];
@@ -499,7 +499,7 @@ describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
 
     await waitFor(() => {
       const overlay = screen.getByText(/Hello wurld/i).parentElement
-          ?.parentElement as HTMLElement;
+        ?.parentElement as HTMLElement;
 
       expect(overlay).toBeInTheDocument();
 
@@ -507,7 +507,9 @@ describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
       const wrongWordSpans = overlay.querySelectorAll("span.border-b-2");
       expect(wrongWordSpans.length).toBeGreaterThan(0); // Sicherstellen, dass Spans existieren
 
-      const wrongWords = Array.from(wrongWordSpans).map((el) => el.textContent?.trim());
+      const wrongWords = Array.from(wrongWordSpans).map((el) =>
+        el.textContent?.trim(),
+      );
       expect(wrongWords).toContain("wurld");
       expect(wrongWords).not.toContain("Hello");
     });
@@ -521,12 +523,12 @@ describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
       expect(overlayDivs.length).toBeGreaterThan(0); // Sicherstellen, dass Spans existieren
 
       const correctWords = overlayDivs
-          .filter((el) => !el.className.includes("border-b-2"))
-          .map((el) => el.textContent?.trim());
+        .filter((el) => !el.className.includes("border-b-2"))
+        .map((el) => el.textContent?.trim());
 
       const wrongWords = overlayDivs
-          .filter((el) => el.className.includes("border-b-2"))
-          .map((el) => el.textContent?.trim());
+        .filter((el) => el.className.includes("border-b-2"))
+        .map((el) => el.textContent?.trim());
 
       expect(correctWords).toContain("Hello");
       /*expect(correctWords).toContain("This");
@@ -546,13 +548,12 @@ describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
       expect(overlayDivs.length).toBeGreaterThan(0); // Sicherstellen, dass Spans existieren
 
       const wrongWords = overlayDivs
-          .filter((el) => el.className.includes("border-b-2"))
-          .map((el) => el.textContent);
+        .filter((el) => el.className.includes("border-b-2"))
+        .map((el) => el.textContent);
 
       expect(wrongWords).not.toContain(",");
       expect(wrongWords).not.toContain("!");
       expect(wrongWords).not.toContain("...");
     });
   });
-
 });

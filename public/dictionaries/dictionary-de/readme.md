@@ -54,7 +54,6 @@ Yields:
 ```js
 const deExample = { aff: "<Buffer>", dic: "<Buffer>" };
 console.log(deExample);
-
 ```
 
 ## API

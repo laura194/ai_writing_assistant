@@ -112,26 +112,26 @@ function FileContentCard({
       if (line.trim() === "") {
         // 🚀 leere Zeile sichtbar machen
         return (
-            <div key={lineIdx} style={{ display: "block", height: "1.5em" }}>
-              &nbsp;
-            </div>
+          <div key={lineIdx} style={{ display: "block", height: "1.5em" }}>
+            &nbsp;
+          </div>
         );
       }
 
       const words = line.split(/(\s+)/);
       return (
-          <div key={lineIdx} style={{ display: "block" }}>
-            {words.map((word, i) => {
-              const isError = !checkWord(word) && word.trim() !== "";
-              return isError ? (
-                  <span key={i} className="border-b-2 border-red-600">
-            {word}
-          </span>
-              ) : (
-                  <span key={i}>{word}</span>
-              );
-            })}
-          </div>
+        <div key={lineIdx} style={{ display: "block" }}>
+          {words.map((word, i) => {
+            const isError = !checkWord(word) && word.trim() !== "";
+            return isError ? (
+              <span key={i} className="border-b-2 border-red-600">
+                {word}
+              </span>
+            ) : (
+              <span key={i}>{word}</span>
+            );
+          })}
+        </div>
       );
     });
   }
