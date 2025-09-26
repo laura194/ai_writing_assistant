@@ -36,7 +36,8 @@ export const FAQDropdown = () => {
     },
     {
       question: "What is the community page?",
-      answer: "You can publish your work on the community page for other users to see and evaluate. You can also see projects of other users. These projects can get upvoted, favored and commented.",
+      answer:
+        "You can publish your work on the community page for other users to see and evaluate. You can also see projects of other users. These projects can get upvoted, favored and commented.",
     },
   ];
 
