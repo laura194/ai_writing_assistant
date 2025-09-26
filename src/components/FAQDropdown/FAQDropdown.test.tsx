@@ -21,12 +21,12 @@ describe("FAQDropdown component", () => {
 
     const questions = [
       "What is this application?",
-      "How does it support writing?",
+      "How does AI support writing?",
       "How does editing work?",
-      "What role does AI play?",
+      "Which AI am I using?",
       "How are projects managed?",
       "Which export formats are supported?",
-      "Is it free?",
+      "What is the community page?",
     ];
 
     questions.forEach((q) => {
