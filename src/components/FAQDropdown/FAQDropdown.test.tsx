@@ -61,7 +61,7 @@ describe("FAQDropdown component", () => {
     render(<FAQDropdown />);
 
     const q1 = screen.getByText("What is this application?");
-    const q2 = screen.getByText("How does it support writing?");
+    const q2 = screen.getByText("How does AI support writing?");
 
     fireEvent.click(q1);
     expect(
