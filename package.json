@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "prettier:check": "prettier --check .",
     "preview": "vite preview",
-    "start": "concurrently \"npm run dev\" \"npm run dev --prefix backend\""
+    "start": "concurrently \"npm run dev\" \"npm run dev --prefix backend\"",
+    "build:pandoc": "docker build -t pandoc-core -f docker-files/Dockerfile.pandoc .",
+    "test:pandoc": "docker run --rm pandoc-core --version"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.31.1",

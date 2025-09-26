@@ -1,0 +1,14 @@
+FROM pandoc/core:latest
+
+# Install LaTeX support for complete PDF/Word conversion
+USER root
+RUN apk add --no-cache \
+    texlive \
+    texlive-xetex \
+    texlive-latexextra \
+    fontconfig
+
+WORKDIR /workspace
+VOLUME ["/workspace"]
+
+ENTRYPOINT ["pandoc"]
