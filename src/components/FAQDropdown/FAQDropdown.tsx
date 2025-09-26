@@ -10,33 +10,33 @@ export const FAQDropdown = () => {
         "A web app that helps students and researchers write academic texts while keeping full authorship control.",
     },
     {
-      question: "How does it support writing?",
+      question: "How does AI support writing?",
       answer:
-        "It assists with structuring arguments, rewriting sections, improving style, checking grammar, and suggesting sources.",
+        "It assists with structuring arguments, rewriting sections, improving style, checking grammar, and suggesting sources. When you are writing a chapter, it is possible to use AI for highlighted sections or for the whole text in the chapter by clicking on the atom symbol.",
     },
     {
       question: "How does editing work?",
       answer:
-        "You can write directly in the app, select specific text, and request targeted AI support like style checks or grammar fixes.",
+        "You can write directly in every chapter of your project. Each chapter has its own writing section.",
     },
     {
-      question: "What role does AI play?",
+      question: "Which AI am I using?",
       answer:
-        "The Gemini model provides suggestions on structure, style, and sources — always transparently logged for integrity.",
+        "The Gemini model provides suggestions on structure, style, and sources. If you use AI for changing your written text it gets logged for integrity.",
     },
     {
       question: "How are projects managed?",
       answer:
-        "Projects are saved per user. Log in with Microsoft, Google, or Apple and continue anytime.",
+        "You can save every new project in your account and come back to it later at any time.",
     },
     {
       question: "Which export formats are supported?",
       answer:
-        "Word (.docx), PDF (.pdf), and LaTeX (.tex) for academic publishing needs.",
+        "Word (.docx), PDF (.pdf), and LaTeX (.tex) for academic publishing needs. The AI protocol gets attached to the file export.",
     },
     {
-      question: "Is it free?",
-      answer: "Yes, currently free.",
+      question: "What is the community page?",
+      answer: "You can publish your work on the community page for other users to see and evaluate. You can also see projects of other users. These projects can get upvoted, favored and commented.",
     },
   ];
 
