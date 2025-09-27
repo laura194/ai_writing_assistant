@@ -21,12 +21,12 @@ describe("FAQDropdown component", () => {
 
     const questions = [
       "What is this application?",
-      "How does it support writing?",
+      "How does AI support writing?",
       "How does editing work?",
-      "What role does AI play?",
+      "Which AI am I using?",
       "How are projects managed?",
       "Which export formats are supported?",
-      "Is it free?",
+      "What is the community page?",
     ];
 
     questions.forEach((q) => {
@@ -61,7 +61,7 @@ describe("FAQDropdown component", () => {
     render(<FAQDropdown />);
 
     const q1 = screen.getByText("What is this application?");
-    const q2 = screen.getByText("How does it support writing?");
+    const q2 = screen.getByText("How does AI support writing?");
 
     fireEvent.click(q1);
     expect(
