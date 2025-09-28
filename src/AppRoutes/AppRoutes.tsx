@@ -24,6 +24,7 @@ import EditPage from "../pages/EditPage/EditPage";
 import SignInPage from "../pages/SignInPage/SignInPage";
 import SignUpPage from "../pages/SignUpPage/SignUpPage";
 import ProjectOverview from "../pages/ProjectOverview/ProjectOverview";
+import CommunityPage from "../pages/CommunityPage/CommunityPage.tsx";
 
 /*
  * AllRoutes Component
@@ -44,8 +45,10 @@ function AllRoutes(isSignedIn: boolean) {
       <Route path="/edit/:projectId" element={<EditPage />} />
       <Route path="/structureSelection" element={<StructureSelectionPage />} />
       <Route path="/myProjects" element={<ProjectOverview />} />
+        <Route path="/communityPage" element={<CommunityPage />} />
 
-      {/* Catch-All (je nachdem ob der User signedIn ist oder nicht) */}
+
+        {/* Catch-All (je nachdem ob der User signedIn ist oder nicht) */}
       <Route
         path="*"
         element={
@@ -71,6 +74,7 @@ export default function AppRoutes() {
     "/edit",
     "/structureSelection",
     "/myProjects",
+      "/communityPage",
   ];
 
   // 2)
