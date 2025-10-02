@@ -21,12 +21,10 @@ export const createProject = async (
   } = req.body;
 
   if (!name || !username || !projectStructure) {
-    res
-      .status(400)
-      .json({
-        error:
-          "Alle Pflichtfelder (name, username, projectStructure) sind erforderlich",
-      });
+    res.status(400).json({
+      error:
+        "Alle Pflichtfelder (name, username, projectStructure) sind erforderlich",
+    });
     return;
   }
 
