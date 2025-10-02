@@ -84,20 +84,16 @@ export const updateProject = async (req: Request, res: Response): Promise<void> 
     return;
   }
 
+  // Pflichtfelder prüfen
+  if (!name || !username || !projectStructure) {
+    res.status(400).json({ error: "All fields are required" });
+    return;
+  }
+
   try {
     const updatedProject = await Project.findOneAndUpdate(
       { _id: id },
-      {
-        ...(name && { name }),
-        ...(username && { username }),
-        ...(projectStructure && { projectStructure }),
-        ...(typeof isPublic !== "undefined" && { isPublic }),
-        ...(tags && { tags }),
-        ...(titleCommunityPage && { titleCommunityPage }),
-        ...(category && { category }),
-        ...(typeOfDocument && { typeOfDocument }),
-        ...(authorName && { authorName }),
-      },
+      { name, username, projectStructure, isPublic, tags, titleCommunityPage, category, typeOfDocument, authorName },
       { new: true }
     );
 
@@ -112,6 +108,7 @@ export const updateProject = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 
 // Get all projects by username
