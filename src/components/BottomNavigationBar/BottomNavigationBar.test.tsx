@@ -16,7 +16,7 @@ describe("BottomNavigationBar Unit Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />
+      />,
     );
 
     expect(screen.getByTitle(/AI Protocol/i)).toBeInTheDocument();
@@ -30,7 +30,7 @@ describe("BottomNavigationBar Unit Tests", () => {
         activeView="fullDocument"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />
+      />,
     );
 
     const activeButton = screen.getByTitle(/Full Document View/i);
@@ -48,7 +48,7 @@ describe("BottomNavigationBar Unit Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />
+      />,
     );
 
     const contributionButton = screen.getByTitle(/Contribution View/i);
@@ -64,7 +64,7 @@ describe("BottomNavigationBar Unit Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={true}
-      />
+      />,
     );
 
     expect(container.firstChild).toHaveClass("flex justify-around");
@@ -76,7 +76,7 @@ describe("BottomNavigationBar Unit Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />
+      />,
     );
 
     expect(container.firstChild).toHaveClass("flex flex-col items-center");
@@ -94,7 +94,7 @@ describe("BottomNavigationBar Mutation Coverage Tests", () => {
           activeView={activeView}
           onChangeView={onChangeViewMock}
           menuOpen={false}
-        />
+        />,
       );
 
       views.forEach((view) => {
@@ -103,7 +103,7 @@ describe("BottomNavigationBar Mutation Coverage Tests", () => {
             ? /AI Protocol/i
             : view === "fullDocument"
               ? /Full Document View/i
-              : /Contribution View/i
+              : /Contribution View/i,
         );
 
         if (view === activeView) {
@@ -123,7 +123,7 @@ describe("BottomNavigationBar Mutation Coverage Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />
+      />,
     );
 
     const aiButton = screen.getByTitle(/AI Protocol/i);
@@ -147,7 +147,7 @@ describe("BottomNavigationBar Mutation Coverage Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={true}
-      />
+      />,
     );
     expect(container.firstChild).toHaveClass("flex justify-around");
   });
@@ -159,7 +159,7 @@ describe("BottomNavigationBar Mutation Coverage Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />
+      />,
     );
     expect(container.firstChild).toHaveClass("flex flex-col items-center");
   });

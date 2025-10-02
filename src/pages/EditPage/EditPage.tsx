@@ -210,7 +210,7 @@ const EditPage = () => {
   const addChapter = (parentId: string | null, newNode: Node) => {
     const recursiveUpdate = (
       nodes: Node[],
-      parentId: string | null
+      parentId: string | null,
     ): Node[] => {
       return nodes.map((node) => {
         if (node.id === parentId) {
@@ -276,7 +276,7 @@ const EditPage = () => {
       setSelectedNode((prev) =>
         prev
           ? { ...prev, name: updatedNode.name, icon: updatedNode.icon }
-          : prev
+          : prev,
       );
     }
 
@@ -297,7 +297,7 @@ const EditPage = () => {
 
   const handleMoveNode = (
     draggedNodeId: string,
-    targetNodeId: string
+    targetNodeId: string,
     //asSibling: boolean = false
   ) => {
     const newNodes = [...nodes];

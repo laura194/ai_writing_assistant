@@ -19,7 +19,7 @@ const projectSchema: Schema = new Schema(
     name: { type: String, required: true },
     username: { type: String, required: true },
     projectStructure: { type: Schema.Types.Mixed, required: true }, // Store JSON object directly
-    
+
     // neue Felder:
     isPublic: { type: Boolean, default: false }, // default = private
     tags: { type: [String], default: [] },

@@ -42,7 +42,10 @@ const ContributionCard: React.FC = () => {
     }
   }, [projectId, reloadTrigger]);
 
-  const updateProjectField = (field: keyof Project, value: any) => {
+  const updateProjectField = <K extends keyof Project>(
+    field: K,
+    value: Project[K],
+  ) => {
     setProject((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
@@ -57,7 +60,7 @@ const ContributionCard: React.FC = () => {
     if (project) {
       updateProjectField(
         "tags",
-        project.tags?.filter((tag) => tag !== tagToRemove) || []
+        project.tags?.filter((tag) => tag !== tagToRemove) || [],
       );
     }
   };
