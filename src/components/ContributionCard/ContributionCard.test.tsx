@@ -8,7 +8,7 @@ import { Project } from "../../utils/types";
 
 // Mock Project
 const mockProject: Project = {
-  id: "1",
+  _id: "1",
   name: "Test Project",
   projectStructure: [],
   isPublic: true,
@@ -21,7 +21,13 @@ const mockProject: Project = {
 };
 
 vi.spyOn(ProjectService, "getProjectById").mockResolvedValue(mockProject);
-vi.spyOn(ProjectService, "updateProject").mockResolvedValue({});
+vi.spyOn(ProjectService, "updateProject").mockResolvedValue({
+  _id: "1",
+  name: "Test",
+  username: "alice",
+  projectStructure: [],
+  isPublic: true,
+});
 
 const renderWithRouter = (projectId: string) => {
   return render(
@@ -184,7 +190,7 @@ describe("ContributionCard", () => {
     renderWithRouter("1");
 
     // Tags zählen vor Add-Versuch anhand spezifischer Klasse im Container (z.B. bg-purple-200)
-    const tagsBefore = screen.queryAllByText((content, element) => {
+    const tagsBefore = screen.queryAllByText((_, element) => {
       return (
         !!element &&
         element.classList &&
@@ -199,7 +205,7 @@ describe("ContributionCard", () => {
     await user.click(addBtn);
 
     // Tags zählen nach Add-Versuch
-    const tagsAfter = screen.queryAllByText((content, element) => {
+    const tagsAfter = screen.queryAllByText((_, element) => {
       return (
         !!element &&
         element.classList &&
