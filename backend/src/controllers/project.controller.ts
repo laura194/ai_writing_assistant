@@ -4,23 +4,25 @@ import NodeContent from "../models/NodeContent";
 import AiProtocol from "../models/AIProtocol";
 
 // Create a new Project entry
-export const createProject = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  const { name, username, projectStructure } = req.body;
+export const createProject = async (req: Request, res: Response): Promise<void> => {
+  const { name, username, projectStructure, isPublic, tags, titleCommunityPage, category, typeOfDocument, authorName } = req.body;
 
   if (!name || !username || !projectStructure) {
-    res.status(400).json({ error: "Alle Felder sind erforderlich" });
+    res.status(400).json({ error: "Alle Pflichtfelder (name, username, projectStructure) sind erforderlich" });
     return;
   }
 
   try {
-    // Save the project with projectStructure as an object (not a string)
     const newProject = new Project({
       name,
       username,
-      projectStructure, // projectStructure is stored as an object
+      projectStructure,
+      isPublic: isPublic ?? false, // falls nicht mitgeschickt → default false
+      tags: tags ?? [],
+      titleCommunityPage: titleCommunityPage ?? "",
+      category: category ?? "",
+      typeOfDocument: typeOfDocument ?? "",
+      authorName: authorName ?? "", // Optional: Name des Autors
     });
 
     const savedProject = await newProject.save();
@@ -73,23 +75,30 @@ export const getAllProjects = async (
 };
 
 // Update a specific project entry by ID
-export const updateProject = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const updateProject = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const { name, username, projectStructure } = req.body;
+  const { name, username, projectStructure, isPublic, tags, titleCommunityPage, category, typeOfDocument, authorName } = req.body;
 
-  if (!id || !name || !username || !projectStructure) {
-    res.status(400).json({ error: "All fields are required" });
+  if (!id) {
+    res.status(400).json({ error: "Project ID is required" });
     return;
   }
 
   try {
     const updatedProject = await Project.findOneAndUpdate(
-      { _id: id }, // Verwende _id statt id als Mongoose ID
-      { name, username, projectStructure: projectStructure || [] }, // Falls projectStructure nicht übergeben wurde, leer lassen
-      { new: true },
+      { _id: id },
+      {
+        ...(name && { name }),
+        ...(username && { username }),
+        ...(projectStructure && { projectStructure }),
+        ...(typeof isPublic !== "undefined" && { isPublic }),
+        ...(tags && { tags }),
+        ...(titleCommunityPage && { titleCommunityPage }),
+        ...(category && { category }),
+        ...(typeOfDocument && { typeOfDocument }),
+        ...(authorName && { authorName }),
+      },
+      { new: true }
     );
 
     if (!updatedProject) {
@@ -103,6 +112,7 @@ export const updateProject = async (
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 // Get all projects by username
 export const getProjectsByUsername = async (
