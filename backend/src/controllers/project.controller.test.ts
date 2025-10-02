@@ -174,7 +174,7 @@ describe("project.controller Fehlerfälle", () => {
     });
 
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error", "Alle Felder sind erforderlich");
+    expect(res.body).toHaveProperty("error", "Alle Pflichtfelder (name, username, projectStructure) sind erforderlich");
   });
 
   it("POST /api/projects save() Fehler gibt 500 zurück", async () => {

@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BottomNavigationBar from "./BottomNavigationBar";
+import { vi } from "vitest";
 
 describe("BottomNavigationBar Unit Tests", () => {
   const onChangeViewMock = vi.fn();
@@ -15,12 +16,12 @@ describe("BottomNavigationBar Unit Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />,
+      />
     );
 
     expect(screen.getByTitle(/AI Protocol/i)).toBeInTheDocument();
     expect(screen.getByTitle(/Full Document View/i)).toBeInTheDocument();
-    expect(screen.getByTitle(/Share Document/i)).toBeInTheDocument();
+    expect(screen.getByTitle(/Contribution View/i)).toBeInTheDocument();
   });
 
   test("active button receives correct classes", () => {
@@ -29,7 +30,7 @@ describe("BottomNavigationBar Unit Tests", () => {
         activeView="fullDocument"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />,
+      />
     );
 
     const activeButton = screen.getByTitle(/Full Document View/i);
@@ -47,14 +48,14 @@ describe("BottomNavigationBar Unit Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />,
+      />
     );
 
-    const shareButton = screen.getByTitle(/Share Document/i);
-    await user.click(shareButton);
+    const contributionButton = screen.getByTitle(/Contribution View/i);
+    await user.click(contributionButton);
 
     expect(onChangeViewMock).toHaveBeenCalledTimes(1);
-    expect(onChangeViewMock).toHaveBeenCalledWith("share");
+    expect(onChangeViewMock).toHaveBeenCalledWith("contribution");
   });
 
   test("menuOpen true applies the correct container class", () => {
@@ -63,7 +64,7 @@ describe("BottomNavigationBar Unit Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={true}
-      />,
+      />
     );
 
     expect(container.firstChild).toHaveClass("flex justify-around");
@@ -75,7 +76,7 @@ describe("BottomNavigationBar Unit Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />,
+      />
     );
 
     expect(container.firstChild).toHaveClass("flex flex-col items-center");
@@ -83,7 +84,7 @@ describe("BottomNavigationBar Unit Tests", () => {
 });
 
 describe("BottomNavigationBar Mutation Coverage Tests", () => {
-  const views = ["ai", "fullDocument", "share"] as const;
+  const views = ["ai", "fullDocument", "contribution"] as const;
 
   views.forEach((activeView) => {
     test(`renders correctly with activeView="${activeView}"`, () => {
@@ -93,7 +94,7 @@ describe("BottomNavigationBar Mutation Coverage Tests", () => {
           activeView={activeView}
           onChangeView={onChangeViewMock}
           menuOpen={false}
-        />,
+        />
       );
 
       views.forEach((view) => {
@@ -102,7 +103,7 @@ describe("BottomNavigationBar Mutation Coverage Tests", () => {
             ? /AI Protocol/i
             : view === "fullDocument"
               ? /Full Document View/i
-              : /Share Document/i,
+              : /Contribution View/i
         );
 
         if (view === activeView) {
@@ -122,21 +123,21 @@ describe("BottomNavigationBar Mutation Coverage Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />,
+      />
     );
 
     const aiButton = screen.getByTitle(/AI Protocol/i);
     const fullButton = screen.getByTitle(/Full Document View/i);
-    const shareButton = screen.getByTitle(/Share Document/i);
+    const contributionButton = screen.getByTitle(/Contribution View/i);
 
     await user.click(aiButton);
     await user.click(fullButton);
-    await user.click(shareButton);
+    await user.click(contributionButton);
 
     expect(onChangeViewMock).toHaveBeenCalledTimes(3);
     expect(onChangeViewMock).toHaveBeenCalledWith("ai");
     expect(onChangeViewMock).toHaveBeenCalledWith("fullDocument");
-    expect(onChangeViewMock).toHaveBeenCalledWith("share");
+    expect(onChangeViewMock).toHaveBeenCalledWith("contribution");
   });
 
   test("renders correctly when menuOpen is true", () => {
@@ -146,7 +147,7 @@ describe("BottomNavigationBar Mutation Coverage Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={true}
-      />,
+      />
     );
     expect(container.firstChild).toHaveClass("flex justify-around");
   });
@@ -158,7 +159,7 @@ describe("BottomNavigationBar Mutation Coverage Tests", () => {
         activeView="ai"
         onChangeView={onChangeViewMock}
         menuOpen={false}
-      />,
+      />
     );
     expect(container.firstChild).toHaveClass("flex flex-col items-center");
   });
