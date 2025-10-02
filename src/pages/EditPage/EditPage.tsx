@@ -15,6 +15,7 @@ import FullDocumentCard from "../../components/FullDocumentCard/FullDocumentCard
 import { ProjectService } from "../../utils/ProjectService";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import ContributionCard from "../../components/ContributionCard/ContributionCard";
 
 const EditPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -209,7 +210,7 @@ const EditPage = () => {
   const addChapter = (parentId: string | null, newNode: Node) => {
     const recursiveUpdate = (
       nodes: Node[],
-      parentId: string | null,
+      parentId: string | null
     ): Node[] => {
       return nodes.map((node) => {
         if (node.id === parentId) {
@@ -275,7 +276,7 @@ const EditPage = () => {
       setSelectedNode((prev) =>
         prev
           ? { ...prev, name: updatedNode.name, icon: updatedNode.icon }
-          : prev,
+          : prev
       );
     }
 
@@ -296,7 +297,7 @@ const EditPage = () => {
 
   const handleMoveNode = (
     draggedNodeId: string,
-    targetNodeId: string,
+    targetNodeId: string
     //asSibling: boolean = false
   ) => {
     const newNodes = [...nodes];
@@ -417,6 +418,8 @@ const EditPage = () => {
                     <AIProtocolCard />
                   ) : activeView === "fullDocument" ? (
                     <FullDocumentCard />
+                  ) : activeView === "contribution" ? (
+                    <ContributionCard />
                   ) : (
                     <div className="flex h-full items-center justify-center">
                       <p className="text-xl text-[#261e3b] dark:text-[#aaa6c3] leading-relaxed">
