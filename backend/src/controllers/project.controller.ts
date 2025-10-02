@@ -4,11 +4,29 @@ import NodeContent from "../models/NodeContent";
 import AiProtocol from "../models/AIProtocol";
 
 // Create a new Project entry
-export const createProject = async (req: Request, res: Response): Promise<void> => {
-  const { name, username, projectStructure, isPublic, tags, titleCommunityPage, category, typeOfDocument, authorName } = req.body;
+export const createProject = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const {
+    name,
+    username,
+    projectStructure,
+    isPublic,
+    tags,
+    titleCommunityPage,
+    category,
+    typeOfDocument,
+    authorName,
+  } = req.body;
 
   if (!name || !username || !projectStructure) {
-    res.status(400).json({ error: "Alle Pflichtfelder (name, username, projectStructure) sind erforderlich" });
+    res
+      .status(400)
+      .json({
+        error:
+          "Alle Pflichtfelder (name, username, projectStructure) sind erforderlich",
+      });
     return;
   }
 
@@ -75,26 +93,43 @@ export const getAllProjects = async (
 };
 
 // Update a specific project entry by ID
-export const updateProject = async (req: Request, res: Response): Promise<void> => {
+export const updateProject = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
-  const { name, username, projectStructure, isPublic, tags, titleCommunityPage, category, typeOfDocument, authorName } = req.body;
+  const {
+    name,
+    username,
+    projectStructure,
+    isPublic,
+    tags,
+    titleCommunityPage,
+    category,
+    typeOfDocument,
+    authorName,
+  } = req.body;
 
   if (!id) {
     res.status(400).json({ error: "Project ID is required" });
     return;
   }
 
-  // Pflichtfelder prüfen
-  if (!name || !username || !projectStructure) {
-    res.status(400).json({ error: "All fields are required" });
-    return;
-  }
-
   try {
     const updatedProject = await Project.findOneAndUpdate(
       { _id: id },
-      { name, username, projectStructure, isPublic, tags, titleCommunityPage, category, typeOfDocument, authorName },
-      { new: true }
+      {
+        ...(name && { name }),
+        ...(username && { username }),
+        ...(projectStructure && { projectStructure }),
+        ...(typeof isPublic !== "undefined" && { isPublic }),
+        ...(tags && { tags }),
+        ...(titleCommunityPage && { titleCommunityPage }),
+        ...(category && { category }),
+        ...(typeOfDocument && { typeOfDocument }),
+        ...(authorName && { authorName }),
+      },
+      { new: true },
     );
 
     if (!updatedProject) {
@@ -108,8 +143,6 @@ export const updateProject = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
 
 // Get all projects by username
 export const getProjectsByUsername = async (

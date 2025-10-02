@@ -25,12 +25,12 @@ export interface Project {
   name: string;
   username: string;
   projectStructure: Node[] | object; // optional: Mixed wie im Schema
-  isPublic: boolean;                // neu: public/private toggle
-  tags?: string[];                  // neu: Tags
-  titleCommunityPage?: string;      // neu: Community Page Title
-  category?: string;                // neu: Kategorie
-  typeOfDocument?: string;          // neu: Dokumenttyp
+  isPublic: boolean; // neu: public/private toggle
+  tags?: string[]; // neu: Tags
+  titleCommunityPage?: string; // neu: Community Page Title
+  category?: string; // neu: Kategorie
+  typeOfDocument?: string; // neu: Dokumenttyp
   createdAt?: string;
   updatedAt?: string;
-  authorName?: string;             // Optional: Name des Autors
+  authorName?: string; // Optional: Name des Autors
 }

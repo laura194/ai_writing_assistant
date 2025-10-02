@@ -29,7 +29,7 @@ const renderWithRouter = (projectId: string) => {
       <Routes>
         <Route path="/projects/:projectId" element={<ContributionCard />} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 
@@ -89,7 +89,7 @@ describe("ContributionCard", () => {
         "1",
         expect.objectContaining({
           titleCommunityPage: "Updated Title",
-        })
+        }),
       );
     });
   });
@@ -148,7 +148,7 @@ describe("ContributionCard", () => {
     await waitFor(() => {
       expect(ProjectService.updateProject).toHaveBeenCalledWith(
         "1",
-        expect.objectContaining({ authorName: "Anonymous" })
+        expect.objectContaining({ authorName: "Anonymous" }),
       );
     });
   });
