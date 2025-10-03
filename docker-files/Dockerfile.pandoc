@@ -5,7 +5,7 @@ USER root
 RUN apk add --no-cache \
     texlive \
     texlive-xetex \
-    texlive-latexextra \
+    texmf-dist-latexextra \
     fontconfig
 
 WORKDIR /workspace
