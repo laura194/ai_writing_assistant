@@ -3,7 +3,7 @@ services:
   pandoc:
     build:
       context: .
-      dockerfile: docker-files/Dockerfile.pandoc
+      dockerfile: Dockerfile.pandoc
     volumes:
-      - ./tmp:/workspace
+      - ../tmp:/workspace
     working_dir: /workspace
