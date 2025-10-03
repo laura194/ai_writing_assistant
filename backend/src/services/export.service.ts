@@ -5,94 +5,72 @@ import os from "os";
 
 export class ExportService {
   /**
-   * Converts LaTeX content to DOCX using Dockerized Pandoc
+   * Converts LaTeX content to DOCX using Dockerized Pandoc (following STDIN/STDOUT approach)
    */
   static async latexToDocx(latexContent: string): Promise<Buffer> {
     let tmpDir: string | null = null;
     
     try {
-      // Create temporary working directory
+      // Create temporary working directory for image downloads
       tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "aiwa-export-"));
-      const texFile = path.join(tmpDir, "document.tex");
-      const docxFile = path.join(tmpDir, "document.docx");
-
+      
       // Prepare LaTeX: download remote images and sanitize for Pandoc
-      const { processedLatex } = await this.prepareLatexResources(
-        latexContent,
-        tmpDir,
-      );
+      const { processedLatex } = await this.prepareLatexResources(latexContent, tmpDir);
       const sanitizedLatex = this.sanitizeLatexForPandoc(processedLatex);
 
-      // Write LaTeX content to file
-      await fs.writeFile(texFile, sanitizedLatex);
+      // Use Dockerized Pandoc following the stdin/stdout structure
+      const buffer = await this.runPandocInDocker(sanitizedLatex, tmpDir);
 
-      // Use Dockerized Pandoc with cross-platform path handling
-      await this.runPandocInDocker(tmpDir);
-
-      // Verify the output file exists and has content
-      const stats = await fs.stat(docxFile);
-      if (stats.size === 0) {
+      if (buffer.length === 0) {
         throw new Error("Generated DOCX file is empty");
       }
-
-      // Read the generated docx
-      const buffer = await fs.readFile(docxFile);
 
       return buffer;
     } catch (error) {
       console.error("Error in latexToDocx:", error);
       throw error;
     } finally {
-      // Always clean up tmp directory
+      // Cleanup tmp directory
       if (tmpDir) {
-        await fs
-          .rm(tmpDir, { recursive: true, force: true })
-          .catch((e) => console.error("Error deleting tmp dir:", tmpDir, e));
+        await fs.rm(tmpDir, { recursive: true, force: true })
+          .catch(e => console.error("Cleanup error:", e));
       }
     }
   }
 
   /**
-   * Run Pandoc conversion inside Docker container with cross-platform path handling
+   * Run Pandoc in Docker using stdin/stdout (most cross-platform)
    */
-  private static async runPandocInDocker(tmpDir: string): Promise<void> {
+  private static async runPandocInDocker(latexContent: string, tmpDir: string): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-      // Convert Windows paths to Docker-compatible paths
-      const dockerVolumePath = this.convertPathToDockerVolume(tmpDir);
-      
-      // Docker command arguments
       const dockerArgs = [
         "run",
         "--rm",
-        "-v",
-        `${dockerVolumePath}:/workspace`,
-        "pandoc-core", // Your Docker image name
-        "-f",
-        "latex",
-        "-t",
-        "docx",
+        "-i",
+        "-v", `${tmpDir}:${tmpDir}`, // Mount the temporary directory
+        "-w", tmpDir, // Set the working directory in the container
+        "pandoc-core",
+        "-f", "latex",
+        "-t", "docx", 
         "-s",
         "--wrap=none",
         "--citeproc",
         "--number-sections",
-        "--resource-path=/workspace",
-        "-o",
-        "/workspace/document.docx",
-        "/workspace/document.tex",
+        "-o", "-",  // Output to stdout
+        "-"         // Input from stdin
       ];
 
-      console.log("Running Docker command: docker", dockerArgs.join(" "));
+      console.log("Running Docker Pandoc conversion...");
 
       const proc = spawn("docker", dockerArgs, {
-        // Use shell on Windows for better path handling
-        shell: process.platform === 'win32'
+        stdio: ['pipe', 'pipe', 'pipe']
       });
-      
-      let stdout = "";
+
+      const chunks: Buffer[] = [];
       let stderr = "";
 
-      proc.stdout.on("data", (data: Buffer) => {
-        stdout += data.toString();
+      proc.stdout.on("data", (chunk: Buffer) => {
+        chunks.push(chunk);
       });
 
       proc.stderr.on("data", (data: Buffer) => {
@@ -106,79 +84,13 @@ export class ExportService {
 
       proc.on("close", (code) => {
         if (code === 0) {
-          console.log("Pandoc Docker conversion completed successfully");
-          resolve();
+          const buffer = Buffer.concat(chunks);
+          console.log(`Pandoc conversion successful, output size: ${buffer.length} bytes`);
+          resolve(buffer);
         } else {
           console.error("Pandoc Docker conversion failed:");
-          console.error("STDOUT:", stdout);
           console.error("STDERR:", stderr);
           reject(new Error(`Pandoc Docker exited with code ${code}: ${stderr}`));
-        }
-      });
-    });
-  }
-
-  /**
-   * Convert Windows paths to Docker volume compatible paths
-   */
-  private static convertPathToDockerVolume(localPath: string): string {
-    if (process.platform === 'win32') {
-      // Convert Windows path like C:\Users\name\temp to //c/Users/name/temp
-      const driveLetter = localPath.substring(0, 1).toLowerCase();
-      const pathWithoutDrive = localPath.substring(3); // Remove "C:\"
-      const unixStylePath = pathWithoutDrive.replace(/\\/g, '/');
-      return `//${driveLetter}${unixStylePath}`;
-    } else {
-      // Unix/Mac paths work directly
-      return localPath;
-    }
-  }
-
-  /**
-   * Alternative: Use stdin/stdout to avoid path issues entirely (most cross-platform)
-   */
-  private static async runPandocViaStdio(latexContent: string): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const dockerArgs = [
-        "run",
-        "--rm",
-        "-i",
-        "pandoc-core",
-        "-f", "latex",
-        "-t", "docx",
-        "-s", "--wrap=none", "--citeproc", "--number-sections",
-        "-o", "-",  // Output to stdout
-        "-"         // Input from stdin
-      ];
-
-      const proc = spawn("docker", dockerArgs, {
-        stdio: ['pipe', 'pipe', 'pipe']
-      });
-
-      const chunks: Buffer[] = [];
-      
-      proc.stdout.on("data", (chunk: Buffer) => {
-        chunks.push(chunk);
-      });
-
-      proc.stderr.on("data", (data: Buffer) => {
-        console.error("Pandoc stderr:", data.toString());
-      });
-
-      proc.on("error", (err) => {
-        reject(new Error(`Docker execution failed: ${err.message}`));
-      });
-
-      proc.on("close", (code) => {
-        if (code === 0) {
-          const buffer = Buffer.concat(chunks);
-          if (buffer.length === 0) {
-            reject(new Error("Generated DOCX file is empty"));
-          } else {
-            resolve(buffer);
-          }
-        } else {
-          reject(new Error(`Pandoc Docker exited with code ${code}`));
         }
       });
 
@@ -188,30 +100,6 @@ export class ExportService {
     });
   }
 
-  /**
-   * Main method using the safest approach (stdio)
-   */
-  static async latexToDocxSafe(latexContent: string): Promise<Buffer> {
-    try {
-      // Prepare LaTeX content
-      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "aiwa-export-"));
-      const { processedLatex } = await this.prepareLatexResources(latexContent, tmpDir);
-      const sanitizedLatex = this.sanitizeLatexForPandoc(processedLatex);
-
-      // Use stdin/stdout approach which is most cross-platform
-      const buffer = await this.runPandocViaStdio(sanitizedLatex);
-
-      // Cleanup
-      await fs.rm(tmpDir, { recursive: true, force: true })
-        .catch(e => console.error("Cleanup error:", e));
-
-      return buffer;
-    } catch (error) {
-      console.error("Error in latexToDocxSafe:", error);
-      throw error;
-    }
-  }
-
   private static sanitizeLatexForPandoc(content: string): string {
     return content
       .replace(/\\usepackage\{biblatex\}\s*/g, "")
@@ -219,7 +107,7 @@ export class ExportService {
   }
 
   /**
-   * This function downloads remote images referenced in \includegraphics and rewrite to local paths
+   * Download remote images and rewrite to local paths
    */
   private static async prepareLatexResources(
     content: string,
@@ -263,21 +151,15 @@ export class ExportService {
           await fs.writeFile(item.localPath, Buffer.from(arrayBuffer));
           downloadedFiles.push(item.localPath);
 
-          const escapedUrl = item.original.replace(
-            /[.*+?^${}()|[\]\\]/g,
-            "\\$&",
-          );
+          // Replace URL with local path in LaTeX content
+          const escapedUrl = item.original.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
           const pattern = new RegExp(
-            String.raw`(\\includegraphics(?:\[[^\]]*\])?\{)` +
-              escapedUrl +
-              String.raw`(\})`,
+            String.raw`(\\includegraphics(?:\[[^\]]*\])?\{)` + escapedUrl + String.raw`(\})`,
             "g",
           );
           processed = processed.replace(pattern, `$1${item.localPath}$2`);
         } else {
-          console.warn(
-            "Global fetch is not available; skipping remote image download.",
-          );
+          console.warn("Global fetch is not available; skipping remote image download.");
         }
       } catch (e) {
         console.error("Error downloading image:", item.original, e);
