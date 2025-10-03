@@ -26,8 +26,8 @@ const BottomNavigationBar = ({
     },
     {
       icon: <Upload className="w-5 h-5" />,
-      view: "share",
-      label: "Share Document",
+      view: "contribution",
+      label: "Contribution View",
     },
   ];
 

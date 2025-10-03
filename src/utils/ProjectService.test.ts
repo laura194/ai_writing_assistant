@@ -41,6 +41,7 @@ describe("ProjectService", () => {
         name: "Test Project",
         username: "alice",
         projectStructure: [],
+        isPublic: false,
       };
 
       const created: Project = {
@@ -67,6 +68,7 @@ describe("ProjectService", () => {
           name: "X",
           username: "y",
           projectStructure: [],
+          isPublic: false,
         }),
       ).rejects.toThrow(err);
 
@@ -81,6 +83,7 @@ describe("ProjectService", () => {
         name: "Proj",
         username: "bob",
         projectStructure: [],
+        isPublic: false,
       };
       mockedAxios.get.mockResolvedValueOnce(makeAxiosResponse(project));
 
@@ -108,6 +111,7 @@ describe("ProjectService", () => {
         name: "Updated",
         username: "bob",
         projectStructure: [],
+        isPublic: false,
       };
 
       mockedAxios.put.mockResolvedValueOnce(makeAxiosResponse(updated));
@@ -134,8 +138,20 @@ describe("ProjectService", () => {
   describe("getProjectsByUsername", () => {
     it("fetches projects by username", async () => {
       const projects: Project[] = [
-        { _id: "1", name: "P1", username: "bob", projectStructure: [] },
-        { _id: "2", name: "P2", username: "bob", projectStructure: [] },
+        {
+          _id: "1",
+          name: "P1",
+          username: "bob",
+          projectStructure: [],
+          isPublic: false,
+        },
+        {
+          _id: "2",
+          name: "P2",
+          username: "bob",
+          projectStructure: [],
+          isPublic: false,
+        },
       ];
       mockedAxios.get.mockResolvedValueOnce(makeAxiosResponse(projects));
 
@@ -177,7 +193,13 @@ describe("ProjectService", () => {
   describe("getRecentProjectsByUsername", () => {
     it("fetches recent projects", async () => {
       const projects: Project[] = [
-        { _id: "3", name: "Recent", username: "bob", projectStructure: [] },
+        {
+          _id: "3",
+          name: "Recent",
+          username: "bob",
+          projectStructure: [],
+          isPublic: false,
+        },
       ];
       mockedAxios.get.mockResolvedValueOnce(makeAxiosResponse(projects));
 

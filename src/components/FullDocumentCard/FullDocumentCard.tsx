@@ -61,10 +61,12 @@ const FullDocumentCard = () => {
     const fetchStructure = async () => {
       try {
         const data = await ProjectService.getProjectById(projectId); // Use the projectId from URL
-        if (data && data.projectStructure) {
-          setStructure(data.projectStructure);
+
+        if (data && Array.isArray(data.projectStructure)) {
+          setStructure(data.projectStructure as StructureNode[]);
         } else {
-          setError("Project structure is empty or unavailable.”");
+          setError("Project structure is empty or unavailable.");
+          setStructure([]); // Fallback, damit der State korrekt bleibt
         }
       } catch {
         setError("Error loading the project structure.");

@@ -96,11 +96,15 @@ const ProjectOverview = () => {
   // Methode zum Aktualisieren des Projekts
   const updateProjectName = async (project: Project) => {
     try {
-      // Kopiere die projectStructure, um den Namen des ersten Nodes zu aktualisieren
-      const updatedProjectStructure = [...project.projectStructure];
+      // Kopiere die projectStructure, falls vorhanden
+      const updatedProjectStructure = Array.isArray(project.projectStructure)
+        ? [...project.projectStructure]
+        : [];
+
       const firstNode = updatedProjectStructure.find(
         (structure) => structure.id === "1",
       );
+
       if (firstNode) {
         firstNode.name = editedName; // Setze den neuen Projektnamen
       }
@@ -110,6 +114,7 @@ const ProjectOverview = () => {
         name: editedName,
         username: user?.username || "",
         projectStructure: updatedProjectStructure, // Sende die aktualisierte Struktur
+        isPublic: project.isPublic, // wichtig, falls dein Typ 'Project' das verlangt
       });
 
       // Projekte im Zustand aktualisieren

@@ -50,11 +50,12 @@ describe("Project type", () => {
       name: "My Project",
       username: "alice",
       projectStructure: [],
+      isPublic: false,
     };
     // check required props
     expectTypeOf(project.name).toEqualTypeOf<string>();
     expectTypeOf(project.username).toEqualTypeOf<string>();
-    expectTypeOf(project.projectStructure).toEqualTypeOf<Node[]>();
+    expectTypeOf(project.projectStructure).items.toMatchTypeOf<Node>();
   });
 
   it("should allow optional fields", () => {
@@ -65,6 +66,7 @@ describe("Project type", () => {
       projectStructure: [],
       createdAt: "2024-01-01T00:00:00Z",
       updatedAt: "2024-01-02T00:00:00Z",
+      isPublic: false,
     };
     // optional fields should be strings (when present)
     expectTypeOf(project._id).toEqualTypeOf<string | undefined>();

@@ -15,6 +15,7 @@ import FullDocumentCard from "../../components/FullDocumentCard/FullDocumentCard
 import { ProjectService } from "../../utils/ProjectService";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import ContributionCard from "../../components/ContributionCard/ContributionCard";
 
 const EditPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -417,6 +418,8 @@ const EditPage = () => {
                     <AIProtocolCard />
                   ) : activeView === "fullDocument" ? (
                     <FullDocumentCard />
+                  ) : activeView === "contribution" ? (
+                    <ContributionCard />
                   ) : (
                     <div className="flex h-full items-center justify-center">
                       <p className="text-xl text-[#261e3b] dark:text-[#aaa6c3] leading-relaxed">
