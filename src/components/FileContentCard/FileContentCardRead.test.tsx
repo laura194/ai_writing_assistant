@@ -29,7 +29,7 @@ describe("FileContentCardRead", () => {
     expect(screen.getByTestId("icon")).toBeInTheDocument();
 
     const ta = screen.getByPlaceholderText(
-      /Write your content here/i
+      /Write your content here/i,
     ) as HTMLTextAreaElement;
     expect(ta.value).toBe("Hello world");
   });
@@ -38,7 +38,7 @@ describe("FileContentCardRead", () => {
     const node = { ...baseNode, content: undefined };
     render(<FileContentCardRead node={node as any} />);
     const ta = screen.getByPlaceholderText(
-      /Write your content here/i
+      /Write your content here/i,
     ) as HTMLTextAreaElement;
     expect(ta.value).toBe("...");
   });
@@ -48,7 +48,7 @@ describe("FileContentCardRead", () => {
     render(<FileContentCardRead node={baseNode as any} />);
 
     const ta = screen.getByPlaceholderText(
-      /Write your content here/i
+      /Write your content here/i,
     ) as HTMLTextAreaElement;
     await user.clear(ta);
     await user.type(ta, "New content here");
@@ -58,7 +58,7 @@ describe("FileContentCardRead", () => {
   it("updates content when new node prop arrives", async () => {
     const { rerender } = render(<FileContentCardRead node={baseNode as any} />);
     const ta = screen.getByPlaceholderText(
-      /Write your content here/i
+      /Write your content here/i,
     ) as HTMLTextAreaElement;
 
     expect(ta.value).toBe("Hello world");
@@ -74,7 +74,7 @@ describe("FileContentCardRead", () => {
   it("syncScroll copies textarea scrollTop to overlay", () => {
     render(<FileContentCardRead node={baseNode as any} />);
     const ta = screen.getByPlaceholderText(
-      /Write your content here/i
+      /Write your content here/i,
     ) as HTMLTextAreaElement;
 
     // Finde overlayRef -> parent von Textarea
