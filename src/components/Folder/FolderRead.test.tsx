@@ -41,13 +41,13 @@ const baseNode = (overrides?: Partial<Node>): Node => ({
 
 const setup = (
   node: Node,
-  props?: Partial<React.ComponentProps<typeof FolderRead>>
+  props?: Partial<React.ComponentProps<typeof FolderRead>>,
 ) => {
   const onNodeClick = vi.fn();
   const utils = render(
     <ul>
       <FolderRead node={node} onNodeClick={onNodeClick} {...props} />
-    </ul>
+    </ul>,
   );
   return { ...utils, onNodeClick };
 };
@@ -64,7 +64,7 @@ describe("FolderRead", () => {
     expect(screen.getByText("Chapter 1")).toBeInTheDocument();
     expect(screen.getByTestId("node-icon")).toHaveAttribute(
       "data-icon",
-      "text"
+      "text",
     );
   });
 
@@ -83,7 +83,7 @@ describe("FolderRead", () => {
     // selected version renders with gradient underline span
     expect(screen.getByText("Selected")).toBeInTheDocument();
     expect(screen.getByText("Selected").closest("span")).toHaveClass(
-      "relative"
+      "relative",
     );
   });
 

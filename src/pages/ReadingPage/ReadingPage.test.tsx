@@ -123,7 +123,7 @@ describe("ReadingPage", () => {
     await waitFor(() => expect(getOrCreateNodeContent).toHaveBeenCalled());
     expect(store.get("selectedNodeId_p1")).toBe("2");
     expect(await screen.findByTestId("file-card")).toHaveTextContent(
-      "intro-content"
+      "intro-content",
     );
   });
 
@@ -134,7 +134,7 @@ describe("ReadingPage", () => {
     fireEvent.click(screen.getByTestId("folder-select-1"));
     expect(getOrCreateNodeContent).not.toHaveBeenCalled();
     expect(
-      screen.getByText(/Select an element on the left/i)
+      screen.getByText(/Select an element on the left/i),
     ).toBeInTheDocument();
   });
 
@@ -164,7 +164,7 @@ describe("ReadingPage", () => {
     store.set("selectedNodeId_p1", "2");
     render(<ReadingPage />);
     await waitFor(() =>
-      expect(getNodeContentById).toHaveBeenCalledWith("2", "p1")
+      expect(getNodeContentById).toHaveBeenCalledWith("2", "p1"),
     );
     expect(await screen.findByTestId("file-card")).toBeInTheDocument();
   });
@@ -176,7 +176,7 @@ describe("ReadingPage", () => {
 
     await waitFor(() => expect(getNodeContentById).toHaveBeenCalled());
     expect(
-      await screen.findByText(/Unknown view selected/i)
+      await screen.findByText(/Unknown view selected/i),
     ).toBeInTheDocument();
   });
 });
