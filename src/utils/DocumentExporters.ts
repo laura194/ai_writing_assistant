@@ -1,4 +1,3 @@
-import jsPDF from "jspdf";
 import { saveAs } from "file-saver";
 import { IAiProtocolEntry } from "../models/IAITypes";
 
@@ -10,11 +9,10 @@ import { IAiProtocolEntry } from "../models/IAITypes";
  * @returns {void}
  *
  * Utilities include:
- * - Word export using backend conversion of LaTeX
- * - PDF export using `jsPDF`
+ * - Word and PDF exports using backend conversion of LaTeX
  * - LaTeX export with support for equations, figures, tables, and citations
  *
- * Use `handleExportWord`, `handleExportPDF`, or `handleExportLATEX` to trigger the export.
+ * Use `handleExportWord`, `handleExportPDF`, or `handleExportLATEX` to trigger the export fuctions.
  */
 
 interface StructureNode {
@@ -139,133 +137,49 @@ export const handleExportWord = async (
   }
 };
 
-export const handleExportPDF = (
+export const handleExportPDF = async ( 
   structure: StructureNode[],
   nodeContents: NodeContent[],
   aiProtocols: IAiProtocolEntry[] = [],
 ) => {
-  const doc = new jsPDF();
-  const pageHeight = doc.internal.pageSize.height;
-  let y = 10;
+  try {
+    const latexContent = generateLaTeXContent(
+      structure,
+      nodeContents,
+      aiProtocols,
+      false, // This export is for PDF, not Word
+    );
+    console.log("Generated LaTeX content for PDF:", latexContent.substring(0, 100));
 
-  structure.forEach((node) => {
-    if (y + 10 > pageHeight) {
-      doc.addPage();
-      y = 10;
-    }
+    const apiBaseUrl =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+    console.log("API Base URL:", apiBaseUrl);
 
-    doc.setFontSize(14);
-    doc.text(node.name, 10, y);
-    y += 10;
-
-    const content = nodeContents.find((n) => n.nodeId === node.id)?.content;
-    if (content) {
-      const splitContent = doc.splitTextToSize(content, 180);
-      splitContent.forEach((line: string | string[]) => {
-        if (y + 10 > pageHeight) {
-          doc.addPage();
-          y = 10;
-        }
-        doc.setFontSize(12);
-        doc.text(line, 10, y);
-        y += 10;
-      });
-    }
-
-    if (node.nodes) {
-      node.nodes.forEach((childNode) => {
-        if (y + 10 > pageHeight) {
-          doc.addPage();
-          y = 10;
-        }
-
-        doc.setFontSize(12);
-        doc.text(`- ${childNode.name}`, 15, y);
-        y += 10;
-
-        const childContent = nodeContents.find(
-          (n) => n.nodeId === childNode.id,
-        )?.content;
-        if (childContent) {
-          const splitChildContent = doc.splitTextToSize(childContent, 180);
-          splitChildContent.forEach((line: string | string[]) => {
-            if (y + 10 > pageHeight) {
-              doc.addPage();
-              y = 10;
-            }
-            doc.setFontSize(10);
-            doc.text(line, 20, y);
-            y += 10;
-          });
-        }
-      });
-    }
-  });
-
-  // Appendix: AI Protocol
-  doc.addPage();
-  y = 10;
-  doc.setFontSize(14);
-  doc.text("Appendix: AI Protocol", 10, y);
-  y += 10;
-
-  if (!aiProtocols || aiProtocols.length === 0) {
-    doc.setFontSize(12);
-    doc.text("No entries have been created in the AI protocol yet.", 10, y);
-  } else {
-    const colWidths = [25, 35, 35, 55, 15, 15];
-    const colXs = [10];
-    for (let i = 1; i < colWidths.length; i++) {
-      colXs[i] = colXs[i - 1] + colWidths[i - 1];
-    }
-
-    doc.setFontSize(10);
-    const headers = [
-      "Name",
-      "Usage",
-      "Affected sections",
-      "Notes",
-      "Created at",
-      "Updated at",
-    ];
-    headers.forEach((h, i) => {
-      doc.text(h, colXs[i] + 1, y);
+    const response = await fetch(`${apiBaseUrl}/api/export/pdf`, { // New endpoint added in backend
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ latexContent }),
     });
-    y += 6;
 
-    aiProtocols.forEach((p) => {
-      const cells = [
-        p.aiName || "",
-        p.usageForm || "",
-        p.affectedParts || "",
-        p.remarks || "",
-        formatDate(p.createdAt || ""),
-        formatDate(p.updatedAt || ""),
-      ];
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Server response:", errorText);
+      throw new Error(`Server returned ${response.status}: ${errorText}`);
+    }
 
-      const linesArray = cells.map((cell, i) =>
-        doc.splitTextToSize(cell, colWidths[i] - 2),
-      );
-      const maxLines = Math.max(...linesArray.map((arr) => arr.length));
+    const blob = await response.blob();
+    if (blob.size === 0) {
+      throw new Error("Received empty file from server");
+    }
 
-      for (let lineIdx = 0; lineIdx < maxLines; lineIdx++) {
-        if (y + 6 > pageHeight) {
-          doc.addPage();
-          y = 10;
-          doc.setFontSize(10);
-        }
-        linesArray.forEach((arr, i) => {
-          const lineText = arr[lineIdx] || "";
-          doc.text(lineText, colXs[i] + 1, y);
-        });
-        y += 6;
-      }
-
-      y += 2; // spacing between rows
-    });
+    console.log("Conversion successful, saving PDF document...");
+    saveAs(blob, "full_document.pdf");
+  } catch (error) {
+    console.error("Error exporting to PDF:", error);
+    throw error;
   }
-
-  doc.save("full_document.pdf");
 };
 
 export const handleExportLATEX = (
@@ -419,7 +333,3 @@ export {
   formatDate,
   buildAiProtocolLatexAppendix,
 };
-
-// TODO PDF Export Improvements:
-// 1. PDF export use latex export function first then convert to PDF to have a better structured look.
-// 2. It should include Works Cited chapter, and ai protocol as a table in appendix even if not present in the structure.
