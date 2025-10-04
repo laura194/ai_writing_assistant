@@ -13,6 +13,6 @@ router.use((req, res, next) => {
 });
 
 router.post("/word", exportWord);
-router.post('/pdf', exportPDF);
+router.post("/pdf", exportPDF);
 
 export default router;

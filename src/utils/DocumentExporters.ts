@@ -137,7 +137,7 @@ export const handleExportWord = async (
   }
 };
 
-export const handleExportPDF = async ( 
+export const handleExportPDF = async (
   structure: StructureNode[],
   nodeContents: NodeContent[],
   aiProtocols: IAiProtocolEntry[] = [],
@@ -149,13 +149,17 @@ export const handleExportPDF = async (
       aiProtocols,
       false, // This export is for PDF, not Word
     );
-    console.log("Generated LaTeX content for PDF:", latexContent.substring(0, 100));
+    console.log(
+      "Generated LaTeX content for PDF:",
+      latexContent.substring(0, 100),
+    );
 
     const apiBaseUrl =
       import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
     console.log("API Base URL:", apiBaseUrl);
 
-    const response = await fetch(`${apiBaseUrl}/api/export/pdf`, { // New endpoint added in backend
+    const response = await fetch(`${apiBaseUrl}/api/export/pdf`, {
+      // New endpoint added in backend
       method: "POST",
       headers: {
         "Content-Type": "application/json",

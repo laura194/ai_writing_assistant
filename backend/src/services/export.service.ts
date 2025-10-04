@@ -68,7 +68,7 @@ export class ExportService {
       );
 
       // Create a dummy references.bib file, as biblatex is used in content
-      await this.createReferencesBib(tmpDir); 
+      await this.createReferencesBib(tmpDir);
 
       // Pandoc will use `--pdf-engine` to invoke xelatex, which will process biblatex.
       const buffer = await this.runPandocInDocker(
@@ -100,17 +100,17 @@ export class ExportService {
 
   // Helper function to normalize Windows paths for Docker
   private static normalizePathForDocker(filePath: string): string {
-      if (os.platform() === 'win32') {
-          // Convert Windows backslashes to forward slashes
-          let dockerPath = filePath.replace(/\\/g, '/');
-          // If it's a drive letter path (e.g., C:/...)
-          if (dockerPath.match(/^[a-zA-Z]:\//)) {
-              // Convert C:/Users to /c/Users
-              dockerPath = `/${dockerPath.charAt(0).toLowerCase()}${dockerPath.substring(1)}`;
-          }
-          return dockerPath;
+    if (os.platform() === "win32") {
+      // Convert Windows backslashes to forward slashes
+      let dockerPath = filePath.replace(/\\/g, "/");
+      // If it's a drive letter path (e.g., C:/...)
+      if (dockerPath.match(/^[a-zA-Z]:\//)) {
+        // Convert C:/Users to /c/Users
+        dockerPath = `/${dockerPath.charAt(0).toLowerCase()}${dockerPath.substring(1)}`;
       }
-      return filePath; // macOS/Linux paths are fine as is
+      return dockerPath;
+    }
+    return filePath; // macOS/Linux paths are fine as is
   }
 
   /**

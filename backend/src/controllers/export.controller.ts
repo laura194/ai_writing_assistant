@@ -52,10 +52,7 @@ export const exportWord = async (
   }
 };
 
-export const exportPDF = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const exportPDF = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log("Starting PDF export process...");
 
