@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { exportWord } from "../controllers/export.controller";
+import { exportWord, exportPDF } from "../controllers/export.controller";
 
 const router = Router();
 
@@ -13,5 +13,6 @@ router.use((req, res, next) => {
 });
 
 router.post("/word", exportWord);
+router.post('/pdf', exportPDF);
 
 export default router;
