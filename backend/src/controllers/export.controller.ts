@@ -51,3 +51,54 @@ export const exportWord = async (
     });
   }
 };
+
+export const exportPDF = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    console.log("Starting PDF export process...");
+
+    const { latexContent } = req.body;
+    if (!latexContent) {
+      console.warn("Missing LaTeX content in request for PDF export");
+      res.status(400).json({ error: "latexContent is required" });
+      return;
+    }
+
+    console.log("LaTeX content length (PDF):", latexContent.length);
+    console.log("First 100 chars (PDF):", latexContent.substring(0, 100));
+
+    console.log("Converting to PDF...");
+    const buffer = await ExportService.latexToPdf(latexContent); // Call new service method
+
+    console.log("Conversion successful, buffer size (PDF):", buffer.length);
+
+    res.setHeader("Content-Disposition", "attachment; filename=document.pdf");
+    res.setHeader(
+      "Content-Type",
+      "application/pdf", // Content-Type for PDF
+    );
+
+    console.log("Sending PDF response...");
+    res.send(buffer);
+    console.log("PDF response sent successfully");
+  } catch (error: unknown) {
+    console.error("Error in exportPDF:", {
+      error,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
+    res.status(500).json({
+      error: "Failed to convert document to PDF",
+      details: error instanceof Error ? error.message : String(error),
+      stack:
+        process.env.NODE_ENV !== "production"
+          ? error instanceof Error
+            ? error.stack
+            : undefined
+          : undefined,
+    });
+  }
+};
