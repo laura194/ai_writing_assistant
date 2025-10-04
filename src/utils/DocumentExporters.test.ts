@@ -137,7 +137,13 @@ describe("export utilities", () => {
     });
   });
 
-  it("handleExportWord - builds document and saves as .docx", async () => {
+  it("handleExportWord - fetches document from backend and saves as .docx", async () => {
+    // Mock fetch directly to solve msw/blob issues
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(new Blob(["fake docx content"])),
+    });
+
     const structure = [
       {
         id: "n1",
@@ -150,22 +156,23 @@ describe("export utilities", () => {
       { nodeId: "n1a", name: "Child A", content: "Child content" },
     ];
 
-    await handleExportWord(structure, nodeContents);
+    await handleExportWord(structure, nodeContents, []);
 
-    expect(Packer.toBlob).toHaveBeenCalled();
+    // Check that fetch was called correctly
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://localhost:5001/api/export/word",
+      expect.any(Object),
+    );
+
+    // Check that saveAs was called
     expect(saveAs).toHaveBeenCalledTimes(1);
 
-    const [_blobArg, filename] = (saveAs as any).mock.calls[0];
+    const [blobArg, filename] = (saveAs as any).mock.calls[0];
     expect(filename).toBe("full_document.docx");
 
-    await new Promise((r) => setTimeout(r, 0));
-
-    const saved = (saveAs as any).__saved as {
-      last?: { blob: any; filename: string; text?: string };
-    };
-    expect(saved.last).toBeDefined();
-    expect(saved.last!.filename).toBe("full_document.docx");
-    expect(saved.last!.text).toContain("mock-docx");
+    // Directly check the content of the blob passed to saveAs
+    const blobText = await blobArg.text();
+    expect(blobText).toContain("fake docx content");
   });
 
   it("handleExportPDF - writes node names, contents and child nodes then saves", () => {
