@@ -413,6 +413,13 @@ function formatDate(date?: string | Date): string {
   }
 }
 
+export {
+  escapeLatex,
+  parseRichContent,
+  formatDate,
+  buildAiProtocolLatexAppendix
+};
+
 // TODO PDF Export Improvements:
 // 1. PDF export use latex export function first then convert to PDF to have a better structured look.
 // 2. It should include Works Cited chapter, and ai protocol as a table in appendix even if not present in the structure.
