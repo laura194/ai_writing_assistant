@@ -102,7 +102,9 @@ describe("ExportService", () => {
     });
 
     it("should throw an error if pandoc conversion fails", async () => {
-      const promise = ExportService.latexToDocx("...");
+      const promise = ExportService.latexToDocx(
+        "\\documentclass{article}\\begin{document}Test\\end{document}",
+      );
 
       await new Promise((resolve) => process.nextTick(resolve));
 
@@ -111,8 +113,9 @@ describe("ExportService", () => {
       mockProcess.stderr.emit("end");
       mockProcess.emit("close", 1);
 
+      // Updated error message expectation to match current implementation
       await expect(promise).rejects.toThrow(
-        "Pandoc Docker exited with code 1: Conversion failed",
+        "Pandoc Docker exited with code 1 for docx: Conversion failed",
       );
       expect(fs.rm).toHaveBeenCalled();
     });
