@@ -24,8 +24,7 @@ import { IAiProtocolEntry } from "../../models/IAITypes";
  * - Fetches a hierarchical project structure and content from backend services.
  * - Renders the document structure dynamically in HTML format.
  * - Allows exporting the full document in multiple formats via buttons:
- *   - Word (.docx) using `docx`
- *   - PDF (.pdf) using `jsPDF`
+ *   - Word and PDF using backend conversion of LaTeX to DOCX/PDF
  *   - LaTeX (.tex) with support for figures, tables, math equations, and citations
  */
 
