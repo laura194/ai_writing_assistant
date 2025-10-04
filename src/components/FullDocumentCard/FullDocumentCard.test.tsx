@@ -351,6 +351,8 @@ describe("FullDocumentCard", () => {
 
     // After data resolves, loading should be gone
     await waitFor(() => screen.getByTitle(/Export as Word/i));
+    // Add this small delay to ensure React has re-rendered
+    await new Promise((resolve) => setTimeout(resolve, 100));
     expect(screen.queryByText(/Loading…/i)).not.toBeInTheDocument();
   });
 
