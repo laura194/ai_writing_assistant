@@ -1,6 +1,14 @@
 /// <reference types="vitest" />
 
-import { vi, describe, it, expect, beforeEach, afterEach, type Mock } from "vitest";
+import {
+  vi,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  type Mock,
+} from "vitest";
 import { ExportService } from "./export.service";
 import { spawn } from "child_process";
 import fs from "fs/promises";
@@ -24,13 +32,13 @@ class MockProcess extends EventEmitter {
     super();
     this.stdout = new Readable({ read() {} });
     this.stderr = new Readable({ read() {} });
-    
+
     // Capture all writes to stdin
-    this.stdin = new Writable({ 
+    this.stdin = new Writable({
       write: (chunk: any, _encoding: string, callback: () => void) => {
         this.stdinWriteCalls.push(chunk.toString());
         callback();
-      }
+      },
     });
   }
 
@@ -39,7 +47,7 @@ class MockProcess extends EventEmitter {
   }
 
   getStdinContent(): string {
-    return this.stdinWriteCalls.join('');
+    return this.stdinWriteCalls.join("");
   }
 }
 
@@ -74,7 +82,7 @@ describe("ExportService", () => {
       );
 
       // Wait for the next tick to ensure processing starts
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
 
       // Simulate the process running and emitting data
       mockProcess.stdout.push(Buffer.from("fake docx"));
@@ -88,7 +96,7 @@ describe("ExportService", () => {
         recursive: true,
         force: true,
       });
-      
+
       // Check that LaTeX was written to stdin
       expect(mockProcess.stdinWriteCalls.length).toBeGreaterThan(0);
     });
@@ -96,11 +104,11 @@ describe("ExportService", () => {
     it("should throw an error if pandoc conversion fails", async () => {
       const promise = ExportService.latexToDocx("...");
 
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
 
       // Simulate the process failing
-      mockProcess.stderr.emit('data', Buffer.from("Conversion failed"));
-      mockProcess.stderr.emit('end');
+      mockProcess.stderr.emit("data", Buffer.from("Conversion failed"));
+      mockProcess.stderr.emit("end");
       mockProcess.emit("close", 1);
 
       await expect(promise).rejects.toThrow(
@@ -123,7 +131,7 @@ describe("ExportService", () => {
     it("should download remote images and rewrite paths", async () => {
       const latexWithImage = "\\includegraphics{https://example.com/image.png}";
       const fakeImageBuffer = Buffer.from("fake image data");
-      
+
       // Mock fetch to resolve immediately with a proper ArrayBuffer
       const mockArrayBuffer = fakeImageBuffer.buffer;
       (global.fetch as Mock).mockResolvedValue({
@@ -135,8 +143,8 @@ describe("ExportService", () => {
 
       // Wait for all async operations to complete - including image downloads
       // Use multiple event loop cycles to ensure all promises resolve
-      await new Promise(resolve => setImmediate(resolve));
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       // Simulate success
       mockProcess.stdout.push(Buffer.from("fake docx"));
@@ -146,8 +154,10 @@ describe("ExportService", () => {
       const result = await promise;
 
       expect(result).toEqual(Buffer.from("fake docx"));
-      expect(global.fetch).toHaveBeenCalledWith("https://example.com/image.png");
-      
+      expect(global.fetch).toHaveBeenCalledWith(
+        "https://example.com/image.png",
+      );
+
       // Check if writeFile was called for the downloaded image
       // The image should be downloaded and saved to the temp directory
       expect(fs.writeFile).toHaveBeenCalledWith(
@@ -162,11 +172,11 @@ describe("ExportService", () => {
 
     it("should sanitize biblatex commands", async () => {
       const latexWithBib = "\\usepackage{biblatex}\\addbibresource{refs.bib}";
-      
+
       const promise = ExportService.latexToDocx(latexWithBib);
 
       // Wait for processing
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       mockProcess.stdout.push(Buffer.from("fake docx"));
       mockProcess.stdout.push(null);
@@ -183,7 +193,7 @@ describe("ExportService", () => {
     it("should throw an error for empty output buffer", async () => {
       const promise = ExportService.latexToDocx("...");
 
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
 
       // Simulate empty output
       mockProcess.stdout.push(null);
@@ -194,7 +204,7 @@ describe("ExportService", () => {
 
     it("should handle image download failure gracefully", async () => {
       const latexWithImage = "\\includegraphics{https://example.com/image.png}";
-      
+
       // Mock fetch to fail
       (global.fetch as Mock).mockResolvedValue({
         ok: false,
@@ -205,8 +215,8 @@ describe("ExportService", () => {
       const promise = ExportService.latexToDocx(latexWithImage);
 
       // Wait for the image download attempt
-      await new Promise(resolve => setImmediate(resolve));
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       // Simulate success
       mockProcess.stdout.push(Buffer.from("fake docx"));
@@ -216,8 +226,10 @@ describe("ExportService", () => {
       await promise;
 
       // The image download should have been attempted but failed
-      expect(global.fetch).toHaveBeenCalledWith("https://example.com/image.png");
-      
+      expect(global.fetch).toHaveBeenCalledWith(
+        "https://example.com/image.png",
+      );
+
       // File should not be written since download failed
       expect(fs.writeFile).not.toHaveBeenCalledWith(
         "/tmp/aiwa-export-123/img_1.png",
@@ -226,7 +238,7 @@ describe("ExportService", () => {
 
       // Check what was written to stdin
       const writtenLatex = mockProcess.getStdinContent();
-      
+
       // The image path should not be rewritten since download failed
       expect(writtenLatex).not.toContain("/tmp/aiwa-export-123/img_1.png");
       // The original URL should remain (or be handled according to implementation)
