@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 
-import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach, type Mock } from "vitest";
 import { ExportService } from "./export.service";
 import { spawn } from "child_process";
 import fs from "fs/promises";
@@ -31,16 +31,16 @@ describe("ExportService", () => {
 
   beforeEach(() => {
     // Mock os
-    (os.tmpdir as vi.Mock).mockReturnValue("/tmp");
+    (os.tmpdir as Mock).mockReturnValue("/tmp");
 
     // Mock fs
-    (fs.mkdtemp as vi.Mock).mockResolvedValue("/tmp/aiwa-export-123");
-    (fs.rm as vi.Mock).mockResolvedValue(undefined);
-    (fs.writeFile as vi.Mock).mockResolvedValue(undefined);
+    (fs.mkdtemp as Mock).mockResolvedValue("/tmp/aiwa-export-123");
+    (fs.rm as Mock).mockResolvedValue(undefined);
+    (fs.writeFile as Mock).mockResolvedValue(undefined);
 
     // Mock child_process
     mockProcess = new MockProcess();
-    (spawn as vi.Mock).mockReturnValue(mockProcess);
+    (spawn as Mock).mockReturnValue(mockProcess);
 
     // Mock global fetch
     global.fetch = vi.fn();
@@ -100,7 +100,7 @@ describe("ExportService", () => {
     it("should download remote images and rewrite paths", async () => {
       const latexWithImage = "\\includegraphics{https://example.com/image.png}";
       const fakeImageBuffer = Buffer.from("fake image data");
-      (global.fetch as vi.Mock).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: true,
         arrayBuffer: () => Promise.resolve(fakeImageBuffer.buffer),
       });
@@ -152,7 +152,7 @@ describe("ExportService", () => {
 
     it("should handle image download failure gracefully", async () => {
       const latexWithImage = "\\includegraphics{https://example.com/image.png}";
-      (global.fetch as vi.Mock).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: false,
         status: 404,
         statusText: "Not Found",
