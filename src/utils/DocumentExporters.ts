@@ -281,7 +281,7 @@ function buildAiProtocolLatexAppendix(
       `\\endfirsthead\n` +
       `\\hline\n` +
       `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \\hline\n` +
-      `\\endhead\n`;
+      `\\endhead\n`; // TODO: It is duplicated because longtable needs it this way. But if we do not use longtable, we could use tabularx or tabulary for better column width management, but they don't support multi-page tables like longtable does. Try to use tabularx with multi-page support.
 
     aiProtocols.forEach((p) => {
       appendix += `${escapeLatex(p.aiName || "")} & ${escapeLatex(p.usageForm || "")} & ${escapeLatex(p.affectedParts || "")} & ${escapeLatex(p.remarks || "")} & ${escapeLatex(formatDate(p.createdAt || ""))} & ${escapeLatex(formatDate(p.updatedAt || ""))} \\\\ \\hline\n`;
@@ -302,7 +302,7 @@ function buildAiProtocolLatexAppendix(
       `\\toprule\n` +
       `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \n` +
       `\\midrule\n` +
-      `\\endhead\n`;
+      `\\endhead\n`; // TODO: try to use tabularx with multi-page support.
 
     aiProtocols.forEach((p) => {
       appendix += `${escapeLatex(p.aiName || "")} & ${escapeLatex(p.usageForm || "")} & ${escapeLatex(p.affectedParts || "")} & ${escapeLatex(p.remarks || "")} & ${escapeLatex(formatDate(p.createdAt || ""))} & ${escapeLatex(formatDate(p.updatedAt || ""))} \\\\ \\hline\n`;
