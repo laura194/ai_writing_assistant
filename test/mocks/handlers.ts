@@ -11,6 +11,6 @@ export const handlers = [
     const blob = new Blob(["Mocked DOCX content"], {
       type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     });
-    return new HttpResponse(blob); 
-    }),
+    return new HttpResponse(blob);
+  }),
 ];
