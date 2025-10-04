@@ -23,7 +23,6 @@ export default defineConfig({
         functions: 90,
         lines: 90,
       },
-      exclude: ["src/types.ts"],
     },
   },
 });
