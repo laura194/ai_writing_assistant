@@ -3,7 +3,7 @@ import {
   escapeLatex,
   parseRichContent,
   formatDate,
-  buildAiProtocolLatexAppendix
+  buildAiProtocolLatexAppendix,
 } from "./DocumentExporters";
 import { IAiProtocolEntry } from "../models/IAITypes";
 
@@ -276,319 +276,324 @@ describe("export utilities", () => {
       /Some math: .*\\textbackslash/.test(text);
     expect(hasRawDollar || hasEscapedDollar).toBeTruthy();
   });
-// Update the AI protocol mock data to include all required properties
-describe("DocumentExporters - Additional Tests", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("handleExportLATEX - should return latex content when saveFile is false", () => {
-    const structure = [
-      {
-        id: "sec1",
-        name: "Test Section",
-        nodes: [],
-      },
-    ];
-
-    const nodeContents = [
-      {
-        nodeId: "sec1",
-        name: "Test Section",
-        content: "Test content",
-      },
-    ];
-
-    const result = handleExportLATEX(structure, nodeContents, [], false);
-
-    expect(result).toContain("\\documentclass{article}");
-    expect(result).toContain("Test Section");
-    expect(saveAs).not.toHaveBeenCalled();
-  });
-
-  it("handleExportLATEX - should include AI protocol appendix with entries", async () => {
-    const structure = [
-      {
-        id: "sec1",
-        name: "Test Section",
-        nodes: [],
-      },
-    ];
-
-    const nodeContents = [
-      {
-        nodeId: "sec1",
-        name: "Test Section",
-        content: "Test content",
-      },
-    ];
-
-    const aiProtocols: IAiProtocolEntry[] = [
-      {
-        projectId: "project1",
-        aiName: "Gemini 2.0",
-        usageForm: "Content generation",
-        affectedParts: "Introduction",
-        remarks: "Used for initial draft",
-        createdAt: "2023-01-01T00:00:00Z",
-        updatedAt: "2023-01-02T00:00:00Z",
-      },
-    ];
-
-    await handleExportLATEX(structure, nodeContents, aiProtocols);
-
-    expect(saveAs).toHaveBeenCalledTimes(1);
-    
-    const saved = (saveAs as any).__saved;
-    expect(saved.last).toBeDefined();
-    const text = saved.last!.text!;
-
-    expect(text).toContain("Appendix: AI Protocol");
-    expect(text).toContain("Gemini 2.0");
-    expect(text).toContain("Content generation");
-    expect(text).toContain("Introduction");
-    expect(text).toContain("Used for initial draft");
-  });
-
-  it("handleExportLATEX - should handle empty AI protocols", async () => {
-    const structure = [
-      {
-        id: "sec1",
-        name: "Test Section",
-        nodes: [],
-      },
-    ];
-
-    const nodeContents = [
-      {
-        nodeId: "sec1",
-        name: "Test Section",
-        content: "Test content",
-      },
-    ];
-
-    await handleExportLATEX(structure, nodeContents, []);
-
-    const saved = (saveAs as any).__saved;
-    expect(saved.last).toBeDefined();
-    const text = saved.last!.text!;
-
-    expect(text).toContain("No entries have been created in the AI protocol yet");
-  });
-
-  it("handleExportPDF - should include AI protocol appendix with entries", () => {
-    const structure = [
-      {
-        id: "n1",
-        name: "Root",
-        nodes: [],
-      },
-    ];
-
-    const nodeContents = [
-      { nodeId: "n1", name: "Root", content: "Root content" },
-    ];
-
-    const aiProtocols: IAiProtocolEntry[] = [
-      {
-        projectId: "project1",
-        aiName: "Test AI",
-        usageForm: "Testing",
-        affectedParts: "All sections",
-        remarks: "Test remarks",
-        createdAt: "2023-01-01T00:00:00Z",
-        updatedAt: "2023-01-02T00:00:00Z",
-      },
-    ];
-
-    handleExportPDF(structure, nodeContents, aiProtocols);
-
-    const inst = (jsPDF as any).lastInstance;
-    expect(inst).toBeDefined();
-
-    // Check that AI Protocol section was added
-    const aiProtocolTitle = inst.texts.find((t: any) =>
-      (t.txt as string).includes("Appendix: AI Protocol")
-    );
-    expect(aiProtocolTitle).toBeTruthy();
-
-    // Check that AI protocol data was added
-    const aiName = inst.texts.find((t: any) =>
-      (t.txt as string).includes("Test AI")
-    );
-    expect(aiName).toBeTruthy();
-  });
-
-  it("handleExportPDF - should handle empty AI protocols", () => {
-    const structure = [
-      {
-        id: "n1",
-        name: "Root",
-        nodes: [],
-      },
-    ];
-
-    const nodeContents = [
-      { nodeId: "n1", name: "Root", content: "Root content" },
-    ];
-
-    handleExportPDF(structure, nodeContents, []);
-
-    const inst = (jsPDF as any).lastInstance;
-    expect(inst).toBeDefined();
-
-    // Check that AI Protocol section was added with empty message
-    const aiProtocolTitle = inst.texts.find((t: any) =>
-      (t.txt as string).includes("Appendix: AI Protocol")
-    );
-    expect(aiProtocolTitle).toBeTruthy();
-
-    const emptyMessage = inst.texts.find((t: any) =>
-      (t.txt as string).includes("No entries have been created")
-    );
-    expect(emptyMessage).toBeTruthy();
-  });
-
-  it("handleExportWord - should include AI protocols in LaTeX content", async () => {
-    // Mock fetch
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      blob: () => Promise.resolve(new Blob(["fake docx content"])),
+  // Update the AI protocol mock data to include all required properties
+  describe("DocumentExporters - Additional Tests", () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
     });
 
-    const structure = [
-      {
-        id: "n1",
-        name: "Section One",
-        nodes: [],
-      },
-    ];
-
-    const nodeContents = [
-      { nodeId: "n1", name: "Section One", content: "Parent content" },
-    ];
-
-    const aiProtocols: IAiProtocolEntry[] = [
-      {
-        projectId: "project1",
-        aiName: "Word AI",
-        usageForm: "Word export",
-        affectedParts: "All",
-        remarks: "Used for Word export",
-        createdAt: "2023-01-01T00:00:00Z",
-        updatedAt: "2023-01-02T00:00:00Z",
-      },
-    ];
-
-    await handleExportWord(structure, nodeContents, aiProtocols);
-
-    // Check that fetch was called with LaTeX containing AI protocols
-    expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:5001/api/export/word",
-      expect.objectContaining({
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    it("handleExportLATEX - should return latex content when saveFile is false", () => {
+      const structure = [
+        {
+          id: "sec1",
+          name: "Test Section",
+          nodes: [],
         },
-        body: expect.stringContaining("Word AI"),
-      })
-    );
-  });
+      ];
 
-  it("parseRichContent - should handle all content types including escaped characters", () => {
-    const testContent = `
+      const nodeContents = [
+        {
+          nodeId: "sec1",
+          name: "Test Section",
+          content: "Test content",
+        },
+      ];
+
+      const result = handleExportLATEX(structure, nodeContents, [], false);
+
+      expect(result).toContain("\\documentclass{article}");
+      expect(result).toContain("Test Section");
+      expect(saveAs).not.toHaveBeenCalled();
+    });
+
+    it("handleExportLATEX - should include AI protocol appendix with entries", async () => {
+      const structure = [
+        {
+          id: "sec1",
+          name: "Test Section",
+          nodes: [],
+        },
+      ];
+
+      const nodeContents = [
+        {
+          nodeId: "sec1",
+          name: "Test Section",
+          content: "Test content",
+        },
+      ];
+
+      const aiProtocols: IAiProtocolEntry[] = [
+        {
+          projectId: "project1",
+          aiName: "Gemini 2.0",
+          usageForm: "Content generation",
+          affectedParts: "Introduction",
+          remarks: "Used for initial draft",
+          createdAt: "2023-01-01T00:00:00Z",
+          updatedAt: "2023-01-02T00:00:00Z",
+        },
+      ];
+
+      await handleExportLATEX(structure, nodeContents, aiProtocols);
+
+      expect(saveAs).toHaveBeenCalledTimes(1);
+
+      const saved = (saveAs as any).__saved;
+      expect(saved.last).toBeDefined();
+      const text = saved.last!.text!;
+
+      expect(text).toContain("Appendix: AI Protocol");
+      expect(text).toContain("Gemini 2.0");
+      expect(text).toContain("Content generation");
+      expect(text).toContain("Introduction");
+      expect(text).toContain("Used for initial draft");
+    });
+
+    it("handleExportLATEX - should handle empty AI protocols", async () => {
+      const structure = [
+        {
+          id: "sec1",
+          name: "Test Section",
+          nodes: [],
+        },
+      ];
+
+      const nodeContents = [
+        {
+          nodeId: "sec1",
+          name: "Test Section",
+          content: "Test content",
+        },
+      ];
+
+      await handleExportLATEX(structure, nodeContents, []);
+
+      const saved = (saveAs as any).__saved;
+      expect(saved.last).toBeDefined();
+      const text = saved.last!.text!;
+
+      expect(text).toContain(
+        "No entries have been created in the AI protocol yet",
+      );
+    });
+
+    it("handleExportPDF - should include AI protocol appendix with entries", () => {
+      const structure = [
+        {
+          id: "n1",
+          name: "Root",
+          nodes: [],
+        },
+      ];
+
+      const nodeContents = [
+        { nodeId: "n1", name: "Root", content: "Root content" },
+      ];
+
+      const aiProtocols: IAiProtocolEntry[] = [
+        {
+          projectId: "project1",
+          aiName: "Test AI",
+          usageForm: "Testing",
+          affectedParts: "All sections",
+          remarks: "Test remarks",
+          createdAt: "2023-01-01T00:00:00Z",
+          updatedAt: "2023-01-02T00:00:00Z",
+        },
+      ];
+
+      handleExportPDF(structure, nodeContents, aiProtocols);
+
+      const inst = (jsPDF as any).lastInstance;
+      expect(inst).toBeDefined();
+
+      // Check that AI Protocol section was added
+      const aiProtocolTitle = inst.texts.find((t: any) =>
+        (t.txt as string).includes("Appendix: AI Protocol"),
+      );
+      expect(aiProtocolTitle).toBeTruthy();
+
+      // Check that AI protocol data was added
+      const aiName = inst.texts.find((t: any) =>
+        (t.txt as string).includes("Test AI"),
+      );
+      expect(aiName).toBeTruthy();
+    });
+
+    it("handleExportPDF - should handle empty AI protocols", () => {
+      const structure = [
+        {
+          id: "n1",
+          name: "Root",
+          nodes: [],
+        },
+      ];
+
+      const nodeContents = [
+        { nodeId: "n1", name: "Root", content: "Root content" },
+      ];
+
+      handleExportPDF(structure, nodeContents, []);
+
+      const inst = (jsPDF as any).lastInstance;
+      expect(inst).toBeDefined();
+
+      // Check that AI Protocol section was added with empty message
+      const aiProtocolTitle = inst.texts.find((t: any) =>
+        (t.txt as string).includes("Appendix: AI Protocol"),
+      );
+      expect(aiProtocolTitle).toBeTruthy();
+
+      const emptyMessage = inst.texts.find((t: any) =>
+        (t.txt as string).includes("No entries have been created"),
+      );
+      expect(emptyMessage).toBeTruthy();
+    });
+
+    it("handleExportWord - should include AI protocols in LaTeX content", async () => {
+      // Mock fetch
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        blob: () => Promise.resolve(new Blob(["fake docx content"])),
+      });
+
+      const structure = [
+        {
+          id: "n1",
+          name: "Section One",
+          nodes: [],
+        },
+      ];
+
+      const nodeContents = [
+        { nodeId: "n1", name: "Section One", content: "Parent content" },
+      ];
+
+      const aiProtocols: IAiProtocolEntry[] = [
+        {
+          projectId: "project1",
+          aiName: "Word AI",
+          usageForm: "Word export",
+          affectedParts: "All",
+          remarks: "Used for Word export",
+          createdAt: "2023-01-01T00:00:00Z",
+          updatedAt: "2023-01-02T00:00:00Z",
+        },
+      ];
+
+      await handleExportWord(structure, nodeContents, aiProtocols);
+
+      // Check that fetch was called with LaTeX containing AI protocols
+      expect(global.fetch).toHaveBeenCalledWith(
+        "http://localhost:5001/api/export/word",
+        expect.objectContaining({
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: expect.stringContaining("Word AI"),
+        }),
+      );
+    });
+
+    it("parseRichContent - should handle all content types including escaped characters", () => {
+      const testContent = `
       Test content with _underscore_ & ampersand % percent # hash $ dollar 
       [FIGURE:Test Caption:/path/image.png]
       [TABLE:Test Table:<table><tr><td>A</td><td>B</td></tr></table>]
       [CITE:test2023]
     `;
 
-    const result = parseRichContent(testContent);
+      const result = parseRichContent(testContent);
 
-    expect(result).toContain("\\_underscore\\_");
-    expect(result).toContain("\\& ampersand");
-    expect(result).toContain("\\% percent");
-    expect(result).toContain("\\# hash");
-    expect(result).toContain("\\$ dollar");
-    expect(result).toContain("\\includegraphics");
-    expect(result).toContain("/path/image.png");
-    expect(result).toContain("\\begin{table}");
-    expect(result).toContain("A & B");
-    expect(result).toContain("\\cite{test2023}");
+      expect(result).toContain("\\_underscore\\_");
+      expect(result).toContain("\\& ampersand");
+      expect(result).toContain("\\% percent");
+      expect(result).toContain("\\# hash");
+      expect(result).toContain("\\$ dollar");
+      expect(result).toContain("\\includegraphics");
+      expect(result).toContain("/path/image.png");
+      expect(result).toContain("\\begin{table}");
+      expect(result).toContain("A & B");
+      expect(result).toContain("\\cite{test2023}");
+    });
+
+    // Fix the escapeLatex test
+    it("escapeLatex - should escape all special characters correctly", () => {
+      const testString =
+        "Test _with_ & special % characters # and $ symbols { } ^ ~ \\";
+      const result = escapeLatex(testString);
+
+      expect(result).toContain("\\_with\\_");
+      expect(result).toContain("\\& special");
+      expect(result).toContain("\\% characters");
+      expect(result).toContain("\\# and");
+      expect(result).toContain("\\$ symbols");
+      expect(result).toContain("\\{ \\}");
+      expect(result).toContain("\\^{}");
+      expect(result).toContain("\\~{}");
+      // Fix: The actual output is \textbackslash\{\} not \textbackslash{}
+      expect(result).toContain("\\textbackslash\\{\\}");
+    });
+
+    // Fix the formatDate test
+    it("formatDate - should handle invalid dates", () => {
+      const result = formatDate("invalid-date");
+      // Fix: The actual function returns "Invalid Date" not "N/A"
+      expect(result).toBe("Invalid Date");
+    });
+
+    it("buildAiProtocolLatexAppendix - should generate table for Word export", () => {
+      const aiProtocols: IAiProtocolEntry[] = [
+        {
+          projectId: "project1",
+          aiName: "Test AI",
+          usageForm: "Testing",
+          affectedParts: "All",
+          remarks: "Test remarks",
+          createdAt: "2023-01-01T00:00:00Z",
+          updatedAt: "2023-01-02T00:00:00Z",
+        },
+      ];
+
+      const result = buildAiProtocolLatexAppendix(aiProtocols, true);
+
+      expect(result).toContain("\\begin{longtable}");
+      expect(result).toContain("Test AI");
+      expect(result).toContain("Testing");
+      expect(result).toContain("All");
+      expect(result).toContain("Test remarks");
+    });
+
+    it("buildAiProtocolLatexAppendix - should generate table for LaTeX export", () => {
+      const aiProtocols: IAiProtocolEntry[] = [
+        {
+          projectId: "project1",
+          aiName: "Test AI",
+          usageForm: "Testing",
+          affectedParts: "All",
+          remarks: "Test remarks",
+          createdAt: "2023-01-01T00:00:00Z",
+          updatedAt: "2023-01-02T00:00:00Z",
+        },
+      ];
+
+      const result = buildAiProtocolLatexAppendix(aiProtocols, false);
+
+      expect(result).toContain("\\begin{longtable}");
+      expect(result).toContain("\\toprule");
+      expect(result).toContain("\\midrule");
+      expect(result).toContain("\\bottomrule");
+      expect(result).toContain("Test AI");
+    });
+
+    it("buildAiProtocolLatexAppendix - should handle empty protocols", () => {
+      const result = buildAiProtocolLatexAppendix([], true);
+
+      expect(result).toContain(
+        "No entries have been created in the AI protocol yet",
+      );
+    });
   });
-
-// Fix the escapeLatex test
-it("escapeLatex - should escape all special characters correctly", () => {
-  const testString = "Test _with_ & special % characters # and $ symbols { } ^ ~ \\";
-  const result = escapeLatex(testString);
-
-  expect(result).toContain("\\_with\\_");
-  expect(result).toContain("\\& special");
-  expect(result).toContain("\\% characters");
-  expect(result).toContain("\\# and");
-  expect(result).toContain("\\$ symbols");
-  expect(result).toContain("\\{ \\}");
-  expect(result).toContain("\\^{}");
-  expect(result).toContain("\\~{}");
-  // Fix: The actual output is \textbackslash\{\} not \textbackslash{}
-  expect(result).toContain("\\textbackslash\\{\\}");
-});
-
-// Fix the formatDate test
-it("formatDate - should handle invalid dates", () => {
-  const result = formatDate("invalid-date");
-  // Fix: The actual function returns "Invalid Date" not "N/A"
-  expect(result).toBe("Invalid Date");
-});
-
-  it("buildAiProtocolLatexAppendix - should generate table for Word export", () => {
-    const aiProtocols: IAiProtocolEntry[] = [
-      {
-        projectId: "project1",
-        aiName: "Test AI",
-        usageForm: "Testing",
-        affectedParts: "All",
-        remarks: "Test remarks",
-        createdAt: "2023-01-01T00:00:00Z",
-        updatedAt: "2023-01-02T00:00:00Z",
-      },
-    ];
-
-    const result = buildAiProtocolLatexAppendix(aiProtocols, true);
-
-    expect(result).toContain("\\begin{longtable}");
-    expect(result).toContain("Test AI");
-    expect(result).toContain("Testing");
-    expect(result).toContain("All");
-    expect(result).toContain("Test remarks");
-  });
-
-  it("buildAiProtocolLatexAppendix - should generate table for LaTeX export", () => {
-    const aiProtocols: IAiProtocolEntry[] = [
-      {
-        projectId: "project1",
-        aiName: "Test AI",
-        usageForm: "Testing",
-        affectedParts: "All",
-        remarks: "Test remarks",
-        createdAt: "2023-01-01T00:00:00Z",
-        updatedAt: "2023-01-02T00:00:00Z",
-      },
-    ];
-
-    const result = buildAiProtocolLatexAppendix(aiProtocols, false);
-
-    expect(result).toContain("\\begin{longtable}");
-    expect(result).toContain("\\toprule");
-    expect(result).toContain("\\midrule");
-    expect(result).toContain("\\bottomrule");
-    expect(result).toContain("Test AI");
-  });
-
-  it("buildAiProtocolLatexAppendix - should handle empty protocols", () => {
-    const result = buildAiProtocolLatexAppendix([], true);
-
-    expect(result).toContain("No entries have been created in the AI protocol yet");
-  });
-});
 });

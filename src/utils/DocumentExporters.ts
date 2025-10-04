@@ -417,7 +417,7 @@ export {
   escapeLatex,
   parseRichContent,
   formatDate,
-  buildAiProtocolLatexAppendix
+  buildAiProtocolLatexAppendix,
 };
 
 // TODO PDF Export Improvements:
