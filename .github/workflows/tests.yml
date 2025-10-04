@@ -1,9 +1,6 @@
 name: Run Tests
 
 on:
-  push:
-    branches:
-      - feature/testing
   pull_request:
     branches:
       - main
@@ -23,8 +20,15 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Install Frontend Dependencies
+        run: npm ci
 
-      - name: Run Tests (with coverage)
-        run: npm run test:coverage
+      - name: Install Backend Dependencies
+        run: cd backend && npm ci
+
+      - name: Run Vitest Tests with Coverage
+        run: npx vitest run --coverage
+
+      #- name: Run Stryker Mutation Testing
+      #  if: github.event_name == 'pull_request'
+      #  run: npx stryker run
