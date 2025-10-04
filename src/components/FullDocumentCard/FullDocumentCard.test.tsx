@@ -248,9 +248,10 @@ describe("FullDocumentCard", () => {
 
     await waitFor(() => expect(screen.getByText("Root")).toBeInTheDocument());
 
-    // Should not render a <p> for empty content (after mapping -> "")
-    const container = document.querySelector("div.overflow-y-auto.border-t-2");
-    expect(container?.querySelector("p")).toBeNull();
+    // Should render the empty state message instead of null
+    expect(
+      screen.getByText(/No entries have been created in the AI protocol yet./i),
+    ).toBeInTheDocument();
   });
 
   it("export buttons call the correct exporters with current structure and nodeContents", async () => {
@@ -485,8 +486,8 @@ describe("FullDocumentCard", () => {
     await userEvent.click(screen.getByTitle(/Export as PDF/i));
     await userEvent.click(screen.getByTitle(/Export as LaTeX/i));
 
-    expect(exp.handleExportWord).toHaveBeenCalledWith([], []);
-    expect(exp.handleExportPDF).toHaveBeenCalledWith([], []);
-    expect(exp.handleExportLATEX).toHaveBeenCalledWith([], []);
+    expect(exp.handleExportWord).toHaveBeenCalledWith([], [], []);
+    expect(exp.handleExportPDF).toHaveBeenCalledWith([], [], []);
+    expect(exp.handleExportLATEX).toHaveBeenCalledWith([], [], []);
   });
 });
