@@ -24,6 +24,6 @@
     /* Für Tests */
     "types": ["vitest/globals", "@testing-library/jest-dom", "vitest", "node"]
   },
-  "include": ["src", "backend/src", "test"],
+  "include": ["src", "test"],
   "exclude": ["node_modules", "dist"]
 }
