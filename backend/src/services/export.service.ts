@@ -9,13 +9,16 @@ export class ExportService {
    */
   static async latexToDocx(latexContent: string): Promise<Buffer> {
     let tmpDir: string | null = null;
-    
+
     try {
       // Create temporary working directory for image downloads
       tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "aiwa-export-"));
-      
+
       // Prepare LaTeX: download remote images and sanitize for Pandoc
-      const { processedLatex } = await this.prepareLatexResources(latexContent, tmpDir);
+      const { processedLatex } = await this.prepareLatexResources(
+        latexContent,
+        tmpDir,
+      );
       const sanitizedLatex = this.sanitizeLatexForPandoc(processedLatex);
 
       // Use Dockerized Pandoc following the stdin/stdout structure
@@ -32,8 +35,9 @@ export class ExportService {
     } finally {
       // Cleanup tmp directory
       if (tmpDir) {
-        await fs.rm(tmpDir, { recursive: true, force: true })
-          .catch(e => console.error("Cleanup error:", e));
+        await fs
+          .rm(tmpDir, { recursive: true, force: true })
+          .catch((e) => console.error("Cleanup error:", e));
       }
     }
   }
@@ -41,29 +45,37 @@ export class ExportService {
   /**
    * Run Pandoc in Docker using stdin/stdout (most cross-platform)
    */
-  private static async runPandocInDocker(latexContent: string, tmpDir: string): Promise<Buffer> {
+  private static async runPandocInDocker(
+    latexContent: string,
+    tmpDir: string,
+  ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       const dockerArgs = [
         "run",
         "--rm",
         "-i",
-        "-v", `${tmpDir}:${tmpDir}`, // Mount the temporary directory
-        "-w", tmpDir, // Set the working directory in the container
+        "-v",
+        `${tmpDir}:${tmpDir}`, // Mount the temporary directory
+        "-w",
+        tmpDir, // Set the working directory in the container
         "pandoc-core",
-        "-f", "latex",
-        "-t", "docx", 
+        "-f",
+        "latex",
+        "-t",
+        "docx",
         "-s",
         "--wrap=none",
         "--citeproc",
         "--number-sections",
-        "-o", "-",  // Output to stdout
-        "-"         // Input from stdin
+        "-o",
+        "-", // Output to stdout
+        "-", // Input from stdin
       ];
 
       console.log("Running Docker Pandoc conversion...");
 
       const proc = spawn("docker", dockerArgs, {
-        stdio: ['pipe', 'pipe', 'pipe']
+        stdio: ["pipe", "pipe", "pipe"],
       });
 
       const chunks: Buffer[] = [];
@@ -85,12 +97,16 @@ export class ExportService {
       proc.on("close", (code) => {
         if (code === 0) {
           const buffer = Buffer.concat(chunks);
-          console.log(`Pandoc conversion successful, output size: ${buffer.length} bytes`);
+          console.log(
+            `Pandoc conversion successful, output size: ${buffer.length} bytes`,
+          );
           resolve(buffer);
         } else {
           console.error("Pandoc Docker conversion failed:");
           console.error("STDERR:", stderr);
-          reject(new Error(`Pandoc Docker exited with code ${code}: ${stderr}`));
+          reject(
+            new Error(`Pandoc Docker exited with code ${code}: ${stderr}`),
+          );
         }
       });
 
@@ -152,14 +168,21 @@ export class ExportService {
           downloadedFiles.push(item.localPath);
 
           // Replace URL with local path in LaTeX content
-          const escapedUrl = item.original.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const escapedUrl = item.original.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            "\\$&",
+          );
           const pattern = new RegExp(
-            String.raw`(\\includegraphics(?:\[[^\]]*\])?\{)` + escapedUrl + String.raw`(\})`,
+            String.raw`(\\includegraphics(?:\[[^\]]*\])?\{)` +
+              escapedUrl +
+              String.raw`(\})`,
             "g",
           );
           processed = processed.replace(pattern, `$1${item.localPath}$2`);
         } else {
-          console.warn("Global fetch is not available; skipping remote image download.");
+          console.warn(
+            "Global fetch is not available; skipping remote image download.",
+          );
         }
       } catch (e) {
         console.error("Error downloading image:", item.original, e);
