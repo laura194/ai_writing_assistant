@@ -47,7 +47,7 @@ function AllRoutes(isSignedIn: boolean) {
       <Route path="/read/:projectId" element={<ReadingPage />} />
       <Route path="/structureSelection" element={<StructureSelectionPage />} />
       <Route path="/myProjects" element={<ProjectOverview />} />
-        <Route path="/communityPage" element={<CommunityPage />} />
+      <Route path="/communityPage" element={<CommunityPage />} />
 
       {/* Catch-All (je nachdem ob der User signedIn ist oder nicht) */}
       <Route
@@ -76,7 +76,7 @@ export default function AppRoutes() {
     "/structureSelection",
     "/myProjects",
     "/read",
-      "/communityPage",
+    "/communityPage",
   ];
 
   // 2)
