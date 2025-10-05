@@ -276,20 +276,14 @@ function buildAiProtocolLatexAppendix(
     return appendix;
   }
 
+  const tableHeader =
+    `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \\hline\n`;
+  const firstHeader = `\\endfirsthead\n\\hline\n${tableHeader}\\endhead\n`;
+
   if (forWord) {
     // Word path: longtable with header defined for first and subsequent pages
     appendix +=
-      `\\begin{longtable}{|l|l|l|l|l|l|}\n` +
-      `\\hline\n` +
-      `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \\hline\n` +
-      `\\endfirsthead\n` +
-      `\\hline\n` +
-      `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \\hline\n` +
-      `\\endhead\n`; // TODO: It is duplicated because longtable needs it this way. But if we do not use longtable, we could use tabularx or tabulary for better column width management, but they don't support multi-page tables like longtable does. Try to use tabularx with multi-page support.
-
-    aiProtocols.forEach((p) => {
-      appendix += `${escapeLatex(p.aiName || "")} & ${escapeLatex(p.usageForm || "")} & ${escapeLatex(p.affectedParts || "")} & ${escapeLatex(p.remarks || "")} & ${escapeLatex(formatDate(p.createdAt || ""))} & ${escapeLatex(formatDate(p.updatedAt || ""))} \\\\ \\hline\n`;
-    });
+      `\\begin{longtable}{|l|l|l|l|l|l|}\n\\hline\n${tableHeader}${firstHeader}`;
 
     appendix += `\\end{longtable}\n`;
   } else {
@@ -299,21 +293,19 @@ function buildAiProtocolLatexAppendix(
       `\\setlength{\\LTpre}{0pt}\n` +
       `\\setlength{\\LTpost}{0pt}\n` +
       `\\begin{longtable}{p{2.5cm} p{3.2cm} p{3.2cm} p{5cm} p{2.2cm} p{2.2cm}}\n` +
-      `\\toprule\n` +
-      `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \n` +
-      `\\midrule\n` +
-      `\\endfirsthead\n` +
-      `\\toprule\n` +
-      `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \n` +
-      `\\midrule\n` +
-      `\\endhead\n`; // TODO: try to use tabularx with multi-page support.
-
-    aiProtocols.forEach((p) => {
-      appendix += `${escapeLatex(p.aiName || "")} & ${escapeLatex(p.usageForm || "")} & ${escapeLatex(p.affectedParts || "")} & ${escapeLatex(p.remarks || "")} & ${escapeLatex(formatDate(p.createdAt || ""))} & ${escapeLatex(formatDate(p.updatedAt || ""))} \\\\ \\hline\n`;
-    });
+      `\\toprule\n${tableHeader.replace(/\\hline/g, "\\midrule")}${firstHeader.replace(/\\hline/g, "\\midrule")}`;
 
     appendix += `\\bottomrule\n\\end{longtable}\n`;
   }
+
+  const rows = aiProtocols
+    .map(
+      (p) =>
+        `${escapeLatex(p.aiName || "")} & ${escapeLatex(p.usageForm || "")} & ${escapeLatex(p.affectedParts || "")} & ${escapeLatex(p.remarks || "")} & ${escapeLatex(formatDate(p.createdAt || ""))} & ${escapeLatex(formatDate(p.updatedAt || ""))} \\\\ \\hline\n`,
+    )
+    .join("");
+
+  appendix = appendix.replace(`\\end{longtable}`, `${rows}\\end{longtable}`);
 
   return appendix;
 }

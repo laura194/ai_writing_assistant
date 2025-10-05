@@ -19,8 +19,14 @@ import { IAiProtocolEntry } from "../models/IAITypes";
 
 class MockBlob {
   private parts: any[];
+  public size: number;
+
   constructor(parts: any[], _opts?: any) {
     this.parts = parts || [];
+    this.size = this.parts.reduce(
+      (acc, part) => acc + (part?.length || 0),
+      0,
+    );
   }
   async text() {
     return this.parts
@@ -100,6 +106,64 @@ describe("export utilities", () => {
     expect(blobText).toContain("fake docx content");
   });
 
+  it("handleExportWord - should handle server error", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: () => Promise.resolve("Internal Server Error"),
+    });
+
+    await expect(handleExportWord([], [], [])).rejects.toThrow(
+      "Server returned 500: Internal Server Error",
+    );
+  });
+
+  it("handleExportWord - should handle empty blob response", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(new Blob([])),
+    });
+
+    await expect(handleExportWord([], [], [])).rejects.toThrow(
+      "Received empty file from server",
+    );
+  });
+
+  it("handleExportWord - should handle fetch throwing an error", async () => {
+    const fetchError = new Error("Network failure");
+    global.fetch = vi.fn().mockRejectedValue(fetchError);
+
+    await expect(handleExportWord([], [], [])).rejects.toThrow(fetchError);
+  });
+
+  it("handleExportWord - should handle empty structure", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(new Blob(["fake docx content"])),
+    });
+
+    await handleExportWord([], [], []);
+    expect(global.fetch).toHaveBeenCalled();
+  });
+
+  it("handleExportWord - should use VITE_API_BASE_URL if set", async () => {
+    const originalEnv = import.meta.env.VITE_API_BASE_URL;
+    import.meta.env.VITE_API_BASE_URL = "http://test-url:1234";
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(new Blob(["fake docx content"])),
+    });
+
+    await handleExportWord([], [], []);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://test-url:1234/api/export/word",
+      expect.any(Object),
+    );
+    import.meta.env.VITE_API_BASE_URL = originalEnv;
+  });
+
   it("handleExportPDF - calls backend PDF endpoint and saves file", async () => {
     // Mock fetch
     global.fetch = vi.fn().mockResolvedValue({
@@ -144,6 +208,36 @@ describe("export utilities", () => {
     // Check blob content
     const blobText = await blobArg.text();
     expect(blobText).toContain("fake pdf content");
+  });
+
+  it("handleExportPDF - should handle empty blob response", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(new Blob([])),
+    });
+
+    await expect(handleExportPDF([], [])).rejects.toThrow(
+      "Received empty file from server",
+    );
+  });
+
+  it("handleExportPDF - should handle server error", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: () => Promise.resolve("PDF Generation Failed"),
+    });
+
+    await expect(handleExportPDF([], [])).rejects.toThrow(
+      "Server returned 500: PDF Generation Failed",
+    );
+  });
+
+  it("handleExportPDF - should handle fetch throwing an error", async () => {
+    const fetchError = new Error("Network failure");
+    global.fetch = vi.fn().mockRejectedValue(fetchError);
+
+    await expect(handleExportPDF([], [])).rejects.toThrow(fetchError);
   });
 
   it("handleExportLATEX - generates latex with escape, figure, table and cite and saves .tex", async () => {
@@ -419,6 +513,26 @@ describe("export utilities", () => {
       expect(result).toContain("\\cite{test2023}");
     });
 
+    it("parseRichContent - should handle empty table tag", () => {
+      const testContent = "[TABLE:Empty Table:<table></table>]";
+      const result = parseRichContent(testContent);
+      expect(result).toContain("\\caption{Empty Table}");
+      expect(result).toContain("\\begin{tabular}{|c|}");
+    });
+
+    it("parseRichContent - should handle malformed table tag", () => {
+      const testContent = "[TABLE:Malformed Table:no html here]";
+      const result = parseRichContent(testContent);
+      expect(result).toContain("\\caption{Malformed Table}");
+      expect(result).toContain("\\begin{tabular}{|c|}");
+    });
+
+    it("parseRichContent - should handle table with empty rows", () => {
+      const testContent = "[TABLE:Empty Rows:<tr></tr><tr></tr>]";
+      const result = parseRichContent(testContent);
+      expect(result).toContain("\\begin{tabular}{|c|}");
+    });
+
     it("escapeLatex - should escape all special characters correctly", () => {
       const testString =
         "Test _with_ & special % characters # and $ symbols { } ^ ~ \\";
@@ -438,6 +552,23 @@ describe("export utilities", () => {
     it("formatDate - should handle invalid dates", () => {
       const result = formatDate("invalid-date");
       expect(result).toBe("Invalid Date");
+    });
+
+    it("formatDate - should handle invalid date objects", () => {
+      const invalidDate = new Date("invalid-date");
+      // Mock toLocaleString to throw an error, simulating an invalid date object
+      invalidDate.toLocaleString = vi.fn().mockImplementation(() => {
+        throw new Error("RangeError");
+      });
+
+      const result = formatDate(invalidDate);
+
+      expect(result).toBe("Invalid Date");
+    });
+
+    it("formatDate - should handle undefined dates", () => {
+      const result = formatDate(undefined);
+      expect(result).toBe("N/A");
     });
 
     it("buildAiProtocolLatexAppendix - should generate table for Word export", () => {
@@ -490,6 +621,48 @@ describe("export utilities", () => {
       expect(result).toContain(
         "No entries have been created in the AI protocol yet",
       );
+    });
+
+    it("handleExportLATEX - should handle nodes without content", async () => {
+      const structure = [
+        {
+          id: "sec1",
+          name: "Section With Content",
+          nodes: [{ id: "sub1", name: "Sub-section without content" }],
+        },
+        {
+          id: "sec2",
+          name: "Section Without Content",
+          nodes: [],
+        },
+      ];
+
+      const nodeContents = [
+        {
+          nodeId: "sec1",
+          name: "Section With Content",
+          content: "I have content.",
+        },
+      ];
+
+      await handleExportLATEX(structure, nodeContents, [], true);
+
+      const [blobArg] = mockedSaveAs.mock.calls[0];
+      const text = await blobArg.text();
+
+      expect(text).toContain("\\section{Section With Content}");
+      expect(text).toContain("I have content.");
+      expect(text).toContain("\\subsection{Sub-section without content}");
+      expect(text).toContain("\\section{Section Without Content}");
+    });
+
+    it("handleExportLATEX - should use 'Untitled' for empty structure", async () => {
+      await handleExportLATEX([], [], [], true);
+
+      const [blobArg] = mockedSaveAs.mock.calls[0];
+      const text = await blobArg.text();
+
+      expect(text).toContain("\\title{Untitled}");
     });
   });
 });
