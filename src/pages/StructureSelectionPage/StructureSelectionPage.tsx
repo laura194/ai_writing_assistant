@@ -65,6 +65,7 @@ const StructureSelectionPage = () => {
         name: projectName,
         username: user?.username || user?.id || "unknown-user",
         projectStructure: projectStructure,
+        isPublic: false,
       });
 
       navigate(`/edit/${createdProject._id}`);
