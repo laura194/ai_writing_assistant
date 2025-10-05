@@ -101,24 +101,19 @@ export class ProjectService {
 
   static async getPublicProjects(): Promise<Project[]> {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/public`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch public projects");
+      const response = await axios.get<Project[]>(`${API_BASE_URL}/public`);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        // No public projects found — return an empty array instead of throwing
+        return [];
       }
 
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error in getPublicProjects:", error);
+      console.error("❌ [getPublicProjects] Error fetching public projects:", error);
       throw error;
     }
   }
+
 
 
 
