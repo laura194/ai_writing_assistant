@@ -106,7 +106,7 @@ export class ExportService {
       // If it's a drive letter path (e.g., C:/...)
       if (dockerPath.match(/^[a-zA-Z]:\//)) {
         // Convert C:/Users to /c/Users
-        dockerPath = `/${dockerPath.charAt(0).toLowerCase()}${dockerPath.substring(1)}`;
+        dockerPath = `/${dockerPath.charAt(0).toLowerCase()}${dockerPath.substring(2)}`;
       }
       return dockerPath;
     }
@@ -251,6 +251,8 @@ export class ExportService {
           console.warn(
             `Invalid URL for image, defaulting to .png: ${url}. Error: ${urlError}`,
           );
+          // Do not attempt to download an invalid URL
+          continue;
         }
         const filename = `img_${toDownload.length + 1}${ext}`;
         const localPath = path.join(tmpDir, filename);

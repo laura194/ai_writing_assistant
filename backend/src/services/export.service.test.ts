@@ -101,6 +101,18 @@ describe("ExportService", () => {
       expect(mockProcess.stdinWriteCalls.length).toBeGreaterThan(0);
     });
 
+    it("should throw an error if docker process emits an error", async () => {
+      const promise = ExportService.latexToDocx("...");
+
+      await new Promise((resolve) => process.nextTick(resolve));
+
+      // Simulate the process failing with a spawn error
+      const spawnError = new Error("EACCES");
+      mockProcess.emit("error", spawnError);
+
+      await expect(promise).rejects.toThrow(`Docker execution failed: EACCES`);
+    });
+
     it("should throw an error if pandoc conversion fails", async () => {
       const promise = ExportService.latexToDocx(
         "\\documentclass{article}\\begin{document}Test\\end{document}",
@@ -246,6 +258,134 @@ describe("ExportService", () => {
       expect(writtenLatex).not.toContain("/tmp/aiwa-export-123/img_1.png");
       // The original URL should remain (or be handled according to implementation)
       expect(writtenLatex).toContain("https://example.com/image.png");
+    });
+
+    it("should handle syntactically invalid image URLs", async () => {
+      const latexWithInvalidUrl =
+        "\\includegraphics{https://exa mple.com/image.png}";
+      const promise = ExportService.latexToDocx(latexWithInvalidUrl);
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      mockProcess.stdout.push(Buffer.from("fake docx"));
+      mockProcess.stdout.push(null);
+      mockProcess.emit("close", 0);
+
+      await promise;
+
+      // The invalid URL should not cause a crash, and fetch should not be called
+      expect(global.fetch).not.toHaveBeenCalled();
+      const writtenLatex = mockProcess.getStdinContent();
+      expect(writtenLatex).toContain(latexWithInvalidUrl);
+    });
+
+    it("should handle missing global fetch function", async () => {
+      (global.fetch as any) = undefined; // Simulate fetch not being available
+      const latexWithImage = "\\includegraphics{https://example.com/image.png}";
+      const promise = ExportService.latexToDocx(latexWithImage);
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      mockProcess.stdout.push(Buffer.from("fake docx"));
+      mockProcess.stdout.push(null);
+      mockProcess.emit("close", 0);
+
+      await promise;
+
+      const writtenLatex = mockProcess.getStdinContent();
+      expect(writtenLatex).toContain(latexWithImage); // Content should be unchanged
+    });
+  });
+
+  describe("latexToPdf", () => {
+    it("should convert LaTeX to PDF successfully", async () => {
+      const promise = ExportService.latexToPdf(
+        "\\documentclass{article}\\begin{document}Hello PDF\\end{document}",
+      );
+
+      await new Promise((resolve) => process.nextTick(resolve));
+
+      mockProcess.stdout.push(Buffer.from("fake pdf"));
+      mockProcess.stdout.push(null);
+      mockProcess.emit("close", 0);
+
+      const result = await promise;
+
+      expect(result).toEqual(Buffer.from("fake pdf"));
+      expect(fs.rm).toHaveBeenCalledWith("/tmp/aiwa-export-123", {
+        recursive: true,
+        force: true,
+      });
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        "/tmp/aiwa-export-123/references.bib",
+        expect.any(String),
+      );
+    });
+
+    it("should throw an error if pandoc conversion fails", async () => {
+      const promise = ExportService.latexToPdf("...");
+
+      await new Promise((resolve) => process.nextTick(resolve));
+
+      mockProcess.stderr.emit("data", Buffer.from("PDF conversion failed"));
+      mockProcess.emit("close", 1);
+
+      await expect(promise).rejects.toThrow(
+        "Pandoc Docker exited with code 1 for pdf: PDF conversion failed",
+      );
+    });
+
+    it("should throw an error for empty output buffer", async () => {
+      const promise = ExportService.latexToPdf("...");
+
+      await new Promise((resolve) => process.nextTick(resolve));
+
+      mockProcess.stdout.push(null);
+      mockProcess.emit("close", 0);
+
+      await expect(promise).rejects.toThrow("Generated PDF file is empty");
+    });
+
+    it("should handle invalid image URLs gracefully", async () => {
+      const latexWithInvalidUrl = "\\includegraphics{not a valid url}";
+      const promise = ExportService.latexToPdf(latexWithInvalidUrl);
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      mockProcess.stdout.push(Buffer.from("fake pdf"));
+      mockProcess.stdout.push(null);
+      mockProcess.emit("close", 0);
+
+      await promise;
+
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("normalizePathForDocker", () => {
+    it("should return unix paths as-is", () => {
+      (os.platform as Mock).mockReturnValue("linux");
+      const result = (ExportService as any).normalizePathForDocker(
+        "/home/user/files",
+      );
+      expect(result).toBe("/home/user/files");
+    });
+
+    it("should convert windows paths with drive letters", () => {
+      (os.platform as Mock).mockReturnValue("win32");
+      const result = (ExportService as any).normalizePathForDocker(
+        "C:\\Users\\Test\\My Files",
+      );
+      expect(result).toBe("/c/Users/Test/My Files");
+    });
+
+    it("should convert windows paths without drive letters (UNC)", () => {
+      (os.platform as Mock).mockReturnValue("win32");
+      const result = (ExportService as any).normalizePathForDocker(
+        "\\\\server\\share\\folder",
+      );
+      // It should just convert backslashes
+      expect(result).toBe("//server/share/folder");
     });
   });
 });

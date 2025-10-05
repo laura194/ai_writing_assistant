@@ -58,6 +58,8 @@ describe("export utilities", () => {
     vi.clearAllMocks();
     // Reset the saveAs mock to have no calls
     mockedSaveAs.mockClear();
+    // Ensure a clean state for the environment variable for each test
+    delete (import.meta.env as any).VITE_API_BASE_URL;
   });
 
   it("handleExportWord - fetches document from backend and saves as .docx", async () => {
@@ -144,7 +146,6 @@ describe("export utilities", () => {
   });
 
   it("handleExportWord - should use VITE_API_BASE_URL if set", async () => {
-    const originalEnv = import.meta.env.VITE_API_BASE_URL;
     import.meta.env.VITE_API_BASE_URL = "http://test-url:1234";
 
     global.fetch = vi.fn().mockResolvedValue({
@@ -158,7 +159,7 @@ describe("export utilities", () => {
       "http://test-url:1234/api/export/word",
       expect.any(Object),
     );
-    import.meta.env.VITE_API_BASE_URL = originalEnv;
+    delete (import.meta.env as any).VITE_API_BASE_URL;
   });
 
   it("handleExportPDF - calls backend PDF endpoint and saves file", async () => {
