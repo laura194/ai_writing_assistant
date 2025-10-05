@@ -23,10 +23,7 @@ class MockBlob {
 
   constructor(parts: any[], _opts?: any) {
     this.parts = parts || [];
-    this.size = this.parts.reduce(
-      (acc, part) => acc + (part?.length || 0),
-      0,
-    );
+    this.size = this.parts.reduce((acc, part) => acc + (part?.length || 0), 0);
   }
   async text() {
     return this.parts

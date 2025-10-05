@@ -276,14 +276,12 @@ function buildAiProtocolLatexAppendix(
     return appendix;
   }
 
-  const tableHeader =
-    `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \\hline\n`;
+  const tableHeader = `Name & Usage & Affected sections & Notes & Created at & Updated at \\\\ \\hline\n`;
   const firstHeader = `\\endfirsthead\n\\hline\n${tableHeader}\\endhead\n`;
 
   if (forWord) {
     // Word path: longtable with header defined for first and subsequent pages
-    appendix +=
-      `\\begin{longtable}{|l|l|l|l|l|l|}\n\\hline\n${tableHeader}${firstHeader}`;
+    appendix += `\\begin{longtable}{|l|l|l|l|l|l|}\n\\hline\n${tableHeader}${firstHeader}`;
 
     appendix += `\\end{longtable}\n`;
   } else {
