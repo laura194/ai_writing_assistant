@@ -109,12 +109,11 @@ export class ProjectService {
         return [];
       }
 
-      console.error("❌ [getPublicProjects] Error fetching public projects:", error);
+      console.error(
+        "❌ [getPublicProjects] Error fetching public projects:",
+        error,
+      );
       throw error;
     }
   }
-
-
-
-
 }
