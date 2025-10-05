@@ -98,4 +98,28 @@ export class ProjectService {
       throw error;
     }
   }
+
+  static async getPublicProjects(): Promise<Project[]> {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/public`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch public projects");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error in getPublicProjects:", error);
+      throw error;
+    }
+  }
+
+
+
 }
