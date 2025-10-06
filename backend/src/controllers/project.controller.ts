@@ -237,7 +237,9 @@ export const getPublicProjects = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const publicProjects = await Project.find({ isPublic: true }).sort({ createdAt: -1 });
+    const publicProjects = await Project.find({ isPublic: true }).sort({
+      createdAt: -1,
+    });
 
     if (publicProjects.length === 0) {
       res.status(404).json({ error: "No public projects found" });
