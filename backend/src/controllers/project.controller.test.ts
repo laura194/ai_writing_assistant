@@ -394,47 +394,47 @@ describe("project.controller zusätzliche Fehlerfälle", () => {
       (Project.find as unknown as vi.Mock).mockReturnValue({
         sort: vi.fn().mockReturnValue(mockProjects),
       });
-  
+
       const res = await request(app).get("/api/projects/public");
-  
+
       expect(res.status).toBe(200);
       expect(res.body).toEqual(mockProjects);
     });
-  
+
     it("gibt 404 zurück, wenn keine öffentlichen Projekte existieren", async () => {
       (Project.find as unknown as vi.Mock).mockReturnValue({
         sort: vi.fn().mockReturnValue([]),
       });
-  
+
       const res = await request(app).get("/api/projects/public");
-  
+
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("error", "No public projects found");
     });
-  
+
     it("gibt 500 zurück, wenn ein Fehler auftritt", async () => {
       const error = new Error("DB Fehler");
-    
+
       (Project.find as unknown as vi.Mock).mockReturnValue({
-        sort: vi.fn().mockImplementation(() => { throw error; }),
+        sort: vi.fn().mockImplementation(() => {
+          throw error;
+        }),
       });
-    
+
       const consoleErrorMock = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
-    
+
       const res = await request(app).get("/api/projects/public");
-    
+
       expect(res.status).toBe(500);
       expect(res.body).toHaveProperty("error", "Internal Server Error");
       expect(consoleErrorMock).toHaveBeenCalledWith(
         "Error fetching public projects:",
         error,
       );
-    
+
       consoleErrorMock.mockRestore();
     });
-    
   });
-  
 });
