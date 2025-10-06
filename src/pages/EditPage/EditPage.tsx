@@ -41,6 +41,9 @@ const EditPage = () => {
 
   const [externalVersionCounter, setExternalVersionCounter] = useState(0);
 
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
   // History refs
   const undoStackRef = useRef<any[]>([]);
   const redoStackRef = useRef<any[]>([]);
@@ -82,6 +85,8 @@ const EditPage = () => {
             // clear history
             undoStackRef.current = [];
             redoStackRef.current = [];
+            setCanUndo(false);
+            setCanRedo(false);
           } else {
             console.error("Project structure is not an array or is undefined!");
           }
@@ -175,6 +180,8 @@ const EditPage = () => {
       undoStackRef.current.shift();
     }
     redoStackRef.current = [];
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(false);
   };
 
   const applySnapshot = async (snapshot: any) => {
@@ -206,6 +213,9 @@ const EditPage = () => {
     setActiveView(snapshot.activeView || "file");
 
     setExternalVersionCounter((v) => v + 1);
+
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(redoStackRef.current.length > 0);
   };
 
   const handleUndo = () => {
@@ -216,6 +226,9 @@ const EditPage = () => {
     applySnapshot(prevSnapshot);
     debounceSave(prevSnapshot.nodes);
     setIsDirty(true);
+
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(redoStackRef.current.length > 0);
   };
 
   const handleRedo = () => {
@@ -226,6 +239,9 @@ const EditPage = () => {
     applySnapshot(nextSnapshot);
     debounceSave(nextSnapshot.nodes);
     setIsDirty(true);
+
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(redoStackRef.current.length > 0);
   };
 
   // globaler Keydown listener für Ctrl/Cmd+Z und Ctrl/Cmd+Y / Shift+Z
@@ -546,7 +562,12 @@ const EditPage = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex flex-col h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-x-hidden">
-        <Header />
+        <Header
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+        />
 
         <div className="flex flex-1 relative">
           <div
