@@ -32,7 +32,7 @@ const CommunityPage = () => {
   }, []);
 
   const handleProjectClick = (id: string) => {
-    navigate(`/community/${id}`); // eigene Route zur Detailansicht
+    navigate(`/read/${id}`); // eigene Route zur Detailansicht
   };
 
   const formatDate = (dateString: string) => {
