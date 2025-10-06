@@ -230,3 +230,23 @@ export const deleteProject = async (
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+// Get all public projects
+export const getPublicProjects = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const publicProjects = await Project.find({ isPublic: true }).sort({ createdAt: -1 });
+
+    if (publicProjects.length === 0) {
+      res.status(404).json({ error: "No public projects found" });
+      return;
+    }
+
+    res.status(200).json(publicProjects);
+  } catch (error) {
+    console.error("Error fetching public projects:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
