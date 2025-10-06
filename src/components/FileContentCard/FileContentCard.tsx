@@ -125,7 +125,16 @@ function FileContentCard({
     // Splitte Zeilen und Wörter, baue HTML mit Fehler-Underline
     const lines = text.split("\n");
     return lines.map((line, lineIdx) => {
-      const words = line.split(/(\s+)/); // Bewahrt Leerzeichen als eigene Elemente
+      if (line.trim() === "") {
+        // 🚀 leere Zeile sichtbar machen
+        return (
+          <div key={lineIdx} style={{ display: "block", height: "1.5em" }}>
+            &nbsp;
+          </div>
+        );
+      }
+
+      const words = line.split(/(\s+)/);
       return (
         <div key={lineIdx} style={{ display: "block" }}>
           {words.map((word, i) => {

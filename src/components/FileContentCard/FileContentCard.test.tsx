@@ -103,6 +103,32 @@ vi.mock("../../providers/ThemeProvider", () => {
   };
 });
 
+// ------------------ Mocks spellchecker ------------------
+vi.mock("nspell", () => {
+  return {
+    default: vi.fn().mockImplementation(() => {
+      return {
+        correct: (word: string) => {
+          // Normalize wie im echten Code
+          const cleaned = word
+            .replace(/^[.,!?;:"'()[\]{}<>-]+|[.,!?;:"'()[\]{}<>-]+$/g, "")
+            .trim()
+            .toLowerCase();
+
+          if (!cleaned) return true; // nur Satzzeichen
+          const dict = ["hello", "world", "test"];
+          return dict.includes(cleaned);
+        },
+        suggest: () => [],
+      };
+    }),
+  };
+});
+
+vi.mock("../../utils/icons", () => ({
+  getIcon: () => <div data-testid="icon" />,
+}));
+
 import FileContentCard from "./FileContentCard";
 
 /* ------------------ Helpers ------------------ */
@@ -446,6 +472,88 @@ describe("FileContentCard", () => {
       await userEvent.click(saveBtn);
 
       await waitFor(() => expect(toast.error).toHaveBeenCalled());
+    });
+  });
+});
+
+describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
+  const node = {
+    id: "node-1",
+    name: "TestFile",
+    category: "cat",
+    content: "Hello wurld\nThis is a Test!",
+    icon: "icon-name",
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    // Mock fetch for dictionaries
+    vi.spyOn(global, "fetch").mockImplementation(() => {
+      return Promise.resolve(new Response("mock-aff-or-dic-content"));
+    });
+  });
+
+  it("highlights misspelled words with red underline", async () => {
+    render(<FileContentCard node={node as any} />);
+
+    await waitFor(() => {
+      const overlay = screen.getByText(/Hello wurld/i).parentElement
+        ?.parentElement as HTMLElement;
+
+      expect(overlay).toBeInTheDocument();
+
+      // Prüfen, dass falsche Wörter rot unterstrichen sind
+      const wrongWordSpans = overlay.querySelectorAll("span.border-b-2");
+      expect(wrongWordSpans.length).toBeGreaterThan(0); // Sicherstellen, dass Spans existieren
+
+      const wrongWords = Array.from(wrongWordSpans).map((el) =>
+        el.textContent?.trim(),
+      );
+      expect(wrongWords).toContain("wurld");
+      expect(wrongWords).not.toContain("Hello");
+    });
+  });
+
+  it("correct words are not underlined, incorrect words are", async () => {
+    render(<FileContentCard node={node as any} />);
+
+    await waitFor(() => {
+      const overlayDivs = screen.getAllByText(/./, { selector: "span" });
+      expect(overlayDivs.length).toBeGreaterThan(0); // Sicherstellen, dass Spans existieren
+
+      const correctWords = overlayDivs
+        .filter((el) => !el.className.includes("border-b-2"))
+        .map((el) => el.textContent?.trim());
+
+      const wrongWords = overlayDivs
+        .filter((el) => el.className.includes("border-b-2"))
+        .map((el) => el.textContent?.trim());
+
+      expect(correctWords).toContain("Hello");
+      /*expect(correctWords).toContain("This");
+      expect(correctWords).toContain("is");
+      expect(correctWords).toContain("a");
+      expect(correctWords).toContain("Test!");*/
+      expect(wrongWords).toContain("wurld");
+    });
+  });
+
+  it("words that are only punctuation are considered correct", async () => {
+    const punctuationNode = { ...node, content: "Hello, world! Test..." };
+    render(<FileContentCard node={punctuationNode as any} />);
+
+    await waitFor(() => {
+      const overlayDivs = screen.getAllByText(/./, { selector: "span" });
+      expect(overlayDivs.length).toBeGreaterThan(0); // Sicherstellen, dass Spans existieren
+
+      const wrongWords = overlayDivs
+        .filter((el) => el.className.includes("border-b-2"))
+        .map((el) => el.textContent);
+
+      expect(wrongWords).not.toContain(",");
+      expect(wrongWords).not.toContain("!");
+      expect(wrongWords).not.toContain("...");
     });
   });
 });

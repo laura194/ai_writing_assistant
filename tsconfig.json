@@ -22,7 +22,7 @@
     "noUncheckedSideEffectImports": true,
 
     /* Für Tests */
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vitest/globals", "@testing-library/jest-dom", "vitest", "node"]
   },
   "include": ["src", "test"],
   "exclude": ["node_modules", "dist"]

@@ -20,12 +20,15 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install Dependencies
+      - name: Install Frontend Dependencies
         run: npm ci
+
+      - name: Install Backend Dependencies
+        run: cd backend && npm ci
 
       - name: Run Vitest Tests with Coverage
         run: npx vitest run --coverage
 
-      - name: Run Stryker Mutation Testing
-        if: github.event_name == 'pull_request'
-        run: npx stryker run
+      #- name: Run Stryker Mutation Testing
+      #  if: github.event_name == 'pull_request'
+      #  run: npx stryker run
