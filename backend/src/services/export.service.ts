@@ -110,7 +110,7 @@ export class ExportService {
       }
       return dockerPath;
     }
-    return filePath; // macOS/Linux paths are fine as is
+    return filePath;
   }
 
   /**
@@ -123,6 +123,8 @@ export class ExportService {
     extraArgs: string[] = [],
   ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
+      const dockerTmpDir = ExportService.normalizePathForDocker(tmpDir);
+
       const pandocBaseArgs = [
         "-f",
         "latex",
@@ -143,11 +145,10 @@ export class ExportService {
         "--rm",
         "-i", // Interactive, so stdin is available
         "-v",
-        `${ExportService.normalizePathForDocker(tmpDir)}:${tmpDir}`, // Use normalized path here
-        //`${tmpDir}:${tmpDir}`, // Mount the temporary directory, not working on Windows without path normalization
+        `${dockerTmpDir}:${dockerTmpDir}`, 
         "-w",
-        tmpDir, // Set the working directory in the container
-        "pandoc-core", // Your custom Pandoc image name
+        dockerTmpDir, 
+        "aylin/pandoc-latex:latest", 
         ...pandocBaseArgs,
       ];
 
