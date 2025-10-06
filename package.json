@@ -12,9 +12,10 @@
     "prettier:check": "prettier --check .",
     "preview": "vite preview",
     "start": "concurrently \"npm run dev\" \"npm run dev --prefix backend\"",
-    "build:pandoc": "docker build -t pandoc-core -f docker-files/Dockerfile.pandoc .",
-    "test:pandoc": "docker run --rm pandoc-core --version",
-    "clean:pandoc": "docker rmi pandoc-core"
+    "build:pandoc:local": "docker buildx build --load -t aylin/pandoc-latex:latest -f docker-files/Dockerfile.pandoc .",
+    "build:pandoc:push": "docker buildx build --platform linux/amd64,linux/arm64 -t aylin/pandoc-latex:latest -f docker-files/Dockerfile.pandoc . --push",
+    "test:pandoc": "docker run --rm aylin/pandoc-latex:latest --version",
+    "clean:pandoc": "docker rmi aylin/pandoc-latex:latest"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.31.1",
