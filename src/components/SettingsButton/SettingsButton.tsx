@@ -1,49 +1,12 @@
 import { useEffect, useState, useRef, KeyboardEvent } from "react";
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/solid";
+import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 
-export const FAQDropdown = () => {
+export const SettingsButton = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const menuId = "faq-menu";
+  const menuId = "settings-menu";
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
-
-  const faqs = [
-    {
-      question: "What is this application?",
-      answer:
-        "A web app that helps students and researchers write academic texts while keeping full authorship control.",
-    },
-    {
-      question: "How does it support writing?",
-      answer:
-        "It assists with structuring arguments, rewriting sections, improving style, checking grammar, and suggesting sources.",
-    },
-    {
-      question: "How does editing work?",
-      answer:
-        "You can write directly in the app, select specific text, and request targeted AI support like style checks or grammar fixes.",
-    },
-    {
-      question: "What role does AI play?",
-      answer:
-        "The Gemini model provides suggestions on structure, style, and sources — always transparently logged for integrity.",
-    },
-    {
-      question: "How are projects managed?",
-      answer:
-        "Projects are saved per user. Log in with Microsoft, Google, or Apple and continue anytime.",
-    },
-    {
-      question: "Which export formats are supported?",
-      answer:
-        "Word (.docx), PDF (.pdf), and LaTeX (.tex) for academic publishing needs.",
-    },
-    {
-      question: "Is it free?",
-      answer: "Yes, currently free.",
-    },
-  ];
 
   const toggleItem = (index: number) => {
     setOpenIndex((prev) => (prev === index ? null : index));
@@ -105,7 +68,7 @@ export const FAQDropdown = () => {
 
   return (
     <div ref={containerRef} className="relative flex items-center gap-1">
-      <QuestionMarkCircleIcon className="h-5 w-5 text-[#473885] dark:text-[#c4b5fd]" />
+      <Cog6ToothIcon className="h-5 w-5 text-[#473885] dark:text-[#c4b5fd]" />
       <button
         aria-haspopup="menu"
         aria-expanded={isOpen}
@@ -114,7 +77,7 @@ export const FAQDropdown = () => {
         onKeyDown={onButtonKeyDown}
         className="text-sm text-[#261e3b] dark:text-[#afa6c5] cursor-pointer hover:text-[#9c85d4] dark:hover:text-[#ffffff] transition-colors duration-150 font-medium"
       >
-        FAQ
+        Settings
       </button>
 
       <div
@@ -132,46 +95,8 @@ export const FAQDropdown = () => {
           ${isOpen ? "opacity-100 translate-y-0 -translate-x-1/2 pointer-events-auto transition duration-800" : "opacity-0 translate-y-1 -translate-x-1/2 pointer-events-none transition duration-800"}`}
       >
         <h3 className="text-lg font-bold mb-4 text-[#261e3b] dark:text-[#c2bad8]">
-          Frequently Asked Questions
+          Settings
         </h3>
-
-        <div className="space-y-2">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="border-b border-[#aca0d6] dark:border-[#32265b] pb-2"
-            >
-              <button
-                ref={(el) => {
-                  if (el) {
-                    itemRefs.current[index] = el;
-                  }
-                }}
-                className="w-full text-left font-semibold text-[#261e3b] dark:text-[#c2bad8] focus:outline-none cursor-pointer hover:text-[#9c85d4] dark:hover:text-[#ffffff] transition-colors duration-150"
-                role="menuitem"
-                aria-expanded={openIndex === index}
-                aria-controls={`faq-answer-${index}`}
-                onClick={() => toggleItem(index)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    toggleItem(index);
-                  }
-                }}
-              >
-                {faq.question}
-              </button>
-              {openIndex === index && (
-                <p
-                  id={`faq-answer-${index}`}
-                  className="mt-1 text-[#261e3b] dark:text-[#afa6c5]"
-                >
-                  {faq.answer}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
