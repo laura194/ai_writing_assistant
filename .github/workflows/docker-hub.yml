@@ -44,3 +44,4 @@ jobs:
             --tag laura194/backend:${{ steps.version.outputs.tag }} \
             --build-arg MONGO_URI=${{ secrets.MONGO_URI }}
           docker push laura194/backend:${{ steps.version.outputs.tag }}
+# TODO: update docker hub yaml file with pushing the new pandoc image as well.
