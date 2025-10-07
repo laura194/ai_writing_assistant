@@ -7,11 +7,13 @@ import {
   getProjectsByUsername,
   deleteProject,
   getRecentProjectsByUsername,
+  getPublicProjects,
 } from "../controllers/project.controller";
 
 const router = express.Router();
 
 // Define your routes
+router.get("/public", getPublicProjects);
 router.post("/", createProject);
 router.get("/", getAllProjects);
 router.get("/by-username", getProjectsByUsername);
