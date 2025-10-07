@@ -5,8 +5,7 @@ import logo from "/logo.svg";
 import { RecentProjectsDropdown } from "../RecentProjectsDropdown/RecentProjectsDropdown";
 import { FAQDropdown } from "../FAQDropdown/FAQDropdown.tsx";
 import ThemeToggleButton from "../ThemeToggleButton/ThemeToggleButton";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
-import { motion, AnimatePresence } from "framer-motion";
+import { UndoRedoButton } from "../UndoRedoButton/UndoRedoButton";
 import { SettingsButton } from "../SettingsButton/SettingsButton";
 
 interface HeaderProps {
@@ -15,11 +14,6 @@ interface HeaderProps {
   canUndo?: boolean;
   canRedo?: boolean;
 }
-
-const tooltipVariants = {
-  enter: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.14 } },
-  exit: { opacity: 0, y: -6, scale: 0.98, transition: { duration: 0.12 } },
-};
 
 const Header = ({
   onUndo,
@@ -89,140 +83,13 @@ const Header = ({
 
         {/* Undo/Redo group */}
         {!hideUndoRedo && (
-          <div className="ml-20 flex items-center gap-3">
-            {/* Undo */}
-            <div className="relative">
-              <motion.button
-                type="button"
-                onClick={onUndo}
-                disabled={!canUndo}
-                aria-label="Undo — Strg/Cmd + Z"
-                aria-disabled={!canUndo}
-                className={`p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400/60 ${
-                  canUndo ? "cursor-pointer" : "cursor-not-allowed"
-                }`}
-                whileHover={canUndo ? { scale: 1.1 } : {}}
-                whileTap={canUndo ? { scale: 0.9 } : {}}
-                animate={{
-                  scale: canUndo ? 1 : 0.98,
-                  boxShadow: canUndo
-                    ? "0 8px 24px rgba(120,69,239,0.18)"
-                    : "0 0 0 rgba(0,0,0,0)",
-                  opacity: canUndo ? 1 : 0.55,
-                }}
-                transition={{ type: "spring", stiffness: 380, damping: 28 }}
-              >
-                <ChevronLeftIcon
-                  className={`h-5 w-5 ${
-                    canUndo
-                      ? "text-[#473885] dark:text-[#c4b5fd]"
-                      : "text-[#8b88b7] dark:text-[#504a6a]"
-                  }`}
-                />
-              </motion.button>
-
-              <AnimatePresence>
-                {canUndo ? (
-                  <motion.div
-                    key="undo-tooltip"
-                    initial="exit"
-                    animate="enter"
-                    exit="exit"
-                    variants={tooltipVariants}
-                    className="absolute -left-2 top-[48px] z-40 w-max rounded-md px-3 py-2 bg-[#0f172a] text-white text-xs shadow-lg"
-                    role="status"
-                  >
-                    <div className="font-medium">Rückgängig</div>
-                    <div className="text-xs opacity-80">Strg / Cmd + Z</div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="undo-tooltip-disabled"
-                    initial="exit"
-                    animate="enter"
-                    exit="exit"
-                    variants={tooltipVariants}
-                    className="absolute -left-2 top-[48px] z-40 w-max rounded-md px-3 py-2 bg-[#ffffff] dark:bg-[#221633] text-[#222] dark:text-[#ddd] text-xs border border-[#e6e2f9]"
-                    role="status"
-                  >
-                    <div className="font-medium">Rückgängig</div>
-                    <div className="text-xs opacity-70">
-                      Keine Aktion verfügbar
-                    </div>
-                    <div className="text-xs opacity-60 mt-0.5">
-                      Strg / Cmd + Z
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Redo */}
-            <div className="relative">
-              <motion.button
-                type="button"
-                onClick={onRedo}
-                disabled={!canRedo}
-                aria-label="Redo (Wiederherstellen) — Strg/Cmd + Y"
-                aria-disabled={!canRedo}
-                className={`p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400/60 ${
-                  canRedo ? "cursor-pointer" : "cursor-not-allowed"
-                }`}
-                whileHover={canRedo ? { scale: 1.06 } : {}}
-                whileTap={canRedo ? { scale: 0.96 } : {}}
-                animate={{
-                  scale: canRedo ? 1 : 0.98,
-                  boxShadow: canRedo
-                    ? "0 8px 24px rgba(120,69,239,0.18)"
-                    : "0 0 0 rgba(0,0,0,0)",
-                  opacity: canRedo ? 1 : 0.55,
-                }}
-                transition={{ type: "spring", stiffness: 380, damping: 28 }}
-              >
-                <ChevronRightIcon
-                  className={`h-5 w-5 ${
-                    canRedo
-                      ? "text-[#473885] dark:text-[#c4b5fd]"
-                      : "text-[#8b88b7] dark:text-[#504a6a]"
-                  }`}
-                />
-              </motion.button>
-
-              <AnimatePresence>
-                {canRedo ? (
-                  <motion.div
-                    key="redo-tooltip"
-                    initial="exit"
-                    animate="enter"
-                    exit="exit"
-                    variants={tooltipVariants}
-                    className="absolute -left-2 top-[48px] z-40 w-max rounded-md px-3 py-2 bg-[#0f172a] text-white text-xs shadow-lg"
-                    role="status"
-                  >
-                    <div className="font-medium">Wiederherstellen</div>
-                    <div className="text-xs opacity-80">Strg / Cmd + Y</div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="redo-tooltip-disabled"
-                    initial="exit"
-                    animate="enter"
-                    exit="exit"
-                    variants={tooltipVariants}
-                    className="absolute -left-2 top-[48px] z-40 w-max rounded-md px-3 py-2 bg-[#ffffff] dark:bg-[#221633] text-[#222] dark:text-[#ddd] text-xs border border-[#e6e2f9]"
-                    role="status"
-                  >
-                    <div className="font-medium">Wiederherstellen</div>
-                    <div className="text-xs opacity-70">
-                      Keine Aktion verfügbar
-                    </div>
-                    <div className="text-xs opacity-60 mt-0.5">
-                      Strg / Cmd + Y
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+          <div className="ml-40">
+            <UndoRedoButton
+              onUndo={onUndo}
+              onRedo={onRedo}
+              canUndo={canUndo}
+              canRedo={canRedo}
+            />
           </div>
         )}
       </div>
