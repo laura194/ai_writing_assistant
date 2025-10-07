@@ -98,4 +98,22 @@ export class ProjectService {
       throw error;
     }
   }
+
+  static async getPublicProjects(): Promise<Project[]> {
+    try {
+      const response = await axios.get<Project[]>(`${API_BASE_URL}/public`);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        // No public projects found — return an empty array instead of throwing
+        return [];
+      }
+
+      console.error(
+        "❌ [getPublicProjects] Error fetching public projects:",
+        error,
+      );
+      throw error;
+    }
+  }
 }
