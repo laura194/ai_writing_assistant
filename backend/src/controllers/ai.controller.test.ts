@@ -9,7 +9,7 @@ vi.mock("../models/AIProtocol", () => {
   return {
     default: Object.assign(
       vi.fn(() => ({ save: vi.fn() })), // Konstruktor mit save()
-      { find: vi.fn() }, // statische Methode
+      { find: vi.fn() } // statische Methode
     ),
   };
 });
@@ -120,7 +120,7 @@ describe("AIProtocol Controller", () => {
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty(
       "error",
-      "ProjectId is required as a query parameter",
+      "ProjectId is required as a query parameter"
     );
   });
 
