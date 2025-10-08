@@ -48,7 +48,7 @@ describe("NodeContentService", () => {
     expect(result).toEqual(created);
     expect(mockedAxios.post).toHaveBeenCalledWith(
       `${BASE_URL}/api/nodeContent`,
-      input
+      input,
     );
   });
 
@@ -81,7 +81,7 @@ describe("NodeContentService", () => {
     mockedAxios.post.mockRejectedValueOnce(error);
 
     await expect(NodeContentService.createNodeContent(input)).rejects.toThrow(
-      error
+      error,
     );
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
@@ -108,7 +108,7 @@ describe("NodeContentService", () => {
       `${BASE_URL}/api/nodeContent`,
       {
         params: { nodeId: "n1", projectId: "p1" },
-      }
+      },
     );
   });
 
@@ -137,7 +137,7 @@ describe("NodeContentService", () => {
     const result = await NodeContentService.getNodeContentById("n1", "p1");
     expect(result).toEqual(node);
     expect(mockedAxios.get).toHaveBeenCalledWith(
-      `${BASE_URL}/api/nodeContent/n1?projectId=p1`
+      `${BASE_URL}/api/nodeContent/n1?projectId=p1`,
     );
   });
 
@@ -146,7 +146,7 @@ describe("NodeContentService", () => {
     mockedAxios.get.mockRejectedValueOnce(error);
 
     await expect(
-      NodeContentService.getNodeContentById("n1", "p1")
+      NodeContentService.getNodeContentById("n1", "p1"),
     ).rejects.toThrow(error);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
@@ -202,7 +202,7 @@ describe("NodeContentService", () => {
         id: "x",
         name: "Y",
         projectId: "p3",
-      })
+      }),
     ).rejects.toThrow(error);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
@@ -234,7 +234,7 @@ describe("NodeContentService", () => {
         content: "new",
         name: "Updated",
         category: "file",
-      }
+      },
     );
   });
 
@@ -265,7 +265,7 @@ describe("NodeContentService", () => {
       NodeContentService.updateNodeContent("n1", {
         projectId: "p1",
         name: "X",
-      })
+      }),
     ).rejects.toThrow(error);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
@@ -292,12 +292,12 @@ describe("NodeContentService", () => {
       projectId,
       content,
       name,
-      category
+      category,
     );
     expect(res).toEqual(createdVersion);
     expect(mockedAxios.post).toHaveBeenCalledWith(
       `${BASE_URL}/api/nodeContent/${nodeId}/versions`,
-      { projectId, content, name, category }
+      { projectId, content, name, category },
     );
   });
 
@@ -314,7 +314,7 @@ describe("NodeContentService", () => {
     expect(res).toEqual(versions);
     expect(mockedAxios.get).toHaveBeenCalledWith(
       `${BASE_URL}/api/nodeContent/${nodeId}/versions`,
-      { params: { projectId, limit: 10, skip: 5 } }
+      { params: { projectId, limit: 10, skip: 5 } },
     );
   });
 
@@ -327,7 +327,7 @@ describe("NodeContentService", () => {
     const res = await NodeContentService.getContentVersion(nodeId, versionId);
     expect(res).toEqual(version);
     expect(mockedAxios.get).toHaveBeenCalledWith(
-      `${BASE_URL}/api/nodeContent/${nodeId}/versions/${versionId}`
+      `${BASE_URL}/api/nodeContent/${nodeId}/versions/${versionId}`,
     );
   });
 
@@ -341,12 +341,12 @@ describe("NodeContentService", () => {
     const res = await NodeContentService.revertToVersion(
       nodeId,
       versionId,
-      projectId
+      projectId,
     );
     expect(res).toEqual(updated);
     expect(mockedAxios.post).toHaveBeenCalledWith(
       `${BASE_URL}/api/nodeContent/${nodeId}/versions/${versionId}/revert`,
-      { projectId }
+      { projectId },
     );
   });
 });

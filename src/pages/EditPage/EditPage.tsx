@@ -80,7 +80,7 @@ const EditPage = () => {
               project.projectStructure,
               null,
               null,
-              "file"
+              "file",
             );
             lastSavedSnapshotRef.current = initial;
             // clear history
@@ -146,7 +146,7 @@ const EditPage = () => {
         // save current nodes as project structure every 5 minutes
         saveProjectStructure(nodes);
       },
-      5 * 60 * 1000
+      5 * 60 * 1000,
     );
     return () => clearInterval(id);
   }, [nodes, projectId]);
@@ -157,14 +157,14 @@ const EditPage = () => {
       nodes,
       selectedNode?.id || null,
       selectedNode?.content || null,
-      activeView
+      activeView,
     );
 
   function createSnapshotFromValues(
     snapshotNodes: Node[],
     selectedNodeId: string | null,
     selectedNodeContent: string | null,
-    view: string
+    view: string,
   ) {
     return {
       nodes: JSON.parse(JSON.stringify(snapshotNodes || [])),
@@ -205,7 +205,7 @@ const EditPage = () => {
       }
       localStorage.setItem(
         `selectedNodeId_${projectId}`,
-        snapshot.selectedNodeId
+        snapshot.selectedNodeId,
       );
     } else {
       setSelectedNode(null);
@@ -271,7 +271,7 @@ const EditPage = () => {
   // ---------------------- Helper: finde Node Metadata ----------------------
   const findNodeById = (
     searchNodes: Node[] | undefined,
-    id: string | null
+    id: string | null,
   ): Node | null => {
     if (!searchNodes || !id) return null;
     for (const n of searchNodes) {
@@ -302,7 +302,7 @@ const EditPage = () => {
         updatedNodes,
         selectedNode?.id || null,
         selectedNode?.content || null,
-        activeView
+        activeView,
       );
       setIsDirty(false);
     } catch (error) {
@@ -396,7 +396,7 @@ const EditPage = () => {
 
     const recursiveUpdate = (
       nodes: Node[],
-      parentId: string | null
+      parentId: string | null,
     ): Node[] => {
       return nodes.map((node) => {
         if (node.id === parentId) {
@@ -468,7 +468,7 @@ const EditPage = () => {
       setSelectedNode((prev) =>
         prev
           ? { ...prev, name: updatedNode.name, icon: updatedNode.icon }
-          : prev
+          : prev,
       );
     }
 
@@ -490,7 +490,7 @@ const EditPage = () => {
 
   const handleMoveNode = (
     draggedNodeId: string,
-    targetNodeId: string
+    targetNodeId: string,
     //asSibling: boolean = false
   ) => {
     pushToUndo();
@@ -547,14 +547,14 @@ const EditPage = () => {
 
   const handleContentChangeForHistory = (
     prevContent: string,
-    nextContent: string
+    nextContent: string,
   ) => {
     if (prevContent === nextContent) return;
 
     pushToUndo();
 
     setSelectedNode((prev) =>
-      prev ? { ...prev, content: nextContent } : prev
+      prev ? { ...prev, content: nextContent } : prev,
     );
 
     setIsDirty(true);

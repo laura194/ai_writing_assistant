@@ -22,7 +22,7 @@ const NodeContentSchema: Schema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 NodeContentSchema.index({ nodeId: 1, projectId: 1 }, { unique: true });

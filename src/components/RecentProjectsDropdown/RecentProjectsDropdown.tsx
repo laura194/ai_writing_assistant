@@ -17,7 +17,7 @@ export const RecentProjectsDropdown = () => {
 
       try {
         const projects = await ProjectService.getRecentProjectsByUsername(
-          user.username
+          user.username,
         );
         setRecentProjects(projects.slice(0, 3));
       } catch (error) {
