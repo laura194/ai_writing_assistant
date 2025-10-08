@@ -71,8 +71,18 @@ const Header = ({
         </div>
       </div>
 
-      {/* GROUP 2: FAQ / Settings (zwischen FAQ und Settings derselbe gap wie oben) */}
-      <div className="flex items-center ml-20 gap-6">
+      {/* GROUP 2: Community */}
+      <div className="ml-18 flex items-center text-sm font-medium dark:text-[#afa6c5] text-[#261e3b]">
+        <Link
+          to="/communityPage"
+          className="relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-[#f32469] after:transition-all after:duration-250 hover:text-[#9f1945] dark:hover:text-[#ffe6ef] hover:after:w-full"
+        >
+          Community
+        </Link>
+      </div>
+
+      {/* GROUP 3: FAQ / Settings */}
+      <div className="flex items-center ml-18 gap-6">
         <div className="hidden lg:block">
           <FAQDropdown />
         </div>
@@ -83,7 +93,7 @@ const Header = ({
 
         {/* Undo/Redo group */}
         {!hideUndoRedo && (
-          <div className="ml-40">
+          <div className="ml-22">
             <UndoRedoButton
               onUndo={onUndo}
               onRedo={onRedo}
