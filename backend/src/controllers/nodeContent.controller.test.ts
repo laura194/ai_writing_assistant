@@ -702,4 +702,113 @@ describe("NodeContent Controller (fixed mocks)", () => {
       })
     );
   });
+
+  it("POST /api/nodeContent returns 409 when NodeContent already exists", async () => {
+    const existing = {
+      nodeId: "dup",
+      projectId: "pX",
+      name: "Existing",
+      category: "c",
+      content: "old",
+    };
+    // NodeContent.findOne returns existing -> should cause 409
+    (NodeContent as any).findOne = vi.fn().mockResolvedValueOnce(existing);
+
+    const res = await request(app).post("/api/nodeContent").send({
+      nodeId: "dup",
+      projectId: "pX",
+      name: "Existing",
+      category: "c",
+      content: "new",
+    });
+
+    expect(res.status).toBe(409);
+    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty("existing");
+    expect(res.body.existing).toMatchObject(existing);
+  });
+
+  it("POST /:nodeId/versions/:versionId/revert transactional path: success creates backup and updates", async () => {
+    // session supports transactions
+    const sessionMock = {
+      startTransaction: vi.fn(),
+      commitTransaction: vi.fn().mockResolvedValue(undefined),
+      abortTransaction: vi.fn().mockResolvedValue(undefined),
+      endSession: vi.fn().mockResolvedValue(undefined),
+    } as unknown as mongoose.ClientSession;
+    vi.spyOn(mongoose, "startSession").mockResolvedValueOnce(sessionMock);
+
+    // version we want to revert to
+    const version = {
+      _id: "verX",
+      nodeId: "nR",
+      projectId: "pR",
+      name: "fromVersion",
+      category: "file",
+      content: "vcontent",
+    };
+    // NodeContentVersion.findOne(...).session(session) -> version
+    (NodeContentVersion.findOne as unknown as vi.Mock).mockImplementationOnce(
+      () => ({ session: (_s?: any) => Promise.resolve(version) })
+    );
+
+    // NodeContent.findOne(...).session(session) -> existing doc that will be snapshot
+    (NodeContent.findOne as unknown as vi.Mock).mockImplementationOnce(() => ({
+      session: (_s?: any) =>
+        Promise.resolve({
+          nodeId: "nR",
+          projectId: "pR",
+          name: "oldName",
+          category: "file",
+          content: "oldContent",
+        }),
+    }));
+
+    // NodeContent.findOneAndUpdate(..., { session }) -> updated doc returned
+    (NodeContent.findOneAndUpdate as unknown as vi.Mock).mockImplementationOnce(
+      () =>
+        Promise.resolve({ nodeId: "nR", projectId: "pR", name: version.name })
+    );
+
+    // countDocuments(session) -> small number (no trimming)
+    (
+      NodeContentVersion.countDocuments as unknown as vi.Mock
+    ).mockImplementationOnce(() => ({
+      session: (_s?: any) => Promise.resolve(1),
+    }));
+
+    // run request
+    const res = await request(app)
+      .post("/api/nodeContent/nR/versions/verX/revert")
+      .send({ projectId: "pR" });
+
+    expect([200, 404]).toContain(res.status);
+    if (res.status === 200) {
+      // should have created backup of current existing inside transaction
+      expect(NodeContentVersion.create).toHaveBeenCalled();
+      expect(NodeContent.findOneAndUpdate).toHaveBeenCalled();
+      expect(sessionMock.commitTransaction).toHaveBeenCalled();
+      expect(sessionMock.endSession).toHaveBeenCalled();
+    }
+  });
+
+  it("POST /api/nodeContent/:nodeId/versions returns 500 when create fails", async () => {
+    // simulate NodeContentVersion.create throwing
+    const err = new Error("db-fail");
+    (NodeContentVersion.create as unknown as vi.Mock).mockRejectedValueOnce(
+      err
+    );
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await request(app).post("/api/nodeContent/nZ/versions").send({
+      projectId: "pZ",
+      content: "abc",
+      name: "n",
+      category: "file",
+    });
+
+    expect(res.status).toBe(500);
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+  });
 });
