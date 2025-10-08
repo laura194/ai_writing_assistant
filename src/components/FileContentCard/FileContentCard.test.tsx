@@ -178,7 +178,7 @@ describe("FileContentCard", () => {
         node={baseNode as any}
         onDirtyChange={vi.fn()}
         onSave={vi.fn()}
-      />
+      />,
     );
 
     expect(screen.getByText(baseNode.name)).toBeInTheDocument();
@@ -194,7 +194,7 @@ describe("FileContentCard", () => {
     const user = userEvent.setup();
 
     render(
-      <FileContentCard node={baseNode as any} onDirtyChange={onDirtyChange} />
+      <FileContentCard node={baseNode as any} onDirtyChange={onDirtyChange} />,
     );
 
     const ta = screen.getByPlaceholderText(/Write your content here\.\.\./i);
@@ -236,7 +236,7 @@ describe("FileContentCard", () => {
         node={baseNode as any}
         onSave={onSave}
         onDirtyChange={vi.fn()}
-      />
+      />,
     );
 
     const ta = screen.getByPlaceholderText(/Write your content here\.\.\./i);
@@ -292,7 +292,7 @@ describe("FileContentCard", () => {
     render(<FileContentCard node={baseNode as any} />);
 
     const ta = screen.getByPlaceholderText(
-      /Write your content here\.\.\./i
+      /Write your content here\.\.\./i,
     ) as HTMLTextAreaElement;
     await user.clear(ta);
     await user.type(ta, "Hello brave new world");
@@ -385,7 +385,7 @@ describe("FileContentCard", () => {
       render(<FileContentCard node={baseNode as any} />);
 
       const ta = screen.getByPlaceholderText(
-        /Write your content here\.\.\./i
+        /Write your content here\.\.\./i,
       ) as HTMLTextAreaElement;
       await userEvent.clear(ta);
       await userEvent.type(ta, "Test selection");
@@ -395,7 +395,7 @@ describe("FileContentCard", () => {
       ta.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
 
       await waitFor(() =>
-        expect(screen.getByTestId("ai-bubble")).toBeInTheDocument()
+        expect(screen.getByTestId("ai-bubble")).toBeInTheDocument(),
       );
 
       // deselect text
@@ -403,7 +403,7 @@ describe("FileContentCard", () => {
       document.dispatchEvent(new Event("selectionchange"));
 
       await waitFor(() =>
-        expect(screen.queryByTestId("ai-bubble")).not.toBeInTheDocument()
+        expect(screen.queryByTestId("ai-bubble")).not.toBeInTheDocument(),
       );
     });
 
@@ -427,11 +427,11 @@ describe("FileContentCard", () => {
       await userEvent.click(aiBtn);
 
       await waitFor(() =>
-        expect(screen.getByTestId("mock-ai-component")).toBeInTheDocument()
+        expect(screen.getByTestId("mock-ai-component")).toBeInTheDocument(),
       );
 
       const ta = screen.getByPlaceholderText(
-        /Write your content here\.\.\./i
+        /Write your content here\.\.\./i,
       ) as HTMLTextAreaElement;
       expect(ta.value).toBe(baseNode.content);
     });
@@ -508,7 +508,7 @@ describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
       expect(wrongWordSpans.length).toBeGreaterThan(0); // Sicherstellen, dass Spans existieren
 
       const wrongWords = Array.from(wrongWordSpans).map((el) =>
-        el.textContent?.trim()
+        el.textContent?.trim(),
       );
       expect(wrongWords).toContain("wurld");
       expect(wrongWords).not.toContain("Hello");
@@ -576,7 +576,7 @@ describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
       const fetchSpy = vi
         .spyOn(global, "fetch")
         .mockImplementationOnce(() =>
-          Promise.reject(new Error("network fail"))
+          Promise.reject(new Error("network fail")),
         );
 
       render(<FileContentCard node={nodeWithMisspell as any} />);
@@ -584,7 +584,7 @@ describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
       // Warte darauf, dass das Overlay gerendert wird (robuster: suche nach dem overlay-Container)
       const overlayEl = await waitFor(() => {
         return document.querySelector(
-          "[aria-hidden='true']"
+          "[aria-hidden='true']",
         ) as HTMLElement | null;
       });
 
@@ -619,14 +619,9 @@ describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
 
       render(<FileContentCard node={nodeWithEmptyLines as any} />);
 
-      // finde das Overlay-Element (wir wissen, es hat aria-hidden="true")
-      const overlay = await screen
-        .findByRole("status", { hidden: true })
-        .catch(() => null); // optional fallback - in case aria-role nicht vorhanden
-
       // fallback: direkt nach dem overlay-Selector suchen
       const overlayEl = document.querySelector(
-        "[aria-hidden='true']"
+        "[aria-hidden='true']",
       ) as HTMLElement | null;
       expect(overlayEl).toBeTruthy();
 
@@ -638,13 +633,13 @@ describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
 
       // finde das DIV, das für die leere Zeile gerendert wurde (height:1.5em)
       const emptyDiv = Array.from(overlayEl!.querySelectorAll("div")).find(
-        (d) => (d as HTMLElement).style.height.includes("1.5em")
+        (d) => (d as HTMLElement).style.height.includes("1.5em"),
       );
 
       expect(emptyDiv).toBeDefined();
       // in der Implementierung wird &nbsp; als innerHTML gerendert -> prüfen wir zumindest auf whitespace
       expect(
-        (emptyDiv as HTMLElement).innerHTML.trim().length
+        (emptyDiv as HTMLElement).innerHTML.trim().length,
       ).toBeGreaterThanOrEqual(0);
 
       fetchSpy.mockRestore();
@@ -653,17 +648,17 @@ describe("FileContentCard Spellchecker & getHighlightedHtml", () => {
     it("syncs overlay scrollTop with textarea scrollTop on scroll", async () => {
       // ensure dictionaries load quickly (mock fetch)
       vi.spyOn(global, "fetch").mockImplementation(() =>
-        Promise.resolve(new Response("mock-aff-or-dic-content"))
+        Promise.resolve(new Response("mock-aff-or-dic-content")),
       );
 
       render(<FileContentCard node={nodeWithMisspell as any} />);
 
       // wait for textarea & overlay to be present
       const ta = await screen.findByPlaceholderText(
-        /Write your content here\.\.\./i
+        /Write your content here\.\.\./i,
       );
       const overlay = document.querySelector(
-        "[aria-hidden='true']"
+        "[aria-hidden='true']",
       ) as HTMLElement;
       expect(overlay).toBeTruthy();
 

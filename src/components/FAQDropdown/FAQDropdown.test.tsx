@@ -43,17 +43,17 @@ describe("FAQDropdown component", () => {
 
     const questionButton = screen.getByText("What is this application?");
     expect(
-      screen.queryByText(/A web app that helps students/i)
+      screen.queryByText(/A web app that helps students/i),
     ).not.toBeInTheDocument();
 
     fireEvent.click(questionButton);
     expect(
-      screen.getByText(/A web app that helps students/i)
+      screen.getByText(/A web app that helps students/i),
     ).toBeInTheDocument();
 
     fireEvent.click(questionButton);
     expect(
-      screen.queryByText(/A web app that helps students/i)
+      screen.queryByText(/A web app that helps students/i),
     ).not.toBeInTheDocument();
   });
 
@@ -66,15 +66,15 @@ describe("FAQDropdown component", () => {
 
     fireEvent.click(q1);
     expect(
-      screen.getByText(/A web app that helps students/i)
+      screen.getByText(/A web app that helps students/i),
     ).toBeInTheDocument();
 
     fireEvent.click(q2);
     expect(
-      screen.queryByText(/A web app that helps students/i)
+      screen.queryByText(/A web app that helps students/i),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText(/It assists with structuring arguments/i)
+      screen.getByText(/It assists with structuring arguments/i),
     ).toBeInTheDocument();
   });
 
@@ -82,7 +82,7 @@ describe("FAQDropdown component", () => {
     render(<FAQDropdown />);
     const faqButton = screen.getByText("FAQ");
     const dropdown = screen.getByText(
-      "Frequently Asked Questions"
+      "Frequently Asked Questions",
     ).parentElement;
 
     // Open

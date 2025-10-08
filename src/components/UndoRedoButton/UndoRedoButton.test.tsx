@@ -16,7 +16,7 @@ describe("UndoRedoButton", () => {
 
   test("renders undo and redo buttons with correct aria labels and disabled state", () => {
     const { container } = render(
-      <UndoRedoButton canUndo={true} canRedo={false} />
+      <UndoRedoButton canUndo={true} canRedo={false} />,
     );
 
     const undoBtn = screen.getByLabelText(/Undo — Ctrl\/Cmd \+ Z/i);
@@ -31,15 +31,15 @@ describe("UndoRedoButton", () => {
 
     // and redo should include the "cursor-not-allowed" class (component uses it)
     expect(redoBtn.className).toEqual(
-      expect.stringContaining("cursor-not-allowed")
+      expect.stringContaining("cursor-not-allowed"),
     );
 
     // sanity: container contains both buttons
     expect(
-      container.querySelectorAll('button[aria-label*="Undo —"]').length
+      container.querySelectorAll('button[aria-label*="Undo —"]').length,
     ).toBeGreaterThanOrEqual(1);
     expect(
-      container.querySelectorAll('button[aria-label*="Redo —"]').length
+      container.querySelectorAll('button[aria-label*="Redo —"]').length,
     ).toBeGreaterThanOrEqual(1);
   });
 
@@ -191,7 +191,7 @@ describe("UndoRedoButton", () => {
     expect(undoTooltipContainer).toBeTruthy();
     expect(undoTooltipContainer!.textContent).toMatch(/No action available/i);
     expect(undoTooltipContainer!.className).toEqual(
-      expect.stringContaining("border-2")
+      expect.stringContaining("border-2"),
     );
 
     // Move to redo (disabled) -> new tooltip for redo after timeout restart
@@ -216,7 +216,7 @@ describe("UndoRedoButton", () => {
         canRedo={false}
         onUndo={onUndo}
         onRedo={onRedo}
-      />
+      />,
     );
 
     const undoBtn = screen.getByLabelText(/Undo — Ctrl\/Cmd \+ Z/i);
@@ -249,7 +249,7 @@ describe("UndoRedoButton", () => {
       // Tooltip still in DOM but should be in exit state (opacity 0 or transformed)
       const styleOpacity = (maybeUndoTooltip as HTMLElement).style.opacity;
       expect(
-        styleOpacity === "0" || styleOpacity === "" /* some envs */
+        styleOpacity === "0" || styleOpacity === "" /* some envs */,
       ).toBeTruthy();
     } else {
       // or it may be removed entirely
@@ -306,7 +306,7 @@ describe("UndoRedoButton", () => {
     if (maybeUndoTooltip) {
       // check exit-state (opacity 0) or fully visible (opacity 1) — be tolerant
       const opacity = window.getComputedStyle(
-        maybeUndoTooltip as Element
+        maybeUndoTooltip as Element,
       ).opacity;
       // expect it to either be hidden (exit) or removed; at least be a string
       expect(["0", "0.0", "1", ""].includes(opacity)).toBeTruthy();

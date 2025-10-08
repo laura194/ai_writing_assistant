@@ -22,7 +22,7 @@ export interface FileContentCardProps {
   onSave?: () => void;
   onContentChangeForHistory?: (
     prevContent: string,
-    nextContent: string
+    nextContent: string,
   ) => void;
   externalVersion?: number;
 }
@@ -39,7 +39,7 @@ function FileContentCard({
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [originalContent, setOriginalContent] = useState<string>(
-    node.content || "..."
+    node.content || "...",
   );
   const [selectedText, setSelectedText] = useState("");
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
@@ -71,16 +71,16 @@ function FileContentCard({
       try {
         const [affDe, dicDe, affEn, dicEn] = await Promise.all([
           fetch("/dictionaries/dictionary-de/index.aff").then((res) =>
-            res.text()
+            res.text(),
           ),
           fetch("/dictionaries/dictionary-de/index.dic").then((res) =>
-            res.text()
+            res.text(),
           ),
           fetch("/dictionaries/dictionary-en/index.aff").then((res) =>
-            res.text()
+            res.text(),
           ),
           fetch("/dictionaries/dictionary-en/index.dic").then((res) =>
-            res.text()
+            res.text(),
           ),
         ]);
 
@@ -219,7 +219,7 @@ function FileContentCard({
               boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
               border: "1px solid #ef4444",
             },
-          }
+          },
         );
         return;
       }
@@ -278,11 +278,19 @@ function FileContentCard({
               boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
               border: "1px solid #ef4444",
             },
-          }
+          },
         );
       }
     },
-    [projectId, fileContent, node.id, node.name, node.category, isDirty, onSave]
+    [
+      projectId,
+      fileContent,
+      node.id,
+      node.name,
+      node.category,
+      isDirty,
+      onSave,
+    ],
   );
 
   const handleSaveClick = useCallback(() => {
@@ -312,7 +320,7 @@ function FileContentCard({
             projectId,
             value,
             node.name,
-            node.category
+            node.category,
           ).catch((err) => {
             console.error("Failed to create background version:", err);
           });

@@ -35,7 +35,7 @@ const renderWithRouter = (projectId: string) => {
       <Routes>
         <Route path="/projects/:projectId" element={<ContributionCard />} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 
@@ -95,7 +95,7 @@ describe("ContributionCard", () => {
         "1",
         expect.objectContaining({
           titleCommunityPage: "Updated Title",
-        })
+        }),
       );
     });
   });
@@ -154,7 +154,7 @@ describe("ContributionCard", () => {
     await waitFor(() => {
       expect(ProjectService.updateProject).toHaveBeenCalledWith(
         "1",
-        expect.objectContaining({ authorName: "Anonymous" })
+        expect.objectContaining({ authorName: "Anonymous" }),
       );
     });
   });
@@ -233,7 +233,7 @@ describe("ContributionCard", () => {
       authorName: "bob",
     };
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(
-      privateProject
+      privateProject,
     );
 
     // ensure updateProject spy exists
@@ -293,7 +293,7 @@ describe("ContributionCard", () => {
         expect.objectContaining({
           titleCommunityPage: "Community Title for Publish",
           isPublic: true,
-        })
+        }),
       );
     });
 
@@ -317,7 +317,7 @@ describe("ContributionCard", () => {
       authorName: "sam",
     };
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(
-      pubProject
+      pubProject,
     );
     const updateSpy = vi
       .spyOn(ProjectService, "updateProject")
@@ -348,7 +348,7 @@ describe("ContributionCard", () => {
         "3",
         expect.objectContaining({
           isPublic: false,
-        })
+        }),
       );
     });
 
@@ -413,7 +413,7 @@ describe("ContributionCard", () => {
     };
     const spyErr = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(
-      badProject
+      badProject,
     );
 
     renderWithRouter("6");

@@ -172,7 +172,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     (NodeContentVersion as any).find = vi
       .fn()
       .mockImplementationOnce(() =>
-        makeChainableResolve([{ _id: "old1" }, { _id: "old2" }])
+        makeChainableResolve([{ _id: "old1" }, { _id: "old2" }]),
       );
 
     // 4) deleteMany resolves ok
@@ -254,7 +254,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     }));
 
     const res = await request(app).get(
-      "/api/nodeContent/node1/versions/v-missing"
+      "/api/nodeContent/node1/versions/v-missing",
     );
     expect(res.status).toBe(404);
     expect(res.body).toHaveProperty("error", "version not found");
@@ -343,7 +343,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
       content: "ct",
     };
     (NodeContentVersion.findOne as unknown as vi.Mock).mockResolvedValueOnce(
-      version
+      version,
     );
     (NodeContent.findOne as unknown as vi.Mock).mockResolvedValueOnce({
       nodeId: "n1",
@@ -411,7 +411,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
       content: "c",
     };
     (NodeContentVersion.create as unknown as vi.Mock).mockResolvedValueOnce(
-      version
+      version,
     );
     (
       NodeContentVersion.countDocuments as unknown as vi.Mock
@@ -430,10 +430,10 @@ describe("NodeContent Controller (fixed mocks)", () => {
         lean() {
           return Promise.resolve([{ _id: "old1" }, { _id: "old2" }]);
         },
-      })
+      }),
     );
     (NodeContentVersion.deleteMany as unknown as vi.Mock).mockResolvedValueOnce(
-      undefined
+      undefined,
     );
 
     const res = await request(app).post("/api/nodeContent/n1/versions").send({
@@ -449,7 +449,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
 
   it("listVersions clamps large limit to 200", async () => {
     (NodeContentVersion.find as unknown as vi.Mock).mockImplementationOnce(() =>
-      makeChainableResolve([])
+      makeChainableResolve([]),
     );
     const res = await request(app)
       .get("/api/nodeContent/n1/versions")
@@ -560,7 +560,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     (NodeContentVersion.findOne as unknown as vi.Mock).mockImplementationOnce(
       () => ({
         session: (_s?: any) => Promise.resolve(null),
-      })
+      }),
     );
 
     const res = await request(app)
@@ -616,7 +616,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     expect(res.status).toBe(404);
     expect(res.body).toHaveProperty(
       "error",
-      "NodeContent with the given nodeId and projectId not found"
+      "NodeContent with the given nodeId and projectId not found",
     );
     expect(NodeContent.findOne as unknown as vi.Mock).toHaveBeenCalledWith({
       nodeId: "n-missing",
@@ -699,7 +699,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
         new: true,
         setDefaultsOnInsert: true,
         upsert: true,
-      })
+      }),
     );
   });
 
@@ -749,7 +749,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     };
     // NodeContentVersion.findOne(...).session(session) -> version
     (NodeContentVersion.findOne as unknown as vi.Mock).mockImplementationOnce(
-      () => ({ session: (_s?: any) => Promise.resolve(version) })
+      () => ({ session: (_s?: any) => Promise.resolve(version) }),
     );
 
     // NodeContent.findOne(...).session(session) -> existing doc that will be snapshot
@@ -767,7 +767,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     // NodeContent.findOneAndUpdate(..., { session }) -> updated doc returned
     (NodeContent.findOneAndUpdate as unknown as vi.Mock).mockImplementationOnce(
       () =>
-        Promise.resolve({ nodeId: "nR", projectId: "pR", name: version.name })
+        Promise.resolve({ nodeId: "nR", projectId: "pR", name: version.name }),
     );
 
     // countDocuments(session) -> small number (no trimming)
@@ -796,7 +796,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     // simulate NodeContentVersion.create throwing
     const err = new Error("db-fail");
     (NodeContentVersion.create as unknown as vi.Mock).mockRejectedValueOnce(
-      err
+      err,
     );
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
 

@@ -2,15 +2,11 @@ import { useEffect, useState, useRef, KeyboardEvent } from "react";
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 
 export const SettingsButton = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [_openIndex, setOpenIndex] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const menuId = "settings-menu";
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
-
-  const toggleItem = (index: number) => {
-    setOpenIndex((prev) => (prev === index ? null : index));
-  };
 
   useEffect(() => {
     if (!isOpen) return;
