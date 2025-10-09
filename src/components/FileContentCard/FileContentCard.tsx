@@ -10,6 +10,7 @@ import GradientAtomIcon from "../GradientAtom/GradientAtom";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { useTheme } from "../../providers/ThemeProvider";
+import { useSettings } from "../../providers/SettingsProvider";
 
 import nspell from "nspell";
 
@@ -22,7 +23,7 @@ export interface FileContentCardProps {
   onSave?: () => void;
   onContentChangeForHistory?: (
     prevContent: string,
-    nextContent: string,
+    nextContent: string
   ) => void;
   externalVersion?: number;
 }
@@ -39,7 +40,7 @@ function FileContentCard({
   const [isAIBubbleOpen, setIsAIBubbleOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string>(node.content || "...");
   const [originalContent, setOriginalContent] = useState<string>(
-    node.content || "...",
+    node.content || "..."
   );
   const [selectedText, setSelectedText] = useState("");
   const [isAIComponentShown, setIsAIComponentShown] = useState(false);
@@ -54,8 +55,8 @@ function FileContentCard({
   const prevContentForHistoryRef = useRef<string>(node.content ?? "");
   const contentChangeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { settings } = useSettings();
   const HISTORY_IDLE_MS = 500;
-  const AUTOSAVE_INTERVAL_MS = 5 * 60 * 1000;
 
   const prevNodeIdRef = useRef<string | null>(null);
   const prevExternalVersionRef = useRef<number | undefined>(externalVersion);
@@ -67,24 +68,28 @@ function FileContentCard({
 
   // Dictionaries laden und Spellchecker erstellen
   useEffect(() => {
+    if (!settings.spellChecker) return;
+
+    let mounted = true;
     async function loadDictionaries() {
       try {
         const [affDe, dicDe, affEn, dicEn] = await Promise.all([
           fetch("/dictionaries/dictionary-de/index.aff").then((res) =>
-            res.text(),
+            res.text()
           ),
           fetch("/dictionaries/dictionary-de/index.dic").then((res) =>
-            res.text(),
+            res.text()
           ),
           fetch("/dictionaries/dictionary-en/index.aff").then((res) =>
-            res.text(),
+            res.text()
           ),
           fetch("/dictionaries/dictionary-en/index.dic").then((res) =>
-            res.text(),
+            res.text()
           ),
         ]);
 
         // ✅ nspell erwartet zwei Strings: aff + dic
+        if (!mounted) return;
         setSpellDe(nspell(affDe, dicDe));
         setSpellEn(nspell(affEn, dicEn));
 
@@ -101,7 +106,10 @@ function FileContentCard({
     }
 
     loadDictionaries();
-  }, []);
+    return () => {
+      mounted = false;
+    };
+  }, [settings.spellChecker]);
 
   /*function checkWord(word: string) {
     if (!spellDe || !spellEn) return true;
@@ -219,7 +227,7 @@ function FileContentCard({
               boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
               border: "1px solid #ef4444",
             },
-          },
+          }
         );
         return;
       }
@@ -278,23 +286,20 @@ function FileContentCard({
               boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
               border: "1px solid #ef4444",
             },
-          },
+          }
         );
       }
     },
-    [
-      projectId,
-      fileContent,
-      node.id,
-      node.name,
-      node.category,
-      isDirty,
-      onSave,
-    ],
+    [projectId, fileContent, node.id, node.name, node.category, isDirty, onSave]
   );
 
   const handleSaveClick = useCallback(() => {
     handleSave();
+  }, [handleSave]);
+
+  const handleSaveRef = useRef<typeof handleSave | null>(null);
+  useEffect(() => {
+    handleSaveRef.current = handleSave;
   }, [handleSave]);
 
   const handleEditorChange = (value: string) => {
@@ -320,7 +325,7 @@ function FileContentCard({
             projectId,
             value,
             node.name,
-            node.category,
+            node.category
           ).catch((err) => {
             console.error("Failed to create background version:", err);
           });
@@ -381,11 +386,23 @@ function FileContentCard({
   }, [isDirty, handleSave]);
 
   useEffect(() => {
+    if (!settings.autoSave.enabled) return;
+    const ms = Math.max(1, settings.autoSave.intervalMinutes) * 60 * 1000;
+
     const id = setInterval(() => {
-      handleSave({ skipVersion: true });
-    }, AUTOSAVE_INTERVAL_MS);
+      if (handleSaveRef.current) {
+        handleSaveRef.current({ skipVersion: true }).catch((e) => {
+          console.error("[autosave] failed saving node content:", e);
+        });
+        console.log("[autosave] node autosave triggered", {
+          nodeId: node.id,
+          timestamp: Date.now(),
+        });
+      }
+    }, ms);
+
     return () => clearInterval(id);
-  }, [handleSave]);
+  }, [settings.autoSave.enabled, settings.autoSave.intervalMinutes, node.id]);
 
   const handleAIBubbleClick = () => {
     setIsAIBubbleOpen(false);
@@ -447,16 +464,18 @@ function FileContentCard({
 
       <div className="relative flex-1 mt-1 rounded-xl overflow-hidden border-2 border-[#afa4e0] dark:border-[#35285f] focus-within:ring-2 focus-within:ring-purple-400 dark:focus-within:ring-purple-700">
         {/* Spellcheck Overlay */}
-        <div
-          ref={overlayRef}
-          aria-hidden="true"
-          className="absolute top-0 left-0 w-full h-full pointer-events-none select-none p-4 whitespace-pre-wrap overflow-y-auto z-10 text-transparent"
-          style={{ fontSize: "1rem", lineHeight: "1.5" }}
-        >
-          <div className="text-inherit font-inherit min-h-full w-full">
-            {getHighlightedHtml(fileContent)}
+        {settings.spellChecker && (
+          <div
+            ref={overlayRef}
+            aria-hidden="true"
+            className="absolute top-0 left-0 w-full h-full pointer-events-none select-none p-4 whitespace-pre-wrap overflow-y-auto z-10 text-transparent"
+            style={{ fontSize: "1rem", lineHeight: "1.5" }}
+          >
+            <div className="text-inherit font-inherit min-h-full w-full">
+              {getHighlightedHtml(fileContent)}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Das Textarea mit transparentem Hintergrund damit Overlay sichtbar ist */}
         <textarea

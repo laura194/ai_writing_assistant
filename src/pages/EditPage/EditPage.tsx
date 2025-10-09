@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "../../App/App.css";
@@ -16,6 +16,7 @@ import { ProjectService } from "../../utils/ProjectService";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import ContributionCard from "../../components/ContributionCard/ContributionCard";
+import { useSettings } from "../../providers/SettingsProvider";
 
 const EditPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -53,6 +54,13 @@ const EditPage = () => {
   // Snapshot of last saved state (used to compute isDirty after saves)
   const lastSavedSnapshotRef = useRef<any>(null);
 
+  const { settings } = useSettings();
+
+  const nodesRef = useRef<Node[]>([]);
+  useEffect(() => {
+    nodesRef.current = nodes;
+  }, [nodes]);
+
   const debounceSave = (updatedNodes: Node[]) => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -68,6 +76,16 @@ const EditPage = () => {
   }, [activeView]);
 
   useEffect(() => {
+    if (project && projectId && settings.lastOpenedProject) {
+      try {
+        localStorage.setItem("lastOpenedProjectId", projectId);
+      } catch (e) {
+        console.warn("Couldn't persist last opened project id", e);
+      }
+    }
+  }, [project, projectId, settings.lastOpenedProject]);
+
+  useEffect(() => {
     if (projectId) {
       ProjectService.getProjectById(projectId)
         .then((project: Project) => {
@@ -80,7 +98,7 @@ const EditPage = () => {
               project.projectStructure,
               null,
               null,
-              "file",
+              "file"
             );
             lastSavedSnapshotRef.current = initial;
             // clear history
@@ -139,32 +157,20 @@ const EditPage = () => {
     };
   }, [isDirty]);
 
-  useEffect(() => {
-    if (!projectId) return;
-    const id = setInterval(
-      () => {
-        // save current nodes as project structure every 5 minutes
-        saveProjectStructure(nodes);
-      },
-      5 * 60 * 1000,
-    );
-    return () => clearInterval(id);
-  }, [nodes, projectId]);
-
   // ---------------------- History helpers ----------------------
   const createSnapshot = () =>
     createSnapshotFromValues(
       nodes,
       selectedNode?.id || null,
       selectedNode?.content || null,
-      activeView,
+      activeView
     );
 
   function createSnapshotFromValues(
     snapshotNodes: Node[],
     selectedNodeId: string | null,
     selectedNodeContent: string | null,
-    view: string,
+    view: string
   ) {
     return {
       nodes: JSON.parse(JSON.stringify(snapshotNodes || [])),
@@ -205,7 +211,7 @@ const EditPage = () => {
       }
       localStorage.setItem(
         `selectedNodeId_${projectId}`,
-        snapshot.selectedNodeId,
+        snapshot.selectedNodeId
       );
     } else {
       setSelectedNode(null);
@@ -271,7 +277,7 @@ const EditPage = () => {
   // ---------------------- Helper: finde Node Metadata ----------------------
   const findNodeById = (
     searchNodes: Node[] | undefined,
-    id: string | null,
+    id: string | null
   ): Node | null => {
     if (!searchNodes || !id) return null;
     for (const n of searchNodes) {
@@ -285,30 +291,59 @@ const EditPage = () => {
   };
 
   // ---------------------- Project save ----------------------
-  const saveProjectStructure = async (updatedNodes: Node[]) => {
+  const saveProjectStructure = useCallback(
+    async (updatedNodes: Node[]) => {
+      if (!projectId) return;
+
+      // Füge die projectStructure hinzu, wenn sie nicht definiert ist, als leeres Array
+      const projectData = {
+        name: project?.name || "Untitled Project",
+        username: project?.username || "Anonymous",
+        projectStructure: updatedNodes || [],
+      };
+
+      try {
+        await ProjectService.updateProject(projectId, projectData);
+        console.log("✅ Project structure updated.");
+        lastSavedSnapshotRef.current = createSnapshotFromValues(
+          updatedNodes,
+          selectedNode?.id || null,
+          selectedNode?.content || null,
+          activeView
+        );
+        setIsDirty(false);
+      } catch (error) {
+        console.error("❌ Failed to update project structure:", error);
+      }
+    },
+    [projectId, project]
+  );
+
+  useEffect(() => {
     if (!projectId) return;
+    if (!settings.autoSave.enabled) return;
 
-    // Füge die projectStructure hinzu, wenn sie nicht definiert ist, als leeres Array
-    const projectData = {
-      name: project?.name || "Untitled Project",
-      username: project?.username || "Anonymous",
-      projectStructure: updatedNodes || [],
+    const intervalMs =
+      Math.max(1, settings.autoSave.intervalMinutes) * 60 * 1000;
+
+    const id = setInterval(() => {
+      saveProjectStructure(nodesRef.current);
+      console.log("[autosave] saving project structure", {
+        projectId,
+        timestamp: Date.now(),
+      });
+    }, intervalMs);
+
+    return () => {
+      clearInterval(id);
+      console.log("[autosave] cleared project-interval");
     };
-
-    try {
-      await ProjectService.updateProject(projectId, projectData);
-      console.log("✅ Project structure updated.");
-      lastSavedSnapshotRef.current = createSnapshotFromValues(
-        updatedNodes,
-        selectedNode?.id || null,
-        selectedNode?.content || null,
-        activeView,
-      );
-      setIsDirty(false);
-    } catch (error) {
-      console.error("❌ Failed to update project structure:", error);
-    }
-  };
+  }, [
+    projectId,
+    settings.autoSave.enabled,
+    settings.autoSave.intervalMinutes,
+    saveProjectStructure,
+  ]);
 
   // ---------------------- Node selection / content load ----------------------
   const handleNodeClick = async (node: Node) => {
@@ -396,7 +431,7 @@ const EditPage = () => {
 
     const recursiveUpdate = (
       nodes: Node[],
-      parentId: string | null,
+      parentId: string | null
     ): Node[] => {
       return nodes.map((node) => {
         if (node.id === parentId) {
@@ -468,7 +503,7 @@ const EditPage = () => {
       setSelectedNode((prev) =>
         prev
           ? { ...prev, name: updatedNode.name, icon: updatedNode.icon }
-          : prev,
+          : prev
       );
     }
 
@@ -490,7 +525,7 @@ const EditPage = () => {
 
   const handleMoveNode = (
     draggedNodeId: string,
-    targetNodeId: string,
+    targetNodeId: string
     //asSibling: boolean = false
   ) => {
     pushToUndo();
@@ -547,14 +582,14 @@ const EditPage = () => {
 
   const handleContentChangeForHistory = (
     prevContent: string,
-    nextContent: string,
+    nextContent: string
   ) => {
     if (prevContent === nextContent) return;
 
     pushToUndo();
 
     setSelectedNode((prev) =>
-      prev ? { ...prev, content: nextContent } : prev,
+      prev ? { ...prev, content: nextContent } : prev
     );
 
     setIsDirty(true);
