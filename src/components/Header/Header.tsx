@@ -32,7 +32,7 @@ const Header = ({
   ];
 
   const hideUndoRedo = excludedPatterns.some(
-    (pattern) => !!matchPath({ path: pattern, end: false }, pathname)
+    (pattern) => !!matchPath({ path: pattern, end: false }, pathname),
   );
 
   return (
