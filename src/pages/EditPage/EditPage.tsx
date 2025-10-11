@@ -18,6 +18,13 @@ import { motion } from "framer-motion";
 import ContributionCard from "../../components/ContributionCard/ContributionCard";
 import { useSettings } from "../../providers/SettingsProvider";
 
+interface Snapshot {
+  nodes: Node[];
+  selectedNodeId: string | null;
+  selectedNodeContent: string | null;
+  activeView: string;
+}
+
 const EditPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
 
@@ -47,12 +54,12 @@ const EditPage = () => {
   const [canRedo, setCanRedo] = useState(false);
 
   // History refs
-  const undoStackRef = useRef<any[]>([]);
-  const redoStackRef = useRef<any[]>([]);
+  const undoStackRef = useRef<Snapshot[]>([]);
+  const redoStackRef = useRef<Snapshot[]>([]);
   const historyLimit = 100;
 
   // Snapshot of last saved state (used to compute isDirty after saves)
-  const lastSavedSnapshotRef = useRef<any>(null);
+  const lastSavedSnapshotRef = useRef<Snapshot | null>(null);
 
   const { settings } = useSettings();
 
@@ -79,8 +86,8 @@ const EditPage = () => {
     if (project && projectId && settings.lastOpenedProject) {
       try {
         localStorage.setItem("lastOpenedProjectId", projectId);
-      } catch (e) {
-        console.warn("Couldn't persist last opened project id", e);
+      } catch (err: unknown) {
+        console.warn("Couldn't persist last opened project id", String(err));
       }
     }
   }, [project, projectId, settings.lastOpenedProject]);
@@ -158,7 +165,7 @@ const EditPage = () => {
   }, [isDirty]);
 
   // ---------------------- History helpers ----------------------
-  const createSnapshot = () =>
+  const createSnapshot = (): Snapshot =>
     createSnapshotFromValues(
       nodes,
       selectedNode?.id || null,
@@ -171,7 +178,7 @@ const EditPage = () => {
     selectedNodeId: string | null,
     selectedNodeContent: string | null,
     view: string
-  ) {
+  ): Snapshot {
     return {
       nodes: JSON.parse(JSON.stringify(snapshotNodes || [])),
       selectedNodeId,
@@ -191,7 +198,7 @@ const EditPage = () => {
     setCanRedo(false);
   };
 
-  const applySnapshot = async (snapshot: any) => {
+  const applySnapshot = async (snapshot: Snapshot) => {
     setNodes(snapshot.nodes || []);
 
     if (snapshot.selectedNodeId) {
@@ -228,6 +235,11 @@ const EditPage = () => {
   const handleUndo = () => {
     if (undoStackRef.current.length === 0) return;
     const prevSnapshot = undoStackRef.current.pop();
+    if (!prevSnapshot) {
+      setCanUndo(undoStackRef.current.length > 0);
+      setCanRedo(redoStackRef.current.length > 0);
+      return;
+    }
     // push current state to redo
     redoStackRef.current.push(createSnapshot());
     applySnapshot(prevSnapshot);
@@ -241,6 +253,11 @@ const EditPage = () => {
   const handleRedo = () => {
     if (redoStackRef.current.length === 0) return;
     const nextSnapshot = redoStackRef.current.pop();
+    if (!nextSnapshot) {
+      setCanUndo(undoStackRef.current.length > 0);
+      setCanRedo(redoStackRef.current.length > 0);
+      return;
+    }
     // push current to undo
     undoStackRef.current.push(createSnapshot());
     applySnapshot(nextSnapshot);
@@ -312,8 +329,8 @@ const EditPage = () => {
           activeView
         );
         setIsDirty(false);
-      } catch (error) {
-        console.error("❌ Failed to update project structure:", error);
+      } catch (err: unknown) {
+        console.error("❌ Failed to update project structure:", err);
       }
     },
     [projectId, project]

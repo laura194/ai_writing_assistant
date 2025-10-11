@@ -17,7 +17,7 @@ export const RecentProjectsDropdown = () => {
 
       try {
         const projects = await ProjectService.getRecentProjectsByUsername(
-          user.username,
+          user.username
         );
         setRecentProjects(projects.slice(0, 3));
       } catch (error) {
@@ -39,16 +39,18 @@ export const RecentProjectsDropdown = () => {
       }
     };
 
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpen(false);
+    const handleEsc = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleDocClick);
-    document.addEventListener("keydown", handleEsc as any);
+    document.addEventListener("keydown", handleEsc);
 
     return () => {
       document.removeEventListener("mousedown", handleDocClick);
-      document.removeEventListener("keydown", handleEsc as any);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [isOpen]);
 

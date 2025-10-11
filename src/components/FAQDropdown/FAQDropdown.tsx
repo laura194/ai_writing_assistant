@@ -62,7 +62,7 @@ export const FAQDropdown = () => {
       }
     };
 
-    const handleEsc = (e: KeyboardEvent) => {
+    const handleEsc = (e: globalThis.KeyboardEvent) => {
       if (e.key === "Escape") {
         setIsOpen(false);
         setOpenIndex(null);
@@ -70,11 +70,11 @@ export const FAQDropdown = () => {
     };
 
     document.addEventListener("mousedown", handleDocClick);
-    document.addEventListener("keydown", handleEsc as any);
+    document.addEventListener("keydown", handleEsc);
 
     return () => {
       document.removeEventListener("mousedown", handleDocClick);
-      document.removeEventListener("keydown", handleEsc as any);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [isOpen]);
 

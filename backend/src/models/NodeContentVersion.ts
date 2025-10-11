@@ -7,7 +7,7 @@ export interface INodeContentVersion extends Document {
   category: string;
   content: string;
   userId?: string | null;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
   createdAt?: Date;
 }
 
@@ -21,7 +21,7 @@ const NodeContentVersionSchema: Schema = new Schema(
     userId: { type: String, default: null },
     meta: { type: Schema.Types.Mixed, default: {} },
   },
-  { timestamps: { createdAt: true, updatedAt: false } },
+  { timestamps: { createdAt: true, updatedAt: false } }
 );
 
 NodeContentVersionSchema.index({ nodeId: 1, projectId: 1, createdAt: -1 });
@@ -29,5 +29,5 @@ NodeContentVersionSchema.index({ nodeId: 1, projectId: 1, createdAt: -1 });
 export default mongoose.models.NodeContentVersion ||
   mongoose.model<INodeContentVersion>(
     "NodeContentVersion",
-    NodeContentVersionSchema,
+    NodeContentVersionSchema
   );
