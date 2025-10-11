@@ -104,7 +104,7 @@ export default function AppRoutes() {
       // Only proceed when the user enabled lastOpenedProject in settings
       if (!settings?.lastOpenedProject) {
         console.log(
-          "[auth-redirect] setting lastOpenedProject disabled -> no redirect"
+          "[auth-redirect] setting lastOpenedProject disabled -> no redirect",
         );
         prevSignedInRef.current = isSignedIn;
         return;
@@ -113,7 +113,7 @@ export default function AppRoutes() {
       const last = localStorage.getItem("lastOpenedProjectId");
       if (!last) {
         console.log(
-          "[auth-redirect] no lastOpenedProjectId set -> no redirect"
+          "[auth-redirect] no lastOpenedProjectId set -> no redirect",
         );
         prevSignedInRef.current = isSignedIn;
         return;
@@ -122,7 +122,7 @@ export default function AppRoutes() {
       // if already on that edit page, don't navigate
       if (pathname === `/edit/${last}`) {
         console.log(
-          "[auth-redirect] already on the last project page -> no redirect"
+          "[auth-redirect] already on the last project page -> no redirect",
         );
         prevSignedInRef.current = isSignedIn;
         return;
@@ -139,14 +139,14 @@ export default function AppRoutes() {
             sessionStorage.setItem("didRedirectToLastProject", last);
           } else {
             console.log(
-              "[auth-redirect] last project not found -> removing key"
+              "[auth-redirect] last project not found -> removing key",
             );
             localStorage.removeItem("lastOpenedProjectId");
           }
         } catch (err) {
           console.warn(
             "[auth-redirect] error while checking last project:",
-            err
+            err,
           );
         }
       })();
@@ -167,7 +167,7 @@ export default function AppRoutes() {
     if (!isEntry) return;
 
     const prevRedirectedProject = sessionStorage.getItem(
-      "didRedirectToLastProject"
+      "didRedirectToLastProject",
     );
     const last = localStorage.getItem("lastOpenedProjectId");
     if (!last) return;
@@ -175,7 +175,7 @@ export default function AppRoutes() {
     // if we've already redirected to this very project this session, skip
     if (prevRedirectedProject === last) {
       console.log(
-        "[home-redirect] already redirected to this project this session -> skip"
+        "[home-redirect] already redirected to this project this session -> skip",
       );
       return;
     }
@@ -192,13 +192,13 @@ export default function AppRoutes() {
         if (project) {
           console.log(
             "[home-redirect] entry on /home -> redirect to last project",
-            last
+            last,
           );
           navigate(`/edit/${last}`, { replace: true });
           sessionStorage.setItem("didRedirectToLastProject", last);
         } else {
           console.log(
-            "[home-redirect] project not found -> clearing stored id"
+            "[home-redirect] project not found -> clearing stored id",
           );
           localStorage.removeItem("lastOpenedProjectId");
         }
@@ -221,11 +221,11 @@ export default function AppRoutes() {
 
   // 2)
   const isPublicPath = publicPaths.some((p) =>
-    p === "/" ? pathname === "/" : pathname.startsWith(p)
+    p === "/" ? pathname === "/" : pathname.startsWith(p),
   );
 
   const isProtectedPath = protectedPaths.some((p) =>
-    p === "/" ? pathname === "/" : pathname.startsWith(p)
+    p === "/" ? pathname === "/" : pathname.startsWith(p),
   );
 
   // Wait for Clerk to load before rendering routes

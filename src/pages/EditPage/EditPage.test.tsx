@@ -18,6 +18,15 @@ vi.mock("react-dnd", () => ({
 }));
 vi.mock("react-dnd-html5-backend", () => ({ HTML5Backend: {} }));
 
+vi.mock("../../providers/SettingsProvider", () => ({
+  useSettings: () => ({
+    settings: {
+      autoSave: { enabled: false, intervalMinutes: 1 },
+      lastOpenedProject: true,
+    },
+  }),
+}));
+
 // Mock child components minimally to avoid complex internals
 vi.mock("../../components/Folder/Folder", () => ({
   __esModule: true,

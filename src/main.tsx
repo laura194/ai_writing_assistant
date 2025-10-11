@@ -41,5 +41,5 @@ createRoot(document.getElementById("root")!).render(
         </ClerkProvider>
       </SettingsProvider>
     </ThemeProvider>
-  </StrictMode>
+  </StrictMode>,
 );

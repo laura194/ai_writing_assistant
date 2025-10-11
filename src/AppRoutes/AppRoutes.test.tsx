@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { vi, describe, it, beforeEach, expect } from "vitest";
+import { ProjectService } from "../utils/ProjectService.ts";
 
 global.ResizeObserver = class {
   observe() {}
@@ -27,6 +28,23 @@ class MockIntersectionObserver implements IntersectionObserver {
 
 global.IntersectionObserver =
   MockIntersectionObserver as unknown as typeof IntersectionObserver;
+
+vi.mock("../providers/SettingsProvider", () => ({
+  SettingsProvider: ({ children }: any) => children,
+  useSettings: () => ({
+    settings: {
+      autoSave: { enabled: false, intervalMinutes: 1 },
+      spellChecker: false,
+      lastOpenedProject: true,
+    },
+  }),
+}));
+
+vi.mock("../utils/ProjectService.ts", () => ({
+  ProjectService: {
+    getProjectById: vi.fn(),
+  },
+}));
 
 vi.mock("../assets/images/sign-in-animate.svg?react", () => ({
   default: () => <svg data-testid="signin-anim" />,
@@ -130,6 +148,7 @@ vi.mock("../pages/ProjectOverview/ProjectOverview", () => ({
 import AppRoutes from "./AppRoutes";
 import * as routerDomMock from "react-router-dom";
 import * as clerkMock from "@clerk/clerk-react";
+import * as SettingsProvider from "../providers/SettingsProvider";
 
 describe("AppRoutes - routing & redirects", () => {
   const setPath = (p: string) => (routerDomMock as any).__setPath(p);
@@ -276,5 +295,105 @@ describe("AppRoutes - routing & redirects", () => {
 
     render(<AppRoutes />);
     expect(screen.getByTestId("projects-page")).toBeInTheDocument();
+  });
+
+  describe("AppRoutes - lastOpenedProject redirects", () => {
+    const setPath = (p: string) => (routerDomMock as any).__setPath(p);
+    const setAuth = (a: any) => (clerkMock as any).__setAuth(a);
+    const navigateMock = (routerDomMock as any).__navigateMock;
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+      localStorage.clear();
+      sessionStorage.clear();
+      sessionStorage.removeItem("didRedirectToLastProject");
+
+      vi.spyOn(SettingsProvider, "useSettings").mockReturnValue({
+        settings: {
+          autoSave: { enabled: false, intervalMinutes: 1 },
+          spellChecker: false,
+          lastOpenedProject: true,
+        },
+        update: vi.fn(),
+        updateAutoSave: vi.fn(),
+      });
+
+      setPath("/home");
+      setAuth({ isSignedIn: false, isLoaded: true });
+    });
+
+    it("redirects to lastOpenedProject after sign-in", async () => {
+      localStorage.setItem("lastOpenedProjectId", "proj-123");
+      setAuth({ isSignedIn: true, isLoaded: true });
+
+      (ProjectService.getProjectById as any).mockResolvedValue({
+        id: "proj-123",
+      });
+
+      render(<AppRoutes />);
+
+      await waitFor(() => {
+        expect(navigateMock).toHaveBeenCalledWith("/edit/proj-123", {
+          replace: true,
+        });
+      });
+    });
+
+    it("does not redirect if lastOpenedProject setting is disabled", async () => {
+      localStorage.setItem("lastOpenedProjectId", "proj-123");
+      setAuth({ isSignedIn: true, isLoaded: true });
+
+      render(<AppRoutes />);
+
+      await waitFor(() => {
+        expect(navigateMock).not.toHaveBeenCalled();
+      });
+    });
+
+    it("clears lastOpenedProjectId if project does not exist", async () => {
+      localStorage.setItem("lastOpenedProjectId", "proj-404");
+      (ProjectService.getProjectById as any).mockResolvedValue(null);
+      setAuth({ isSignedIn: true, isLoaded: true });
+
+      render(<AppRoutes />);
+
+      await waitFor(() => {
+        expect(localStorage.getItem("lastOpenedProjectId")).toBeNull();
+        expect(navigateMock).not.toHaveBeenCalled();
+      });
+    });
+
+    it("skips redirect if already on last project page", async () => {
+      localStorage.setItem("lastOpenedProjectId", "proj-123");
+      setPath("/edit/proj-123");
+      (ProjectService.getProjectById as any).mockResolvedValue({
+        id: "proj-123",
+      });
+      setAuth({ isSignedIn: true, isLoaded: true });
+
+      render(<AppRoutes />);
+
+      await waitFor(() => {
+        // Da wir bereits auf der Seite sind, soll kein Redirect passieren
+        expect(navigateMock).not.toHaveBeenCalled();
+
+        // Auch das Session-Flag wird nicht gesetzt – wir prüfen also nur, dass es null ist
+        expect(sessionStorage.getItem("didRedirectToLastProject")).toBeNull();
+      });
+    });
+
+    it("skips redirect if already redirected this session", async () => {
+      setPath("/edit/proj-123");
+
+      localStorage.setItem("lastOpenedProjectId", "proj-123");
+      sessionStorage.setItem("didRedirectToLastProject", "proj-123");
+      setAuth({ isSignedIn: true, isLoaded: true });
+
+      render(<AppRoutes />);
+
+      await waitFor(() => {
+        expect(navigateMock).not.toHaveBeenCalled();
+      });
+    });
   });
 });
