@@ -5,14 +5,19 @@ import NodeContentVersion from "../models/NodeContentVersion";
 
 const MAX_VERSIONS = Number(process.env.MAX_VERSIONS_PER_NODE || 50);
 
+// typed Request when authentication middleware sets user
+type AuthenticatedRequest = Request & { user?: { id?: string } };
+
 function getUserIdFromReq(req: Request): string | null {
-  return (req as any)?.user?.id ?? null;
+  // Use typed access but remain safe if not authenticated
+  const authReq = req as AuthenticatedRequest;
+  return authReq.user?.id ?? null;
 }
 
 // Create a new NodeContent entry (prevents duplicates)
 export const createNodeContent = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { nodeId, name, category, content, projectId } = req.body;
 
@@ -26,7 +31,6 @@ export const createNodeContent = async (
     return;
   }
 
-  let session: mongoose.ClientSession | null = null;
   try {
     const existing = await NodeContent.findOne({ nodeId, projectId });
     if (existing) {
@@ -56,7 +60,7 @@ export const createNodeContent = async (
 // Get all NodeContent entries, or filter by ?nodeId=... and ?projectId=...
 export const getNodeContents = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   try {
     const { nodeId, projectId } = req.query;
@@ -83,7 +87,7 @@ export const getNodeContents = async (
 // Get a specific NodeContent entry by its nodeId (via URL param)
 export const getNodeContentById = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { id } = req.params;
   const { projectId } = req.query;
@@ -116,10 +120,9 @@ export const getNodeContentById = async (
 /**
  * UPDATE (PUT) — erstellt vor dem Update eine Version des bisherigen Inhalts
  */
-// replace updateNodeContent in your controller
 export const updateNodeContent = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { nodeId } = req.params;
   const { name, category, content, projectId, icon, skipVersion } = req.body;
@@ -146,18 +149,21 @@ export const updateNodeContent = async (
       // Transactions not supported on this deployment (standalone). We will fall back.
       console.warn(
         "Transactions not supported, falling back to non-transactional update:",
-        txErr,
+        txErr
       );
       try {
         await session.endSession();
-      } catch (e) {}
+      } catch (e) {
+        // ensure e used to satisfy eslint rules
+        void e;
+      }
       session = null;
       useTransaction = false;
     }
 
     if (useTransaction && session) {
       const existing = await NodeContent.findOne({ nodeId, projectId }).session(
-        session,
+        session
       );
 
       if (existing && !skipVersion) {
@@ -173,11 +179,19 @@ export const updateNodeContent = async (
               meta: { from: "updateNodeContent" },
             },
           ],
-          { session },
+          { session }
         );
       }
 
-      const upsertData: any = {
+      type UpsertData = {
+        name: string;
+        category: string;
+        content: string;
+        projectId: string;
+        icon?: string;
+      };
+
+      const upsertData: UpsertData = {
         name,
         category,
         content,
@@ -188,7 +202,7 @@ export const updateNodeContent = async (
       const updatedNodeContent = await NodeContent.findOneAndUpdate(
         { nodeId, projectId },
         { $set: upsertData },
-        { new: true, upsert: true, setDefaultsOnInsert: true, session },
+        { new: true, upsert: true, setDefaultsOnInsert: true, session }
       );
 
       // trim old versions if exceed MAX_VERSIONS (only when versioning actually used)
@@ -199,16 +213,20 @@ export const updateNodeContent = async (
         }).session(session);
         if (count > MAX_VERSIONS) {
           const toDelete = count - MAX_VERSIONS;
-          const oldest = await NodeContentVersion.find({ nodeId, projectId })
+          const oldest = (await NodeContentVersion.find({ nodeId, projectId })
             .sort({ createdAt: 1 })
             .limit(toDelete)
             .select("_id")
             .lean()
-            .session(session);
-          const ids = oldest.map((o: any) => o._id);
+            .session(session)) as Array<{
+            _id: mongoose.Types.ObjectId | string;
+          }>;
+
+          const ids = oldest.map((o) => o._id);
+
           if (ids.length) {
             await NodeContentVersion.deleteMany({ _id: { $in: ids } }).session(
-              session,
+              session
             );
           }
         }
@@ -229,7 +247,9 @@ export const updateNodeContent = async (
       try {
         await session.abortTransaction();
         await session.endSession();
-      } catch (e) {}
+      } catch (e) {
+        void e;
+      }
       session = null;
     }
     // continue to fallback
@@ -261,7 +281,7 @@ export const updateNodeContent = async (
           ...(icon !== undefined ? { icon } : {}),
         },
       },
-      { new: true, upsert: true, setDefaultsOnInsert: true },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
     );
 
     if (!skipVersion) {
@@ -271,12 +291,16 @@ export const updateNodeContent = async (
       });
       if (count2 > MAX_VERSIONS) {
         const toDelete = count2 - MAX_VERSIONS;
-        const oldest = await NodeContentVersion.find({ nodeId, projectId })
+        const oldest = (await NodeContentVersion.find({ nodeId, projectId })
           .sort({ createdAt: 1 })
           .limit(toDelete)
           .select("_id")
-          .lean();
-        const ids = oldest.map((o: any) => o._id);
+          .lean()
+          .session(session)) as Array<{
+          _id: mongoose.Types.ObjectId | string;
+        }>;
+
+        const ids = oldest.map((o) => o._id);
         if (ids.length)
           await NodeContentVersion.deleteMany({ _id: { $in: ids } });
       }
@@ -296,7 +320,7 @@ export const updateNodeContent = async (
  */
 export const createVersion = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { nodeId } = req.params;
   const { projectId, content, name, category, meta } = req.body;
@@ -327,7 +351,8 @@ export const createVersion = async (
         .limit(toDelete)
         .select("_id")
         .lean();
-      const ids = oldest.map((o: any) => o._id);
+
+      const ids = oldest.map((o) => o._id);
       if (ids.length)
         await NodeContentVersion.deleteMany({ _id: { $in: ids } });
     }
@@ -344,7 +369,7 @@ export const createVersion = async (
  */
 export const listVersions = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { nodeId } = req.params;
   const projectId = String(req.query.projectId || "");
@@ -372,7 +397,7 @@ export const listVersions = async (
  */
 export const getVersion = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { nodeId, versionId } = req.params;
   if (!nodeId || !versionId) {
@@ -400,7 +425,7 @@ export const getVersion = async (
  */
 export const revertToVersion = async (
   req: Request,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const { nodeId, versionId } = req.params;
   const { projectId } = req.body;
@@ -419,11 +444,13 @@ export const revertToVersion = async (
     } catch (txErr) {
       console.warn(
         "Transactions not supported for revert; falling back:",
-        txErr,
+        txErr
       );
       try {
         await session.endSession();
-      } catch (e) {}
+      } catch (e) {
+        void e;
+      }
       session = null;
       useTransaction = false;
     }
@@ -442,7 +469,7 @@ export const revertToVersion = async (
       }
 
       const existing = await NodeContent.findOne({ nodeId, projectId }).session(
-        session,
+        session
       );
       if (existing) {
         await NodeContentVersion.create(
@@ -457,7 +484,7 @@ export const revertToVersion = async (
               meta: { from: "revert" },
             },
           ],
-          { session },
+          { session }
         );
       }
 
@@ -472,7 +499,7 @@ export const revertToVersion = async (
             updatedAt: new Date(),
           },
         },
-        { new: true, upsert: true, session },
+        { new: true, upsert: true, session }
       );
 
       // trim versions if exceeded
@@ -482,16 +509,19 @@ export const revertToVersion = async (
       }).session(session);
       if (count > MAX_VERSIONS) {
         const toDelete = count - MAX_VERSIONS;
-        const oldest = await NodeContentVersion.find({ nodeId, projectId })
+        const oldest = (await NodeContentVersion.find({ nodeId, projectId })
           .sort({ createdAt: 1 })
           .limit(toDelete)
           .select("_id")
           .lean()
-          .session(session);
-        const ids = oldest.map((o: any) => o._id);
+          .session(session)) as Array<{
+          _id: mongoose.Types.ObjectId | string;
+        }>;
+
+        const ids = oldest.map((o) => o._id);
         if (ids.length)
           await NodeContentVersion.deleteMany({ _id: { $in: ids } }).session(
-            session,
+            session
           );
       }
 
@@ -507,7 +537,9 @@ export const revertToVersion = async (
       try {
         await session.abortTransaction();
         await session.endSession();
-      } catch (e) {}
+      } catch (e) {
+        void e;
+      }
       session = null;
     }
     // Fallthrough to non-transactional handling below
@@ -549,7 +581,7 @@ export const revertToVersion = async (
           updatedAt: new Date(),
         },
       },
-      { new: true, upsert: true },
+      { new: true, upsert: true }
     );
 
     const count = await NodeContentVersion.countDocuments({
@@ -558,12 +590,16 @@ export const revertToVersion = async (
     });
     if (count > MAX_VERSIONS) {
       const toDelete = count - MAX_VERSIONS;
-      const oldest = await NodeContentVersion.find({ nodeId, projectId })
+      const oldest = (await NodeContentVersion.find({ nodeId, projectId })
         .sort({ createdAt: 1 })
         .limit(toDelete)
         .select("_id")
-        .lean();
-      const ids = oldest.map((o: any) => o._id);
+        .lean()
+        .session(session)) as Array<{
+        _id: mongoose.Types.ObjectId | string;
+      }>;
+
+      const ids = oldest.map((o) => o._id);
       if (ids.length)
         await NodeContentVersion.deleteMany({ _id: { $in: ids } });
     }
