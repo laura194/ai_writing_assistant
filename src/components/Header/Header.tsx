@@ -24,10 +24,15 @@ const Header = ({
   const { user } = useUser();
   const { pathname } = useLocation();
 
-  const excludedPatterns = ["/home", "/structureSelection", "/myProjects"];
+  const excludedPatterns = [
+    "/home",
+    "/structureSelection",
+    "/myProjects",
+    "communityPage",
+  ];
 
   const hideUndoRedo = excludedPatterns.some(
-    (pattern) => !!matchPath({ path: pattern, end: false }, pathname),
+    (pattern) => !!matchPath({ path: pattern, end: false }, pathname)
   );
 
   return (
