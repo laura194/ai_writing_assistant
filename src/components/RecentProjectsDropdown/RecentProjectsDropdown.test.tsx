@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { RecentProjectsDropdown } from "./RecentProjectsDropdown";
 import { useUser } from "@clerk/clerk-react";
 import { ProjectService } from "../../utils/ProjectService";
@@ -44,6 +44,9 @@ describe("RecentProjectsDropdown Unit Tests", () => {
 
     renderWithRouter(<RecentProjectsDropdown />);
 
+    // open menu to reveal content
+    fireEvent.click(screen.getByRole("button", { name: /Recent Projects/i }));
+
     await waitFor(() =>
       expect(screen.getByText(/No recent projects/i)).toBeInTheDocument(),
     );
@@ -55,6 +58,9 @@ describe("RecentProjectsDropdown Unit Tests", () => {
     );
 
     renderWithRouter(<RecentProjectsDropdown />);
+
+    // open menu
+    fireEvent.click(screen.getByRole("button", { name: /Recent Projects/i }));
 
     await waitFor(() => {
       expect(screen.getByText("Project One")).toBeInTheDocument();
@@ -71,6 +77,9 @@ describe("RecentProjectsDropdown Unit Tests", () => {
 
     renderWithRouter(<RecentProjectsDropdown />);
 
+    // open menu
+    fireEvent.click(screen.getByRole("button", { name: /Recent Projects/i }));
+
     await waitFor(() => {
       const link = screen.getByText("Project One").closest("a");
       expect(link).toHaveAttribute("href", "/edit/1");
@@ -86,6 +95,8 @@ describe("RecentProjectsDropdown Unit Tests", () => {
       screen.getByRole("button", { name: /Recent Projects/i }),
     ).toBeInTheDocument();
 
+    // open menu — component should early-return from fetch and show fallback
+    fireEvent.click(screen.getByRole("button", { name: /Recent Projects/i }));
     expect(await screen.findByText(/No recent projects/i)).toBeInTheDocument();
   });
 });
@@ -146,7 +157,7 @@ describe("RecentProjectsDropdown Mutation-focused Tests", () => {
     consoleSpy.mockRestore();
   });
 
-  test("renders correctly when fewer than 3 projects returned", async () => {
+  test("renders correctly when fewer than 3 projects returned (menu open)", async () => {
     const smallList = [{ _id: "1", name: "Only One" }];
     (ProjectService.getRecentProjectsByUsername as any).mockResolvedValue(
       smallList,
@@ -154,11 +165,75 @@ describe("RecentProjectsDropdown Mutation-focused Tests", () => {
 
     renderWithRouter(<RecentProjectsDropdown />);
 
+    // open menu first — otherwise menu items are aria-hidden / not accessible
+    const btn = screen.getByRole("button", { name: /Recent Projects/i });
+    fireEvent.click(btn);
+
     await waitFor(() => {
       expect(screen.getByText("Only One")).toBeInTheDocument();
-      const links = screen.queryAllByRole("link");
-      expect(links.length).toBe(1);
-      expect(links[0]).toHaveAttribute("href", "/edit/1");
+      // the items use role="menuitem" so query that role
+      const menuItems = screen.getAllByRole("menuitem");
+      expect(menuItems.length).toBe(1);
+      expect(menuItems[0]).toHaveTextContent("Only One");
+      // and ensure the anchor href points where expected
+      const anchor = menuItems[0].closest("a");
+      expect(anchor).toHaveAttribute("href", "/edit/1");
     });
+  });
+
+  test("keyboard toggles menu (Enter and Space) and Escape closes it", async () => {
+    (ProjectService.getRecentProjectsByUsername as any).mockResolvedValue(
+      mockProjects,
+    );
+
+    renderWithRouter(<RecentProjectsDropdown />);
+
+    const btn = screen.getByRole("button", { name: /Recent Projects/i });
+
+    // Enter opens
+    fireEvent.keyDown(btn, { key: "Enter" });
+    await waitFor(() => expect(btn).toHaveAttribute("aria-expanded", "true"));
+
+    // Escape closes
+    fireEvent.keyDown(document, { key: "Escape" });
+    await waitFor(() => expect(btn).toHaveAttribute("aria-expanded", "false"));
+
+    // Space opens
+    fireEvent.keyDown(btn, { key: " " });
+    await waitFor(() => expect(btn).toHaveAttribute("aria-expanded", "true"));
+  });
+
+  test("clicking outside closes the menu", async () => {
+    (ProjectService.getRecentProjectsByUsername as any).mockResolvedValue(
+      mockProjects,
+    );
+
+    renderWithRouter(<RecentProjectsDropdown />);
+
+    const btn = screen.getByRole("button", { name: /Recent Projects/i });
+    fireEvent.click(btn);
+    await waitFor(() => expect(btn).toHaveAttribute("aria-expanded", "true"));
+
+    // click outside (document body)
+    fireEvent.mouseDown(document.body);
+    await waitFor(() => expect(btn).toHaveAttribute("aria-expanded", "false"));
+  });
+
+  test("clicking a project link closes the menu", async () => {
+    (ProjectService.getRecentProjectsByUsername as any).mockResolvedValue(
+      mockProjects,
+    );
+
+    renderWithRouter(<RecentProjectsDropdown />);
+
+    const btn = screen.getByRole("button", { name: /Recent Projects/i });
+    fireEvent.click(btn);
+    await waitFor(() => expect(btn).toHaveAttribute("aria-expanded", "true"));
+
+    const projectOneLink = screen.getByText("Project One").closest("a")!;
+    fireEvent.click(projectOneLink);
+
+    // clicking a link triggers onClick that sets isOpen(false)
+    await waitFor(() => expect(btn).toHaveAttribute("aria-expanded", "false"));
   });
 });

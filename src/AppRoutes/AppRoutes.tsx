@@ -13,9 +13,18 @@
  * 7) Render all routes with Loaduing Spinner if Clerk is still loading user data.
  */
 
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import Spinner from "../components/Spinner/Spinner";
+import { useSettings } from "../providers/SettingsProvider";
+import { useEffect, useRef } from "react";
+import { ProjectService } from "../utils/ProjectService.ts";
 
 import LandingPage from "../pages/LandingPage/LandingPage";
 import HomePage from "../pages/HomePage/HomePage";
@@ -67,6 +76,137 @@ function AllRoutes(isSignedIn: boolean) {
 export default function AppRoutes() {
   const { isSignedIn, isLoaded } = useAuth();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { settings } = useSettings();
+
+  const prevSignedInRef = useRef<boolean>(isSignedIn);
+
+  // Redirect the user to the last opened project
+  useEffect(() => {
+    if (!isLoaded) {
+      prevSignedInRef.current = isSignedIn;
+      return;
+    }
+
+    const wasSignedIn = prevSignedInRef.current;
+    if (!wasSignedIn && isSignedIn) {
+      // User hat sich soeben angemeldet
+      console.log("[auth-redirect] detected sign-in transition");
+
+      // SignUp should always go to /home
+      if (pathname.startsWith("/signUp")) {
+        console.log("[auth-redirect] on signUp -> navigate /home");
+        navigate("/home", { replace: true });
+        prevSignedInRef.current = isSignedIn;
+        return;
+      }
+
+      // Only proceed when the user enabled lastOpenedProject in settings
+      if (!settings?.lastOpenedProject) {
+        console.log(
+          "[auth-redirect] setting lastOpenedProject disabled -> no redirect",
+        );
+        prevSignedInRef.current = isSignedIn;
+        return;
+      }
+
+      const last = localStorage.getItem("lastOpenedProjectId");
+      if (!last) {
+        console.log(
+          "[auth-redirect] no lastOpenedProjectId set -> no redirect",
+        );
+        prevSignedInRef.current = isSignedIn;
+        return;
+      }
+
+      // if already on that edit page, don't navigate
+      if (pathname === `/edit/${last}`) {
+        console.log(
+          "[auth-redirect] already on the last project page -> no redirect",
+        );
+        prevSignedInRef.current = isSignedIn;
+        return;
+      }
+
+      // Navigate to last project
+      (async () => {
+        try {
+          const project = await ProjectService.getProjectById(last);
+          if (project) {
+            console.log("[auth-redirect] sign-in redirect -> edit page", last);
+            navigate(`/edit/${last}`, { replace: true });
+            // set per-project session flag so general /home redirects won't run again to same project
+            sessionStorage.setItem("didRedirectToLastProject", last);
+          } else {
+            console.log(
+              "[auth-redirect] last project not found -> removing key",
+            );
+            localStorage.removeItem("lastOpenedProjectId");
+          }
+        } catch (err) {
+          console.warn(
+            "[auth-redirect] error while checking last project:",
+            err,
+          );
+        }
+      })();
+    }
+
+    // update ref
+    prevSignedInRef.current = isSignedIn;
+  }, [isLoaded, isSignedIn, pathname, navigate, settings?.lastOpenedProject]);
+
+  useEffect(() => {
+    // only run when fully loaded and signed in
+    if (!isLoaded || !isSignedIn) return;
+    if (!settings?.lastOpenedProject) return;
+
+    // we consider /home as entry path for new-tab landing
+    const entryPaths = ["/home"];
+    const isEntry = entryPaths.some((p) => pathname.startsWith(p));
+    if (!isEntry) return;
+
+    const prevRedirectedProject = sessionStorage.getItem(
+      "didRedirectToLastProject",
+    );
+    const last = localStorage.getItem("lastOpenedProjectId");
+    if (!last) return;
+
+    // if we've already redirected to this very project this session, skip
+    if (prevRedirectedProject === last) {
+      console.log(
+        "[home-redirect] already redirected to this project this session -> skip",
+      );
+      return;
+    }
+
+    // if already on that project page, mark it and skip
+    if (pathname === `/edit/${last}`) {
+      sessionStorage.setItem("didRedirectToLastProject", last);
+      return;
+    }
+
+    (async () => {
+      try {
+        const project = await ProjectService.getProjectById(last);
+        if (project) {
+          console.log(
+            "[home-redirect] entry on /home -> redirect to last project",
+            last,
+          );
+          navigate(`/edit/${last}`, { replace: true });
+          sessionStorage.setItem("didRedirectToLastProject", last);
+        } else {
+          console.log(
+            "[home-redirect] project not found -> clearing stored id",
+          );
+          localStorage.removeItem("lastOpenedProjectId");
+        }
+      } catch (err) {
+        console.warn("[home-redirect] error checking project:", err);
+      }
+    })();
+  }, [isLoaded, isSignedIn, settings?.lastOpenedProject, pathname, navigate]);
 
   // 1)
   const publicPaths = ["/", "/signIn", "/signUp"];

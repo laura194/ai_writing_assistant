@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "../../App/App.css";
@@ -16,6 +16,14 @@ import { ProjectService } from "../../utils/ProjectService";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import ContributionCard from "../../components/ContributionCard/ContributionCard";
+import { useSettings } from "../../providers/SettingsProvider";
+
+interface Snapshot {
+  nodes: Node[];
+  selectedNodeId: string | null;
+  selectedNodeContent: string | null;
+  activeView: string;
+}
 
 const EditPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -40,6 +48,26 @@ const EditPage = () => {
   const [pendingView, setPendingView] = useState<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [externalVersionCounter, setExternalVersionCounter] = useState(0);
+
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  // History refs
+  const undoStackRef = useRef<Snapshot[]>([]);
+  const redoStackRef = useRef<Snapshot[]>([]);
+  const historyLimit = 100;
+
+  // Snapshot of last saved state (used to compute isDirty after saves)
+  const lastSavedSnapshotRef = useRef<Snapshot | null>(null);
+
+  const { settings } = useSettings();
+
+  const nodesRef = useRef<Node[]>([]);
+  useEffect(() => {
+    nodesRef.current = nodes;
+  }, [nodes]);
+
   const debounceSave = (updatedNodes: Node[]) => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -55,12 +83,36 @@ const EditPage = () => {
   }, [activeView]);
 
   useEffect(() => {
+    if (project && projectId && settings.lastOpenedProject) {
+      try {
+        localStorage.setItem("lastOpenedProjectId", projectId);
+      } catch (err: unknown) {
+        console.warn("Couldn't persist last opened project id", String(err));
+      }
+    }
+  }, [project, projectId, settings.lastOpenedProject]);
+
+  useEffect(() => {
     if (projectId) {
       ProjectService.getProjectById(projectId)
         .then((project: Project) => {
           if (Array.isArray(project.projectStructure)) {
             setNodes(project.projectStructure);
             setProject(project);
+
+            // initial last saved snapshot
+            const initial = createSnapshotFromValues(
+              project.projectStructure,
+              null,
+              null,
+              "file",
+            );
+            lastSavedSnapshotRef.current = initial;
+            // clear history
+            undoStackRef.current = [];
+            redoStackRef.current = [];
+            setCanUndo(false);
+            setCanRedo(false);
           } else {
             console.error("Project structure is not an array or is undefined!");
           }
@@ -112,24 +164,205 @@ const EditPage = () => {
     };
   }, [isDirty]);
 
-  const saveProjectStructure = async (updatedNodes: Node[]) => {
-    if (!projectId) return;
+  // ---------------------- History helpers ----------------------
+  const createSnapshot = (): Snapshot =>
+    createSnapshotFromValues(
+      nodes,
+      selectedNode?.id || null,
+      selectedNode?.content || null,
+      activeView,
+    );
 
-    // Füge die projectStructure hinzu, wenn sie nicht definiert ist, als leeres Array
-    const projectData = {
-      name: project?.name || "Untitled Project",
-      username: project?.username || "Anonymous",
-      projectStructure: updatedNodes || [],
+  function createSnapshotFromValues(
+    snapshotNodes: Node[],
+    selectedNodeId: string | null,
+    selectedNodeContent: string | null,
+    view: string,
+  ): Snapshot {
+    return {
+      nodes: JSON.parse(JSON.stringify(snapshotNodes || [])),
+      selectedNodeId,
+      selectedNodeContent,
+      activeView: view,
     };
+  }
 
-    try {
-      await ProjectService.updateProject(projectId, projectData);
-      console.log("✅ Project structure updated.");
-    } catch (error) {
-      console.error("❌ Failed to update project structure:", error);
+  const pushToUndo = () => {
+    const s = createSnapshot();
+    undoStackRef.current.push(s);
+    if (undoStackRef.current.length > historyLimit) {
+      undoStackRef.current.shift();
     }
+    redoStackRef.current = [];
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(false);
   };
 
+  const applySnapshot = async (snapshot: Snapshot) => {
+    setNodes(snapshot.nodes || []);
+
+    if (snapshot.selectedNodeId) {
+      const found = findNodeById(snapshot.nodes, snapshot.selectedNodeId);
+      if (found) {
+        setSelectedNode({
+          ...found,
+          content: snapshot.selectedNodeContent ?? "",
+        });
+      } else {
+        setSelectedNode({
+          id: snapshot.selectedNodeId,
+          name: "",
+          content: snapshot.selectedNodeContent ?? "",
+          category: "",
+        });
+      }
+      localStorage.setItem(
+        `selectedNodeId_${projectId}`,
+        snapshot.selectedNodeId,
+      );
+    } else {
+      setSelectedNode(null);
+    }
+
+    setActiveView(snapshot.activeView || "file");
+
+    setExternalVersionCounter((v) => v + 1);
+
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(redoStackRef.current.length > 0);
+  };
+
+  const handleUndo = () => {
+    if (undoStackRef.current.length === 0) return;
+    const prevSnapshot = undoStackRef.current.pop();
+    if (!prevSnapshot) {
+      setCanUndo(undoStackRef.current.length > 0);
+      setCanRedo(redoStackRef.current.length > 0);
+      return;
+    }
+    // push current state to redo
+    redoStackRef.current.push(createSnapshot());
+    applySnapshot(prevSnapshot);
+    debounceSave(prevSnapshot.nodes);
+    setIsDirty(true);
+
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(redoStackRef.current.length > 0);
+  };
+
+  const handleRedo = () => {
+    if (redoStackRef.current.length === 0) return;
+    const nextSnapshot = redoStackRef.current.pop();
+    if (!nextSnapshot) {
+      setCanUndo(undoStackRef.current.length > 0);
+      setCanRedo(redoStackRef.current.length > 0);
+      return;
+    }
+    // push current to undo
+    undoStackRef.current.push(createSnapshot());
+    applySnapshot(nextSnapshot);
+    debounceSave(nextSnapshot.nodes);
+    setIsDirty(true);
+
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(redoStackRef.current.length > 0);
+  };
+
+  // globaler Keydown listener für Ctrl/Cmd+Z und Ctrl/Cmd+Y / Shift+Z
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+
+      // Mac: Cmd+Z = undo, Cmd+Shift+Z = redo. Windows: Ctrl+Z undo, Ctrl+Y redo
+      if ((e.key === "z" || e.key === "Z") && e.shiftKey) {
+        e.preventDefault();
+        handleRedo();
+      } else if (e.key === "y" || e.key === "Y") {
+        e.preventDefault();
+        handleRedo();
+      } else if (e.key === "z" || e.key === "Z") {
+        e.preventDefault();
+        handleUndo();
+      }
+    };
+
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [nodes, selectedNode, activeView]);
+
+  // ---------------------- Helper: finde Node Metadata ----------------------
+  const findNodeById = (
+    searchNodes: Node[] | undefined,
+    id: string | null,
+  ): Node | null => {
+    if (!searchNodes || !id) return null;
+    for (const n of searchNodes) {
+      if (n.id === id) return n;
+      if (n.nodes) {
+        const found = findNodeById(n.nodes, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  // ---------------------- Project save ----------------------
+  const saveProjectStructure = useCallback(
+    async (updatedNodes: Node[]) => {
+      if (!projectId) return;
+
+      // Füge die projectStructure hinzu, wenn sie nicht definiert ist, als leeres Array
+      const projectData = {
+        name: project?.name || "Untitled Project",
+        username: project?.username || "Anonymous",
+        projectStructure: updatedNodes || [],
+      };
+
+      try {
+        await ProjectService.updateProject(projectId, projectData);
+        console.log("✅ Project structure updated.");
+        lastSavedSnapshotRef.current = createSnapshotFromValues(
+          updatedNodes,
+          selectedNode?.id || null,
+          selectedNode?.content || null,
+          activeView,
+        );
+        setIsDirty(false);
+      } catch (err: unknown) {
+        console.error("❌ Failed to update project structure:", err);
+      }
+    },
+    [projectId, project],
+  );
+
+  useEffect(() => {
+    if (!projectId) return;
+    if (!settings.autoSave.enabled) return;
+
+    const intervalMs =
+      Math.max(1, settings.autoSave.intervalMinutes) * 60 * 1000;
+
+    const id = setInterval(() => {
+      saveProjectStructure(nodesRef.current);
+      console.log("[autosave] saving project structure", {
+        projectId,
+        timestamp: Date.now(),
+      });
+    }, intervalMs);
+
+    return () => {
+      clearInterval(id);
+      console.log("[autosave] cleared project-interval");
+    };
+  }, [
+    projectId,
+    settings.autoSave.enabled,
+    settings.autoSave.intervalMinutes,
+    saveProjectStructure,
+  ]);
+
+  // ---------------------- Node selection / content load ----------------------
   const handleNodeClick = async (node: Node) => {
     if (node.name === "Chapter structure") {
       return; // ⛔ prevent click
@@ -164,6 +397,8 @@ const EditPage = () => {
   };
 
   const handleNodeSave = () => {
+    lastSavedSnapshotRef.current = createSnapshot();
+    setIsDirty(false);
     reloadProjectStructure();
   };
 
@@ -207,7 +442,10 @@ const EditPage = () => {
     setPendingView(null);
   };
 
+  // ---------------------- Mutations (jeweils pushToUndo vor mutation) ----------------------
   const addChapter = (parentId: string | null, newNode: Node) => {
+    pushToUndo();
+
     const recursiveUpdate = (
       nodes: Node[],
       parentId: string | null,
@@ -225,14 +463,17 @@ const EditPage = () => {
 
     const updatedNodes = recursiveUpdate(nodes, parentId);
     setNodes(updatedNodes);
-    saveProjectStructure(updatedNodes);
+    debounceSave(updatedNodes);
 
     if (selectedNode) {
       handleNodeClick(selectedNode);
     }
+    setIsDirty(true);
   };
 
   const deleteChapter = (nodeId: string) => {
+    pushToUndo();
+
     const recursiveDelete = (nodes: Node[], nodeId: string): Node[] => {
       return nodes.filter((node) => {
         if (node.id === nodeId) return false;
@@ -243,7 +484,7 @@ const EditPage = () => {
 
     const updatedNodes = recursiveDelete(nodes, nodeId);
     setNodes(updatedNodes);
-    saveProjectStructure(updatedNodes);
+    debounceSave(updatedNodes);
 
     if (selectedNode) {
       const exists = JSON.stringify(updatedNodes).includes(selectedNode.id);
@@ -253,9 +494,12 @@ const EditPage = () => {
         setSelectedNode(null);
       }
     }
+    setIsDirty(true);
   };
 
   const handleRenameOrIconUpdate = (updatedNode: Node) => {
+    pushToUndo();
+
     const updateNodes = (nodes: Node[], updatedNode: Node): Node[] => {
       return nodes.map((node) => {
         if (node.id === updatedNode.id) {
@@ -270,7 +514,7 @@ const EditPage = () => {
 
     const updatedNodes = updateNodes(nodes, updatedNode);
     setNodes(updatedNodes);
-    saveProjectStructure(updatedNodes);
+    debounceSave(updatedNodes);
 
     if (selectedNode?.id === updatedNode.id) {
       setSelectedNode((prev) =>
@@ -293,6 +537,7 @@ const EditPage = () => {
         console.error("❌ Failed to update node content metadata:", error);
       });
     }
+    setIsDirty(true);
   };
 
   const handleMoveNode = (
@@ -300,6 +545,8 @@ const EditPage = () => {
     targetNodeId: string,
     //asSibling: boolean = false
   ) => {
+    pushToUndo();
+
     const newNodes = [...nodes];
     let draggedNode: Node | null = null;
 
@@ -347,12 +594,33 @@ const EditPage = () => {
       const exists = JSON.stringify(newNodes).includes(selectedNode.id);
       setSelectedNode(exists ? selectedNode : null);
     }
+    setIsDirty(true);
+  };
+
+  const handleContentChangeForHistory = (
+    prevContent: string,
+    nextContent: string,
+  ) => {
+    if (prevContent === nextContent) return;
+
+    pushToUndo();
+
+    setSelectedNode((prev) =>
+      prev ? { ...prev, content: nextContent } : prev,
+    );
+
+    setIsDirty(true);
   };
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex flex-col h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-x-hidden">
-        <Header />
+        <Header
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+        />
 
         <div className="flex flex-1 relative">
           <div
@@ -413,6 +681,8 @@ const EditPage = () => {
                       node={selectedNode}
                       onDirtyChange={(dirty: boolean) => setIsDirty(dirty)}
                       onSave={handleNodeSave}
+                      onContentChangeForHistory={handleContentChangeForHistory}
+                      externalVersion={externalVersionCounter}
                     />
                   ) : activeView === "ai" ? (
                     <AIProtocolCard />
