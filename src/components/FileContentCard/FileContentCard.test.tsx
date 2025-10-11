@@ -17,6 +17,19 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+vi.mock("../../providers/SettingsProvider", () => {
+  return {
+    SettingsProvider: ({ children }: any) => children,
+    useSettings: () => ({
+      settings: {
+        autoSave: { enabled: false, intervalMinutes: 1 },
+        spellChecker: true,
+        lastOpenedProject: true,
+      },
+    }),
+  };
+});
+
 // --- mock axios ---
 const AXIOS_GET = vi.fn();
 vi.mock("axios", () => ({

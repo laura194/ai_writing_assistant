@@ -17,7 +17,7 @@ function getUserIdFromReq(req: Request): string | null {
 // Create a new NodeContent entry (prevents duplicates)
 export const createNodeContent = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { nodeId, name, category, content, projectId } = req.body;
 
@@ -60,7 +60,7 @@ export const createNodeContent = async (
 // Get all NodeContent entries, or filter by ?nodeId=... and ?projectId=...
 export const getNodeContents = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { nodeId, projectId } = req.query;
@@ -87,7 +87,7 @@ export const getNodeContents = async (
 // Get a specific NodeContent entry by its nodeId (via URL param)
 export const getNodeContentById = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { id } = req.params;
   const { projectId } = req.query;
@@ -122,7 +122,7 @@ export const getNodeContentById = async (
  */
 export const updateNodeContent = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { nodeId } = req.params;
   const { name, category, content, projectId, icon, skipVersion } = req.body;
@@ -149,7 +149,7 @@ export const updateNodeContent = async (
       // Transactions not supported on this deployment (standalone). We will fall back.
       console.warn(
         "Transactions not supported, falling back to non-transactional update:",
-        txErr
+        txErr,
       );
       try {
         await session.endSession();
@@ -163,7 +163,7 @@ export const updateNodeContent = async (
 
     if (useTransaction && session) {
       const existing = await NodeContent.findOne({ nodeId, projectId }).session(
-        session
+        session,
       );
 
       if (existing && !skipVersion) {
@@ -179,7 +179,7 @@ export const updateNodeContent = async (
               meta: { from: "updateNodeContent" },
             },
           ],
-          { session }
+          { session },
         );
       }
 
@@ -202,7 +202,7 @@ export const updateNodeContent = async (
       const updatedNodeContent = await NodeContent.findOneAndUpdate(
         { nodeId, projectId },
         { $set: upsertData },
-        { new: true, upsert: true, setDefaultsOnInsert: true, session }
+        { new: true, upsert: true, setDefaultsOnInsert: true, session },
       );
 
       // trim old versions if exceed MAX_VERSIONS (only when versioning actually used)
@@ -226,7 +226,7 @@ export const updateNodeContent = async (
 
           if (ids.length) {
             await NodeContentVersion.deleteMany({ _id: { $in: ids } }).session(
-              session
+              session,
             );
           }
         }
@@ -281,7 +281,7 @@ export const updateNodeContent = async (
           ...(icon !== undefined ? { icon } : {}),
         },
       },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
+      { new: true, upsert: true, setDefaultsOnInsert: true },
     );
 
     if (!skipVersion) {
@@ -320,7 +320,7 @@ export const updateNodeContent = async (
  */
 export const createVersion = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { nodeId } = req.params;
   const { projectId, content, name, category, meta } = req.body;
@@ -369,7 +369,7 @@ export const createVersion = async (
  */
 export const listVersions = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { nodeId } = req.params;
   const projectId = String(req.query.projectId || "");
@@ -397,7 +397,7 @@ export const listVersions = async (
  */
 export const getVersion = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { nodeId, versionId } = req.params;
   if (!nodeId || !versionId) {
@@ -425,7 +425,7 @@ export const getVersion = async (
  */
 export const revertToVersion = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { nodeId, versionId } = req.params;
   const { projectId } = req.body;
@@ -444,7 +444,7 @@ export const revertToVersion = async (
     } catch (txErr) {
       console.warn(
         "Transactions not supported for revert; falling back:",
-        txErr
+        txErr,
       );
       try {
         await session.endSession();
@@ -469,7 +469,7 @@ export const revertToVersion = async (
       }
 
       const existing = await NodeContent.findOne({ nodeId, projectId }).session(
-        session
+        session,
       );
       if (existing) {
         await NodeContentVersion.create(
@@ -484,7 +484,7 @@ export const revertToVersion = async (
               meta: { from: "revert" },
             },
           ],
-          { session }
+          { session },
         );
       }
 
@@ -499,7 +499,7 @@ export const revertToVersion = async (
             updatedAt: new Date(),
           },
         },
-        { new: true, upsert: true, session }
+        { new: true, upsert: true, session },
       );
 
       // trim versions if exceeded
@@ -521,7 +521,7 @@ export const revertToVersion = async (
         const ids = oldest.map((o) => o._id);
         if (ids.length)
           await NodeContentVersion.deleteMany({ _id: { $in: ids } }).session(
-            session
+            session,
           );
       }
 
@@ -581,7 +581,7 @@ export const revertToVersion = async (
           updatedAt: new Date(),
         },
       },
-      { new: true, upsert: true }
+      { new: true, upsert: true },
     );
 
     const count = await NodeContentVersion.countDocuments({
