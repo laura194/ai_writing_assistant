@@ -34,3 +34,16 @@ export interface Project {
   updatedAt?: string;
   authorName?: string; // Optional: Name des Autors
 }
+
+
+
+export interface IComment {
+  _id?: string;
+  projectId: string;
+  username: string;
+  content: string;
+  date?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
