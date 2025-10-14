@@ -38,7 +38,7 @@ describe("CommentSection", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(CommentService, "getCommentsByProjectId").mockResolvedValue(
-      mockComments
+      mockComments,
     );
     vi.spyOn(CommentService, "createComment").mockResolvedValue({
       ...mockComments[0],
@@ -70,14 +70,14 @@ describe("CommentSection", () => {
     expect(
       screen.getAllByText(
         (text, el) =>
-          !!el && text.includes("2025") && el.className.includes("text-xs")
-      ).length
+          !!el && text.includes("2025") && el.className.includes("text-xs"),
+      ).length,
     ).toBeGreaterThan(0);
   });
 
   it("shows empty message when no comments", async () => {
     vi.spyOn(CommentService, "getCommentsByProjectId").mockResolvedValueOnce(
-      []
+      [],
     );
     render(<CommentSection projectId="p2" />);
 
@@ -124,7 +124,7 @@ describe("CommentSection", () => {
   it("handles fetch error gracefully", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(CommentService, "getCommentsByProjectId").mockRejectedValueOnce(
-      new Error("network")
+      new Error("network"),
     );
     render(<CommentSection projectId="bad" />);
     userEvent.click(screen.getByRole("button"));
@@ -136,7 +136,7 @@ describe("CommentSection", () => {
 
   it("shows error if createComment fails", async () => {
     vi.spyOn(CommentService, "createComment").mockRejectedValueOnce(
-      new Error("dbFail")
+      new Error("dbFail"),
     );
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 

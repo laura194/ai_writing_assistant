@@ -181,7 +181,7 @@ function FileContentCard({
       }
       prevNodeIdRef.current = node.id;
     }
-  }, [node.id, node.name]);
+  }, [node.id, node.name, node.content]);
 
   useEffect(() => {
     if (prevExternalVersionRef.current !== externalVersion) {

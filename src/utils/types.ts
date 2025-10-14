@@ -35,8 +35,6 @@ export interface Project {
   authorName?: string; // Optional: Name des Autors
 }
 
-
-
 export interface IComment {
   _id?: string;
   projectId: string;
@@ -46,4 +44,3 @@ export interface IComment {
   createdAt?: string;
   updatedAt?: string;
 }
-
