@@ -10,7 +10,7 @@ vi.mock("../models/Comment", () => {
       {
         find: vi.fn(),
         findByIdAndDelete: vi.fn(),
-      } // static methods
+      }, // static methods
     ),
   };
 });
@@ -61,7 +61,9 @@ describe("Comment Controller", () => {
     (Comment as unknown as vi.Mock).mockImplementation(() => ({
       save: mockSave,
     }));
-    const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     const res = await request(app).post("/api/comments").send({
       projectId: "p1",
@@ -96,7 +98,11 @@ describe("Comment Controller", () => {
 
     // find returns promise resolving to mockComments sorted descending
     (Comment.find as unknown as vi.Mock).mockReturnValue({
-      sort: vi.fn().mockResolvedValue(mockComments.sort((a,b) => b.createdAt - a.createdAt)),
+      sort: vi
+        .fn()
+        .mockResolvedValue(
+          mockComments.sort((a, b) => b.createdAt - a.createdAt),
+        ),
     });
 
     const res = await request(app).get("/api/comments/p1");
@@ -116,7 +122,9 @@ describe("Comment Controller", () => {
     (Comment.find as unknown as vi.Mock).mockReturnValue({
       sort: vi.fn().mockRejectedValue(error),
     });
-    const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     const res = await request(app).get("/api/comments/p1");
 
@@ -154,7 +162,9 @@ describe("Comment Controller", () => {
   it("DELETE /api/comments/:id error returns 500", async () => {
     const error = new Error("DB error");
     (Comment.findByIdAndDelete as unknown as vi.Mock).mockRejectedValue(error);
-    const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     const res = await request(app).delete("/api/comments/123");
 

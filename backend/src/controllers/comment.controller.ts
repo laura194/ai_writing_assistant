@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
-import Comment, { IComment } from "../models/Comment";
+import Comment from "../models/Comment";
 
-export const createComment = async (req: Request, res: Response): Promise<void> => {
+export const createComment = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { projectId, username, content } = req.body;
 
@@ -31,7 +34,10 @@ export const getCommentsByProjectId = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteComment = async (req: Request, res: Response): Promise<void> => {
+export const deleteComment = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await Comment.findByIdAndDelete(id);

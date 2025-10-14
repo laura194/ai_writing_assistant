@@ -20,7 +20,7 @@ const commentSchema: Schema = new Schema(
     content: { type: String, required: true },
     date: { type: Date, default: Date.now },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model<IComment>("Comment", commentSchema);

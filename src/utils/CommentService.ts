@@ -2,7 +2,8 @@
 import { IComment } from "./types";
 
 const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL || "http://localhost:5001") + "/api/comments";
+  (import.meta.env.VITE_API_BASE_URL || "http://localhost:5001") +
+  "/api/comments";
 
 const CommentService = {
   // ➕ Kommentar erstellen → gibt das gespeicherte Kommentar zurück

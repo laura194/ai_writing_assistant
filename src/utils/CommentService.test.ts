@@ -19,8 +19,15 @@ describe("CommentService", () => {
   });
 
   it("createComment - posts and returns created comment on success", async () => {
-    const newComment: Partial<IComment> = { content: "Testkommentar", projectId: "foo" };
-    const savedComment: IComment = { ...newComment, id: "c1", createdAt: "2024-05-01" } as IComment;
+    const newComment: Partial<IComment> = {
+      content: "Testkommentar",
+      projectId: "foo",
+    };
+    const savedComment: IComment = {
+      ...newComment,
+      id: "c1",
+      createdAt: "2024-05-01",
+    } as IComment;
     (fetch as any).mockResolvedValue({
       ok: true,
       json: async () => savedComment,
@@ -43,18 +50,29 @@ describe("CommentService", () => {
       json: async () => ({ error: "validation failed" }),
     });
 
-    await expect(CommentService.createComment({ content: "fail" })).rejects.toThrow("validation failed");
+    await expect(
+      CommentService.createComment({ content: "fail" }),
+    ).rejects.toThrow("validation failed");
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("createComment - throws and logs on fetch error", async () => {
     (fetch as any).mockRejectedValue(new Error("network down"));
-    await expect(CommentService.createComment({ content: "fail" })).rejects.toThrow("network down");
+    await expect(
+      CommentService.createComment({ content: "fail" }),
+    ).rejects.toThrow("network down");
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("getCommentsByProjectId - returns array of comments on success", async () => {
-    const comments: IComment[] = [{username: "test1", content: "hi", projectId: "foo", createdAt: "2024-05-01" }];
+    const comments: IComment[] = [
+      {
+        username: "test1",
+        content: "hi",
+        projectId: "foo",
+        createdAt: "2024-05-01",
+      },
+    ];
     (fetch as any).mockResolvedValue({
       ok: true,
       json: async () => comments,
@@ -91,7 +109,9 @@ describe("CommentService", () => {
       ok: true,
     });
 
-    await expect(CommentService.deleteComment("cid123")).resolves.toBeUndefined();
+    await expect(
+      CommentService.deleteComment("cid123"),
+    ).resolves.toBeUndefined();
     expect(fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (fetch as any).mock.calls[0];
     expect(url).toBe(`${BASE_URL}/cid123`);
@@ -103,14 +123,18 @@ describe("CommentService", () => {
       ok: false,
     });
 
-    await expect(CommentService.deleteComment("cid123")).resolves.toBeUndefined();
+    await expect(
+      CommentService.deleteComment("cid123"),
+    ).resolves.toBeUndefined();
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("deleteComment - logs error on fetch reject", async () => {
     (fetch as any).mockRejectedValue(new Error("network fail"));
 
-    await expect(CommentService.deleteComment("cid123")).resolves.toBeUndefined();
+    await expect(
+      CommentService.deleteComment("cid123"),
+    ).resolves.toBeUndefined();
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 });
