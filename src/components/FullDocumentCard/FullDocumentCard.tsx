@@ -12,6 +12,7 @@ import pdf from "/src/assets/images/full-document-page/pdf.jpg";
 import latex from "/src/assets/images/full-document-page/latex.png";
 import { motion } from "framer-motion";
 import { useTheme } from "../../providers/ThemeProvider";
+import { IAiProtocolEntry } from "../../models/IAITypes";
 
 /**
  * Generates the whole project content in one single page and exports it as Word, PDF, or LaTeX format.
@@ -23,8 +24,7 @@ import { useTheme } from "../../providers/ThemeProvider";
  * - Fetches a hierarchical project structure and content from backend services.
  * - Renders the document structure dynamically in HTML format.
  * - Allows exporting the full document in multiple formats via buttons:
- *   - Word (.docx) using `docx`
- *   - PDF (.pdf) using `jsPDF`
+ *   - Word and PDF using backend conversion of LaTeX to DOCX/PDF
  *   - LaTeX (.tex) with support for figures, tables, math equations, and citations
  */
 
@@ -46,7 +46,13 @@ const FullDocumentCard = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [structure, setStructure] = useState<StructureNode[]>([]);
   const [nodeContents, setNodeContents] = useState<NodeContent[]>([]);
+  const [aiProtocols, setAiProtocols] = useState<IAiProtocolEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState({
+    word: false,
+    pdf: false,
+    latex: false,
+  });
   const [error, setError] = useState<string | null>(null);
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -61,12 +67,10 @@ const FullDocumentCard = () => {
     const fetchStructure = async () => {
       try {
         const data = await ProjectService.getProjectById(projectId); // Use the projectId from URL
-
-        if (data && Array.isArray(data.projectStructure)) {
+        if (data && data.projectStructure) {
           setStructure(data.projectStructure as StructureNode[]);
         } else {
-          setError("Project structure is empty or unavailable.");
-          setStructure([]); // Fallback, damit der State korrekt bleibt
+          setError("Project structure is empty or unavailable.”");
         }
       } catch {
         setError("Error loading the project structure.");
@@ -96,6 +100,28 @@ const FullDocumentCard = () => {
           content: node.content || "",
         }));
         setNodeContents(mappedData);
+
+        // Fetch AI Protocols for Appendix
+        try {
+          const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+          const resp = await fetch(
+            `${apiBaseUrl}/api/ai/aiProtocol?projectId=${projectId}`,
+          );
+          if (resp.ok) {
+            const protocols: IAiProtocolEntry[] = await resp.json();
+            setAiProtocols(protocols || []);
+          } else {
+            console.warn(
+              "Failed to fetch AI protocols for appendix:",
+              resp.status,
+            );
+            setAiProtocols([]);
+          }
+        } catch (e) {
+          console.warn("Error fetching AI protocols:", e);
+          setAiProtocols([]);
+        }
       } catch {
         setError("Error loading the contents.");
       } finally {
@@ -107,12 +133,7 @@ const FullDocumentCard = () => {
   }, [projectId]);
 
   useEffect(() => {
-    if (
-      !containerRef.current ||
-      structure.length === 0 ||
-      nodeContents.length === 0
-    )
-      return;
+    if (!containerRef.current) return;
 
     const buildHtml = (nodes: StructureNode[], depth = 1): string => {
       return nodes
@@ -138,9 +159,52 @@ const FullDocumentCard = () => {
         .join("");
     };
 
-    const finalHtml = buildHtml(structure);
+    const buildAiProtocolAppendix = (): string => {
+      const heading = `<h2 class="text-2xl font-bold mt-6 text-[#261e3b] dark:text-white">Appendix: AI Protocol</h2>`;
+      if (!aiProtocols || aiProtocols.length === 0) {
+        return (
+          heading +
+          `<p class="whitespace-pre-line mt-2 mb-4 text-gray-600 dark:text-gray-200">No entries have been created in the AI protocol yet.</p>`
+        );
+      }
+
+      const rows = aiProtocols
+        .map(
+          (p) => `
+        <tr class="border-t border-[#beb5e4] dark:border-[#3e316e]">
+          <td class="px-3 py-2 align-top">${escapeHtml(p.aiName || "")}</td>
+          <td class="px-3 py-2 align-top">${escapeHtml(p.usageForm || "")}</td>
+          <td class="px-3 py-2 align-top">${escapeHtml(p.affectedParts || "")}</td>
+          <td class="px-3 py-2 align-top">${escapeHtml(p.remarks || "")}</td>
+          <td class="px-3 py-2 align-top">${escapeHtml(formatDate(p.createdAt))}</td>
+          <td class="px-3 py-2 align-top">${escapeHtml(formatDate(p.updatedAt))}</td>
+        </tr>`,
+        )
+        .join("");
+
+      const table = `
+        <div class="relative overflow-x-auto rounded-xl border-2 border-[#beb5e4] dark:border-[#3e316e] mt-3">
+          <table class="min-w-full text-m text-left text-[#595996] dark:text-[#d4d4f2]">
+            <thead class="bg-[#e1dcf8] dark:bg-[#2f214d] text-[#261e3b] dark:text-[#ffffff]">
+              <tr>
+                <th class="px-3 py-2 font-semibold">Name</th>
+                <th class="px-3 py-2 font-semibold">Usage</th>
+                <th class="px-3 py-2 font-semibold">Affected sections</th>
+                <th class="px-3 py-2 font-semibold">Notes</th>
+                <th class="px-3 py-2 font-semibold">Created at</th>
+                <th class="px-3 py-2 font-semibold">Updated at</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+
+      return heading + table;
+    };
+
+    const finalHtml = buildHtml(structure) + buildAiProtocolAppendix();
     containerRef.current.innerHTML = finalHtml;
-  }, [structure, nodeContents]);
+  }, [structure, nodeContents, aiProtocols]);
 
   const escapeHtml = (unsafe: string) => {
     return unsafe
@@ -150,6 +214,73 @@ const FullDocumentCard = () => {
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   };
+
+  const formatDate = (date?: string): string => {
+    if (!date) return "N/A";
+    try {
+      return new Date(date).toLocaleString("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
+    } catch {
+      return String(date);
+    }
+  };
+
+  const handleExport = async (format: "word" | "pdf" | "latex") => {
+    setExporting((prev) => ({ ...prev, [format]: true }));
+    try {
+      switch (format) {
+        case "word":
+          await handleExportWord(structure, nodeContents, aiProtocols);
+          break;
+        case "pdf":
+          await handleExportPDF(structure, nodeContents, aiProtocols);
+          break;
+        case "latex":
+          // LaTeX export is synchronous, but we can make it feel async for UX
+          await new Promise<void>((resolve) => {
+            handleExportLATEX(structure, nodeContents, aiProtocols);
+            setTimeout(resolve, 300); // Give feedback for a moment
+          });
+          break;
+      }
+    } catch (err) {
+      console.error(`Error exporting to ${format}:`, err);
+      // Optionally, set an error state to show a toast or message
+    } finally {
+      setExporting((prev) => ({ ...prev, [format]: false }));
+    }
+  };
+
+  const Spinner = () => (
+    <div role="status" className="w-12 h-12">
+      <svg className="animate-spin" viewBox="0 0 50 50">
+        <defs>
+          <linearGradient
+            id="spinner-gradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="#7c3aed" />
+            <stop offset="50%" stopColor="#db2777" />
+            <stop offset="100%" stopColor="#facc15" />
+          </linearGradient>
+        </defs>
+        <circle
+          cx="25"
+          cy="25"
+          r="20"
+          stroke="url(#spinner-gradient)"
+          strokeWidth="5"
+          fill="none"
+          strokeLinecap="round"
+        />
+      </svg>
+    </div>
+  );
 
   return (
     <div className="relative flex flex-col h-full p-6 rounded-3xl bg-[#e9e5f8] dark:bg-[#1e1538]">
@@ -165,17 +296,17 @@ const FullDocumentCard = () => {
           {/** Gradient-Border um die Buttons wie im FileContentCard **/}
           {[
             {
-              onClick: () => handleExportWord(structure, nodeContents),
+              format: "word" as const,
               src: word,
               alt: "Word",
             },
             {
-              onClick: () => handleExportPDF(structure, nodeContents),
+              format: "pdf" as const,
               src: pdf,
               alt: "PDF",
             },
             {
-              onClick: () => handleExportLATEX(structure, nodeContents),
+              format: "latex" as const,
               src: latex,
               alt: "LaTeX",
             },
@@ -193,11 +324,16 @@ const FullDocumentCard = () => {
               className="p-[3px] rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-yellow-300 transition-shadow duration-20"
             >
               <button
-                onClick={btn.onClick}
-                className="bg-[#e1dcf8] dark:bg-[#2f214d] p-2 rounded-lg shadow-inner shadow-purple-600/50 dark:shadow-purple-700/70 hover:shadow-purple-600/60 dark:hover:shadow-purple-500/75 transition cursor-pointer"
+                onClick={() => handleExport(btn.format)}
+                disabled={exporting[btn.format]}
+                className="bg-[#e1dcf8] dark:bg-[#2f214d] w-[64px] h-[64px] flex items-center justify-center p-2 rounded-lg shadow-inner shadow-purple-600/50 dark:shadow-purple-700/70 hover:shadow-purple-600/60 dark:hover:shadow-purple-500/75 transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 title={`Export as ${btn.alt}`}
               >
-                <img src={btn.src} alt={btn.alt} className="w-12 h-12" />
+                {exporting[btn.format] ? (
+                  <Spinner />
+                ) : (
+                  <img src={btn.src} alt={btn.alt} className="w-12 h-12" />
+                )}
               </button>
             </motion.div>
           ))}
