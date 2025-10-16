@@ -10,6 +10,7 @@ import GradientAtomIcon from "../GradientAtom/GradientAtom";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { useTheme } from "../../providers/ThemeProvider";
+import { useSettings } from "../../providers/SettingsProvider";
 
 import nspell from "nspell";
 
@@ -20,12 +21,19 @@ export interface FileContentCardProps {
   node: Node;
   onDirtyChange?: (dirty: boolean) => void;
   onSave?: () => void;
+  onContentChangeForHistory?: (
+    prevContent: string,
+    nextContent: string,
+  ) => void;
+  externalVersion?: number;
 }
 
 function FileContentCard({
   node,
   onDirtyChange,
   onSave,
+  onContentChangeForHistory,
+  externalVersion,
 }: FileContentCardProps) {
   const { projectId } = useParams<{ projectId: string }>();
 
@@ -43,6 +51,15 @@ function FileContentCard({
   const isDark = theme === "dark";
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const prevContentForHistoryRef = useRef<string>(node.content ?? "");
+  const contentChangeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { settings } = useSettings();
+  const HISTORY_IDLE_MS = 500;
+
+  const prevNodeIdRef = useRef<string | null>(null);
+  const prevExternalVersionRef = useRef<number | undefined>(externalVersion);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // States für Spellchecker
@@ -51,6 +68,9 @@ function FileContentCard({
 
   // Dictionaries laden und Spellchecker erstellen
   useEffect(() => {
+    if (!settings.spellChecker) return;
+
+    let mounted = true;
     async function loadDictionaries() {
       try {
         const [affDe, dicDe, affEn, dicEn] = await Promise.all([
@@ -69,6 +89,7 @@ function FileContentCard({
         ]);
 
         // ✅ nspell erwartet zwei Strings: aff + dic
+        if (!mounted) return;
         setSpellDe(nspell(affDe, dicDe));
         setSpellEn(nspell(affEn, dicEn));
 
@@ -85,7 +106,10 @@ function FileContentCard({
     }
 
     loadDictionaries();
-  }, []);
+    return () => {
+      mounted = false;
+    };
+  }, [settings.spellChecker]);
 
   /*function checkWord(word: string) {
     if (!spellDe || !spellEn) return true;
@@ -144,11 +168,39 @@ function FileContentCard({
   };
 
   useEffect(() => {
-    setFileContent(node.content || "...");
-    setOriginalContent(node.content || "...");
-    setAiNodeName(node.name || ""); // Aktualisiere den Namen
-    setIsDirty(false);
-  }, [node]);
+    setAiNodeName(node.name || "");
+
+    if (prevNodeIdRef.current !== node.id) {
+      setFileContent(node.content ?? "");
+      setOriginalContent(node.content ?? "");
+      setIsDirty(false);
+      prevContentForHistoryRef.current = node.content ?? "";
+      if (contentChangeTimerRef.current) {
+        clearTimeout(contentChangeTimerRef.current);
+        contentChangeTimerRef.current = null;
+      }
+      prevNodeIdRef.current = node.id;
+    }
+  }, [node.id, node.name, node.content]);
+
+  useEffect(() => {
+    if (prevExternalVersionRef.current !== externalVersion) {
+      prevExternalVersionRef.current = externalVersion;
+      if ((node.content ?? "") !== fileContent) {
+        setFileContent(node.content ?? "");
+        const dirty = (node.content ?? "") !== originalContent;
+        setIsDirty(dirty);
+        onDirtyChange?.(dirty);
+        prevContentForHistoryRef.current = node.content ?? "";
+      }
+    }
+  }, [
+    externalVersion,
+    node.content,
+    fileContent,
+    originalContent,
+    onDirtyChange,
+  ]);
 
   useEffect(() => {
     const dirty = fileContent !== originalContent;
@@ -156,74 +208,140 @@ function FileContentCard({
     onDirtyChange?.(dirty);
   }, [fileContent, originalContent, onDirtyChange]);
 
-  const handleSave = useCallback(async () => {
-    if (!projectId) {
-      console.error("❌ Cannot save node content: projectId is missing");
-      toast.error(
-        "Project ID missing. Cannot save. Please try again or contact: plantfriends@gmail.com",
-        {
-          duration: 10000,
-          icon: "❌",
+  const handleSave = useCallback(
+    async (opts?: { skipVersion?: boolean }) => {
+      if (!projectId) {
+        console.error("❌ Cannot save node content: projectId is missing");
+        toast.error(
+          "Project ID missing. Cannot save. Please try again or contact: plantfriends@gmail.com",
+          {
+            duration: 10000,
+            icon: "❌",
+            style: {
+              background: "#2a1b1e",
+              color: "#ffe4e6",
+              padding: "16px 20px",
+              borderRadius: "12px",
+              fontSize: "15px",
+              fontWeight: "500",
+              boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
+              border: "1px solid #ef4444",
+            },
+          },
+        );
+        return;
+      }
+
+      if (!isDirty && opts?.skipVersion) return;
+
+      if (!isDirty && !opts?.skipVersion) {
+        toast.success("No changes to save.", {
+          duration: 5000,
+          icon: "✅",
           style: {
-            background: "#2a1b1e",
-            color: "#ffe4e6",
+            background: "#1e2b2d",
+            color: "#d1fae5",
             padding: "16px 20px",
             borderRadius: "12px",
             fontSize: "15px",
             fontWeight: "500",
-            boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
-            border: "1px solid #ef4444",
+            boxShadow: "0 4px 12px rgba(0, 255, 170, 0.1)",
+            border: "1px solid #10b981",
           },
-        },
-      );
-      return;
+        });
+        return;
+      }
+
+      try {
+        await NodeContentService.updateNodeContent(node.id, {
+          nodeId: node.id,
+          name: node.name,
+          category: node.category,
+          content: fileContent,
+          projectId,
+          skipVersion: opts?.skipVersion,
+        });
+
+        setOriginalContent(fileContent);
+        setIsDirty(false);
+        onSave?.();
+
+        if (!opts?.skipVersion) {
+          console.info("Porject was saved successfully.");
+        }
+      } catch (error) {
+        console.error("Error updating node content:", error);
+        toast.error(
+          "Failed to save content. Please try again or contact: plantfriends@gmail.com",
+          {
+            duration: 10000,
+            icon: "❌",
+            style: {
+              background: "#2a1b1e",
+              color: "#ffe4e6",
+              padding: "16px 20px",
+              borderRadius: "12px",
+              fontSize: "15px",
+              fontWeight: "500",
+              boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
+              border: "1px solid #ef4444",
+            },
+          },
+        );
+      }
+    },
+    [
+      projectId,
+      fileContent,
+      node.id,
+      node.name,
+      node.category,
+      isDirty,
+      onSave,
+    ],
+  );
+
+  const handleSaveClick = useCallback(() => {
+    handleSave();
+  }, [handleSave]);
+
+  const handleSaveRef = useRef<typeof handleSave | null>(null);
+  useEffect(() => {
+    handleSaveRef.current = handleSave;
+  }, [handleSave]);
+
+  const handleEditorChange = (value: string) => {
+    setFileContent(value);
+    setIsDirty(true);
+    onDirtyChange?.(true);
+
+    if (contentChangeTimerRef.current) {
+      clearTimeout(contentChangeTimerRef.current);
+      contentChangeTimerRef.current = null;
     }
 
-    try {
-      await NodeContentService.updateNodeContent(node.id, {
-        nodeId: node.id,
-        name: node.name,
-        category: node.category,
-        content: fileContent,
-        projectId,
-      });
+    const prevContent = prevContentForHistoryRef.current;
+    contentChangeTimerRef.current = setTimeout(() => {
+      try {
+        onContentChangeForHistory?.(prevContent, value);
 
-      setOriginalContent(fileContent);
-      setIsDirty(false);
-      onSave?.();
-    } catch (error) {
-      console.error("Error updating node content:", error);
-      toast.error(
-        "Failed to save content. Please try again or contact: plantfriends@gmail.com",
-        {
-          duration: 10000,
-          icon: "❌",
-          style: {
-            background: "#2a1b1e",
-            color: "#ffe4e6",
-            padding: "16px 20px",
-            borderRadius: "12px",
-            fontSize: "15px",
-            fontWeight: "500",
-            boxShadow: "0 4px 12px rgba(255, 0, 80, 0.1)",
-            border: "1px solid #ef4444",
-          },
-        },
-      );
-    }
-  }, [projectId, fileContent, node, onSave]);
+        prevContentForHistoryRef.current = value;
 
-  const handleReplace = (newContent: string) => {
-    if (!selectedText) return;
-    setFileContent((prev) =>
-      prev.includes(selectedText)
-        ? prev.replace(selectedText, newContent)
-        : prev,
-    );
-  };
-
-  const handleAppend = (additionalContent: string) => {
-    setFileContent((prev) => `${prev}\n${additionalContent}`);
+        if (projectId) {
+          NodeContentService.createContentVersion(
+            node.id,
+            projectId,
+            value,
+            node.name,
+            node.category,
+          ).catch((err) => {
+            console.error("Failed to create background version:", err);
+          });
+        }
+      } catch (err) {
+        console.error("Error in idle commit:", err);
+      }
+    }, HISTORY_IDLE_MS);
   };
 
   const handleTextSelect = () => {
@@ -265,7 +383,6 @@ function FileContentCard({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isCtrlS = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s";
-
       if (isCtrlS && isDirty) {
         e.preventDefault();
         handleSave();
@@ -275,6 +392,25 @@ function FileContentCard({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isDirty, handleSave]);
+
+  useEffect(() => {
+    if (!settings.autoSave.enabled) return;
+    const ms = Math.max(1, settings.autoSave.intervalMinutes) * 60 * 1000;
+
+    const id = setInterval(() => {
+      if (handleSaveRef.current) {
+        handleSaveRef.current({ skipVersion: true }).catch((e) => {
+          console.error("[autosave] failed saving node content:", e);
+        });
+        console.log("[autosave] node autosave triggered", {
+          nodeId: node.id,
+          timestamp: Date.now(),
+        });
+      }
+    }, ms);
+
+    return () => clearInterval(id);
+  }, [settings.autoSave.enabled, settings.autoSave.intervalMinutes, node.id]);
 
   const handleAIBubbleClick = () => {
     setIsAIBubbleOpen(false);
@@ -329,29 +465,31 @@ function FileContentCard({
           nodeName={aiNodeName || ""}
           isOpen={isAIComponentShown}
           onClose={() => setIsAIComponentShown(false)}
-          onReplace={handleReplace}
-          onAppend={handleAppend}
+          onReplace={(newText) => setFileContent(newText)}
+          onAppend={(extra) => setFileContent((prev) => prev + "\n" + extra)}
         />
       )}
 
       <div className="relative flex-1 mt-1 rounded-xl overflow-hidden border-2 border-[#afa4e0] dark:border-[#35285f] focus-within:ring-2 focus-within:ring-purple-400 dark:focus-within:ring-purple-700">
         {/* Spellcheck Overlay */}
-        <div
-          ref={overlayRef}
-          aria-hidden="true"
-          className="absolute top-0 left-0 w-full h-full pointer-events-none select-none p-4 whitespace-pre-wrap overflow-y-auto z-10 text-transparent"
-          style={{ fontSize: "1rem", lineHeight: "1.5" }}
-        >
-          <div className="text-inherit font-inherit min-h-full w-full">
-            {getHighlightedHtml(fileContent)}
+        {settings.spellChecker && (
+          <div
+            ref={overlayRef}
+            aria-hidden="true"
+            className="absolute top-0 left-0 w-full h-full pointer-events-none select-none p-4 whitespace-pre-wrap overflow-y-auto z-10 text-transparent"
+            style={{ fontSize: "1rem", lineHeight: "1.5" }}
+          >
+            <div className="text-inherit font-inherit min-h-full w-full">
+              {getHighlightedHtml(fileContent)}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Das Textarea mit transparentem Hintergrund damit Overlay sichtbar ist */}
         <textarea
           ref={textareaRef}
           value={fileContent}
-          onChange={(e) => setFileContent(e.target.value)}
+          onChange={(e) => handleEditorChange(e.target.value)}
           onMouseUp={handleTextSelect}
           onKeyUp={handleTextSelect}
           onScroll={syncScroll}
@@ -370,7 +508,7 @@ function FileContentCard({
         <motion.button
           disabled={!isDirty}
           title={!isDirty ? "No changes" : "Save changes"}
-          onClick={handleSave}
+          onClick={handleSaveClick}
           whileHover={
             isDirty
               ? {

@@ -6,6 +6,7 @@ import Header from "../../components/Header/Header";
 import { FolderOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "../../providers/ThemeProvider";
+import CommentSection from "../../components/CommentSection/CommentSection";
 
 const CommunityPage = () => {
   const navigate = useNavigate();
@@ -142,51 +143,61 @@ const CommunityPage = () => {
                               ? "0 2px 24px rgba(251,146,60,0.35)"
                               : "0 2px 24px rgba(251,146,60,0.6)",
                           }}
-                          onClick={() => handleProjectClick(project._id!)}
-                          className="group flex flex-col gap-2 px-6 py-4 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-xl shadow-[0_2px_12px_rgba(139,92,246,0.15)] transition cursor-pointer"
+                          className="group flex flex-col gap-4 px-6 py-6 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-xl shadow-[0_2px_12px_rgba(139,92,246,0.15)] transition"
                         >
-                          <div className="flex items-center gap-3">
-                            <FolderOpen className="w-6 h-6 stroke-[#cb8a07] dark:stroke-[#fb923c]" />
-                            <h3 className="text-lg font-semibold truncate group-hover:text-[#cb8a07] dark:group-hover:text-[#fb923c]">
-                              {project.titleCommunityPage}
-                            </h3>
-                          </div>
-
-                          <div className="text-sm text-[#261e3b] dark:text-[#aaa6c3]">
-                            By{" "}
-                            <span className="font-medium">
-                              {project.authorName}
-                            </span>
-                          </div>
-
-                          {project.tags && project.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {project.tags.map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="px-2 py-1 text-xs rounded-full bg-[#e7e4f4] dark:bg-[#3a2e54]"
-                                >
-                                  #{tag}
-                                </span>
-                              ))}
+                          {/* Header mit Titel, Autor etc. */}
+                          <div
+                            onClick={() => handleProjectClick(project._id!)}
+                            className="cursor-pointer"
+                          >
+                            <div className="flex items-center gap-3 mb-2">
+                              <FolderOpen className="w-6 h-6 stroke-[#cb8a07] dark:stroke-[#fb923c]" />
+                              <h3 className="text-lg font-semibold truncate group-hover:text-[#cb8a07] dark:group-hover:text-[#fb923c]">
+                                {project.titleCommunityPage}
+                              </h3>
                             </div>
-                          )}
 
-                          <div className="text-sm mt-2">
-                            <span className="font-medium text-[#c54516]">
-                              Category:
-                            </span>{" "}
-                            {project.category || "—"}{" "}
-                            <span className="mx-1">•</span>
-                            <span className="font-medium text-[#d49307]">
-                              Type:
-                            </span>{" "}
-                            {project.typeOfDocument || "—"}
+                            <div className="text-sm text-[#261e3b] dark:text-[#aaa6c3]">
+                              By{" "}
+                              <span className="font-medium">
+                                {project.authorName}
+                              </span>
+                            </div>
+
+                            {project.tags && project.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {project.tags.map((tag) => (
+                                  <span
+                                    key={tag}
+                                    className="px-2 py-1 text-xs rounded-full bg-[#e7e4f4] dark:bg-[#3a2e54]"
+                                  >
+                                    #{tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+
+                            <div className="text-sm mt-2">
+                              <span className="font-medium text-[#c54516]">
+                                Category:
+                              </span>{" "}
+                              {project.category || "—"}{" "}
+                              <span className="mx-1">•</span>
+                              <span className="font-medium text-[#d49307]">
+                                Type:
+                              </span>{" "}
+                              {project.typeOfDocument || "—"}
+                            </div>
+
+                            <div className="text-xs text-[#666] dark:text-[#aaa] mt-1">
+                              Created: {formatDate(project.createdAt!)} •
+                              Updated: {formatDate(project.updatedAt!)}
+                            </div>
                           </div>
 
-                          <div className="text-xs text-[#666] dark:text-[#aaa] mt-1">
-                            Created: {formatDate(project.createdAt!)} • Updated:{" "}
-                            {formatDate(project.updatedAt!)}
+                          {/* Kommentarbereich direkt IN der Card */}
+                          <div className="mt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58] pt-3">
+                            <CommentSection projectId={project._id!} />
                           </div>
                         </motion.div>
                       </li>
