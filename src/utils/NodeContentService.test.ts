@@ -269,4 +269,84 @@ describe("NodeContentService", () => {
     ).rejects.toThrow(error);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
+
+  it("createContentVersion posts a new version and returns result", async () => {
+    const nodeId = "nV1";
+    const projectId = "pV1";
+    const content = "version-content";
+    const name = "vname";
+    const category = "file";
+
+    const createdVersion = {
+      _id: "ver1",
+      nodeId,
+      projectId,
+      content,
+      name,
+      category,
+    };
+    mockedAxios.post.mockResolvedValueOnce(makeAxiosResponse(createdVersion));
+
+    const res = await NodeContentService.createContentVersion(
+      nodeId,
+      projectId,
+      content,
+      name,
+      category,
+    );
+    expect(res).toEqual(createdVersion);
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      `${BASE_URL}/api/nodeContent/${nodeId}/versions`,
+      { projectId, content, name, category },
+    );
+  });
+
+  it("getContentVersions fetches versions with params (limit/skip)", async () => {
+    const nodeId = "nV2";
+    const projectId = "pV2";
+    const versions = [{ _id: "v1" }, { _id: "v2" }];
+    mockedAxios.get.mockResolvedValueOnce(makeAxiosResponse(versions));
+
+    const res = await NodeContentService.getContentVersions(nodeId, projectId, {
+      limit: 10,
+      skip: 5,
+    });
+    expect(res).toEqual(versions);
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      `${BASE_URL}/api/nodeContent/${nodeId}/versions`,
+      { params: { projectId, limit: 10, skip: 5 } },
+    );
+  });
+
+  it("getContentVersion fetches a single version by id", async () => {
+    const nodeId = "nV3";
+    const versionId = "verX";
+    const version = { _id: versionId, content: "abc" };
+    mockedAxios.get.mockResolvedValueOnce(makeAxiosResponse(version));
+
+    const res = await NodeContentService.getContentVersion(nodeId, versionId);
+    expect(res).toEqual(version);
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      `${BASE_URL}/api/nodeContent/${nodeId}/versions/${versionId}`,
+    );
+  });
+
+  it("revertToVersion posts revert request and returns result", async () => {
+    const nodeId = "nR1";
+    const versionId = "verR";
+    const projectId = "pR1";
+    const updated = { nodeId, projectId, content: "reverted-content" };
+    mockedAxios.post.mockResolvedValueOnce(makeAxiosResponse(updated));
+
+    const res = await NodeContentService.revertToVersion(
+      nodeId,
+      versionId,
+      projectId,
+    );
+    expect(res).toEqual(updated);
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      `${BASE_URL}/api/nodeContent/${nodeId}/versions/${versionId}/revert`,
+      { projectId },
+    );
+  });
 });
