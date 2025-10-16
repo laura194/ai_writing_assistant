@@ -8,7 +8,6 @@ import projectRoutes from "./routes/project.routes";
 import commentRoutes from "./routes/comment.routes";
 import exportRoutes from "./routes/export.routes";
 
-
 const app = express();
 
 app.use(cors());
