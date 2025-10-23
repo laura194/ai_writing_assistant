@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
-import { isEncryptionEnabled } from "./utils/encryption.util";
-
 // Pfad zur .env eine Ebene höher
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 console.log("MONGO_URI aus env:", process.env.MONGO_URI);
+
+import { isEncryptionEnabled } from "./utils/encryption.util";
 
 const connectDB = async () => {
   try {
@@ -14,6 +14,8 @@ const connectDB = async () => {
       authSource: "admin",
     });
 
+    console.log("Loaded .env path:", path.resolve(__dirname, "../../.env"));
+    console.log("ENCRYPTION_KEY:", process.env.ENCRYPTION_KEY);
     console.log("✅ MongoDB verbunden");
     
     // Check encryption status
