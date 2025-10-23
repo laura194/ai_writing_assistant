@@ -12,13 +12,16 @@
   "description": "",
   "dependencies": {
     "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "mongodb-client-encryption": "^6.5.0",
+    "mongodb-crypt-library-version": "^1.0.5",
     "mongoose": "^8.13.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
+    "@types/crypto-js": "^4.2.2",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.1",
     "@types/mongodb": "^4.0.6",

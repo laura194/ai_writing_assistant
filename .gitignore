@@ -28,3 +28,4 @@ reports
 *.sln
 *.sw?
 master-key.txt
+encryption-key.txt
