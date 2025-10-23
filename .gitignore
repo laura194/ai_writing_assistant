@@ -27,3 +27,4 @@ reports
 *.njsproj
 *.sln
 *.sw?
+master-key.txt
