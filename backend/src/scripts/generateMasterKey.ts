@@ -3,10 +3,9 @@ import fs from 'fs';
 import path from 'path';
 
 /**
- * Generate a 96-byte master key for local CSFLE development
- * This key will be used to encrypt the Data Encryption Keys (DEKs)
+ * This function generates a 96-byte master key for local CSFLE development.
+ * This key will be used to encrypt the Data Encryption Keys (DEKs).
  * 
- * IMPORTANT: In production, use a proper KMS (AWS KMS, Azure Key Vault, or GCP KMS)
  */
 function generateMasterKey() {
   // Generate 96 random bytes
@@ -19,9 +18,9 @@ function generateMasterKey() {
   const keyPath = path.resolve(__dirname, '../../master-key.txt');
   fs.writeFileSync(keyPath, masterKeyBase64);
   
-  console.log('✅ Master key generated successfully!');
-  console.log('📁 Saved to:', keyPath);
-  console.log('\n📋 Add this to your .env file:');
+  console.log('Master key generated successfully!');
+  console.log('Saved to:', keyPath);
+  console.log('\nAdd this to your .env file:');
   console.log(`CSFLE_MASTER_KEY=${masterKeyBase64}`);
   console.log('\n⚠️  IMPORTANT: Keep this key secure and NEVER commit it to git!');
   console.log('Add master-key.txt to your .gitignore file.');
