@@ -16,6 +16,7 @@ const CommunityPage = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [upvotes, setUpvotes] = useState<Record<string, number>>({});
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState<boolean>(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -50,12 +51,16 @@ const CommunityPage = () => {
 
   const filteredProjects = projects.filter((project) => {
     const search = searchTerm.toLowerCase();
-    return (
+    const matchesSearch =
         project.titleCommunityPage?.toLowerCase().includes(search) ||
         project.authorName?.toLowerCase().includes(search) ||
         project.category?.toLowerCase().includes(search) ||
-        project.tags?.some((tag) => tag.toLowerCase().includes(search))
-    );
+        project.tags?.some((tag) => tag.toLowerCase().includes(search));
+    
+    if (showOnlyFavorites) {
+      return matchesSearch && favorites.includes(project._id!);
+    }
+    return matchesSearch;
   });
 
   const handleUpvote = (id: string) => {
@@ -134,7 +139,7 @@ const CommunityPage = () => {
                   by other users, view categories, and find inspiration.
                 </p>
 
-                <div className="flex justify-center mb-8">
+                <div className="flex justify-center gap-4 mb-8 flex-wrap">
                   <input
                       type="text"
                       value={searchTerm}
@@ -142,6 +147,16 @@ const CommunityPage = () => {
                       placeholder="Search by title, author, category, or tag..."
                       className="w-full max-w-md px-4 py-2 rounded-full border border-[#c5bbeb] dark:border-[#3b2f58] bg-[#f3f0fb] dark:bg-[#2a1e44] text-[#362466] dark:text-white placeholder-[#7b6ea5] dark:placeholder-[#aaa6c3] focus:outline-none focus:ring-2 focus:ring-[#fb923c] transition"
                   />
+                  <button
+                      onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+                      className={`px-6 py-2 rounded-full font-medium transition ${
+                          showOnlyFavorites
+                              ? "bg-[#fb923c] text-white shadow-[0_0_15px_rgba(251,146,60,0.4)]"
+                              : "bg-[#e7e4f4] dark:bg-[#3a2e54] text-[#362466] dark:text-[#aaa6c3] hover:bg-[#ddd6f3] dark:hover:bg-[#4a3a64]"
+                      }`}
+                  >
+                    ❤️ Favorites
+                  </button>
                 </div>
 
 
