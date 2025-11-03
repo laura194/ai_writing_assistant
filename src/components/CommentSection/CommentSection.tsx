@@ -35,7 +35,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
         console.error("Error loading comments:", error);
       }
     };
-    fetchComments();
+    void fetchComments();
   }, [projectId]);
 
   const handleAddComment = async () => {
@@ -66,6 +66,12 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
       minute: "2-digit",
     });
   };
+
+  const sortedComments = [...comments].sort(
+      (a, b) =>
+          new Date(b.date || b.createdAt || "").getTime() -
+          new Date(a.date || a.createdAt || "").getTime()
+  );
 
   return (
     <motion.div
@@ -145,7 +151,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
                   No comments yet — be the first to write one!
                 </p>
               ) : (
-                comments.map((c, i) => (
+                  sortedComments.map((c, i) => (
                   <motion.div
                     key={c._id || i}
                     initial={{ opacity: 0, x: -10 }}
