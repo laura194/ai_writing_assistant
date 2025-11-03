@@ -13,6 +13,7 @@ const CommunityPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -44,6 +45,17 @@ const CommunityPage = () => {
       day: "numeric",
     });
   };
+
+  const filteredProjects = projects.filter((project) => {
+    const search = searchTerm.toLowerCase();
+    return (
+        project.titleCommunityPage?.toLowerCase().includes(search) ||
+        project.authorName?.toLowerCase().includes(search) ||
+        project.category?.toLowerCase().includes(search) ||
+        project.tags?.some((tag) => tag.toLowerCase().includes(search))
+    );
+  });
+
 
   return (
     <div className="min-h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-hidden flex flex-col items-center">
@@ -107,6 +119,17 @@ const CommunityPage = () => {
                   by other users, view categories, and find inspiration.
                 </p>
 
+                <div className="flex justify-center mb-8">
+                  <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search by title, author, category, or tag..."
+                      className="w-full max-w-md px-4 py-2 rounded-full border border-[#c5bbeb] dark:border-[#3b2f58] bg-[#f3f0fb] dark:bg-[#2a1e44] text-[#362466] dark:text-white placeholder-[#7b6ea5] dark:placeholder-[#aaa6c3] focus:outline-none focus:ring-2 focus:ring-[#fb923c] transition"
+                  />
+                </div>
+
+
                 {loading ? (
                   <div className="flex justify-center">
                     <div className="animate-pulse px-6 py-4 bg-[#e0dbf4] dark:bg-[#090325] bg-opacity-30 rounded-full text-[#362466] dark:text-[#fee2e2] font-medium">
@@ -134,7 +157,7 @@ const CommunityPage = () => {
                   </div>
                 ) : (
                   <ul className="space-y-6">
-                    {projects.map((project) => (
+                    {filteredProjects.map((project) => (
                       <li key={project._id}>
                         <motion.div
                           whileHover={{
