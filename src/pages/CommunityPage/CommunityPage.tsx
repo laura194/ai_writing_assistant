@@ -171,9 +171,10 @@ const CommunityPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <ul className="space-y-6">
-                    {filteredProjects.map((project) => (
-                      <li key={project._id}>
+                  <ul className="space-y-0">
+                    {filteredProjects.map((project, index) => (
+                      <li key={project._id} className={index > 0 ? "mt-6" : ""}>
+                        {/* Animierte Card mit Header und Buttons - OHNE CommentSection */}
                         <motion.div
                           layout={false}
                           whileHover={{
@@ -236,39 +237,32 @@ const CommunityPage = () => {
                             </div>
                           </div>
 
-                          {/* Kommentarbereich direkt IN der Card */}
-                          <motion.div layout={false} tabIndex={-1} className="mt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58] pt-3 focus:outline-none focus-visible:outline-none focus:ring-0 active:outline-none focus-within:outline-none target:outline-none visited:outline-none">
-                            <CommentSection projectId={project._id!} />
-                          </motion.div>
-                          <motion.div layout={false} className="relative mt-3 pt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58]">
-                            <div className="flex items-center justify-between pointer-events-none">
-                              {/* Upvote */}
-                              <div className="pointer-events-auto">
-                                <button
-                                    type="button"
-                                    onMouseDown={(e) => e.preventDefault()}
-                                    onFocus={(e) => e.currentTarget.blur()}
-                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleUpvote(project._id!); }}
-                                    className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
-                                >
+                          {/* Button-Zeile */}
+                          <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58]">
+                            {/* Upvote */}
+                            <button
+                                type="button"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onFocus={(e) => e.currentTarget.blur()}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleUpvote(project._id!); }}
+                                className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
+                            >
                               <ThumbsUp
                                   className={`w-5 h-5 ${
                                       upvotes[project._id!] ? "fill-[#cb8a07]" : "stroke-[#cb8a07]"
                                   }`}
                               />
                               <span>{upvotes[project._id!] || 0}</span>
-                                </button>
-                              </div>
+                            </button>
 
-                              {/* Favorite */}
-                              <div className="pointer-events-auto">
-                                <button
-                                    type="button"
-                                    onMouseDown={(e) => e.preventDefault()}
-                                    onFocus={(e) => e.currentTarget.blur()}
-                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(project._id!); }}
-                                    className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
-                                >
+                            {/* Favorite */}
+                            <button
+                                type="button"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onFocus={(e) => e.currentTarget.blur()}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(project._id!); }}
+                                className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
+                            >
                               <Heart
                                   className={`w-5 h-5 ${
                                       favorites.includes(project._id!)
@@ -277,13 +271,14 @@ const CommunityPage = () => {
                                   }`}
                               />
                               <span>Favorite</span>
-                                </button>
-                              </div>
-                            </div>
-                          </motion.div>
-
-
+                            </button>
+                          </div>
                         </motion.div>
+
+                        {/* Entkoppelte CommentSection - KOMPLETT AUSSERHALB der animierten Card */}
+                        <div className="ml-4 mr-0 mt-2 px-6 py-5 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-lg shadow-[0_1px_8px_rgba(139,92,246,0.08)]">
+                          <CommentSection projectId={project._id!} />
+                        </div>
                       </li>
                     ))}
                   </ul>
