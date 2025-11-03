@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { ProjectService } from "../../utils/ProjectService";
 import { Project } from "../../utils/types";
 import Header from "../../components/Header/Header";
-import { FolderOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "../../providers/ThemeProvider";
 import CommentSection from "../../components/CommentSection/CommentSection";
+import { FolderOpen, ThumbsUp, Heart } from "lucide-react";
 
 const CommunityPage = () => {
   const navigate = useNavigate();
@@ -14,6 +14,8 @@ const CommunityPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [upvotes, setUpvotes] = useState<Record<string, number>>({});
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -55,6 +57,19 @@ const CommunityPage = () => {
         project.tags?.some((tag) => tag.toLowerCase().includes(search))
     );
   });
+
+  const handleUpvote = (id: string) => {
+    setUpvotes((prev) => ({
+      ...prev,
+      [id]: (prev[id] || 0) + 1,
+    }));
+  };
+
+  const toggleFavorite = (id: string) => {
+    setFavorites((prev) =>
+        prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
+    );
+  };
 
 
   return (
@@ -160,6 +175,7 @@ const CommunityPage = () => {
                     {filteredProjects.map((project) => (
                       <li key={project._id}>
                         <motion.div
+                          layout={false}
                           whileHover={{
                             scale: 1.05,
                             boxShadow: isDark
@@ -169,15 +185,17 @@ const CommunityPage = () => {
                           className="group flex flex-col gap-4 px-6 py-6 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-xl shadow-[0_2px_12px_rgba(139,92,246,0.15)] transition"
                         >
                           {/* Header mit Titel, Autor etc. */}
-                          <div
-                            onClick={() => handleProjectClick(project._id!)}
-                            className="cursor-pointer"
-                          >
-                            <div className="flex items-center gap-3 mb-2">
-                              <FolderOpen className="w-6 h-6 stroke-[#cb8a07] dark:stroke-[#fb923c]" />
-                              <h3 className="text-lg font-semibold truncate group-hover:text-[#cb8a07] dark:group-hover:text-[#fb923c]">
-                                {project.titleCommunityPage}
-                              </h3>
+                          <div className="cursor-default">
+                            <div
+                              onClick={() => handleProjectClick(project._id!)}
+                              className="cursor-pointer"
+                            >
+                              <div className="flex items-center gap-3 mb-2">
+                                <FolderOpen className="w-6 h-6 stroke-[#cb8a07] dark:stroke-[#fb923c]" />
+                                <h3 className="text-lg font-semibold truncate group-hover:text-[#cb8a07] dark:group-hover:text-[#fb923c]">
+                                  {project.titleCommunityPage}
+                                </h3>
+                              </div>
                             </div>
 
                             <div className="text-sm text-[#261e3b] dark:text-[#aaa6c3]">
@@ -219,9 +237,52 @@ const CommunityPage = () => {
                           </div>
 
                           {/* Kommentarbereich direkt IN der Card */}
-                          <div className="mt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58] pt-3">
+                          <motion.div layout={false} tabIndex={-1} className="mt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58] pt-3 focus:outline-none focus-visible:outline-none focus:ring-0 active:outline-none focus-within:outline-none target:outline-none visited:outline-none">
                             <CommentSection projectId={project._id!} />
-                          </div>
+                          </motion.div>
+                          <motion.div layout={false} className="relative mt-3 pt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58]">
+                            <div className="flex items-center justify-between pointer-events-none">
+                              {/* Upvote */}
+                              <div className="pointer-events-auto">
+                                <button
+                                    type="button"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onFocus={(e) => e.currentTarget.blur()}
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleUpvote(project._id!); }}
+                                    className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
+                                >
+                              <ThumbsUp
+                                  className={`w-5 h-5 ${
+                                      upvotes[project._id!] ? "fill-[#cb8a07]" : "stroke-[#cb8a07]"
+                                  }`}
+                              />
+                              <span>{upvotes[project._id!] || 0}</span>
+                                </button>
+                              </div>
+
+                              {/* Favorite */}
+                              <div className="pointer-events-auto">
+                                <button
+                                    type="button"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onFocus={(e) => e.currentTarget.blur()}
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(project._id!); }}
+                                    className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
+                                >
+                              <Heart
+                                  className={`w-5 h-5 ${
+                                      favorites.includes(project._id!)
+                                          ? "fill-[#fb923c]"
+                                          : "stroke-[#fb923c]"
+                                  }`}
+                              />
+                              <span>Favorite</span>
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+
+
                         </motion.div>
                       </li>
                     ))}
