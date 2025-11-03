@@ -30,7 +30,7 @@ const CommunityPage = () => {
       }
     };
 
-    fetchProjects();
+    void fetchProjects();
   }, []);
 
   const handleProjectClick = (id: string) => {
