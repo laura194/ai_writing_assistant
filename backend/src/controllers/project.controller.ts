@@ -252,3 +252,68 @@ export const getPublicProjects = async (
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+// Toggle Upvote
+export const toggleUpvote = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { username } = req.body;
+
+  if (!username) {
+    res.status(400).json({ error: "Username is required" });
+    return;
+  }
+
+  try {
+    const project = await Project.findById(id);
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    const hasVoted = project.upvotedBy.includes(username);
+    if (hasVoted) {
+      project.upvotedBy = project.upvotedBy.filter((u) => u !== username);
+    } else {
+      project.upvotedBy.push(username);
+    }
+
+    await project.save();
+    res.status(200).json(project);
+  } catch (error) {
+    console.error("Error toggling upvote:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Toggle Favorite
+export const toggleFavorite = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { username } = req.body;
+
+  if (!username) {
+    res.status(400).json({ error: "Username is required" });
+    return;
+  }
+
+  try {
+    const project = await Project.findById(id);
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    const hasFavorited = project.favoritedBy.includes(username);
+    if (hasFavorited) {
+      project.favoritedBy = project.favoritedBy.filter((u) => u !== username);
+    } else {
+      project.favoritedBy.push(username);
+    }
+
+    await project.save();
+    res.status(200).json(project);
+  } catch (error) {
+    console.error("Error toggling favorite:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
