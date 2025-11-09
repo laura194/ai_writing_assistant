@@ -254,7 +254,10 @@ export const getPublicProjects = async (
 };
 
 // Toggle Upvote
-export const toggleUpvote = async (req: Request, res: Response): Promise<void> => {
+export const toggleUpvote = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const { username } = req.body;
 
@@ -286,7 +289,10 @@ export const toggleUpvote = async (req: Request, res: Response): Promise<void> =
 };
 
 // Toggle Favorite
-export const toggleFavorite = async (req: Request, res: Response): Promise<void> => {
+export const toggleFavorite = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   const { id } = req.params;
   const { username } = req.body;
 
@@ -316,4 +322,3 @@ export const toggleFavorite = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-

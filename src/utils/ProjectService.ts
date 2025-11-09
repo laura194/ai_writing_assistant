@@ -118,38 +118,42 @@ export class ProjectService {
   }
 
   // ✅ Upvote toggeln
-  static async toggleUpvote(projectId: string, username: string): Promise<Project> {
+  static async toggleUpvote(
+    projectId: string,
+    username: string,
+  ): Promise<Project> {
     try {
       const response = await axios.post<Project>(
-          `${API_BASE_URL}/${projectId}/toggle-upvote`,
-          { username }
+        `${API_BASE_URL}/${projectId}/toggle-upvote`,
+        { username },
       );
       return response.data;
     } catch (error) {
       console.error(
-          `❌ [toggleUpvote] Error toggling upvote for project ${projectId}:`,
-          error
+        `❌ [toggleUpvote] Error toggling upvote for project ${projectId}:`,
+        error,
       );
       throw error;
     }
   }
 
   // ✅ Favorite toggeln
-  static async toggleFavorite(projectId: string, username: string): Promise<Project> {
+  static async toggleFavorite(
+    projectId: string,
+    username: string,
+  ): Promise<Project> {
     try {
       const response = await axios.post<Project>(
-          `${API_BASE_URL}/${projectId}/toggle-favorite`,
-          { username }
+        `${API_BASE_URL}/${projectId}/toggle-favorite`,
+        { username },
       );
       return response.data;
     } catch (error) {
       console.error(
-          `❌ [toggleFavorite] Error toggling favorite for project ${projectId}:`,
-          error
+        `❌ [toggleFavorite] Error toggling favorite for project ${projectId}:`,
+        error,
       );
       throw error;
     }
   }
-
 }
-

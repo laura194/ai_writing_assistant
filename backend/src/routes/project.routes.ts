@@ -26,5 +26,4 @@ router.delete("/:id", deleteProject);
 router.post("/:id/toggle-upvote", toggleUpvote);
 router.post("/:id/toggle-favorite", toggleFavorite);
 
-
 export default router;
