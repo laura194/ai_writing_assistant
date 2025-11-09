@@ -68,9 +68,9 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
   };
 
   const sortedComments = [...comments].sort(
-      (a, b) =>
-          new Date(b.date || b.createdAt || "").getTime() -
-          new Date(a.date || a.createdAt || "").getTime()
+    (a, b) =>
+      new Date(b.date || b.createdAt || "").getTime() -
+      new Date(a.date || a.createdAt || "").getTime(),
   );
 
   return (
@@ -151,7 +151,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
                   No comments yet — be the first to write one!
                 </p>
               ) : (
-                  sortedComments.map((c, i) => (
+                sortedComments.map((c, i) => (
                   <motion.div
                     key={c._id || i}
                     initial={{ opacity: 0, x: -10 }}

@@ -52,11 +52,11 @@ const CommunityPage = () => {
   const filteredProjects = projects.filter((project) => {
     const search = searchTerm.toLowerCase();
     const matchesSearch =
-        project.titleCommunityPage?.toLowerCase().includes(search) ||
-        project.authorName?.toLowerCase().includes(search) ||
-        project.category?.toLowerCase().includes(search) ||
-        project.tags?.some((tag) => tag.toLowerCase().includes(search));
-    
+      project.titleCommunityPage?.toLowerCase().includes(search) ||
+      project.authorName?.toLowerCase().includes(search) ||
+      project.category?.toLowerCase().includes(search) ||
+      project.tags?.some((tag) => tag.toLowerCase().includes(search));
+
     if (showOnlyFavorites) {
       return matchesSearch && favorites.includes(project._id!);
     }
@@ -72,10 +72,9 @@ const CommunityPage = () => {
 
   const toggleFavorite = (id: string) => {
     setFavorites((prev) =>
-        prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id],
     );
   };
-
 
   return (
     <div className="min-h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-hidden flex flex-col items-center">
@@ -141,24 +140,23 @@ const CommunityPage = () => {
 
                 <div className="flex justify-center gap-4 mb-8 flex-wrap">
                   <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search by title, author, category, or tag..."
-                      className="w-full max-w-md px-4 py-2 rounded-full border border-[#c5bbeb] dark:border-[#3b2f58] bg-[#f3f0fb] dark:bg-[#2a1e44] text-[#362466] dark:text-white placeholder-[#7b6ea5] dark:placeholder-[#aaa6c3] focus:outline-none focus:ring-2 focus:ring-[#fb923c] transition"
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search by title, author, category, or tag..."
+                    className="w-full max-w-md px-4 py-2 rounded-full border border-[#c5bbeb] dark:border-[#3b2f58] bg-[#f3f0fb] dark:bg-[#2a1e44] text-[#362466] dark:text-white placeholder-[#7b6ea5] dark:placeholder-[#aaa6c3] focus:outline-none focus:ring-2 focus:ring-[#fb923c] transition"
                   />
                   <button
-                      onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-                      className={`px-6 py-2 rounded-full font-medium transition ${
-                          showOnlyFavorites
-                              ? "bg-[#fb923c] text-white shadow-[0_0_15px_rgba(251,146,60,0.4)]"
-                              : "bg-[#e7e4f4] dark:bg-[#3a2e54] text-[#362466] dark:text-[#aaa6c3] hover:bg-[#ddd6f3] dark:hover:bg-[#4a3a64]"
-                      }`}
+                    onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+                    className={`px-6 py-2 rounded-full font-medium transition ${
+                      showOnlyFavorites
+                        ? "bg-[#fb923c] text-white shadow-[0_0_15px_rgba(251,146,60,0.4)]"
+                        : "bg-[#e7e4f4] dark:bg-[#3a2e54] text-[#362466] dark:text-[#aaa6c3] hover:bg-[#ddd6f3] dark:hover:bg-[#4a3a64]"
+                    }`}
                   >
                     ❤️ Favorites
                   </button>
                 </div>
-
 
                 {loading ? (
                   <div className="flex justify-center">
@@ -256,34 +254,44 @@ const CommunityPage = () => {
                           <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58]">
                             {/* Upvote */}
                             <button
-                                type="button"
-                                onMouseDown={(e) => e.preventDefault()}
-                                onFocus={(e) => e.currentTarget.blur()}
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleUpvote(project._id!); }}
-                                className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onFocus={(e) => e.currentTarget.blur()}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleUpvote(project._id!);
+                              }}
+                              className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
                             >
                               <ThumbsUp
-                                  className={`w-5 h-5 ${
-                                      upvotes[project._id!] ? "fill-[#cb8a07]" : "stroke-[#cb8a07]"
-                                  }`}
+                                className={`w-5 h-5 ${
+                                  upvotes[project._id!]
+                                    ? "fill-[#cb8a07]"
+                                    : "stroke-[#cb8a07]"
+                                }`}
                               />
                               <span>{upvotes[project._id!] || 0}</span>
                             </button>
 
                             {/* Favorite */}
                             <button
-                                type="button"
-                                onMouseDown={(e) => e.preventDefault()}
-                                onFocus={(e) => e.currentTarget.blur()}
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(project._id!); }}
-                                className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onFocus={(e) => e.currentTarget.blur()}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleFavorite(project._id!);
+                              }}
+                              className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
                             >
                               <Heart
-                                  className={`w-5 h-5 ${
-                                      favorites.includes(project._id!)
-                                          ? "fill-[#fb923c]"
-                                          : "stroke-[#fb923c]"
-                                  }`}
+                                className={`w-5 h-5 ${
+                                  favorites.includes(project._id!)
+                                    ? "fill-[#fb923c]"
+                                    : "stroke-[#fb923c]"
+                                }`}
                               />
                               <span>Favorite</span>
                             </button>
