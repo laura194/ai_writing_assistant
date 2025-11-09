@@ -8,17 +8,23 @@ import { useTheme } from "../../providers/ThemeProvider";
 import CommentSection from "../../components/CommentSection/CommentSection";
 import { FolderOpen, ThumbsUp, Heart } from "lucide-react";
 
+import { useUser } from "@clerk/clerk-react";
+
+
 const CommunityPage = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [upvotes, setUpvotes] = useState<Record<string, number>>({});
   const [showOnlyFavorites, setShowOnlyFavorites] = useState<boolean>(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+  const { user, isSignedIn } = useUser();
+  const currentUsername = user?.username || user?.id || "";
+
+
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -52,29 +58,69 @@ const CommunityPage = () => {
   const filteredProjects = projects.filter((project) => {
     const search = searchTerm.toLowerCase();
     const matchesSearch =
-      project.titleCommunityPage?.toLowerCase().includes(search) ||
-      project.authorName?.toLowerCase().includes(search) ||
-      project.category?.toLowerCase().includes(search) ||
-      project.tags?.some((tag) => tag.toLowerCase().includes(search));
+        project.titleCommunityPage?.toLowerCase().includes(search) ||
+        project.authorName?.toLowerCase().includes(search) ||
+        project.category?.toLowerCase().includes(search) ||
+        project.tags?.some((tag) => tag.toLowerCase().includes(search));
 
     if (showOnlyFavorites) {
-      return matchesSearch && favorites.includes(project._id!);
+      return matchesSearch && project.favoritedBy.includes(currentUsername);
     }
     return matchesSearch;
   });
 
-  const handleUpvote = (id: string) => {
-    setUpvotes((prev) => ({
-      ...prev,
-      [id]: (prev[id] || 0) + 1,
-    }));
+  const handleUpvote = async (id: string) => {
+    if (!isSignedIn || !currentUsername) {
+      alert("Please sign in to upvote.");
+      return;
+    }
+
+    setProjects((prev) =>
+        prev.map((project) =>
+            project._id === id
+                ? {
+                  ...project,
+                  upvotedBy: project.upvotedBy.includes(currentUsername)
+                      ? project.upvotedBy.filter((u) => u !== currentUsername)
+                      : [...project.upvotedBy, currentUsername],
+                }
+                : project,
+        ),
+    );
+
+    try {
+      await ProjectService.toggleUpvote(id, currentUsername);
+    } catch (err) {
+      console.error("Error toggling upvote:", err);
+    }
   };
 
-  const toggleFavorite = (id: string) => {
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id],
+  const toggleFavorite = async (id: string) => {
+    if (!isSignedIn || !currentUsername) {
+      alert("Please sign in to favorite.");
+      return;
+    }
+
+    setProjects((prev) =>
+        prev.map((project) =>
+            project._id === id
+                ? {
+                  ...project,
+                  favoritedBy: project.favoritedBy.includes(currentUsername)
+                      ? project.favoritedBy.filter((u) => u !== currentUsername)
+                      : [...project.favoritedBy, currentUsername],
+                }
+                : project,
+        ),
     );
+
+    try {
+      await ProjectService.toggleFavorite(id, currentUsername);
+    } catch (err) {
+      console.error("Error toggling favorite:", err);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-hidden flex flex-col items-center">
@@ -254,48 +300,44 @@ const CommunityPage = () => {
                           <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58]">
                             {/* Upvote */}
                             <button
-                              type="button"
-                              onMouseDown={(e) => e.preventDefault()}
-                              onFocus={(e) => e.currentTarget.blur()}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleUpvote(project._id!);
-                              }}
-                              className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleUpvote(project._id!);
+                                }}
+                                className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition"
                             >
                               <ThumbsUp
-                                className={`w-5 h-5 ${
-                                  upvotes[project._id!]
-                                    ? "fill-[#cb8a07]"
-                                    : "stroke-[#cb8a07]"
-                                }`}
+                                  className={`w-5 h-5 ${
+                                      project.upvotedBy.includes(currentUsername)
+                                          ? "fill-[#cb8a07]"
+                                          : "stroke-[#cb8a07]"
+                                  }`}
                               />
-                              <span>{upvotes[project._id!] || 0}</span>
+                              <span>{project.upvotedBy.length}</span>
                             </button>
 
                             {/* Favorite */}
                             <button
-                              type="button"
-                              onMouseDown={(e) => e.preventDefault()}
-                              onFocus={(e) => e.currentTarget.blur()}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                toggleFavorite(project._id!);
-                              }}
-                              className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition focus:outline-none focus-visible:outline-none focus:ring-0"
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  toggleFavorite(project._id!);
+                                }}
+                                className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition"
                             >
                               <Heart
-                                className={`w-5 h-5 ${
-                                  favorites.includes(project._id!)
-                                    ? "fill-[#fb923c]"
-                                    : "stroke-[#fb923c]"
-                                }`}
+                                  className={`w-5 h-5 ${
+                                      project.favoritedBy.includes(currentUsername)
+                                          ? "fill-[#fb923c]"
+                                          : "stroke-[#fb923c]"
+                                  }`}
                               />
                               <span>Favorite</span>
                             </button>
-                          </div>
+                        </div>
                         </motion.div>
 
                         {/* Entkoppelte CommentSection - KOMPLETT AUSSERHALB der animierten Card */}

@@ -8,6 +8,8 @@ import {
   deleteProject,
   getRecentProjectsByUsername,
   getPublicProjects,
+  toggleUpvote,
+  toggleFavorite,
 } from "../controllers/project.controller";
 
 const router = express.Router();
@@ -21,5 +23,8 @@ router.get("/by-username/recent", getRecentProjectsByUsername);
 router.get("/:id", getProjectById);
 router.put("/:id", updateProject);
 router.delete("/:id", deleteProject);
+router.post("/:id/toggle-upvote", toggleUpvote);
+router.post("/:id/toggle-favorite", toggleFavorite);
+
 
 export default router;
