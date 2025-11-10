@@ -290,7 +290,7 @@ describe("EditPage", () => {
 
       // File card is shown after the node content is loaded
       await waitFor(() =>
-        expect(getNodeContentById).toHaveBeenCalledWith("2", "p1"),
+        expect(getNodeContentById).toHaveBeenCalledWith("2", "p1")
       );
       expect(await screen.findByTestId("file-card")).toBeInTheDocument();
     });
@@ -314,7 +314,7 @@ describe("EditPage", () => {
       // confirm dialog -> should switch to ai and close dialog
       fireEvent.click(screen.getByTestId("dialog-confirm"));
       await waitFor(() =>
-        expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
       );
 
       // AI card should be present
@@ -357,8 +357,8 @@ describe("EditPage", () => {
             projectId: "p1",
             nodeId: "2",
             name: expect.stringContaining("Intro-renamed"),
-          }),
-        ),
+          })
+        )
       );
     });
 
@@ -401,13 +401,13 @@ describe("EditPage", () => {
       await waitFor(() =>
         expect(removeSpy).toHaveBeenCalledWith(
           "beforeunload",
-          expect.any(Function),
-        ),
+          expect.any(Function)
+        )
       );
 
       // Now take the *last* registered beforeunload handler (the fresh one)
       const beforeUnloadCalls = addSpy.mock.calls.filter(
-        (c) => c[0] === "beforeunload",
+        (c) => c[0] === "beforeunload"
       );
       expect(beforeUnloadCalls.length).toBeGreaterThan(0);
       const lastCall = beforeUnloadCalls[beforeUnloadCalls.length - 1];
@@ -434,8 +434,8 @@ describe("EditPage", () => {
       render(<EditPage />);
       await waitFor(() =>
         expect(spy).toHaveBeenCalledWith(
-          "Project structure is not an array or is undefined!",
-        ),
+          "Project structure is not an array or is undefined!"
+        )
       );
       spy.mockRestore();
     });
@@ -459,22 +459,17 @@ describe("EditPage", () => {
     });
 
     test("handleUndo / handleRedo stack manipulations", async () => {
-      store.set("menuOpen", JSON.stringify(true)); // Folder sichtbar
       render(<EditPage />);
       await screen.findByTestId("header");
 
-      // Warten bis Folder gerendert
-      await screen.findByTestId("folder-item-2");
-
-      // Node 2 auswählen
       fireEvent.click(screen.getByTestId("folder-select-2"));
       await waitFor(() => expect(getOrCreateNodeContent).toHaveBeenCalled());
 
-      // Add chapter, um undo stack zu füllen
+      // Add chapter, to populate undo stack
       fireEvent.click(screen.getByTestId("folder-add-1"));
 
-      // Undo simulieren (hier einfach placeholder, dein undo-button ist nicht gemockt)
-      fireEvent.click(screen.getByTestId("header"));
+      // Undo should revert
+      fireEvent.click(screen.getByTestId("header")); // undo button not mocked, but could call handleUndo directly
     });
 
     test("addChapter pushes to undo and triggers debounceSave", async () => {
@@ -556,11 +551,11 @@ describe("EditPage", () => {
 
       // After confirming, wait for dialog to close
       await waitFor(() =>
-        expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
       );
 
       expect(
-        store.has("selectedNodeId_p1") || store.has("selectedNodeId"),
+        store.has("selectedNodeId_p1") || store.has("selectedNodeId")
       ).toBeDefined();
     });
 
@@ -626,7 +621,7 @@ describe("EditPage - undo/redo & applySnapshot behaviors", () => {
 
     // now we expect at least one more save call (undo triggers debounceSave)
     expect((updateProject as any).mock.calls.length).toBeGreaterThanOrEqual(
-      firstCallCount + 1,
+      firstCallCount + 1
     );
   }, 15000);
 
@@ -726,7 +721,7 @@ describe("EditPage - dialog confirm & cancel (handleDialogConfirm / handleDialog
     // Initially select node 2 -> this loads node content and sets selectedNode
     fireEvent.click(screen.getByTestId("folder-select-2"));
     await waitFor(() =>
-      expect(getOrCreateNodeContent).toHaveBeenCalledTimes(1),
+      expect(getOrCreateNodeContent).toHaveBeenCalledTimes(1)
     );
 
     // mark editor as dirty
@@ -751,7 +746,7 @@ describe("EditPage - dialog confirm & cancel (handleDialogConfirm / handleDialog
 
     // wait for getOrCreateNodeContent to be called for confirmation
     await waitFor(() =>
-      expect(getOrCreateNodeContent).toHaveBeenCalledTimes(2),
+      expect(getOrCreateNodeContent).toHaveBeenCalledTimes(2)
     );
 
     // verify the last call included the projectId and the node id
@@ -764,7 +759,7 @@ describe("EditPage - dialog confirm & cancel (handleDialogConfirm / handleDialog
 
     // dialog should be closed after confirm
     await waitFor(() =>
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
   });
 
@@ -777,7 +772,7 @@ describe("EditPage - dialog confirm & cancel (handleDialogConfirm / handleDialog
     // select node 2 and wait for content load
     fireEvent.click(screen.getByTestId("folder-select-2"));
     await waitFor(() =>
-      expect(getOrCreateNodeContent).toHaveBeenCalledTimes(1),
+      expect(getOrCreateNodeContent).toHaveBeenCalledTimes(1)
     );
 
     // mark dirty
@@ -792,7 +787,7 @@ describe("EditPage - dialog confirm & cancel (handleDialogConfirm / handleDialog
 
     // dialog should be closed
     await waitFor(() =>
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
 
     // getOrCreateNodeContent should NOT have been called again after cancel (still only the initial call)

@@ -42,8 +42,6 @@ describe("ProjectService", () => {
         username: "alice",
         projectStructure: [],
         isPublic: false,
-        upvotedBy: [],
-        favoritedBy: [],
       };
 
       const created: Project = {
@@ -71,8 +69,6 @@ describe("ProjectService", () => {
           username: "y",
           projectStructure: [],
           isPublic: false,
-          upvotedBy: [],
-          favoritedBy: [],
         }),
       ).rejects.toThrow(err);
 
@@ -88,8 +84,6 @@ describe("ProjectService", () => {
         username: "bob",
         projectStructure: [],
         isPublic: false,
-        upvotedBy: [],
-        favoritedBy: [],
       };
       mockedAxios.get.mockResolvedValueOnce(makeAxiosResponse(project));
 
@@ -118,8 +112,6 @@ describe("ProjectService", () => {
         username: "bob",
         projectStructure: [],
         isPublic: false,
-        upvotedBy: [],
-        favoritedBy: [],
       };
 
       mockedAxios.put.mockResolvedValueOnce(makeAxiosResponse(updated));
@@ -152,8 +144,6 @@ describe("ProjectService", () => {
           username: "bob",
           projectStructure: [],
           isPublic: false,
-          upvotedBy: [],
-          favoritedBy: [],
         },
         {
           _id: "2",
@@ -161,8 +151,6 @@ describe("ProjectService", () => {
           username: "bob",
           projectStructure: [],
           isPublic: false,
-          upvotedBy: [],
-          favoritedBy: [],
         },
       ];
       mockedAxios.get.mockResolvedValueOnce(makeAxiosResponse(projects));
@@ -211,8 +199,6 @@ describe("ProjectService", () => {
           username: "bob",
           projectStructure: [],
           isPublic: false,
-          upvotedBy: [],
-          favoritedBy: [],
         },
       ];
       mockedAxios.get.mockResolvedValueOnce(makeAxiosResponse(projects));
