@@ -16,6 +16,14 @@ vi.mock("../../components/CommentSection/CommentSection", () => ({
   ),
 }));
 
+// ✅ Mock Clerk useUser
+vi.mock("@clerk/clerk-react", () => ({
+  useUser: () => ({
+    user: { username: "demo-user" },
+    isSignedIn: true,
+  }),
+}));
+
 // ✅ Mock motion wrappers
 vi.mock("framer-motion", () => ({
   motion: new Proxy({}, { get: () => (p: any) => <div {...p} /> }),
@@ -85,14 +93,14 @@ describe("CommunityPage", () => {
     // Projects listed
     expect(
       screen.getAllByText(
-        (_, node) => node?.textContent?.includes("By Alice") ?? false,
-      ).length,
+        (_, node) => node?.textContent?.includes("By Alice") ?? false
+      ).length
     ).toBeGreaterThan(0);
 
     expect(
       screen.getAllByText(
-        (_, node) => node?.textContent?.includes("By Bob") ?? false,
-      ).length,
+        (_, node) => node?.textContent?.includes("By Bob") ?? false
+      ).length
     ).toBeGreaterThan(0);
 
     // Tags rendered
