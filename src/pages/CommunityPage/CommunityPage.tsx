@@ -81,8 +81,8 @@ const CommunityPage = () => {
                 ? project.upvotedBy.filter((u) => u !== currentUsername)
                 : [...project.upvotedBy, currentUsername],
             }
-          : project
-      )
+          : project,
+      ),
     );
 
     try {
@@ -107,8 +107,8 @@ const CommunityPage = () => {
                 ? project.favoritedBy.filter((u) => u !== currentUsername)
                 : [...project.favoritedBy, currentUsername],
             }
-          : project
-      )
+          : project,
+      ),
     );
 
     try {
