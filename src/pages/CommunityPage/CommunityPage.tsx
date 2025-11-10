@@ -306,12 +306,14 @@ const CommunityPage = () => {
                             >
                               <ThumbsUp
                                 className={`w-5 h-5 ${
-                                  project.upvotedBy.includes(currentUsername)
+                                  (project.upvotedBy ?? []).includes(
+                                    currentUsername,
+                                  )
                                     ? "fill-[#cb8a07]"
                                     : "stroke-[#cb8a07]"
                                 }`}
                               />
-                              <span>{project.upvotedBy.length}</span>
+                              <span>{(project.upvotedBy ?? []).length}</span>
                             </button>
 
                             {/* Favorite */}
@@ -326,7 +328,9 @@ const CommunityPage = () => {
                             >
                               <Heart
                                 className={`w-5 h-5 ${
-                                  project.favoritedBy.includes(currentUsername)
+                                  (project.favoritedBy ?? []).includes(
+                                    currentUsername,
+                                  )
                                     ? "fill-[#fb923c]"
                                     : "stroke-[#fb923c]"
                                 }`}
@@ -334,12 +338,11 @@ const CommunityPage = () => {
                               <span>Favorite</span>
                             </button>
                           </div>
+                          {/* Entkoppelte CommentSection - KOMPLETT AUSSERHALB der animierten Card */}
+                          <div className="ml-4 mr-0 mt-2 px-6 py-5 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-lg shadow-[0_1px_8px_rgba(139,92,246,0.08)]">
+                            <CommentSection projectId={project._id!} />
+                          </div>
                         </motion.div>
-
-                        {/* Entkoppelte CommentSection - KOMPLETT AUSSERHALB der animierten Card */}
-                        <div className="ml-4 mr-0 mt-2 px-6 py-5 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-lg shadow-[0_1px_8px_rgba(139,92,246,0.08)]">
-                          <CommentSection projectId={project._id!} />
-                        </div>
                       </li>
                     ))}
                   </ul>
