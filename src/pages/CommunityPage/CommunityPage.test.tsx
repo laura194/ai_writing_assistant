@@ -16,6 +16,14 @@ vi.mock("../../components/CommentSection/CommentSection", () => ({
   ),
 }));
 
+// ✅ Mock Clerk useUser
+vi.mock("@clerk/clerk-react", () => ({
+  useUser: () => ({
+    user: { username: "demo-user" },
+    isSignedIn: true,
+  }),
+}));
+
 // ✅ Mock motion wrappers
 vi.mock("framer-motion", () => ({
   motion: new Proxy({}, { get: () => (p: any) => <div {...p} /> }),

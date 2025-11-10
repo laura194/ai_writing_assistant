@@ -459,17 +459,22 @@ describe("EditPage", () => {
     });
 
     test("handleUndo / handleRedo stack manipulations", async () => {
+      store.set("menuOpen", JSON.stringify(true)); // Folder sichtbar
       render(<EditPage />);
       await screen.findByTestId("header");
 
+      // Warten bis Folder gerendert
+      await screen.findByTestId("folder-item-2");
+
+      // Node 2 auswählen
       fireEvent.click(screen.getByTestId("folder-select-2"));
       await waitFor(() => expect(getOrCreateNodeContent).toHaveBeenCalled());
 
-      // Add chapter to populate undo stack
+      // Add chapter, um undo stack zu füllen
       fireEvent.click(screen.getByTestId("folder-add-1"));
 
-      // Undo should revert
-      fireEvent.click(screen.getByTestId("header")); // undo button not mocked, but could call handleUndo directly
+      // Undo simulieren (hier einfach placeholder, dein undo-button ist nicht gemockt)
+      fireEvent.click(screen.getByTestId("header"));
     });
 
     test("addChapter pushes to undo and triggers debounceSave", async () => {
