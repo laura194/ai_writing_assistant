@@ -18,8 +18,6 @@ const mockProject: Project = {
   tags: [],
   username: "TestUser",
   authorName: "TestUser",
-  upvotedBy: [],
-  favoritedBy: [],
 };
 
 vi.spyOn(ProjectService, "getProjectById").mockResolvedValue(mockProject);
@@ -29,13 +27,6 @@ vi.spyOn(ProjectService, "updateProject").mockResolvedValue({
   username: "alice",
   projectStructure: [],
   isPublic: true,
-  titleCommunityPage: "Community Title",
-  category: "Computer Science",
-  typeOfDocument: "Bachelor Thesis",
-  tags: [],
-  authorName: "alice",
-  upvotedBy: [],
-  favoritedBy: [],
 });
 
 const renderWithRouter = (projectId: string) => {
@@ -44,7 +35,7 @@ const renderWithRouter = (projectId: string) => {
       <Routes>
         <Route path="/projects/:projectId" element={<ContributionCard />} />
       </Routes>
-    </MemoryRouter>,
+    </MemoryRouter>
   );
 };
 
@@ -104,7 +95,7 @@ describe("ContributionCard", () => {
         "1",
         expect.objectContaining({
           titleCommunityPage: "Updated Title",
-        }),
+        })
       );
     });
   });
@@ -163,7 +154,7 @@ describe("ContributionCard", () => {
     await waitFor(() => {
       expect(ProjectService.updateProject).toHaveBeenCalledWith(
         "1",
-        expect.objectContaining({ authorName: "Anonymous" }),
+        expect.objectContaining({ authorName: "Anonymous" })
       );
     });
   });
@@ -240,11 +231,9 @@ describe("ContributionCard", () => {
       tags: [],
       username: "bob",
       authorName: "bob",
-      upvotedBy: [],
-      favoritedBy: [],
     };
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(
-      privateProject,
+      privateProject
     );
 
     // ensure updateProject spy exists
@@ -304,7 +293,7 @@ describe("ContributionCard", () => {
         expect.objectContaining({
           titleCommunityPage: "Community Title for Publish",
           isPublic: true,
-        }),
+        })
       );
     });
 
@@ -326,11 +315,9 @@ describe("ContributionCard", () => {
       tags: ["t"],
       username: "sam",
       authorName: "sam",
-      upvotedBy: [],
-      favoritedBy: [],
     };
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(
-      pubProject,
+      pubProject
     );
     const updateSpy = vi
       .spyOn(ProjectService, "updateProject")
@@ -361,7 +348,7 @@ describe("ContributionCard", () => {
         "3",
         expect.objectContaining({
           isPublic: false,
-        }),
+        })
       );
     });
 
@@ -380,8 +367,6 @@ describe("ContributionCard", () => {
       tags: [],
       username: "z",
       authorName: "z",
-      upvotedBy: [],
-      favoritedBy: [],
     };
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(project);
 
@@ -428,7 +413,7 @@ describe("ContributionCard", () => {
     };
     const spyErr = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(
-      badProject,
+      badProject
     );
 
     renderWithRouter("6");
@@ -456,8 +441,6 @@ describe("ContributionCard", () => {
       tags: ["a"],
       username: "usr",
       authorName: "usr",
-      upvotedBy: [],
-      favoritedBy: [],
     };
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(p);
     const updateSpy = vi

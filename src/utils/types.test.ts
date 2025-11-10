@@ -51,8 +51,6 @@ describe("Project type", () => {
       username: "alice",
       projectStructure: [],
       isPublic: false,
-      upvotedBy: [],
-      favoritedBy: [],
     };
     // check required props
     expectTypeOf(project.name).toEqualTypeOf<string>();
@@ -69,8 +67,6 @@ describe("Project type", () => {
       createdAt: "2024-01-01T00:00:00Z",
       updatedAt: "2024-01-02T00:00:00Z",
       isPublic: false,
-      upvotedBy: [],
-      favoritedBy: [],
     };
     // optional fields should be strings (when present)
     expectTypeOf(project._id).toEqualTypeOf<string | undefined>();
