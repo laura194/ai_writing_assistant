@@ -93,14 +93,14 @@ describe("CommunityPage", () => {
     // Projects listed
     expect(
       screen.getAllByText(
-        (_, node) => node?.textContent?.includes("By Alice") ?? false
-      ).length
+        (_, node) => node?.textContent?.includes("By Alice") ?? false,
+      ).length,
     ).toBeGreaterThan(0);
 
     expect(
       screen.getAllByText(
-        (_, node) => node?.textContent?.includes("By Bob") ?? false
-      ).length
+        (_, node) => node?.textContent?.includes("By Bob") ?? false,
+      ).length,
     ).toBeGreaterThan(0);
 
     // Tags rendered
