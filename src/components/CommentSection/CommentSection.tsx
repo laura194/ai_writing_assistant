@@ -74,8 +74,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
   );
 
   return (
-    <motion.div
-      layout
+    <div
       className={`mt-3 rounded-2xl overflow-hidden ${
         isDark ? "bg-[#241b3b]" : "bg-[#ece8f9]"
       } shadow-[0_2px_12px_rgba(139,92,246,0.15)]`}
@@ -105,14 +104,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
       {/* Ein-/Ausklappbarer Bereich */}
       <AnimatePresence initial={false}>
         {isOpen && (
-          <motion.div
-            key="comments"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="px-4 pb-4"
-          >
+          <div key="comments" className="px-4 pb-4">
             {/* Kommentarformular */}
             <div className="flex flex-col sm:flex-row items-center gap-3 mb-4">
               <div
@@ -174,10 +166,10 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
                 ))
               )}
             </div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };
 
