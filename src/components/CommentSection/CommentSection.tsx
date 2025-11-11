@@ -111,7 +111,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="px-4 pb-4"
+            className="px-4 pb-4 pt-4"
           >
             {/* Kommentarformular */}
             <div className="flex flex-col sm:flex-row items-center gap-3 mb-4">
