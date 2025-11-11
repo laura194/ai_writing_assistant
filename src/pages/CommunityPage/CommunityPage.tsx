@@ -54,11 +54,57 @@ const CommunityPage = () => {
 
   const filteredProjects = projects.filter((project) => {
     const search = searchTerm.toLowerCase();
-    const matchesSearch =
-      project.titleCommunityPage?.toLowerCase().includes(search) ||
-      project.authorName?.toLowerCase().includes(search) ||
-      project.category?.toLowerCase().includes(search) ||
-      project.tags?.some((tag) => tag.toLowerCase().includes(search));
+    const createdDate = project.createdAt ? new Date(project.createdAt) : null;
+const updatedDate = project.updatedAt ? new Date(project.updatedAt) : null;
+
+// formatiere als locale string (z. B. "Nov 11, 2025") für Textsuche
+const createdString = createdDate
+  ? createdDate.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).toLowerCase()
+  : "";
+
+const updatedString = updatedDate
+  ? updatedDate.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).toLowerCase()
+  : "";
+
+// hole Zahlenanteile (Jahr, Monat, Tag) als Strings
+const createdParts = createdDate
+  ? [
+      createdDate.getFullYear().toString(),
+      (createdDate.getMonth() + 1).toString(), // Monate: 0-11 → +1
+      createdDate.getDate().toString(),
+    ]
+  : [];
+
+const updatedParts = updatedDate
+  ? [
+      updatedDate.getFullYear().toString(),
+      (updatedDate.getMonth() + 1).toString(),
+      updatedDate.getDate().toString(),
+    ]
+  : [];
+
+// jetzt das eigentliche Matching:
+const matchesSearch =
+  project.titleCommunityPage?.toLowerCase().includes(search) ||
+  project.authorName?.toLowerCase().includes(search) ||
+  project.category?.toLowerCase().includes(search) ||
+  project.typeOfDocument?.toLowerCase().includes(search) ||
+  project.tags?.some((tag) => tag.toLowerCase().includes(search)) ||
+  createdString.includes(search) ||
+  updatedString.includes(search) ||
+  createdParts.some((p) => p.includes(search)) ||
+  updatedParts.some((p) => p.includes(search));
+
+
+
 
     if (showOnlyFavorites) {
       return (
