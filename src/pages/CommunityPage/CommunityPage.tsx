@@ -61,7 +61,9 @@ const CommunityPage = () => {
       project.tags?.some((tag) => tag.toLowerCase().includes(search));
 
     if (showOnlyFavorites) {
-      return matchesSearch && project.favoritedBy.includes(currentUsername);
+      return (
+        matchesSearch && (project.favoritedBy ?? []).includes(currentUsername)
+      );
     }
     return matchesSearch;
   });
@@ -77,7 +79,7 @@ const CommunityPage = () => {
         project._id === id
           ? {
               ...project,
-              upvotedBy: project.upvotedBy.includes(currentUsername)
+              upvotedBy: (project.upvotedBy ?? []).includes(currentUsername)
                 ? project.upvotedBy.filter((u) => u !== currentUsername)
                 : [...project.upvotedBy, currentUsername],
             }
@@ -103,7 +105,7 @@ const CommunityPage = () => {
         project._id === id
           ? {
               ...project,
-              favoritedBy: project.favoritedBy.includes(currentUsername)
+              favoritedBy: (project.favoritedBy ?? []).includes(currentUsername)
                 ? project.favoritedBy.filter((u) => u !== currentUsername)
                 : [...project.favoritedBy, currentUsername],
             }
@@ -306,12 +308,14 @@ const CommunityPage = () => {
                             >
                               <ThumbsUp
                                 className={`w-5 h-5 ${
-                                  project.upvotedBy.includes(currentUsername)
+                                  (project.upvotedBy ?? []).includes(
+                                    currentUsername,
+                                  )
                                     ? "fill-[#cb8a07]"
                                     : "stroke-[#cb8a07]"
                                 }`}
                               />
-                              <span>{project.upvotedBy.length}</span>
+                              <span>{(project.upvotedBy ?? []).length}</span>
                             </button>
 
                             {/* Favorite */}
@@ -326,7 +330,9 @@ const CommunityPage = () => {
                             >
                               <Heart
                                 className={`w-5 h-5 ${
-                                  project.favoritedBy.includes(currentUsername)
+                                  (project.favoritedBy ?? []).includes(
+                                    currentUsername,
+                                  )
                                     ? "fill-[#fb923c]"
                                     : "stroke-[#fb923c]"
                                 }`}
