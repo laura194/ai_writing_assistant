@@ -18,6 +18,8 @@ const mockProject: Project = {
   tags: [],
   username: "TestUser",
   authorName: "TestUser",
+  upvotedBy: [],
+  favoritedBy: [],
 };
 
 vi.spyOn(ProjectService, "getProjectById").mockResolvedValue(mockProject);
@@ -27,6 +29,8 @@ vi.spyOn(ProjectService, "updateProject").mockResolvedValue({
   username: "alice",
   projectStructure: [],
   isPublic: true,
+  upvotedBy: [],
+  favoritedBy: [],
 });
 
 const renderWithRouter = (projectId: string) => {
@@ -231,6 +235,8 @@ describe("ContributionCard", () => {
       tags: [],
       username: "bob",
       authorName: "bob",
+      upvotedBy: [],
+      favoritedBy: [],
     };
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(
       privateProject,
@@ -315,6 +321,8 @@ describe("ContributionCard", () => {
       tags: ["t"],
       username: "sam",
       authorName: "sam",
+      upvotedBy: [],
+      favoritedBy: [],
     };
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(
       pubProject,
@@ -367,6 +375,8 @@ describe("ContributionCard", () => {
       tags: [],
       username: "z",
       authorName: "z",
+      upvotedBy: [],
+      favoritedBy: [],
     };
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(project);
 
@@ -441,6 +451,8 @@ describe("ContributionCard", () => {
       tags: ["a"],
       username: "usr",
       authorName: "usr",
+      upvotedBy: [],
+      favoritedBy: [],
     };
     vi.spyOn(ProjectService, "getProjectById").mockResolvedValueOnce(p);
     const updateSpy = vi

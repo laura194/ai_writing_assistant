@@ -1,4 +1,5 @@
 import { fireEvent, screen } from "@testing-library/react";
+import { vi } from "vitest";
 import { render } from "../../../test/renderWithProviders";
 import CommunityPage from "./CommunityPage";
 
@@ -41,6 +42,14 @@ vi.mock("../../utils/ProjectService", () => ({
   },
 }));
 
+// ✅ Mock Clerk useUser hook
+vi.mock("@clerk/clerk-react", () => ({
+  useUser: () => ({
+    isSignedIn: true,
+    user: { id: "test-user", username: "TestUser" },
+  }),
+}));
+
 // 🧩 Testdaten
 const communityProjects = [
   {
@@ -52,6 +61,8 @@ const communityProjects = [
     typeOfDocument: "Paper",
     createdAt: new Date("2024-05-01").toISOString(),
     updatedAt: new Date("2024-06-01").toISOString(),
+    upvotedBy: [],
+    favoritedBy: [],
   },
   {
     _id: "c2",
@@ -62,6 +73,8 @@ const communityProjects = [
     typeOfDocument: "Doc",
     createdAt: new Date("2024-03-10").toISOString(),
     updatedAt: new Date("2024-04-20").toISOString(),
+    upvotedBy: [],
+    favoritedBy: [],
   },
 ];
 
