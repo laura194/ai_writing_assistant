@@ -3,18 +3,25 @@ import { useNavigate } from "react-router-dom";
 import { ProjectService } from "../../utils/ProjectService";
 import { Project } from "../../utils/types";
 import Header from "../../components/Header/Header";
-import { FolderOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "../../providers/ThemeProvider";
 import CommentSection from "../../components/CommentSection/CommentSection";
+import { FolderOpen, ThumbsUp, Heart } from "lucide-react";
+
+import { useUser } from "@clerk/clerk-react";
 
 const CommunityPage = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState<boolean>(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+  const { user, isSignedIn } = useUser();
+  const currentUsername = user?.username || user?.id || "";
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -29,7 +36,7 @@ const CommunityPage = () => {
       }
     };
 
-    fetchProjects();
+    void fetchProjects();
   }, []);
 
   const handleProjectClick = (id: string) => {
@@ -43,6 +50,121 @@ const CommunityPage = () => {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const filteredProjects = projects.filter((project) => {
+    const search = searchTerm.toLowerCase();
+    const createdDate = project.createdAt ? new Date(project.createdAt) : null;
+    const updatedDate = project.updatedAt ? new Date(project.updatedAt) : null;
+
+    // formatiere als locale string (z. B. "Nov 11, 2025") für Textsuche
+    const createdString = createdDate
+      ? createdDate
+          .toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+          .toLowerCase()
+      : "";
+
+    const updatedString = updatedDate
+      ? updatedDate
+          .toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+          .toLowerCase()
+      : "";
+
+    // hole Zahlenanteile (Jahr, Monat, Tag) als Strings
+    const createdParts = createdDate
+      ? [
+          createdDate.getFullYear().toString(),
+          (createdDate.getMonth() + 1).toString(), // Monate: 0-11 → +1
+          createdDate.getDate().toString(),
+        ]
+      : [];
+
+    const updatedParts = updatedDate
+      ? [
+          updatedDate.getFullYear().toString(),
+          (updatedDate.getMonth() + 1).toString(),
+          updatedDate.getDate().toString(),
+        ]
+      : [];
+
+    // jetzt das eigentliche Matching:
+    const matchesSearch =
+      project.titleCommunityPage?.toLowerCase().includes(search) ||
+      project.authorName?.toLowerCase().includes(search) ||
+      project.category?.toLowerCase().includes(search) ||
+      project.typeOfDocument?.toLowerCase().includes(search) ||
+      project.tags?.some((tag) => tag.toLowerCase().includes(search)) ||
+      createdString.includes(search) ||
+      updatedString.includes(search) ||
+      createdParts.some((p) => p.includes(search)) ||
+      updatedParts.some((p) => p.includes(search));
+
+    if (showOnlyFavorites) {
+      return (
+        matchesSearch && (project.favoritedBy ?? []).includes(currentUsername)
+      );
+    }
+    return matchesSearch;
+  });
+
+  const handleUpvote = async (id: string) => {
+    if (!isSignedIn || !currentUsername) {
+      alert("Please sign in to upvote.");
+      return;
+    }
+
+    setProjects((prev) =>
+      prev.map((project) =>
+        project._id === id
+          ? {
+              ...project,
+              upvotedBy: (project.upvotedBy ?? []).includes(currentUsername)
+                ? project.upvotedBy.filter((u) => u !== currentUsername)
+                : [...project.upvotedBy, currentUsername],
+            }
+          : project,
+      ),
+    );
+
+    try {
+      await ProjectService.toggleUpvote(id, currentUsername);
+    } catch (err) {
+      console.error("Error toggling upvote:", err);
+    }
+  };
+
+  const toggleFavorite = async (id: string) => {
+    if (!isSignedIn || !currentUsername) {
+      alert("Please sign in to favorite.");
+      return;
+    }
+
+    setProjects((prev) =>
+      prev.map((project) =>
+        project._id === id
+          ? {
+              ...project,
+              favoritedBy: (project.favoritedBy ?? []).includes(currentUsername)
+                ? project.favoritedBy.filter((u) => u !== currentUsername)
+                : [...project.favoritedBy, currentUsername],
+            }
+          : project,
+      ),
+    );
+
+    try {
+      await ProjectService.toggleFavorite(id, currentUsername);
+    } catch (err) {
+      console.error("Error toggling favorite:", err);
+    }
   };
 
   return (
@@ -107,6 +229,26 @@ const CommunityPage = () => {
                   by other users, view categories, and find inspiration.
                 </p>
 
+                <div className="flex justify-center gap-4 mb-8 flex-wrap">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search by title, author, category, or tag..."
+                    className="w-full max-w-md px-4 py-2 rounded-full border border-[#c5bbeb] dark:border-[#3b2f58] bg-[#f3f0fb] dark:bg-[#2a1e44] text-[#362466] dark:text-white placeholder-[#7b6ea5] dark:placeholder-[#aaa6c3] focus:outline-none focus:ring-2 focus:ring-[#fb923c] transition"
+                  />
+                  <button
+                    onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+                    className={`px-6 py-2 rounded-full font-medium transition ${
+                      showOnlyFavorites
+                        ? "bg-[#fb923c] text-white shadow-[0_0_15px_rgba(251,146,60,0.4)]"
+                        : "bg-[#e7e4f4] dark:bg-[#3a2e54] text-[#362466] dark:text-[#aaa6c3] hover:bg-[#ddd6f3] dark:hover:bg-[#4a3a64]"
+                    }`}
+                  >
+                    ❤️ Favorites
+                  </button>
+                </div>
+
                 {loading ? (
                   <div className="flex justify-center">
                     <div className="animate-pulse px-6 py-4 bg-[#e0dbf4] dark:bg-[#090325] bg-opacity-30 rounded-full text-[#362466] dark:text-[#fee2e2] font-medium">
@@ -133,10 +275,12 @@ const CommunityPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <ul className="space-y-6">
-                    {projects.map((project) => (
-                      <li key={project._id}>
+                  <ul className="space-y-0">
+                    {filteredProjects.map((project, index) => (
+                      <li key={project._id} className={index > 0 ? "mt-6" : ""}>
+                        {/* Animierte Card mit Header und Buttons - OHNE CommentSection */}
                         <motion.div
+                          layout={false}
                           whileHover={{
                             scale: 1.05,
                             boxShadow: isDark
@@ -146,15 +290,17 @@ const CommunityPage = () => {
                           className="group flex flex-col gap-4 px-6 py-6 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-xl shadow-[0_2px_12px_rgba(139,92,246,0.15)] transition"
                         >
                           {/* Header mit Titel, Autor etc. */}
-                          <div
-                            onClick={() => handleProjectClick(project._id!)}
-                            className="cursor-pointer"
-                          >
-                            <div className="flex items-center gap-3 mb-2">
-                              <FolderOpen className="w-6 h-6 stroke-[#cb8a07] dark:stroke-[#fb923c]" />
-                              <h3 className="text-lg font-semibold truncate group-hover:text-[#cb8a07] dark:group-hover:text-[#fb923c]">
-                                {project.titleCommunityPage}
-                              </h3>
+                          <div className="cursor-default">
+                            <div
+                              onClick={() => handleProjectClick(project._id!)}
+                              className="cursor-pointer"
+                            >
+                              <div className="flex items-center gap-3 mb-2">
+                                <FolderOpen className="w-6 h-6 stroke-[#cb8a07] dark:stroke-[#fb923c]" />
+                                <h3 className="text-lg font-semibold truncate group-hover:text-[#cb8a07] dark:group-hover:text-[#fb923c]">
+                                  {project.titleCommunityPage}
+                                </h3>
+                              </div>
                             </div>
 
                             <div className="text-sm text-[#261e3b] dark:text-[#aaa6c3]">
@@ -195,11 +341,58 @@ const CommunityPage = () => {
                             </div>
                           </div>
 
-                          {/* Kommentarbereich direkt IN der Card */}
-                          <div className="mt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58] pt-3">
-                            <CommentSection projectId={project._id!} />
+                          {/* Button-Zeile */}
+                          <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#c5bbeb] dark:border-[#3b2f58]">
+                            {/* Upvote */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleUpvote(project._id!);
+                              }}
+                              className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition"
+                            >
+                              <ThumbsUp
+                                className={`w-5 h-5 ${
+                                  (project.upvotedBy ?? []).includes(
+                                    currentUsername,
+                                  )
+                                    ? "fill-[#cb8a07]"
+                                    : "stroke-[#cb8a07]"
+                                }`}
+                              />
+                              <span>{(project.upvotedBy ?? []).length}</span>
+                            </button>
+
+                            {/* Favorite */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleFavorite(project._id!);
+                              }}
+                              className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition"
+                            >
+                              <Heart
+                                className={`w-5 h-5 ${
+                                  (project.favoritedBy ?? []).includes(
+                                    currentUsername,
+                                  )
+                                    ? "fill-[#fb923c]"
+                                    : "stroke-[#fb923c]"
+                                }`}
+                              />
+                              <span>Favorite</span>
+                            </button>
                           </div>
                         </motion.div>
+
+                        {/* Entkoppelte CommentSection - KOMPLETT AUSSERHALB der animierten Card */}
+                        <div className="ml-4 mr-0 mt-2 px-6 py-5 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-lg shadow-[0_1px_8px_rgba(139,92,246,0.08)]">
+                          <CommentSection projectId={project._id!} />
+                        </div>
                       </li>
                     ))}
                   </ul>

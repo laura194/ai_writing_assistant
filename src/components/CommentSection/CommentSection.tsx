@@ -35,7 +35,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
         console.error("Error loading comments:", error);
       }
     };
-    fetchComments();
+    void fetchComments();
   }, [projectId]);
 
   const handleAddComment = async () => {
@@ -66,6 +66,12 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
       minute: "2-digit",
     });
   };
+
+  const sortedComments = [...comments].sort(
+    (a, b) =>
+      new Date(b.date || b.createdAt || "").getTime() -
+      new Date(a.date || a.createdAt || "").getTime(),
+  );
 
   return (
     <motion.div
@@ -105,7 +111,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="px-4 pb-4"
+            className="px-4 pb-4 pt-4"
           >
             {/* Kommentarformular */}
             <div className="flex flex-col sm:flex-row items-center gap-3 mb-4">
@@ -145,7 +151,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
                   No comments yet — be the first to write one!
                 </p>
               ) : (
-                comments.map((c, i) => (
+                sortedComments.map((c, i) => (
                   <motion.div
                     key={c._id || i}
                     initial={{ opacity: 0, x: -10 }}

@@ -233,6 +233,7 @@ function Folder({
           />
         ) : (
           <motion.span
+            data-testid={`folder-select-${node.id}`}
             whileHover={{ scale: 1.025, transition: { duration: 0.2 } }}
             whileTap={{ scale: 0.95 }}
             className={`flex-1 min-w-0 whitespace-normal break-words cursor-pointer px-3 py-2 rounded-lg

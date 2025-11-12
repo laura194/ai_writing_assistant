@@ -33,6 +33,8 @@ export interface Project {
   createdAt?: string;
   updatedAt?: string;
   authorName?: string; // Optional: Name des Autors
+  upvotedBy: string[];
+  favoritedBy: string[];
 }
 
 export interface IComment {

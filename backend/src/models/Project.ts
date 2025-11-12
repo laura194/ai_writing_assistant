@@ -12,6 +12,8 @@ export interface IProject extends Document {
   authorName?: string; // Optional: Name des Autors
   created_at?: Date;
   updated_at?: Date;
+  upvotedBy: string[];
+  favoritedBy: string[];
 }
 
 const projectSchema: Schema = new Schema(
@@ -27,6 +29,9 @@ const projectSchema: Schema = new Schema(
     category: { type: String, default: "" },
     typeOfDocument: { type: String, default: "" },
     authorName: { type: String, default: "" }, // Optional: Name des Autors
+
+    upvotedBy: { type: [String], default: [] },
+    favoritedBy: { type: [String], default: [] },
   },
   {
     timestamps: true, // created_at + updated_at automatisch
