@@ -24,6 +24,14 @@ vi.mock("../models/NodeContent", () => {
   };
 });
 
+vi.mock("../models/Project", () => {
+  const m = {
+    findByIdAndUpdate: vi.fn().mockResolvedValue({}),
+    findById: vi.fn().mockResolvedValue(null),
+  };
+  return { __esModule: true, default: m, ...m };
+});
+
 vi.mock("../models/NodeContentVersion", () => {
   const m: any = vi.fn();
   m.create = vi.fn().mockResolvedValue(undefined);
@@ -40,6 +48,7 @@ import app from "../app";
 /* ------------------ import mocked modules so tests can control them ------------------ */
 import NodeContentVersion from "../models/NodeContentVersion";
 import NodeContent from "../models/NodeContent";
+import Project from "../models/Project";
 
 /* small helper type alias to satisfy TS in tests */
 type MockFn = ReturnType<typeof vi.fn>;
@@ -399,6 +408,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
 
     expect(res.status).toBe(200);
     expect(NodeContentVersion.create).not.toHaveBeenCalled();
+    expect(Project.findByIdAndUpdate as unknown as vi.Mock).toHaveBeenCalled();
   });
 
   it("createVersion trims when count > MAX", async () => {
@@ -541,6 +551,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     expect(mongoose.startSession).toHaveBeenCalled();
     expect(NodeContentVersion.create).not.toHaveBeenCalled();
     expect(sessionMock.commitTransaction).toHaveBeenCalled();
+    expect(Project.findByIdAndUpdate as unknown as vi.Mock).toHaveBeenCalled();
   });
 
   /* ------------------------------
@@ -701,6 +712,8 @@ describe("NodeContent Controller (fixed mocks)", () => {
         upsert: true,
       }),
     );
+
+    expect(Project.findByIdAndUpdate as unknown as vi.Mock).toHaveBeenCalled();
   });
 
   it("POST /api/nodeContent returns 409 when NodeContent already exists", async () => {
