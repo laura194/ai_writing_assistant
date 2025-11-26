@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: Start App in Background
-        run: npm run dev &
+        run: npm run dev 2>&1 | tee vite.log &
 
       - name: Wait for Vite server
         run: npx wait-on http://localhost:5173
