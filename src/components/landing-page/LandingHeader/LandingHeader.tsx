@@ -32,6 +32,7 @@ const LandingHeader = () => {
 
   return (
     <nav
+      data-cy="landing-header"
       className={`${
         LandingPageStyles.paddingX
       } w-full flex items-center py-5 fixed top-0 z-20 transition-colors duration-750 ease-in-out ${
@@ -70,6 +71,7 @@ const LandingHeader = () => {
               onClick={() => setActive(nav.title)}
             >
               <button
+                data-cy={`nav-${nav.id}`}
                 className="cursor-pointer transform transition-transform duration-300 hover:scale-108"
                 onClick={() => {
                   setActive(nav.title);

@@ -1,0 +1,43 @@
+name: Cypress E2E Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Start App in Background
+        run: npm run start &
+        # Optional: wait a few seconds for dev server to be ready
+        # You can also use wait-on package for robust waiting
+        # run: npx wait-on http://localhost:3000 && echo "Server ready"
+
+      - name: Run Cypress E2E Tests
+        run: npx cypress run
+
+      - name: Upload Cypress Videos & Screenshots (Optional)
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-artifacts
+          path: cypress/videos,cypress/screenshots
