@@ -66,6 +66,32 @@ describe("DocumentExporters", () => {
   });
 
   describe("Pure Functions", () => {
+    it("parseRichContent should handle empty table gracefully", () => {
+      const content = "[TABLE:Empty:<table></table>]";
+      const result = parseRichContent(content);
+      expect(result).toContain("\\begin{table}");
+      expect(result).toContain("\\end{table}");
+    });
+
+    it("formatDate should return 'Invalid Date' for invalid date strings", () => {
+      const result = formatDate("invalid-date");
+      expect(result).toBe("Invalid Date");
+    });
+
+    it("handleExportWord should throw if fetch rejects", async () => {
+      mockFetch.mockRejectedValue(new Error("Network Error"));
+      await expect(
+        handleExportWord(mockStructure, mockNodeContents, mockAiProtocols),
+      ).rejects.toThrow("Network Error");
+    });
+
+    it("handleExportPDF should throw if fetch rejects", async () => {
+      mockFetch.mockRejectedValue(new Error("Network Error"));
+      await expect(
+        handleExportPDF(mockStructure, mockNodeContents, mockAiProtocols),
+      ).rejects.toThrow("Network Error");
+    });
+
     it("escapeLatex should escape special LaTeX characters", () => {
       const input = "\\\\_%&#${}{}^~";
       const result = escapeLatex(input);
