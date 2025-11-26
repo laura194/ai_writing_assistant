@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import NodeContent from "../models/NodeContent";
 import NodeContentVersion from "../models/NodeContentVersion";
+import Project from "../models/Project";
 
 const MAX_VERSIONS = Number(process.env.MAX_VERSIONS_PER_NODE || 50);
 
@@ -205,6 +206,12 @@ export const updateNodeContent = async (
         { new: true, upsert: true, setDefaultsOnInsert: true, session },
       );
 
+      await Project.findByIdAndUpdate(
+        projectId,
+        { $set: { updatedAt: new Date() } },
+        { session },
+      );
+
       // trim old versions if exceed MAX_VERSIONS (only when versioning actually used)
       if (!skipVersion) {
         const count = await NodeContentVersion.countDocuments({
@@ -283,6 +290,10 @@ export const updateNodeContent = async (
       },
       { new: true, upsert: true, setDefaultsOnInsert: true },
     );
+
+    await Project.findByIdAndUpdate(projectId, {
+      $set: { updatedAt: new Date() },
+    });
 
     if (!skipVersion) {
       const count2 = await NodeContentVersion.countDocuments({

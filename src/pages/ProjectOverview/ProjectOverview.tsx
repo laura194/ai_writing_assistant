@@ -24,6 +24,7 @@ const ProjectOverview = () => {
   const [error, setError] = useState<string | null>(null);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState<string>("");
+  const [startAnimation, setStartAnimation] = useState(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -51,6 +52,12 @@ const ProjectOverview = () => {
 
     fetchProjects();
   }, [user, isLoaded]);
+
+  useEffect(() => {
+    if (!loading) {
+      setStartAnimation(true);
+    }
+  }, [loading]);
 
   const handleProjectClick = (id: string) => {
     navigate(`/edit/${id}`);
@@ -254,159 +261,176 @@ const ProjectOverview = () => {
                     </div>
                   </div>
                 ) : (
-                  <ul className="space-y-6">
+                  <motion.ul
+                    initial="hidden"
+                    animate={startAnimation ? "visible" : "hidden"}
+                    variants={{
+                      hidden: {},
+                      visible: {
+                        transition: {
+                          delayChildren: 2.3,
+                          staggerChildren: 0.2,
+                        },
+                      },
+                    }}
+                    className="space-y-6"
+                  >
                     {projects.map((project) => {
                       const isEditing = editingProjectId === project._id;
 
                       return (
-                        <li key={project._id}>
-                          <div
-                            data-aos="zoom-in"
-                            data-aos-duration="800"
-                            data-aos-delay="2100"
+                        <motion.li
+                          key={project._id}
+                          variants={{
+                            hidden: { opacity: 0, y: 40 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.6 },
+                            },
+                          }}
+                        >
+                          <motion.div
+                            whileHover={{
+                              scale: 1.05,
+                              boxShadow: isDark
+                                ? "0 2px 24px rgba(251,146,60,0.35)"
+                                : "0 2px 24px rgba(251,146,60,0.6)",
+                            }}
+                            onClick={() => handleProjectClick(project._id!)}
+                            className="group flex items-center justify-between px-6 py-4 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-xl shadow-[0_2px_12px_rgba(139,92,246,0.15)] transition cursor-pointer relative group"
                           >
-                            <motion.div
-                              whileHover={{
-                                scale: 1.05,
-                                boxShadow: isDark
-                                  ? "0 2px 24px rgba(251,146,60,0.35)"
-                                  : "0 2px 24px rgba(251,146,60,0.6)",
-                              }}
-                              onClick={() => handleProjectClick(project._id!)}
-                              className="group flex items-center justify-between px-6 py-4 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-xl shadow-[0_2px_12px_rgba(139,92,246,0.15)] transition cursor-pointer relative group"
-                            >
-                              {/* Title & Actions */}
-                              <div className="flex items-center gap-3 max-w-[60%] overflow-hidden">
-                                <FolderOpen className="w-6 h-6 stroke-[#cb8a07] dark:stroke-[#fb923c]" />
+                            {/* Title & Actions */}
+                            <div className="flex items-center gap-3 max-w-[60%] overflow-hidden">
+                              <FolderOpen className="w-6 h-6 stroke-[#cb8a07] dark:stroke-[#fb923c]" />
+                              {isEditing ? (
+                                <input
+                                  className="bg-[#e0dbf4] dark:bg-[#1e1538] border border-[#cb8a07] dark:border-[#fb923c] rounded px-2 py-1.5 text-sm text-[#362466] dark:text-white outline-none flex-1 focus:bg-[#e7e4f4] dark:focus:bg-[#3a2e54] focus:border-2 focus:border-[#cb8a07] dark:focus:border-[#ffa200] transition"
+                                  value={editedName}
+                                  onChange={(e) =>
+                                    setEditedName(e.target.value)
+                                  }
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              ) : (
+                                <span
+                                  className="text-lg font-semibold truncate transition-colors duration-300 group-hover:text-[#cb8a07] dark:group-hover:text-[#fb923c]"
+                                  title={project.name}
+                                >
+                                  {project.name}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Meta & Controls */}
+                            <div className="flex items-center gap-4">
+                              <div className="text-sm text-right text-[#261e3b] dark:text-[#aaa6c3] min-w-[120px]">
+                                <div>
+                                  <span className="font-medium text-[#c54516] dark:text-[#ff662f]">
+                                    Created:
+                                  </span>{" "}
+                                  {formatDate(project.createdAt!)}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-[#d49307] dark:text-[#fcc141]">
+                                    Updated:
+                                  </span>{" "}
+                                  {formatDate(project.updatedAt!)}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
                                 {isEditing ? (
-                                  <input
-                                    className="bg-[#e0dbf4] dark:bg-[#1e1538] border border-[#cb8a07] dark:border-[#fb923c] rounded px-2 py-1.5 text-sm text-[#362466] dark:text-white outline-none flex-1 focus:bg-[#e7e4f4] dark:focus:bg-[#3a2e54] focus:border-2 focus:border-[#cb8a07] dark:focus:border-[#ffa200] transition"
-                                    value={editedName}
-                                    onChange={(e) =>
-                                      setEditedName(e.target.value)
-                                    }
-                                    onClick={(e) => e.stopPropagation()}
-                                  />
+                                  <>
+                                    <motion.div
+                                      whileHover={{
+                                        scale: 1.2,
+                                      }}
+                                    >
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          updateProjectName(project);
+                                        }}
+                                        disabled={
+                                          !editedName.trim() ||
+                                          editedName.trim() ===
+                                            project.name.trim()
+                                        }
+                                        className={`p-1 rounded transition ${
+                                          !editedName.trim() ||
+                                          editedName.trim() ===
+                                            project.name.trim()
+                                            ? "text-[#0e9c1a] dark:text-[#39d646] opacity-40 cursor-not-allowed"
+                                            : "text-[#0e9c1a] dark:text-[#39d646] cursor-pointer hover:text-[#32d00a] dark:hover:text-[#52f629] transition"
+                                        }`}
+                                        title="Save"
+                                      >
+                                        <CircleCheckBig className="w-5 h-5" />
+                                      </button>
+                                    </motion.div>
+                                    <motion.div
+                                      whileHover={{
+                                        scale: 1.2,
+                                      }}
+                                    >
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingProjectId(null);
+                                          setEditedName("");
+                                        }}
+                                        className="p-1 text-[#261e3b] dark:text-[#aaa6c3] hover:text-[#e0551e] dark:hover:text-[#f5662d] transition cursor-pointer"
+                                        title="Cancel"
+                                      >
+                                        <CircleX className="w-5 h-5" />
+                                      </button>
+                                    </motion.div>
+                                  </>
                                 ) : (
-                                  <span
-                                    className="text-lg font-semibold truncate transition-colors duration-300 group-hover:text-[#cb8a07] dark:group-hover:text-[#fb923c]"
-                                    title={project.name}
-                                  >
-                                    {project.name}
-                                  </span>
+                                  <>
+                                    <motion.div
+                                      whileHover={{
+                                        scale: 1.2,
+                                      }}
+                                    >
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingProjectId(project._id!);
+                                          setEditedName(project.name);
+                                        }}
+                                        className="p-1 text-[#261e3b] dark:text-[#aaa6c3] hover:text-[#dc8317] dark:hover:text-[#fba53c] transition cursor-pointer"
+                                        title="Edit"
+                                      >
+                                        <Edit className="w-5 h-5" />
+                                      </button>
+                                    </motion.div>
+                                    <motion.div
+                                      whileHover={{
+                                        scale: 1.2,
+                                      }}
+                                    >
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDelete(project._id!);
+                                        }}
+                                        className="p-1 text-[#261e3b] dark:text-[#aaa6c3] hover:text-[#f42f2f] transition cursor-pointer"
+                                        title="Delete"
+                                      >
+                                        <Trash2 className="w-5 h-5" />
+                                      </button>
+                                    </motion.div>
+                                  </>
                                 )}
                               </div>
-
-                              {/* Meta & Controls */}
-                              <div className="flex items-center gap-4">
-                                <div className="text-sm text-right text-[#261e3b] dark:text-[#aaa6c3] min-w-[120px]">
-                                  <div>
-                                    <span className="font-medium text-[#c54516] dark:text-[#ff662f]">
-                                      Created:
-                                    </span>{" "}
-                                    {formatDate(project.createdAt!)}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-[#d49307] dark:text-[#fcc141]">
-                                      Updated:
-                                    </span>{" "}
-                                    {formatDate(project.updatedAt!)}
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                  {isEditing ? (
-                                    <>
-                                      <motion.div
-                                        whileHover={{
-                                          scale: 1.2,
-                                        }}
-                                      >
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            updateProjectName(project);
-                                          }}
-                                          disabled={
-                                            !editedName.trim() ||
-                                            editedName.trim() ===
-                                              project.name.trim()
-                                          }
-                                          className={`p-1 rounded transition ${
-                                            !editedName.trim() ||
-                                            editedName.trim() ===
-                                              project.name.trim()
-                                              ? "text-[#0e9c1a] dark:text-[#39d646] opacity-40 cursor-not-allowed"
-                                              : "text-[#0e9c1a] dark:text-[#39d646] cursor-pointer hover:text-[#32d00a] dark:hover:text-[#52f629] transition"
-                                          }`}
-                                          title="Save"
-                                        >
-                                          <CircleCheckBig className="w-5 h-5" />
-                                        </button>
-                                      </motion.div>
-                                      <motion.div
-                                        whileHover={{
-                                          scale: 1.2,
-                                        }}
-                                      >
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingProjectId(null);
-                                            setEditedName("");
-                                          }}
-                                          className="p-1 text-[#261e3b] dark:text-[#aaa6c3] hover:text-[#e0551e] dark:hover:text-[#f5662d] transition cursor-pointer"
-                                          title="Cancel"
-                                        >
-                                          <CircleX className="w-5 h-5" />
-                                        </button>
-                                      </motion.div>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <motion.div
-                                        whileHover={{
-                                          scale: 1.2,
-                                        }}
-                                      >
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingProjectId(project._id!);
-                                            setEditedName(project.name);
-                                          }}
-                                          className="p-1 text-[#261e3b] dark:text-[#aaa6c3] hover:text-[#dc8317] dark:hover:text-[#fba53c] transition cursor-pointer"
-                                          title="Edit"
-                                        >
-                                          <Edit className="w-5 h-5" />
-                                        </button>
-                                      </motion.div>
-                                      <motion.div
-                                        whileHover={{
-                                          scale: 1.2,
-                                        }}
-                                      >
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDelete(project._id!);
-                                          }}
-                                          className="p-1 text-[#261e3b] dark:text-[#aaa6c3] hover:text-[#f42f2f] transition cursor-pointer"
-                                          title="Delete"
-                                        >
-                                          <Trash2 className="w-5 h-5" />
-                                        </button>
-                                      </motion.div>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                            </motion.div>
-                          </div>
-                        </li>
+                            </div>
+                          </motion.div>
+                        </motion.li>
                       );
                     })}
-                  </ul>
+                  </motion.ul>
                 )}
               </div>
             </motion.div>
