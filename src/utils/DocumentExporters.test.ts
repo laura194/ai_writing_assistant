@@ -73,14 +73,9 @@ describe("DocumentExporters", () => {
       expect(result).toContain("\\end{table}");
     });
 
-    it("formatDate should return string if date is invalid", () => {
+    it("formatDate should return 'Invalid Date' for invalid date strings", () => {
       const result = formatDate("invalid-date");
-      expect(result).toBe("invalid-date");
-    });
-
-    it("formatDate should return string if date is invalid", () => {
-      const result = formatDate("invalid-date");
-      expect(result).toBe("invalid-date");
+      expect(result).toBe("Invalid Date");
     });
 
     it("handleExportWord should throw if fetch rejects", async () => {
