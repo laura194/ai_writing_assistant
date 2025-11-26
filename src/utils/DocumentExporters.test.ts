@@ -86,14 +86,14 @@ describe("DocumentExporters", () => {
     it("handleExportWord should throw if fetch rejects", async () => {
       mockFetch.mockRejectedValue(new Error("Network Error"));
       await expect(
-        handleExportWord(mockStructure, mockNodeContents, mockAiProtocols)
+        handleExportWord(mockStructure, mockNodeContents, mockAiProtocols),
       ).rejects.toThrow("Network Error");
     });
 
     it("handleExportPDF should throw if fetch rejects", async () => {
       mockFetch.mockRejectedValue(new Error("Network Error"));
       await expect(
-        handleExportPDF(mockStructure, mockNodeContents, mockAiProtocols)
+        handleExportPDF(mockStructure, mockNodeContents, mockAiProtocols),
       ).rejects.toThrow("Network Error");
     });
 
@@ -126,7 +126,7 @@ describe("DocumentExporters", () => {
       expect(result).toContain("\\begin{figure}");
       expect(result).toContain("\\caption{A cat}");
       expect(result).toContain(
-        "\\includegraphics[width=0.8\\textwidth]{cat.jpg}"
+        "\\includegraphics[width=0.8\\textwidth]{cat.jpg}",
       );
       expect(result).toContain("\\begin{table}");
       expect(result).toContain("\\caption{Numbers}");
@@ -146,7 +146,7 @@ describe("DocumentExporters", () => {
     it("buildAiProtocolLatexAppendix should handle empty protocols", () => {
       const result = buildAiProtocolLatexAppendix([], false);
       expect(result).toContain(
-        "No entries have been created in the AI protocol yet."
+        "No entries have been created in the AI protocol yet.",
       );
       expect(result).not.toContain("\\begin{longtable}");
     });
@@ -174,7 +174,7 @@ describe("DocumentExporters", () => {
         mockStructure,
         mockNodeContents,
         mockAiProtocols,
-        false
+        false,
       );
 
       expect(saveAs).not.toHaveBeenCalled();
@@ -245,7 +245,7 @@ describe("DocumentExporters", () => {
       mockFetch.mockResolvedValue(mockResponse);
 
       await expect(
-        handleExportWord(mockStructure, mockNodeContents, mockAiProtocols)
+        handleExportWord(mockStructure, mockNodeContents, mockAiProtocols),
       ).rejects.toThrow("Server returned 500: Internal Server Error");
 
       expect(saveAs).not.toHaveBeenCalled();
@@ -267,7 +267,7 @@ describe("DocumentExporters", () => {
       mockFetch.mockResolvedValue(mockResponse);
 
       await expect(
-        handleExportWord(mockStructure, mockNodeContents, mockAiProtocols)
+        handleExportWord(mockStructure, mockNodeContents, mockAiProtocols),
       ).rejects.toThrow("Received empty file from server");
 
       expect(saveAs).not.toHaveBeenCalled();
@@ -329,7 +329,7 @@ describe("DocumentExporters", () => {
       mockFetch.mockResolvedValue(mockResponse);
 
       await expect(
-        handleExportPDF(mockStructure, mockNodeContents, mockAiProtocols)
+        handleExportPDF(mockStructure, mockNodeContents, mockAiProtocols),
       ).rejects.toThrow("Server returned 500: Internal Server Error");
 
       expect(saveAs).not.toHaveBeenCalled();
@@ -349,7 +349,7 @@ describe("DocumentExporters", () => {
       mockFetch.mockResolvedValue(mockResponse);
 
       await expect(
-        handleExportPDF(mockStructure, mockNodeContents, mockAiProtocols)
+        handleExportPDF(mockStructure, mockNodeContents, mockAiProtocols),
       ).rejects.toThrow("Received empty file from server");
 
       expect(saveAs).not.toHaveBeenCalled();
