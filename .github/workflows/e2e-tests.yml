@@ -27,17 +27,19 @@ jobs:
         run: npm ci
 
       - name: Start App in Background
-        run: npm run start &
-        # Optional: wait a few seconds for dev server to be ready
-        # You can also use wait-on package for robust waiting
-        # run: npx wait-on http://localhost:3000 && echo "Server ready"
+        run: npm run dev &
+
+      - name: Wait for Vite server
+        run: npx wait-on http://localhost:5173
 
       - name: Run Cypress E2E Tests
         run: npx cypress run
 
-      - name: Upload Cypress Videos & Screenshots (Optional)
+      - name: Upload Cypress Artifacts (Videos & Screenshots)
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cypress-artifacts
-          path: cypress/videos,cypress/screenshots
+          path: |
+            cypress/videos
+            cypress/screenshots
