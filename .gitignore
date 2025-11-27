@@ -16,6 +16,9 @@ coverage
 .stryker-tmp
 reports
 .qodo
+cypress/videos/
+cypress/screenshots/
+coverage/
 
 # Editor directories and files
 .vscode/*

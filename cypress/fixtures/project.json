@@ -1,0 +1,19 @@
+{
+  "projectId": "proj-123",
+  "name": "My Test Project",
+  "username": "tester",
+  "projectStructure": [
+    {
+      "id": "n1",
+      "name": "Chapter 1",
+      "category": "chapter",
+      "nodes": []
+    },
+    {
+      "id": "n2",
+      "name": "Chapter 2",
+      "category": "chapter",
+      "nodes": []
+    }
+  ]
+}
