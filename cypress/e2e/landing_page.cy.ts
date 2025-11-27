@@ -3,6 +3,14 @@
 
 describe("Landing Page E2E", () => {
   beforeEach(() => {
+    cy.intercept({ url: "**" }, (req) => {
+      // this prints to Cypress runner logs (visible in CI)
+      // you can filter by req.url.includes('clerk') etc.
+      // eslint-disable-next-line no-console
+      console.log("[CYPRESS-REQ]", req.method, req.url);
+      req.continue();
+    });
+
     cy.viewport(1280, 720);
 
     // optional: stub externe 3rd-party requests, reduziert Noise / race conditions
