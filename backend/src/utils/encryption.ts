@@ -54,7 +54,9 @@ export const encryptValue = (value: string | null | undefined): string => {
  * @param encryptedValue - The encrypted string to decrypt
  * @returns Decrypted string or original value if decryption fails
  */
-export const decryptValue = (encryptedValue: string | null | undefined): string => {
+export const decryptValue = (
+  encryptedValue: string | null | undefined,
+): string => {
   const key = getEncryptionKey();
   const enabled = isEncryptionEnabledConfig();
 
@@ -127,7 +129,10 @@ export const decryptObject = <T extends Record<string, unknown>>(
         try {
           const decryptedValue = decryptValue(value);
           // Try to parse as JSON if it looks like JSON
-          if (decryptedValue.startsWith("{") || decryptedValue.startsWith("[")) {
+          if (
+            decryptedValue.startsWith("{") ||
+            decryptedValue.startsWith("[")
+          ) {
             decrypted[field] = JSON.parse(decryptedValue) as T[keyof T];
           } else {
             decrypted[field] = decryptedValue as T[keyof T];
