@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, beforeAll } from "vitest";
 import dotenv from "dotenv";
 import path from "path";
 
-// Load environment variables before importing encryption module
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+// Load environment variables from project root before importing encryption module
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 import {
   encryptValue,
@@ -15,6 +15,16 @@ import {
 } from "./encryption";
 
 describe("Encryption Utility", () => {
+  beforeAll(() => {
+    // Ensure encryption key is set for tests
+    if (!process.env.ENCRYPTION_KEY) {
+      // Fallback test key if not in .env
+      process.env.ENCRYPTION_KEY =
+        "REDACTED";
+    }
+    process.env.ENCRYPTION_ENABLED = "true";
+  });
+
   beforeEach(() => {
     // Reset encryption config before each test
     process.env.ENCRYPTION_ENABLED = "true";
