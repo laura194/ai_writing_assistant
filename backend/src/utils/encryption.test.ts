@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, beforeAll } from "vitest";
+import { describe, it, expect, beforeEach, beforeAll, vi } from "vitest";
 import dotenv from "dotenv";
 import path from "path";
+import crypto from "crypto";
 
 // Load environment variables from project root before importing encryption module
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
@@ -14,13 +15,25 @@ import {
   getEncryptionStatus,
 } from "./encryption";
 
+/**
+ * Generate a secure test encryption key
+ * Uses Node.js crypto to generate a random 256-bit key
+ */
+const generateTestEncryptionKey = (): string => {
+  return crypto.randomBytes(32).toString("hex");
+};
+
 describe("Encryption Utility", () => {
+  let testEncryptionKey: string;
+
   beforeAll(() => {
-    // Ensure encryption key is set for tests
+    // Generate a unique test key for this test suite
+    testEncryptionKey = generateTestEncryptionKey();
+
+    // Only set the key if it's not already configured in the environment
+    // This allows tests to use the real key from .env if available
     if (!process.env.ENCRYPTION_KEY) {
-      // Fallback test key if not in .env
-      process.env.ENCRYPTION_KEY =
-        "REDACTED";
+      process.env.ENCRYPTION_KEY = testEncryptionKey;
     }
     process.env.ENCRYPTION_ENABLED = "true";
   });
