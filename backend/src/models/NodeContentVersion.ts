@@ -1,5 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { encryptValue, decryptValue, isEncryptionEnabled } from "../utils/encryption";
+import {
+  encryptValue,
+  decryptValue,
+  isEncryptionEnabled,
+} from "../utils/encryption";
 export interface INodeContentVersion extends Document {
   nodeId: string;
   projectId: string;
@@ -67,19 +71,22 @@ NodeContentVersionSchema.post("find", function (docs: INodeContentVersion[]) {
 });
 
 // Decryption hook - after finding one document
-NodeContentVersionSchema.post("findOne", function (doc: INodeContentVersion | null) {
-  if (!isEncryptionEnabled() || !doc) {
-    return;
-  }
+NodeContentVersionSchema.post(
+  "findOne",
+  function (doc: INodeContentVersion | null) {
+    if (!isEncryptionEnabled() || !doc) {
+      return;
+    }
 
-  if (doc.content) {
-    doc.content = decryptValue(doc.content);
-  }
+    if (doc.content) {
+      doc.content = decryptValue(doc.content);
+    }
 
-  if (doc.name) {
-    doc.name = decryptValue(doc.name);
-  }
-});
+    if (doc.name) {
+      doc.name = decryptValue(doc.name);
+    }
+  },
+);
 
 export default mongoose.models.NodeContentVersion ||
   mongoose.model<INodeContentVersion>(

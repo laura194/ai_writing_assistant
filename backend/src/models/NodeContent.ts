@@ -1,5 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { encryptValue, decryptValue, isEncryptionEnabled } from "../utils/encryption";
+import {
+  encryptValue,
+  decryptValue,
+  isEncryptionEnabled,
+} from "../utils/encryption";
 
 export interface INodeContent extends Document {
   nodeId: string;

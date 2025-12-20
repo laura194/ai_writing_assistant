@@ -1,5 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { encryptValue, decryptValue, isEncryptionEnabled } from "../utils/encryption";
+import {
+  encryptValue,
+  decryptValue,
+  isEncryptionEnabled,
+} from "../utils/encryption";
 
 export interface IProject extends Document {
   name: string;
@@ -86,7 +90,9 @@ projectSchema.post("find", function (docs: IProject[]) {
 
     if (doc.projectStructure) {
       try {
-        const decrypted = decryptValue(doc.projectStructure as unknown as string);
+        const decrypted = decryptValue(
+          doc.projectStructure as unknown as string,
+        );
         doc.projectStructure = JSON.parse(decrypted);
       } catch (error) {
         console.error("Error decrypting projectStructure:", error);

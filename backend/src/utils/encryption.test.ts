@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+} from "vitest";
 import mongoose from "mongoose";
 import crypto from "crypto";
 import dotenv from "dotenv";
@@ -11,7 +19,9 @@ dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 // Import models
 import Project, { IProject } from "../models/Project";
 import NodeContent, { INodeContent } from "../models/NodeContent";
-import NodeContentVersion, { INodeContentVersion } from "../models/NodeContentVersion";
+import NodeContentVersion, {
+  INodeContentVersion,
+} from "../models/NodeContentVersion";
 import Comment, { IComment } from "../models/Comment";
 
 /**
@@ -40,7 +50,7 @@ describe("Model Encryption Hooks", () => {
     // Start in-memory MongoDB server
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
-    
+
     try {
       await mongoose.connect(mongoUri);
       console.log("Connected to in-memory MongoDB for testing");
@@ -57,7 +67,7 @@ describe("Model Encryption Hooks", () => {
     } else {
       delete process.env.ENCRYPTION_KEY;
     }
-    
+
     if (originalEncryptionEnabled !== undefined) {
       process.env.ENCRYPTION_ENABLED = originalEncryptionEnabled;
     } else {
@@ -110,15 +120,17 @@ describe("Model Encryption Hooks", () => {
       await project.save();
 
       // Fetch raw document from database
-      const rawDoc = await mongoose.connection.collection("projects").findOne({ 
-        _id: new mongoose.Types.ObjectId(project._id as string) 
+      const rawDoc = await mongoose.connection.collection("projects").findOne({
+        _id: new mongoose.Types.ObjectId(project._id as string),
       });
 
       // Check that sensitive fields are encrypted in the database
       expect(rawDoc?.name).not.toBe(projectData.name);
       expect(rawDoc?.name).toBeTruthy();
       expect(rawDoc?.authorName).not.toBe(projectData.authorName);
-      expect(rawDoc?.titleCommunityPage).not.toBe(projectData.titleCommunityPage);
+      expect(rawDoc?.titleCommunityPage).not.toBe(
+        projectData.titleCommunityPage,
+      );
       expect(typeof rawDoc?.projectStructure).toBe("string");
     });
 
@@ -140,8 +152,12 @@ describe("Model Encryption Hooks", () => {
       // Check that fields are decrypted
       expect(foundProject?.name).toBe(projectData.name);
       expect(foundProject?.authorName).toBe(projectData.authorName);
-      expect(foundProject?.titleCommunityPage).toBe(projectData.titleCommunityPage);
-      expect(foundProject?.projectStructure).toEqual(projectData.projectStructure);
+      expect(foundProject?.titleCommunityPage).toBe(
+        projectData.titleCommunityPage,
+      );
+      expect(foundProject?.projectStructure).toEqual(
+        projectData.projectStructure,
+      );
     });
 
     it("should decrypt fields when querying with find", async () => {
@@ -210,9 +226,11 @@ describe("Model Encryption Hooks", () => {
       await node.save();
 
       // Fetch raw document
-      const rawDoc = await mongoose.connection.collection("nodecontents").findOne({ 
-        _id: new mongoose.Types.ObjectId(node._id as string) 
-      });
+      const rawDoc = await mongoose.connection
+        .collection("nodecontents")
+        .findOne({
+          _id: new mongoose.Types.ObjectId(node._id as string),
+        });
 
       expect(rawDoc?.name).not.toBe(nodeData.name);
       expect(rawDoc?.content).not.toBe(nodeData.content);
@@ -284,9 +302,11 @@ describe("Model Encryption Hooks", () => {
       const version = new NodeContentVersion(versionData);
       await version.save();
 
-      const rawDoc = await mongoose.connection.collection("nodecontentversions").findOne({ 
-        _id: new mongoose.Types.ObjectId(version._id as string) 
-      });
+      const rawDoc = await mongoose.connection
+        .collection("nodecontentversions")
+        .findOne({
+          _id: new mongoose.Types.ObjectId(version._id as string),
+        });
 
       expect(rawDoc?.name).not.toBe(versionData.name);
       expect(rawDoc?.content).not.toBe(versionData.content);
@@ -304,7 +324,9 @@ describe("Model Encryption Hooks", () => {
       const version = new NodeContentVersion(versionData);
       await version.save();
 
-      const found = await NodeContentVersion.findOne({ nodeId: versionData.nodeId });
+      const found = await NodeContentVersion.findOne({
+        nodeId: versionData.nodeId,
+      });
 
       expect(found?.name).toBe(versionData.name);
       expect(found?.content).toBe(versionData.content);
@@ -334,7 +356,9 @@ describe("Model Encryption Hooks", () => {
         await version.save();
       }
 
-      const found = await NodeContentVersion.find({ nodeId: "node-1" }).sort({ createdAt: 1 });
+      const found = await NodeContentVersion.find({ nodeId: "node-1" }).sort({
+        createdAt: 1,
+      });
 
       expect(found).toHaveLength(2);
       expect(found[0].content).toBe(versions[0].content);
@@ -354,8 +378,8 @@ describe("Model Encryption Hooks", () => {
       const comment = new Comment(commentData);
       await comment.save();
 
-      const rawDoc = await mongoose.connection.collection("comments").findOne({ 
-        _id: new mongoose.Types.ObjectId(comment._id as string) 
+      const rawDoc = await mongoose.connection.collection("comments").findOne({
+        _id: new mongoose.Types.ObjectId(comment._id as string),
       });
 
       expect(rawDoc?.username).not.toBe(commentData.username);
@@ -423,8 +447,8 @@ describe("Model Encryption Hooks", () => {
       const project = new Project(projectData);
       await project.save();
 
-      const rawDoc = await mongoose.connection.collection("projects").findOne({ 
-        _id: new mongoose.Types.ObjectId(project._id as string) 
+      const rawDoc = await mongoose.connection.collection("projects").findOne({
+        _id: new mongoose.Types.ObjectId(project._id as string),
       });
 
       // Fields should remain unencrypted
@@ -450,7 +474,7 @@ describe("Model Encryption Hooks", () => {
 
     it("should handle special characters in content", async () => {
       const specialContent = "Special: !@#$%^&*()_+-=[]{}|;:',.<>?/`~";
-      
+
       const node = new NodeContent({
         nodeId: "node-special",
         name: "Special Node",
