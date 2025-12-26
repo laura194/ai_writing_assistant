@@ -167,9 +167,11 @@ describe("NodeContentVersion Model", () => {
 
       const found = await NodeContentVersion.find({ projectId: "p1" });
 
-      expect(found).toHaveLength(2);
-      expect(found[0].name).toBe("File A");
-      expect(found[1].content).toBe("B");
+      const names = found.map((d) => d.name).sort();
+      const contents = found.map((d) => d.content).sort();
+
+      expect(names).toEqual(["File A", "File B"]);
+      expect(contents).toEqual(["A", "B"]);
     });
 
     it("should not encrypt when encryption is disabled", async () => {
