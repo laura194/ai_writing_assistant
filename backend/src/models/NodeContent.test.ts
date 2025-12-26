@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+} from "vitest";
 import mongoose from "mongoose";
 import crypto from "crypto";
 import dotenv from "dotenv";
@@ -277,9 +285,11 @@ describe("NodeContent Model", () => {
       await node.save();
 
       // Fetch raw document from database
-      const rawDoc = await mongoose.connection.collection("nodecontents").findOne({
-        _id: new mongoose.Types.ObjectId(node._id as string),
-      });
+      const rawDoc = await mongoose.connection
+        .collection("nodecontents")
+        .findOne({
+          _id: new mongoose.Types.ObjectId(node._id as string),
+        });
 
       expect(rawDoc?.content).not.toBe(nodeData.content);
       expect(rawDoc?.content).toBeTruthy();
@@ -298,9 +308,11 @@ describe("NodeContent Model", () => {
       const node = new NodeContent(nodeData);
       await node.save();
 
-      const rawDoc = await mongoose.connection.collection("nodecontents").findOne({
-        _id: new mongoose.Types.ObjectId(node._id as string),
-      });
+      const rawDoc = await mongoose.connection
+        .collection("nodecontents")
+        .findOne({
+          _id: new mongoose.Types.ObjectId(node._id as string),
+        });
 
       expect(rawDoc?.name).not.toBe(nodeData.name);
       expect(rawDoc?.name).toBeTruthy();
@@ -369,9 +381,11 @@ describe("NodeContent Model", () => {
       const node = new NodeContent(nodeData);
       await node.save();
 
-      const rawDoc = await mongoose.connection.collection("nodecontents").findOne({
-        _id: new mongoose.Types.ObjectId(node._id as string),
-      });
+      const rawDoc = await mongoose.connection
+        .collection("nodecontents")
+        .findOne({
+          _id: new mongoose.Types.ObjectId(node._id as string),
+        });
 
       // Should remain unencrypted
       expect(rawDoc?.name).toBe(nodeData.name);
@@ -417,9 +431,27 @@ describe("NodeContent Model", () => {
   describe("Query Operations", () => {
     it("should find nodes by projectId", async () => {
       const nodes = [
-        { nodeId: "n1", name: "N1", category: "file", content: "C1", projectId: "p1" },
-        { nodeId: "n2", name: "N2", category: "file", content: "C2", projectId: "p1" },
-        { nodeId: "n3", name: "N3", category: "file", content: "C3", projectId: "p2" },
+        {
+          nodeId: "n1",
+          name: "N1",
+          category: "file",
+          content: "C1",
+          projectId: "p1",
+        },
+        {
+          nodeId: "n2",
+          name: "N2",
+          category: "file",
+          content: "C2",
+          projectId: "p1",
+        },
+        {
+          nodeId: "n3",
+          name: "N3",
+          category: "file",
+          content: "C3",
+          projectId: "p2",
+        },
       ];
 
       for (const data of nodes) {
@@ -432,16 +464,37 @@ describe("NodeContent Model", () => {
 
     it("should find nodes by category", async () => {
       const nodes = [
-        { nodeId: "n1", name: "N1", category: "file", content: "C1", projectId: "p1" },
-        { nodeId: "n2", name: "N2", category: "folder", content: "C2", projectId: "p1" },
-        { nodeId: "n3", name: "N3", category: "file", content: "C3", projectId: "p1" },
+        {
+          nodeId: "n1",
+          name: "N1",
+          category: "file",
+          content: "C1",
+          projectId: "p1",
+        },
+        {
+          nodeId: "n2",
+          name: "N2",
+          category: "folder",
+          content: "C2",
+          projectId: "p1",
+        },
+        {
+          nodeId: "n3",
+          name: "N3",
+          category: "file",
+          content: "C3",
+          projectId: "p1",
+        },
       ];
 
       for (const data of nodes) {
         await new NodeContent(data).save();
       }
 
-      const found = await NodeContent.find({ projectId: "p1", category: "file" });
+      const found = await NodeContent.find({
+        projectId: "p1",
+        category: "file",
+      });
       expect(found).toHaveLength(2);
     });
 
@@ -502,9 +555,27 @@ describe("NodeContent Model", () => {
 
     it("should delete all nodes in a project", async () => {
       const nodes = [
-        { nodeId: "n1", name: "N1", category: "file", content: "C1", projectId: "p1" },
-        { nodeId: "n2", name: "N2", category: "file", content: "C2", projectId: "p1" },
-        { nodeId: "n3", name: "N3", category: "file", content: "C3", projectId: "p2" },
+        {
+          nodeId: "n1",
+          name: "N1",
+          category: "file",
+          content: "C1",
+          projectId: "p1",
+        },
+        {
+          nodeId: "n2",
+          name: "N2",
+          category: "file",
+          content: "C2",
+          projectId: "p1",
+        },
+        {
+          nodeId: "n3",
+          name: "N3",
+          category: "file",
+          content: "C3",
+          projectId: "p2",
+        },
       ];
 
       for (const data of nodes) {
@@ -520,9 +591,27 @@ describe("NodeContent Model", () => {
 
     it("should count nodes in a project", async () => {
       const nodes = [
-        { nodeId: "n1", name: "N1", category: "file", content: "C1", projectId: "p1" },
-        { nodeId: "n2", name: "N2", category: "file", content: "C2", projectId: "p1" },
-        { nodeId: "n3", name: "N3", category: "file", content: "C3", projectId: "p1" },
+        {
+          nodeId: "n1",
+          name: "N1",
+          category: "file",
+          content: "C1",
+          projectId: "p1",
+        },
+        {
+          nodeId: "n2",
+          name: "N2",
+          category: "file",
+          content: "C2",
+          projectId: "p1",
+        },
+        {
+          nodeId: "n3",
+          name: "N3",
+          category: "file",
+          content: "C3",
+          projectId: "p1",
+        },
       ];
 
       for (const data of nodes) {
@@ -698,7 +787,8 @@ Line 4`;
     });
 
     it("should preserve whitespace in content", async () => {
-      const contentWithWhitespace = "  Start with spaces\n\n\nMultiple newlines\t\tTabs here  ";
+      const contentWithWhitespace =
+        "  Start with spaces\n\n\nMultiple newlines\t\tTabs here  ";
 
       const node = new NodeContent({
         nodeId: "node-whitespace",
