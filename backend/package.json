@@ -7,7 +7,6 @@
     "start": "node index.js",
     "test": "vitest",
     "test:encryption": "vitest src/utils/encryption.test.ts",
-    "test:projectmodel": "vitest src/models/project.model.test.ts"
   },
   "keywords": [],
   "author": "",
