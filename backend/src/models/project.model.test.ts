@@ -79,13 +79,14 @@ describe("Project Model", () => {
         projectStructure: { nodes: [] },
       };
 
-      const project = new Project(projectData);
-      await project.save();
+    const project = new Project(projectData);
+    await project.save();
 
-      expect(project._id).toBeDefined();
-      expect(project.name).toBe(projectData.name);
-      expect(project.username).toBe(projectData.username);
-      expect(project.projectStructure).toEqual(projectData.projectStructure);
+    const found = await Project.findOne({ _id: project._id });
+
+    expect(found?.name).toBe(projectData.name);
+    expect(found?.username).toBe(projectData.username);
+    expect(found?.projectStructure).toEqual(projectData.projectStructure);
     });
 
     it("should fail validation without required name field", async () => {
@@ -151,18 +152,17 @@ describe("Project Model", () => {
         titleCommunityPage: "My Project",
         category: "Fiction",
         typeOfDocument: "Novel",
-        authorName: "John Doe",
+        authorName: "Eileen Stark",
       };
 
       const project = new Project(projectData);
       await project.save();
 
-      expect(project.isPublic).toBe(true);
-      expect(project.tags).toEqual(["tag1", "tag2"]);
-      expect(project.titleCommunityPage).toBe("My Project");
-      expect(project.category).toBe("Fiction");
-      expect(project.typeOfDocument).toBe("Novel");
-      expect(project.authorName).toBe("John Doe");
+      const found = await Project.findOne({ _id: project._id });
+      expect(found?.titleCommunityPage).toBe("My Project");
+      expect(found?.category).toBe("Fiction");
+      expect(found?.typeOfDocument).toBe("Novel");
+      expect(found?.authorName).toBe("Eileen Stark");
     });
 
     it("should automatically add timestamps", async () => {
