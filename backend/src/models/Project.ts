@@ -39,7 +39,7 @@ const projectSchema: Schema = new Schema(
     favoritedBy: { type: [String], default: [] },
   },
   {
-    timestamps: true, // created_at + updated_at automatisch
+    timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
   },
 );
 
