@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+} from "vitest";
 import mongoose from "mongoose";
 import crypto from "crypto";
 import dotenv from "dotenv";
@@ -79,14 +87,14 @@ describe("Project Model", () => {
         projectStructure: { nodes: [] },
       };
 
-    const project = new Project(projectData);
-    await project.save();
+      const project = new Project(projectData);
+      await project.save();
 
-    const found = await Project.findOne({ _id: project._id });
+      const found = await Project.findOne({ _id: project._id });
 
-    expect(found?.name).toBe(projectData.name);
-    expect(found?.username).toBe(projectData.username);
-    expect(found?.projectStructure).toEqual(projectData.projectStructure);
+      expect(found?.name).toBe(projectData.name);
+      expect(found?.username).toBe(projectData.username);
+      expect(found?.projectStructure).toEqual(projectData.projectStructure);
     });
 
     it("should fail validation without required name field", async () => {
@@ -119,7 +127,9 @@ describe("Project Model", () => {
 
       const project = new Project(projectData);
 
-      await expect(project.save()).rejects.toThrow(/projectStructure.*required/i);
+      await expect(project.save()).rejects.toThrow(
+        /projectStructure.*required/i,
+      );
     });
 
     it("should set default values for optional fields", async () => {
@@ -254,7 +264,9 @@ describe("Project Model", () => {
         _id: new mongoose.Types.ObjectId(project._id as string),
       });
 
-      expect(rawDoc?.titleCommunityPage).not.toBe(projectData.titleCommunityPage);
+      expect(rawDoc?.titleCommunityPage).not.toBe(
+        projectData.titleCommunityPage,
+      );
       expect(rawDoc?.titleCommunityPage).toBeTruthy();
     });
 
@@ -366,7 +378,12 @@ describe("Project Model", () => {
     it("should find public projects", async () => {
       const projects = [
         { name: "P1", username: "user1", projectStructure: {}, isPublic: true },
-        { name: "P2", username: "user2", projectStructure: {}, isPublic: false },
+        {
+          name: "P2",
+          username: "user2",
+          projectStructure: {},
+          isPublic: false,
+        },
         { name: "P3", username: "user3", projectStructure: {}, isPublic: true },
       ];
 
@@ -393,8 +410,18 @@ describe("Project Model", () => {
 
     it("should find projects by category", async () => {
       const projects = [
-        { name: "P1", username: "u1", projectStructure: {}, category: "Fiction" },
-        { name: "P2", username: "u2", projectStructure: {}, category: "Non-Fiction" },
+        {
+          name: "P1",
+          username: "u1",
+          projectStructure: {},
+          category: "Fiction",
+        },
+        {
+          name: "P2",
+          username: "u2",
+          projectStructure: {},
+          category: "Non-Fiction",
+        },
       ];
 
       for (const data of projects) {
@@ -487,9 +514,24 @@ describe("Project Model", () => {
 
     it("should find projects upvoted by a user", async () => {
       const projects = [
-        { name: "P1", username: "u1", projectStructure: {}, upvotedBy: ["user1"] },
-        { name: "P2", username: "u2", projectStructure: {}, upvotedBy: ["user2"] },
-        { name: "P3", username: "u3", projectStructure: {}, upvotedBy: ["user1"] },
+        {
+          name: "P1",
+          username: "u1",
+          projectStructure: {},
+          upvotedBy: ["user1"],
+        },
+        {
+          name: "P2",
+          username: "u2",
+          projectStructure: {},
+          upvotedBy: ["user2"],
+        },
+        {
+          name: "P3",
+          username: "u3",
+          projectStructure: {},
+          upvotedBy: ["user1"],
+        },
       ];
 
       for (const data of projects) {
