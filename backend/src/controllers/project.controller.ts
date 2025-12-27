@@ -129,10 +129,12 @@ export const updateProject = async (
     // Update fields
     if (name !== undefined) project.name = name;
     if (username !== undefined) project.username = username;
-    if (projectStructure !== undefined) project.projectStructure = projectStructure;
+    if (projectStructure !== undefined)
+      project.projectStructure = projectStructure;
     if (isPublic !== undefined) project.isPublic = isPublic;
     if (tags !== undefined) project.tags = tags;
-    if (titleCommunityPage !== undefined) project.titleCommunityPage = titleCommunityPage;
+    if (titleCommunityPage !== undefined)
+      project.titleCommunityPage = titleCommunityPage;
     if (category !== undefined) project.category = category;
     if (typeOfDocument !== undefined) project.typeOfDocument = typeOfDocument;
     if (authorName !== undefined) project.authorName = authorName;

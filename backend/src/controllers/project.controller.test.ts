@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, type Mock} from "vitest";
+import { describe, it, expect, beforeEach, type Mock } from "vitest";
 import { vi } from "vitest";
 import request from "supertest";
 import express from "express";
@@ -25,38 +25,41 @@ beforeEach(() => {
 
 describe("project.controller", () => {
   it("POST /api/projects erstellt ein neues Projekt und gibt entschlüsselte Daten zurück", async () => {
-      const mockProject = { 
-        _id: "1", 
-        name: "Project1", 
-        username: "user1", 
-        projectStructure: [],
-        isPublic: false,
-        tags: [],
-        titleCommunityPage: "",
-        category: "",
-        typeOfDocument: "",
-        authorName: ""
-      };
-      
-      // Mock the constructor and save
-      const mockSave = vi.fn().mockResolvedValue(mockProject);
-      vi.mocked(Project).mockImplementation(() => ({
-        save: mockSave,
-        ...mockProject
-      } as any));
-      
-      // Mock the re-query for decrypted data
-      (Project.findById as unknown as Mock).mockResolvedValue(mockProject);
+    const mockProject = {
+      _id: "1",
+      name: "Project1",
+      username: "user1",
+      projectStructure: [],
+      isPublic: false,
+      tags: [],
+      titleCommunityPage: "",
+      category: "",
+      typeOfDocument: "",
+      authorName: "",
+    };
 
-      const res = await request(app).post("/api/projects").send({
-        name: "Project1",
-        username: "user1",
-        projectStructure: [],
-      });
+    // Mock the constructor and save
+    const mockSave = vi.fn().mockResolvedValue(mockProject);
+    vi.mocked(Project).mockImplementation(
+      () =>
+        ({
+          save: mockSave,
+          ...mockProject,
+        }) as any,
+    );
 
-      expect(res.status).toBe(201);
-      expect(res.body).toEqual(mockProject);
+    // Mock the re-query for decrypted data
+    (Project.findById as unknown as Mock).mockResolvedValue(mockProject);
+
+    const res = await request(app).post("/api/projects").send({
+      name: "Project1",
+      username: "user1",
+      projectStructure: [],
     });
+
+    expect(res.status).toBe(201);
+    expect(res.body).toEqual(mockProject);
+  });
 
   it("GET /api/projects/:id gibt ein Projekt zurück", async () => {
     const mockProject = { _id: "1", name: "Project1", username: "user1" };
@@ -82,43 +85,45 @@ describe("project.controller", () => {
   });
 
   it("PUT /api/projects/:id aktualisiert via Find-then-Save Pattern", async () => {
-      const existingProject = {
-        _id: "1",
-        name: "OldName",
-        username: "user1",
-        projectStructure: [],
-        isPublic: false,
-        tags: [],
-        titleCommunityPage: "",
-        category: "",
-        typeOfDocument: "",
-        authorName: "",
-        save: vi.fn().mockResolvedValue(true)
-      };
-      
-      const updatedProject = { 
-        _id: "1", 
-        name: "NewName", 
-        username: "user1",
-        projectStructure: [],
-        isPublic: false,
-        tags: [],
-        titleCommunityPage: "",
-        category: "",
-        typeOfDocument: "",
-        authorName: ""
-      };
+    const existingProject = {
+      _id: "1",
+      name: "OldName",
+      username: "user1",
+      projectStructure: [],
+      isPublic: false,
+      tags: [],
+      titleCommunityPage: "",
+      category: "",
+      typeOfDocument: "",
+      authorName: "",
+      save: vi.fn().mockResolvedValue(true),
+    };
 
-      (Project.findById as unknown as Mock)
-        .mockResolvedValueOnce(existingProject) // First call: find to update
-        .mockResolvedValueOnce(updatedProject); // Second call: query back decrypted
+    const updatedProject = {
+      _id: "1",
+      name: "NewName",
+      username: "user1",
+      projectStructure: [],
+      isPublic: false,
+      tags: [],
+      titleCommunityPage: "",
+      category: "",
+      typeOfDocument: "",
+      authorName: "",
+    };
 
-      const res = await request(app).put("/api/projects/1").send({ name: "NewName" });
+    (Project.findById as unknown as Mock)
+      .mockResolvedValueOnce(existingProject) // First call: find to update
+      .mockResolvedValueOnce(updatedProject); // Second call: query back decrypted
 
-      expect(res.status).toBe(200);
-      expect(existingProject.save).toHaveBeenCalled();
-      expect(res.body.name).toBe("NewName");
-    });
+    const res = await request(app)
+      .put("/api/projects/1")
+      .send({ name: "NewName" });
+
+    expect(res.status).toBe(200);
+    expect(existingProject.save).toHaveBeenCalled();
+    expect(res.body.name).toBe("NewName");
+  });
 
   it("GET /api/projects/by-username gibt Projekte für einen Benutzer zurück", async () => {
     const mockProjects = [
@@ -172,17 +177,19 @@ describe("project.controller", () => {
   });
 
   it("DELETE /api/projects/:id löscht Projekt und zugehörige Daten", async () => {
-    const deletedProject = { 
-      _id: "1", 
+    const deletedProject = {
+      _id: "1",
       name: "Project1",
-      username: "user1" // Added username to match controller response
+      username: "user1", // Added username to match controller response
     };
 
     // Mock findById to return project (called first in controller)
     (Project.findById as unknown as Mock).mockResolvedValue(deletedProject);
     // Mock deleteOne for actual deletion
-    (Project.deleteOne as unknown as Mock).mockResolvedValue({ deletedCount: 1 });
-    
+    (Project.deleteOne as unknown as Mock).mockResolvedValue({
+      deletedCount: 1,
+    });
+
     (NodeContent.deleteMany as unknown as Mock).mockResolvedValue({
       deletedCount: 2,
     });
@@ -220,12 +227,15 @@ describe("project.controller Fehlerfälle", () => {
 
   it("POST /api/projects save() Fehler gibt 500 zurück", async () => {
     const error = new Error("DB Fehler");
-    
+
     // Mock the Project constructor
     const mockSave = vi.fn().mockRejectedValue(error);
-    vi.mocked(Project).mockImplementation(() => ({
-      save: mockSave
-    } as any));
+    vi.mocked(Project).mockImplementation(
+      () =>
+        ({
+          save: mockSave,
+        }) as any,
+    );
 
     const consoleErrorMock = vi
       .spyOn(console, "error")
@@ -290,12 +300,12 @@ describe("project.controller Fehlerfälle", () => {
       category: "",
       typeOfDocument: "",
       authorName: "",
-      save: vi.fn().mockResolvedValue(true)
+      save: vi.fn().mockResolvedValue(true),
     };
-    
-    const updatedProject = { 
-      _id: "1", 
-      name: "UpdatedProject", 
+
+    const updatedProject = {
+      _id: "1",
+      name: "UpdatedProject",
       username: "user1",
       projectStructure: [],
       isPublic: false,
@@ -303,7 +313,7 @@ describe("project.controller Fehlerfälle", () => {
       titleCommunityPage: "",
       category: "",
       typeOfDocument: "",
-      authorName: ""
+      authorName: "",
     };
 
     (Project.findById as unknown as Mock)

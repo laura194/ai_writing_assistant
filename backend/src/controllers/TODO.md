@@ -1,75 +1,4 @@
-## 1. Clarify controller responsibilities
-
-For all controllers (Project, NodeContent, Comment):
-
-- Do **not** re‑implement encryption logic in controllers. Let the model hooks handle it.
-- Ensure controllers:
-  - Always use the Mongoose models (not raw collections) so hooks run.
-  - Never expose sensitive fields that should stay internal (even if decrypted).
-  - Handle cases where encryption is disabled (env toggle) transparently.
-
-***
-
-## 2. Project controller plan
-
-### 2.1 Endpoints / handlers
-
-For `ProjectController` (or `Project.ts` controller file):
-
-- `createProject`
-  - Validate input DTO/body.
-  - Call `Project.create()` (or `new Project().save()`).
-  - Return created project with non‑sensitive fields only.
-- `getProjectById`
-  - Call `Project.findById(id)` or `findOne({ _id: id })`.
-  - Rely on `post('findOne')` to give decrypted data.
-  - If not found, return 404.
-- `listProjects`
-  - Call `Project.find(query)` for list/filter.
-  - Rely on `post('find')` for decryption.
-- `updateProject`
-  - Call `Project.findByIdAndUpdate` **or**:
-    - `const p = await Project.findById(id);`
-    - mutate allowed fields;
-    - `await p.save();` (ensures `pre('save')` runs).
-  - Prefer the second pattern if your encryption logic only triggers correctly on `save`.
-- `deleteProject`
-  - Soft or hard delete as your domain requires.
-
-### 2.2 Project controller tests
-
-For `Project.test.ts`:
-
-- Setup:
-  - Use in‑memory MongoDB (same pattern as model tests).
-  - Ensure encryption env vars are set.
-
-- Test cases:
-  - `createProject`:
-    - Send request or call handler with plaintext fields.
-    - Assert response contains correct plaintext values.
-    - Optionally check raw DB (via separate collection) to ensure data is encrypted.
-  - `getProjectById`:
-    - Seed a project using the model.
-    - Fetch via controller.
-    - Assert returned data is correctly decrypted and matches original.
-  - `listProjects`:
-    - Seed multiple projects.
-    - Fetch via controller.
-    - Assert all items are readable.
-  - `updateProject`:
-    - Create project.
-    - Update a subset of fields through controller.
-    - Assert response shows updated plaintext.
-    - Optionally verify that only changed fields are re‑encrypted (if you test that at controller level).
-  - `encryption disabled`:
-    - Temporarily set `ENCRYPTION_ENABLED=false`.
-    - Create/fetch through controller.
-    - Assert data still flows correctly, and DB holds plaintext (optional raw check).
-
-***
-
-## 3. NodeContent controller plan
+## Update NodeContent controller
 
 ### 3.1 Endpoints / handlers
 
@@ -102,7 +31,7 @@ For `NodeContent.test.ts`:
     - Old versions are stored via `NodeContentVersion` with correct encryption (if relevant).
   - Behavior with encryption disabled flag.
 
-***
+---
 
 ## 4. Comment controller plan
 
@@ -143,7 +72,7 @@ For `CommentController` tests:
   - Comment not found → 404.
   - Invalid IDs / validation errors.
 
-***
+---
 
 ## 5. Cross‑cutting concerns for controllers
 
@@ -166,4 +95,3 @@ For `CommentController` tests:
 - Wherever you need encryption hooks:
   - Avoid `updateOne` / `findOneAndUpdate` unless you are explicitly handling encryption for those.
   - Prefer `findById` → mutate → `save()` if your encryption is `pre('save')` only.
-  
