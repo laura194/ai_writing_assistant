@@ -33,15 +33,18 @@ export const createProject = async (
       name,
       username,
       projectStructure,
-      isPublic: isPublic ?? false, // falls nicht mitgeschickt → default false
+      isPublic: isPublic ?? false,
       tags: tags ?? [],
       titleCommunityPage: titleCommunityPage ?? "",
       category: category ?? "",
       typeOfDocument: typeOfDocument ?? "",
-      authorName: authorName ?? "", // Optional: Name des Autors
+      authorName: authorName ?? "",
     });
 
-    const savedProject = await newProject.save();
+    await newProject.save(); // ✅ Pre-save hook encrypts data
+
+    // Query back to get decrypted data for response
+    const savedProject = await Project.findById(newProject._id);
     res.status(201).json(savedProject);
   } catch (error) {
     console.error("Fehler beim Erstellen des Projekts:", error);
@@ -55,14 +58,14 @@ export const getProjectById = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { id } = req.params; // ID aus den URL-Parametern holen
+    const { id } = req.params;
 
     if (!id) {
       res.status(400).json({ error: "Project ID is required" });
       return;
     }
 
-    const project = await Project.findById(id);
+    const project = await Project.findById(id); // ✅ Post-findOne hook decrypts
 
     if (!project) {
       res.status(404).json({ error: "Project not found" });
@@ -82,7 +85,7 @@ export const getAllProjects = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const projects = await Project.find();
+    const projects = await Project.find(); // ✅ Post-find hook decrypts
     res.status(200).json(projects);
   } catch (error) {
     console.error("Error fetching all projects:", error);
@@ -91,6 +94,7 @@ export const getAllProjects = async (
 };
 
 // Update a specific project entry by ID
+// 🔧 FIXED: Changed from findOneAndUpdate to find + save pattern
 export const updateProject = async (
   req: Request,
   res: Response,
@@ -114,27 +118,30 @@ export const updateProject = async (
   }
 
   try {
-    const updatedProject = await Project.findOneAndUpdate(
-      { _id: id },
-      {
-        ...(name && { name }),
-        ...(username && { username }),
-        ...(projectStructure && { projectStructure }),
-        ...(typeof isPublic !== "undefined" && { isPublic }),
-        ...(tags && { tags }),
-        ...(titleCommunityPage && { titleCommunityPage }),
-        ...(category && { category }),
-        ...(typeOfDocument && { typeOfDocument }),
-        ...(authorName && { authorName }),
-      },
-      { new: true },
-    );
+    // Find the project first
+    const project = await Project.findById(id);
 
-    if (!updatedProject) {
+    if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
     }
 
+    // Update fields
+    if (name !== undefined) project.name = name;
+    if (username !== undefined) project.username = username;
+    if (projectStructure !== undefined) project.projectStructure = projectStructure;
+    if (isPublic !== undefined) project.isPublic = isPublic;
+    if (tags !== undefined) project.tags = tags;
+    if (titleCommunityPage !== undefined) project.titleCommunityPage = titleCommunityPage;
+    if (category !== undefined) project.category = category;
+    if (typeOfDocument !== undefined) project.typeOfDocument = typeOfDocument;
+    if (authorName !== undefined) project.authorName = authorName;
+
+    // Save (triggers pre-save encryption hook)
+    await project.save();
+
+    // Query back to get decrypted data
+    const updatedProject = await Project.findById(id);
     res.status(200).json(updatedProject);
   } catch (error) {
     console.error("Error updating project:", error);
@@ -157,7 +164,7 @@ export const getProjectsByUsername = async (
   try {
     const projects = await Project.find({ username: username.toString() }).sort(
       { createdAt: -1 },
-    );
+    ); // ✅ Post-find hook decrypts
 
     if (projects.length === 0) {
       res.status(404).json({ error: "No projects found for this username" });
@@ -186,7 +193,7 @@ export const getRecentProjectsByUsername = async (
   try {
     const projects = await Project.find({ username: username.toString() })
       .sort({ createdAt: -1 })
-      .limit(3);
+      .limit(3); // ✅ Post-find hook decrypts
 
     res.status(200).json(projects);
   } catch (error) {
@@ -208,20 +215,24 @@ export const deleteProject = async (
   }
 
   try {
-    const deletedProject = await Project.findByIdAndDelete(id);
+    // Get project details before deletion (for response)
+    const project = await Project.findById(id); // ✅ Post-findOne hook decrypts
 
-    if (!deletedProject) {
+    if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
     }
 
-    const deletedNodeContents = await NodeContent.deleteMany({ projectId: id });
+    // Delete the project
+    await Project.deleteOne({ _id: id });
 
+    // Delete related data
+    const deletedNodeContents = await NodeContent.deleteMany({ projectId: id });
     const deletedAiProtocols = await AiProtocol.deleteMany({ projectId: id });
 
     res.status(200).json({
       message: "Project and related data successfully deleted",
-      deletedProject,
+      deletedProject: project,
       deletedNodeContents: deletedNodeContents.deletedCount,
       deletedAiProtocols: deletedAiProtocols.deletedCount,
     });
@@ -239,7 +250,7 @@ export const getPublicProjects = async (
   try {
     const publicProjects = await Project.find({ isPublic: true }).sort({
       createdAt: -1,
-    });
+    }); // ✅ Post-find hook decrypts
 
     if (publicProjects.length === 0) {
       res.status(404).json({ error: "No public projects found" });
@@ -267,7 +278,7 @@ export const toggleUpvote = async (
   }
 
   try {
-    const project = await Project.findById(id);
+    const project = await Project.findById(id); // ✅ Post-findOne hook decrypts
     if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
@@ -280,8 +291,11 @@ export const toggleUpvote = async (
       project.upvotedBy.push(username);
     }
 
-    await project.save();
-    res.status(200).json(project);
+    await project.save(); // ✅ Pre-save hook encrypts
+
+    // Query back to get decrypted data
+    const updatedProject = await Project.findById(id);
+    res.status(200).json(updatedProject);
   } catch (error) {
     console.error("Error toggling upvote:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -302,7 +316,7 @@ export const toggleFavorite = async (
   }
 
   try {
-    const project = await Project.findById(id);
+    const project = await Project.findById(id); // ✅ Post-findOne hook decrypts
     if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
@@ -315,8 +329,11 @@ export const toggleFavorite = async (
       project.favoritedBy.push(username);
     }
 
-    await project.save();
-    res.status(200).json(project);
+    await project.save(); // ✅ Pre-save hook encrypts
+
+    // Query back to get decrypted data
+    const updatedProject = await Project.findById(id);
+    res.status(200).json(updatedProject);
   } catch (error) {
     console.error("Error toggling favorite:", error);
     res.status(500).json({ error: "Internal Server Error" });
