@@ -41,7 +41,7 @@ export const createProject = async (
       authorName: authorName ?? "",
     });
 
-    await newProject.save(); // ✅ Pre-save hook encrypts data
+    await newProject.save(); // Pre-save hook encrypts data
 
     // Query back to get decrypted data for response
     const savedProject = await Project.findById(newProject._id);
@@ -65,7 +65,7 @@ export const getProjectById = async (
       return;
     }
 
-    const project = await Project.findById(id); // ✅ Post-findOne hook decrypts
+    const project = await Project.findById(id); // Post-findOne hook decrypts
 
     if (!project) {
       res.status(404).json({ error: "Project not found" });
@@ -85,7 +85,7 @@ export const getAllProjects = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const projects = await Project.find(); // ✅ Post-find hook decrypts
+    const projects = await Project.find(); // Post-find hook decrypts
     res.status(200).json(projects);
   } catch (error) {
     console.error("Error fetching all projects:", error);
@@ -93,8 +93,7 @@ export const getAllProjects = async (
   }
 };
 
-// Update a specific project entry by ID
-// 🔧 FIXED: Changed from findOneAndUpdate to find + save pattern
+// Changed from findOneAndUpdate to find + save pattern
 export const updateProject = async (
   req: Request,
   res: Response,
@@ -166,7 +165,7 @@ export const getProjectsByUsername = async (
   try {
     const projects = await Project.find({ username: username.toString() }).sort(
       { createdAt: -1 },
-    ); // ✅ Post-find hook decrypts
+    ); // Post-find hook decrypts
 
     if (projects.length === 0) {
       res.status(404).json({ error: "No projects found for this username" });
@@ -195,7 +194,7 @@ export const getRecentProjectsByUsername = async (
   try {
     const projects = await Project.find({ username: username.toString() })
       .sort({ createdAt: -1 })
-      .limit(3); // ✅ Post-find hook decrypts
+      .limit(3); // Post-find hook decrypts
 
     res.status(200).json(projects);
   } catch (error) {
@@ -252,7 +251,7 @@ export const getPublicProjects = async (
   try {
     const publicProjects = await Project.find({ isPublic: true }).sort({
       createdAt: -1,
-    }); // ✅ Post-find hook decrypts
+    }); // Post-find hook decrypts
 
     if (publicProjects.length === 0) {
       res.status(404).json({ error: "No public projects found" });
@@ -280,7 +279,7 @@ export const toggleUpvote = async (
   }
 
   try {
-    const project = await Project.findById(id); // ✅ Post-findOne hook decrypts
+    const project = await Project.findById(id); // Post-findOne hook decrypts
     if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
@@ -293,7 +292,7 @@ export const toggleUpvote = async (
       project.upvotedBy.push(username);
     }
 
-    await project.save(); // ✅ Pre-save hook encrypts
+    await project.save(); // Pre-save hook encrypts
 
     // Query back to get decrypted data
     const updatedProject = await Project.findById(id);
@@ -318,7 +317,7 @@ export const toggleFavorite = async (
   }
 
   try {
-    const project = await Project.findById(id); // ✅ Post-findOne hook decrypts
+    const project = await Project.findById(id); // Post-findOne hook decrypts
     if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
@@ -331,7 +330,7 @@ export const toggleFavorite = async (
       project.favoritedBy.push(username);
     }
 
-    await project.save(); // ✅ Pre-save hook encrypts
+    await project.save(); // Pre-save hook encrypts
 
     // Query back to get decrypted data
     const updatedProject = await Project.findById(id);
