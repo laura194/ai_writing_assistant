@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, type Mock} from "vitest";
+import { vi } from "vitest";
 import request from "supertest";
 import express from "express";
 import bodyParser from "body-parser";
@@ -30,7 +31,7 @@ describe("project.controller", () => {
       username: "user1",
       projectStructure: [],
     };
-    (Project.prototype.save as unknown as vi.Mock).mockResolvedValue(
+    (Project.prototype.save as unknown as Mock).mockResolvedValue(
       mockProject,
     );
 
@@ -46,7 +47,7 @@ describe("project.controller", () => {
 
   it("GET /api/projects/:id gibt ein Projekt zurück", async () => {
     const mockProject = { _id: "1", name: "Project1", username: "user1" };
-    (Project.findById as unknown as vi.Mock).mockResolvedValue(mockProject);
+    (Project.findById as unknown as Mock).mockResolvedValue(mockProject);
 
     const res = await request(app).get("/api/projects/1");
 
@@ -59,7 +60,7 @@ describe("project.controller", () => {
       { _id: "1", name: "Project1", username: "user1" },
       { _id: "2", name: "Project2", username: "user2" },
     ];
-    (Project.find as unknown as vi.Mock).mockResolvedValue(mockProjects);
+    (Project.find as unknown as Mock).mockResolvedValue(mockProjects);
 
     const res = await request(app).get("/api/projects");
 
@@ -74,7 +75,7 @@ describe("project.controller", () => {
       username: "user1",
       projectStructure: [],
     };
-    (Project.findOneAndUpdate as unknown as vi.Mock).mockResolvedValue(
+    (Project.findOneAndUpdate as unknown as Mock).mockResolvedValue(
       mockUpdated,
     );
 
@@ -94,7 +95,7 @@ describe("project.controller", () => {
       { _id: "2", name: "Project2", username: "user1" },
     ];
 
-    (Project.find as unknown as vi.Mock).mockReturnValue({
+    (Project.find as unknown as Mock).mockReturnValue({
       sort: vi.fn().mockReturnValue(mockProjects),
     });
 
@@ -107,7 +108,7 @@ describe("project.controller", () => {
   });
 
   it("GET /api/projects/by-username ohne Projekte gibt 404", async () => {
-    (Project.find as unknown as vi.Mock).mockReturnValue({
+    (Project.find as unknown as Mock).mockReturnValue({
       sort: vi.fn().mockReturnValue([]),
     });
 
@@ -125,7 +126,7 @@ describe("project.controller", () => {
       { _id: "3", name: "Project3", username: "user1" },
     ];
 
-    (Project.find as unknown as vi.Mock).mockReturnValue({
+    (Project.find as unknown as Mock).mockReturnValue({
       sort: vi.fn().mockReturnValue({
         limit: vi.fn().mockReturnValue(mockProjects),
       }),
@@ -142,13 +143,13 @@ describe("project.controller", () => {
   it("DELETE /api/projects/:id löscht Projekt und zugehörige Daten", async () => {
     const deletedProject = { _id: "1", name: "Project1" };
 
-    (Project.findByIdAndDelete as unknown as vi.Mock).mockResolvedValue(
+    (Project.findByIdAndDelete as unknown as Mock).mockResolvedValue(
       deletedProject,
     );
-    (NodeContent.deleteMany as unknown as vi.Mock).mockResolvedValue({
+    (NodeContent.deleteMany as unknown as Mock).mockResolvedValue({
       deletedCount: 2,
     });
-    (AiProtocol.deleteMany as unknown as vi.Mock).mockResolvedValue({
+    (AiProtocol.deleteMany as unknown as Mock).mockResolvedValue({
       deletedCount: 2,
     });
 
@@ -182,7 +183,7 @@ describe("project.controller Fehlerfälle", () => {
 
   it("POST /api/projects save() Fehler gibt 500 zurück", async () => {
     const error = new Error("DB Fehler");
-    (Project.prototype.save as unknown as vi.Mock).mockRejectedValue(error);
+    (Project.prototype.save as unknown as Mock).mockRejectedValue(error);
 
     const consoleErrorMock = vi
       .spyOn(console, "error")
@@ -206,7 +207,7 @@ describe("project.controller Fehlerfälle", () => {
 
   // --- GET BY ID ---
   it("GET /api/projects/:id ungültige ID gibt 404 zurück", async () => {
-    (Project.findById as unknown as vi.Mock).mockResolvedValue(null);
+    (Project.findById as unknown as Mock).mockResolvedValue(null);
 
     const res = await request(app).get("/api/projects/invalid-id");
 
@@ -216,7 +217,7 @@ describe("project.controller Fehlerfälle", () => {
 
   it("GET /api/projects/:id Fehler gibt 500 zurück", async () => {
     const error = new Error("DB Fehler");
-    (Project.findById as unknown as vi.Mock).mockRejectedValue(error);
+    (Project.findById as unknown as Mock).mockRejectedValue(error);
 
     const consoleErrorMock = vi
       .spyOn(console, "error")
@@ -249,7 +250,7 @@ describe("project.controller Fehlerfälle", () => {
   });
 
   it("PUT /api/projects/:id nicht gefunden gibt 404 zurück", async () => {
-    (Project.findOneAndUpdate as unknown as vi.Mock).mockResolvedValue(null);
+    (Project.findOneAndUpdate as unknown as Mock).mockResolvedValue(null);
 
     const res = await request(app).put("/api/projects/1").send({
       name: "Project1",
@@ -263,7 +264,7 @@ describe("project.controller Fehlerfälle", () => {
 
   it("PUT /api/projects/:id Fehler gibt 500 zurück", async () => {
     const error = new Error("DB Fehler");
-    (Project.findOneAndUpdate as unknown as vi.Mock).mockRejectedValue(error);
+    (Project.findOneAndUpdate as unknown as Mock).mockRejectedValue(error);
 
     const consoleErrorMock = vi
       .spyOn(console, "error")
@@ -296,7 +297,7 @@ describe("project.controller Fehlerfälle", () => {
   it("GET /api/projects/by-username Fehler gibt 500 zurück", async () => {
     const error = new Error("DB Fehler");
 
-    (Project.find as unknown as vi.Mock).mockReturnValue({
+    (Project.find as unknown as Mock).mockReturnValue({
       sort: vi.fn().mockRejectedValue(error),
     });
 
@@ -330,7 +331,7 @@ describe("project.controller zusätzliche Fehlerfälle", () => {
   it("GET /api/projects/by-username/recent Fehler gibt 500 zurück", async () => {
     const error = new Error("DB Fehler");
 
-    (Project.find as unknown as vi.Mock).mockReturnValue({
+    (Project.find as unknown as Mock).mockReturnValue({
       sort: vi.fn().mockReturnValue({
         limit: vi.fn().mockRejectedValue(error),
       }),
@@ -357,7 +358,7 @@ describe("project.controller zusätzliche Fehlerfälle", () => {
   // --- DELETE PROJECT ---
 
   it("DELETE /api/projects/:id nicht gefunden gibt 404 zurück", async () => {
-    (Project.findByIdAndDelete as unknown as vi.Mock).mockResolvedValue(null);
+    (Project.findByIdAndDelete as unknown as Mock).mockResolvedValue(null);
 
     const res = await request(app).delete("/api/projects/invalid-id");
 
@@ -367,7 +368,7 @@ describe("project.controller zusätzliche Fehlerfälle", () => {
 
   it("DELETE /api/projects/:id Fehler gibt 500 zurück", async () => {
     const error = new Error("DB Fehler");
-    (Project.findByIdAndDelete as unknown as vi.Mock).mockRejectedValue(error);
+    (Project.findByIdAndDelete as unknown as Mock).mockRejectedValue(error);
 
     const consoleErrorMock = vi
       .spyOn(console, "error")
@@ -391,7 +392,7 @@ describe("project.controller zusätzliche Fehlerfälle", () => {
         { _id: "1", name: "Public1", isPublic: true },
         { _id: "2", name: "Public2", isPublic: true },
       ];
-      (Project.find as unknown as vi.Mock).mockReturnValue({
+      (Project.find as unknown as Mock).mockReturnValue({
         sort: vi.fn().mockReturnValue(mockProjects),
       });
 
@@ -402,7 +403,7 @@ describe("project.controller zusätzliche Fehlerfälle", () => {
     });
 
     it("gibt 404 zurück, wenn keine öffentlichen Projekte existieren", async () => {
-      (Project.find as unknown as vi.Mock).mockReturnValue({
+      (Project.find as unknown as Mock).mockReturnValue({
         sort: vi.fn().mockReturnValue([]),
       });
 
@@ -415,7 +416,7 @@ describe("project.controller zusätzliche Fehlerfälle", () => {
     it("gibt 500 zurück, wenn ein Fehler auftritt", async () => {
       const error = new Error("DB Fehler");
 
-      (Project.find as unknown as vi.Mock).mockReturnValue({
+      (Project.find as unknown as Mock).mockReturnValue({
         sort: vi.fn().mockImplementation(() => {
           throw error;
         }),
