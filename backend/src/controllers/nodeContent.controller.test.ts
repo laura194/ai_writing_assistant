@@ -1,5 +1,6 @@
+//TODO: update tests according to the new structure of the controller
 import request from "supertest";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from "vitest";
 import mongoose from "mongoose";
 
 // ---- STABILE, EINHEITLICHE MOCKS (default export ist jetzt ein "Konstruktor"-Mock) ----
@@ -125,7 +126,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
       content: "Content",
       projectId: "proj1",
     });
-    (NodeContent as unknown as vi.Mock).mockImplementation(() => ({
+    (NodeContent as unknown as Mock).mockImplementation(() => ({
       save: mockSave,
     }));
 
@@ -227,7 +228,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     ];
 
     // override find once to return chainable that resolves to versions
-    (NCVersion.find as unknown as vi.Mock).mockImplementationOnce(() => ({
+    (NCVersion.find as unknown as Mock).mockImplementationOnce(() => ({
       sort() {
         return this;
       },
@@ -256,7 +257,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
 
   it("GET /:nodeId/versions/:versionId not found -> 404", async () => {
     // override findOne to return null when called by controller
-    (NCVersion.findOne as unknown as vi.Mock).mockImplementationOnce(() => ({
+    (NCVersion.findOne as unknown as Mock).mockImplementationOnce(() => ({
       lean() {
         return Promise.resolve(null);
       },
@@ -271,7 +272,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
 
   it("GET /:nodeId/versions/:versionId found -> 200", async () => {
     const v = { _id: "vx", content: "c" };
-    (NCVersion.findOne as unknown as vi.Mock).mockImplementationOnce(() => ({
+    (NCVersion.findOne as unknown as Mock).mockImplementationOnce(() => ({
       lean() {
         return Promise.resolve(v);
       },
@@ -351,17 +352,17 @@ describe("NodeContent Controller (fixed mocks)", () => {
       category: "c",
       content: "ct",
     };
-    (NodeContentVersion.findOne as unknown as vi.Mock).mockResolvedValueOnce(
+    (NodeContentVersion.findOne as unknown as Mock).mockResolvedValueOnce(
       version,
     );
-    (NodeContent.findOne as unknown as vi.Mock).mockResolvedValueOnce({
+    (NodeContent.findOne as unknown as Mock).mockResolvedValueOnce({
       nodeId: "n1",
       projectId: "p1",
       name: "old",
       category: "c",
       content: "old",
     });
-    (NodeContent.findOneAndUpdate as unknown as vi.Mock).mockResolvedValueOnce({
+    (NodeContent.findOneAndUpdate as unknown as Mock).mockResolvedValueOnce({
       nodeId: "n1",
       projectId: "p1",
       name: version.name,
@@ -383,14 +384,14 @@ describe("NodeContent Controller (fixed mocks)", () => {
   });
 
   it("PUT update with skipVersion=true does not create a version", async () => {
-    (NodeContent.findOne as unknown as vi.Mock).mockResolvedValueOnce({
+    (NodeContent.findOne as unknown as Mock).mockResolvedValueOnce({
       nodeId: "n1",
       projectId: "p1",
       name: "old",
       category: "c",
       content: "old",
     });
-    (NodeContent.findOneAndUpdate as unknown as vi.Mock).mockResolvedValueOnce({
+    (NodeContent.findOneAndUpdate as unknown as Mock).mockResolvedValueOnce({
       nodeId: "n1",
       projectId: "p1",
       name: "new",
@@ -408,7 +409,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
 
     expect(res.status).toBe(200);
     expect(NodeContentVersion.create).not.toHaveBeenCalled();
-    expect(Project.findByIdAndUpdate as unknown as vi.Mock).toHaveBeenCalled();
+    expect(Project.findByIdAndUpdate as unknown as Mock).toHaveBeenCalled();
   });
 
   it("createVersion trims when count > MAX", async () => {
@@ -420,13 +421,13 @@ describe("NodeContent Controller (fixed mocks)", () => {
       category: "file",
       content: "c",
     };
-    (NodeContentVersion.create as unknown as vi.Mock).mockResolvedValueOnce(
+    (NodeContentVersion.create as unknown as Mock).mockResolvedValueOnce(
       version,
     );
     (
-      NodeContentVersion.countDocuments as unknown as vi.Mock
+      NodeContentVersion.countDocuments as unknown as Mock
     ).mockResolvedValueOnce(100);
-    (NodeContentVersion.find as unknown as vi.Mock).mockImplementationOnce(
+    (NodeContentVersion.find as unknown as Mock).mockImplementationOnce(
       () => ({
         sort() {
           return this;
@@ -442,7 +443,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
         },
       }),
     );
-    (NodeContentVersion.deleteMany as unknown as vi.Mock).mockResolvedValueOnce(
+    (NodeContentVersion.deleteMany as unknown as Mock).mockResolvedValueOnce(
       undefined,
     );
 
@@ -458,7 +459,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
   });
 
   it("listVersions clamps large limit to 200", async () => {
-    (NodeContentVersion.find as unknown as vi.Mock).mockImplementationOnce(() =>
+    (NodeContentVersion.find as unknown as Mock).mockImplementationOnce(() =>
       makeChainableResolve([]),
     );
     const res = await request(app)
@@ -473,7 +474,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
 
   it("listVersions logs and returns 500 on DB error", async () => {
     const err = new Error("boom");
-    (NodeContentVersion.find as unknown as vi.Mock).mockRejectedValueOnce(err);
+    (NodeContentVersion.find as unknown as Mock).mockRejectedValueOnce(err);
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     const res = await request(app)
       .get("/api/nodeContent/n1/versions")
@@ -521,11 +522,11 @@ describe("NodeContent Controller (fixed mocks)", () => {
     vi.spyOn(mongoose, "startSession").mockResolvedValueOnce(sessionMock);
 
     // findOne(...).session(session) -> resolves null (no existing)
-    (NodeContent.findOne as unknown as vi.Mock).mockImplementationOnce(() => ({
+    (NodeContent.findOne as unknown as Mock).mockImplementationOnce(() => ({
       session: (_s?: any) => Promise.resolve(null),
     }));
 
-    (NodeContent.findOneAndUpdate as unknown as vi.Mock).mockResolvedValueOnce({
+    (NodeContent.findOneAndUpdate as unknown as Mock).mockResolvedValueOnce({
       nodeId: "n1",
       projectId: "p1",
       name: "new",
@@ -535,7 +536,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
 
     // countDocuments returns 0 (no trimming)
     (
-      NodeContentVersion.countDocuments as unknown as vi.Mock
+      NodeContentVersion.countDocuments as unknown as Mock
     ).mockImplementationOnce(() => ({
       session: (_s?: any) => Promise.resolve(0),
     }));
@@ -551,7 +552,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     expect(mongoose.startSession).toHaveBeenCalled();
     expect(NodeContentVersion.create).not.toHaveBeenCalled();
     expect(sessionMock.commitTransaction).toHaveBeenCalled();
-    expect(Project.findByIdAndUpdate as unknown as vi.Mock).toHaveBeenCalled();
+    expect(Project.findByIdAndUpdate as unknown as Mock).toHaveBeenCalled();
   });
 
   /* ------------------------------
@@ -568,7 +569,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     vi.spyOn(mongoose, "startSession").mockResolvedValueOnce(sessionMock);
 
     // NodeContentVersion.findOne(...).session(session) -> null => triggers 404 path inside transaction
-    (NodeContentVersion.findOne as unknown as vi.Mock).mockImplementationOnce(
+    (NodeContentVersion.findOne as unknown as Mock).mockImplementationOnce(
       () => ({
         session: (_s?: any) => Promise.resolve(null),
       }),
@@ -618,7 +619,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
 
   it("GET /api/nodeContent/:id with projectId not found -> 404", async () => {
     // findOne should resolve to null to trigger 404
-    (NodeContent.findOne as unknown as vi.Mock).mockResolvedValueOnce(null);
+    (NodeContent.findOne as unknown as Mock).mockResolvedValueOnce(null);
 
     const res = await request(app).get("/api/nodeContent/n-missing").query({
       projectId: "p1",
@@ -629,7 +630,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
       "error",
       "NodeContent with the given nodeId and projectId not found",
     );
-    expect(NodeContent.findOne as unknown as vi.Mock).toHaveBeenCalledWith({
+    expect(NodeContent.findOne as unknown as Mock).toHaveBeenCalledWith({
       nodeId: "n-missing",
       projectId: "p1",
     });
@@ -644,7 +645,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
       content: "the content",
     };
 
-    (NodeContent.findOne as unknown as vi.Mock).mockResolvedValueOnce(existing);
+    (NodeContent.findOne as unknown as Mock).mockResolvedValueOnce(existing);
 
     const res = await request(app).get("/api/nodeContent/n2").query({
       projectId: "p1",
@@ -652,7 +653,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject(existing);
-    expect(NodeContent.findOne as unknown as vi.Mock).toHaveBeenCalledWith({
+    expect(NodeContent.findOne as unknown as Mock).toHaveBeenCalledWith({
       nodeId: "n2",
       projectId: "p1",
     });
@@ -713,7 +714,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
       }),
     );
 
-    expect(Project.findByIdAndUpdate as unknown as vi.Mock).toHaveBeenCalled();
+    expect(Project.findByIdAndUpdate as unknown as Mock).toHaveBeenCalled();
   });
 
   it("POST /api/nodeContent returns 409 when NodeContent already exists", async () => {
@@ -761,12 +762,12 @@ describe("NodeContent Controller (fixed mocks)", () => {
       content: "vcontent",
     };
     // NodeContentVersion.findOne(...).session(session) -> version
-    (NodeContentVersion.findOne as unknown as vi.Mock).mockImplementationOnce(
+    (NodeContentVersion.findOne as unknown as Mock).mockImplementationOnce(
       () => ({ session: (_s?: any) => Promise.resolve(version) }),
     );
 
     // NodeContent.findOne(...).session(session) -> existing doc that will be snapshot
-    (NodeContent.findOne as unknown as vi.Mock).mockImplementationOnce(() => ({
+    (NodeContent.findOne as unknown as Mock).mockImplementationOnce(() => ({
       session: (_s?: any) =>
         Promise.resolve({
           nodeId: "nR",
@@ -778,14 +779,14 @@ describe("NodeContent Controller (fixed mocks)", () => {
     }));
 
     // NodeContent.findOneAndUpdate(..., { session }) -> updated doc returned
-    (NodeContent.findOneAndUpdate as unknown as vi.Mock).mockImplementationOnce(
+    (NodeContent.findOneAndUpdate as unknown as Mock).mockImplementationOnce(
       () =>
         Promise.resolve({ nodeId: "nR", projectId: "pR", name: version.name }),
     );
 
     // countDocuments(session) -> small number (no trimming)
     (
-      NodeContentVersion.countDocuments as unknown as vi.Mock
+      NodeContentVersion.countDocuments as unknown as Mock
     ).mockImplementationOnce(() => ({
       session: (_s?: any) => Promise.resolve(1),
     }));
@@ -808,7 +809,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
   it("POST /api/nodeContent/:nodeId/versions returns 500 when create fails", async () => {
     // simulate NodeContentVersion.create throwing
     const err = new Error("db-fail");
-    (NodeContentVersion.create as unknown as vi.Mock).mockRejectedValueOnce(
+    (NodeContentVersion.create as unknown as Mock).mockRejectedValueOnce(
       err,
     );
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
