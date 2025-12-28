@@ -1,23 +1,5 @@
 ## Update NodeContent controller
 
-### 3.1 Endpoints / handlers
-
-For `NodeContent` (and `NodeContentVersion` if involved via controller):
-
-- `createNodeContent`
-  - Validate body (projectId, nodeId, content fields, etc.).
-  - Use `NodeContent.create()` → encryption via `pre('save')`.
-- `getNodeContentById` / `getNodeContentForNode`
-  - Use `NodeContent.findOne({ _id: id })` or `find({ nodeId })`.
-  - Decryption handled by `post('find')` / `post('findOne')`.
-- `updateNodeContent`
-  - Prefer load‑modify‑save pattern if required by your hooks:
-    - `const nc = await NodeContent.findById(id);`
-    - change fields;
-    - `await nc.save();`.
-- If `NodeContentVersion` is used for history:
-  - When updating content, create a `NodeContentVersion` entry (which will also encrypt via its hooks).
-
 ### 3.2 NodeContent controller tests
 
 For `NodeContent.test.ts`:
@@ -89,9 +71,3 @@ For `CommentController` tests:
 - Define DTO / response mappers to prevent:
   - Exposing raw internal IDs you do not want public.
   - Exposing any encryption metadata (if you store IV, etc.).
-
-### 5.3 Consistency with model behavior
-
-- Wherever you need encryption hooks:
-  - Avoid `updateOne` / `findOneAndUpdate` unless you are explicitly handling encryption for those.
-  - Prefer `findById` → mutate → `save()` if your encryption is `pre('save')` only.
