@@ -54,7 +54,7 @@ export const createNodeContent = async (
     await newNodeContent.save();
 
     // Query back to get decrypted version
-    const savedNodeContent = await newNodeContent.findById(newNodeContent._id);
+    const savedNodeContent = await NodeContent.findById(newNodeContent._id);
     res.status(201).json(savedNodeContent);
   } catch (error) {
     console.error("Error saving node content:", error);
