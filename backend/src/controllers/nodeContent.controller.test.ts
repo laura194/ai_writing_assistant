@@ -1,5 +1,13 @@
 import request from "supertest";
-import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+  type Mock,
+} from "vitest";
 import mongoose from "mongoose";
 
 // ---- STABILE, EINHEITLICHE MOCKS (default export ist jetzt ein "Konstruktor"-Mock) ----
@@ -91,8 +99,8 @@ function makeChainableResolve(value: any) {
     },
     then(resolve: any) {
       return Promise.resolve(value).then(resolve);
-  },
-};
+    },
+  };
 }
 
 beforeEach(() => {
@@ -121,12 +129,12 @@ describe("NodeContent Controller (fixed mocks)", () => {
     (NodeContent as any).findOne = vi.fn().mockResolvedValue(null);
 
     const savedDoc = {
-    _id: "id1",
-    nodeId: "node1",
-    name: "Name",
-    category: "Cat",
-    content: "Content",
-    projectId: "proj1",   
+      _id: "id1",
+      nodeId: "node1",
+      name: "Name",
+      category: "Cat",
+      content: "Content",
+      projectId: "proj1",
     };
 
     // constructor should return an object with save() which resolves to the saved doc
@@ -216,7 +224,7 @@ describe("NodeContent Controller (fixed mocks)", () => {
     expect(res.body).toEqual(v);
   });
 
-  // Use find + save pattern instead of findOneAndUpdate 
+  // Use find + save pattern instead of findOneAndUpdate
   it("POST revert fallback path (startSession throws) -> 200 and creates backup version", async () => {
     // prepare a version to revert to
     const version = {
@@ -240,14 +248,14 @@ describe("NodeContent Controller (fixed mocks)", () => {
       name: "old",
       category: "c",
       content: "old",
-      save: vi.fn().mockResolvedValueOnce(undefined) // new mock save function
+      save: vi.fn().mockResolvedValueOnce(undefined), // new mock save function
     };
 
     // NodeContent.findOne returns doc twice (once for backup, once for update)
     (NodeContent as any).findOne = vi
-    .fn()
-    .mockResolvedValueOnce(existingContent) // First for backup
-    .mockResolvedValueOnce(existingContent); // Second for update
+      .fn()
+      .mockResolvedValueOnce(existingContent) // First for backup
+      .mockResolvedValueOnce(existingContent); // Second for update
 
     const updatedContent = {
       nodeId: "n1",
@@ -282,74 +290,74 @@ describe("NodeContent Controller (fixed mocks)", () => {
     expect(existingContent.save).toHaveBeenCalled();
   });
 
-  // Use find + save pattern instead of findOneAndUpdate  
+  // Use find + save pattern instead of findOneAndUpdate
   it("revert uses transactional path when startSession supports it", async () => {
-  const sessionMock = {
-    startTransaction: vi.fn(),
-    commitTransaction: vi.fn().mockResolvedValue(undefined),
-    abortTransaction: vi.fn().mockResolvedValue(undefined),
-    endSession: vi.fn().mockResolvedValue(undefined),
-  } as unknown as mongoose.ClientSession;
+    const sessionMock = {
+      startTransaction: vi.fn(),
+      commitTransaction: vi.fn().mockResolvedValue(undefined),
+      abortTransaction: vi.fn().mockResolvedValue(undefined),
+      endSession: vi.fn().mockResolvedValue(undefined),
+    } as unknown as mongoose.ClientSession;
 
-  vi.spyOn(mongoose, "startSession").mockResolvedValueOnce(sessionMock);
+    vi.spyOn(mongoose, "startSession").mockResolvedValueOnce(sessionMock);
 
-  const version = {
-    _id: "ver1",
-    nodeId: "n1",
-    projectId: "p1",
-    name: "nm",
-    category: "c",
-    content: "ct",
-  };
+    const version = {
+      _id: "ver1",
+      nodeId: "n1",
+      projectId: "p1",
+      name: "nm",
+      category: "c",
+      content: "ct",
+    };
 
-  const existingContent = {
-    nodeId: "n1",
-    projectId: "p1",
-    name: "old",
-    category: "c",
-    content: "old",
-    save: vi.fn().mockResolvedValue(undefined),
-  };
+    const existingContent = {
+      nodeId: "n1",
+      projectId: "p1",
+      name: "old",
+      category: "c",
+      content: "old",
+      save: vi.fn().mockResolvedValue(undefined),
+    };
 
-  const updatedContent = {
-    ...existingContent,
-    name: version.name,
-    content: version.content,
-  };
+    const updatedContent = {
+      ...existingContent,
+      name: version.name,
+      content: version.content,
+    };
 
-  // version lookup
-  (NodeContentVersion.findOne as Mock).mockImplementationOnce(() => ({
-    session: () => Promise.resolve(version),
-  }));
+    // version lookup
+    (NodeContentVersion.findOne as Mock).mockImplementationOnce(() => ({
+      session: () => Promise.resolve(version),
+    }));
 
-  // existing NodeContent (twice)
-  let findCall = 0;
-  (NodeContent.findOne as Mock).mockImplementation(() => ({
-    session: () =>
-      Promise.resolve(findCall++ === 0 ? existingContent : updatedContent),
-  }));
+    // existing NodeContent (twice)
+    let findCall = 0;
+    (NodeContent.findOne as Mock).mockImplementation(() => ({
+      session: () =>
+        Promise.resolve(findCall++ === 0 ? existingContent : updatedContent),
+    }));
 
-  (NodeContentVersion.create as Mock).mockResolvedValueOnce({});
-  (NodeContentVersion.countDocuments as Mock).mockImplementation(() => ({
-    session: () => Promise.resolve(1),
-  }));
+    (NodeContentVersion.create as Mock).mockResolvedValueOnce({});
+    (NodeContentVersion.countDocuments as Mock).mockImplementation(() => ({
+      session: () => Promise.resolve(1),
+    }));
 
-  (NodeContentVersion.find as Mock).mockImplementation(() => ({
-    sort: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    session: () => Promise.resolve([]),
-  }));
+    (NodeContentVersion.find as Mock).mockImplementation(() => ({
+      sort: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      session: () => Promise.resolve([]),
+    }));
 
-  const res = await request(app)
-    .post("/api/nodeContent/n1/versions/ver1/revert")
-    .send({ projectId: "p1" });
+    const res = await request(app)
+      .post("/api/nodeContent/n1/versions/ver1/revert")
+      .send({ projectId: "p1" });
 
-  expect(res.status).toBe(200);
-  expect(NodeContentVersion.create).toHaveBeenCalled();
-  expect(existingContent.save).toHaveBeenCalled();
-  expect(sessionMock.commitTransaction).toHaveBeenCalled();
-  expect(sessionMock.endSession).toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(NodeContentVersion.create).toHaveBeenCalled();
+    expect(existingContent.save).toHaveBeenCalled();
+    expect(sessionMock.commitTransaction).toHaveBeenCalled();
+    expect(sessionMock.endSession).toHaveBeenCalled();
   });
 
   it("PUT update with skipVersion=true does not create a version", async () => {
@@ -380,8 +388,8 @@ describe("NodeContent Controller (fixed mocks)", () => {
     };
 
     (NodeContent.findOne as unknown as Mock)
-    .mockResolvedValueOnce(existingContent) // for update
-    .mockResolvedValueOnce(updatedContent); // for response
+      .mockResolvedValueOnce(existingContent) // for update
+      .mockResolvedValueOnce(updatedContent); // for response
 
     const res = await request(app).put("/api/nodeContent/n1").send({
       name: "new",
@@ -398,46 +406,45 @@ describe("NodeContent Controller (fixed mocks)", () => {
   });
 
   it("createVersion trims when count > MAX", async () => {
-  const version = {
-    _id: "v1",
-    nodeId: "n1",
-    projectId: "p1",
-    name: "n",
-    category: "file",
-    content: "c",
-  };
+    const version = {
+      _id: "v1",
+      nodeId: "n1",
+      projectId: "p1",
+      name: "n",
+      category: "file",
+      content: "c",
+    };
 
-  (NodeContentVersion.create as Mock).mockResolvedValueOnce(version);
-  (NodeContentVersion as any).findById = vi.fn().mockResolvedValueOnce(version);
+    (NodeContentVersion.create as Mock).mockResolvedValueOnce(version);
+    (NodeContentVersion as any).findById = vi
+      .fn()
+      .mockResolvedValueOnce(version);
 
-  // MUST be > MAX_VERSIONS
-  (NodeContentVersion.countDocuments as Mock).mockImplementationOnce(() => ({
-    session: () => Promise.resolve(101),
-    exec: () => Promise.resolve(101),
-  }));
+    // MUST be > MAX_VERSIONS
+    (NodeContentVersion.countDocuments as Mock).mockImplementationOnce(() => ({
+      session: () => Promise.resolve(101),
+      exec: () => Promise.resolve(101),
+    }));
 
-  (NodeContentVersion.find as Mock).mockImplementationOnce(() => ({
-    sort: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    lean: vi.fn().mockResolvedValue([
-      { _id: "old1" },
-      { _id: "old2" },
-    ]),
-  }));
+    (NodeContentVersion.find as Mock).mockImplementationOnce(() => ({
+      sort: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      lean: vi.fn().mockResolvedValue([{ _id: "old1" }, { _id: "old2" }]),
+    }));
 
-  (NodeContentVersion.deleteMany as Mock).mockResolvedValueOnce({});
+    (NodeContentVersion.deleteMany as Mock).mockResolvedValueOnce({});
 
-  const res = await request(app).post("/api/nodeContent/n1/versions").send({
-    projectId: "p1",
-    name: "n",
-    content: "c",
-    category: "file",
-  });
+    const res = await request(app).post("/api/nodeContent/n1/versions").send({
+      projectId: "p1",
+      name: "n",
+      content: "c",
+      category: "file",
+    });
 
-  expect(res.status).toBe(201);
-  expect(NodeContentVersion.countDocuments).toHaveBeenCalled();
-  expect(NodeContentVersion.findById).toHaveBeenCalledWith("v1");
+    expect(res.status).toBe(201);
+    expect(NodeContentVersion.countDocuments).toHaveBeenCalled();
+    expect(NodeContentVersion.findById).toHaveBeenCalledWith("v1");
   });
 
   it("listVersions clamps large limit to 200", async () => {
@@ -493,58 +500,58 @@ describe("NodeContent Controller (fixed mocks)", () => {
   /* ------------------------------
  Transactional update: existing == null -> no NodeContentVersion.create
 ------------------------------- */
-it("PUT /api/nodeContent/:nodeId transactional path: existing is null → fallback creates version", async () => {
-  const sessionMock = {
-    startTransaction: vi.fn(),
-    commitTransaction: vi.fn().mockResolvedValue(undefined),
-    abortTransaction: vi.fn().mockResolvedValue(undefined),
-    endSession: vi.fn().mockResolvedValue(undefined),
-  } as unknown as mongoose.ClientSession;
+  it("PUT /api/nodeContent/:nodeId transactional path: existing is null → fallback creates version", async () => {
+    const sessionMock = {
+      startTransaction: vi.fn(),
+      commitTransaction: vi.fn().mockResolvedValue(undefined),
+      abortTransaction: vi.fn().mockResolvedValue(undefined),
+      endSession: vi.fn().mockResolvedValue(undefined),
+    } as unknown as mongoose.ClientSession;
 
-  vi.spyOn(mongoose, "startSession").mockResolvedValueOnce(sessionMock);
+    vi.spyOn(mongoose, "startSession").mockResolvedValueOnce(sessionMock);
 
-  const newContent = {
-    _id: "new1",
-    nodeId: "n1",
-    projectId: "p1",
-    name: "new",
-    category: "c",
-    content: "new",
-    save: vi.fn().mockResolvedValue(undefined),
-  };
+    const newContent = {
+      _id: "new1",
+      nodeId: "n1",
+      projectId: "p1",
+      name: "new",
+      category: "c",
+      content: "new",
+      save: vi.fn().mockResolvedValue(undefined),
+    };
 
-  // Transactional path → existing = null
-  (NodeContent.findOne as Mock).mockImplementationOnce(() => ({
-    session: () => Promise.resolve(null),
-  }));
+    // Transactional path → existing = null
+    (NodeContent.findOne as Mock).mockImplementationOnce(() => ({
+      session: () => Promise.resolve(null),
+    }));
 
-  // Fallback path → existing exists
-  (NodeContent.findOne as Mock)
-    .mockResolvedValueOnce(newContent)
-    .mockResolvedValueOnce(newContent);
+    // Fallback path → existing exists
+    (NodeContent.findOne as Mock)
+      .mockResolvedValueOnce(newContent)
+      .mockResolvedValueOnce(newContent);
 
-  vi.mocked(NodeContent).mockImplementation(() => newContent as any);
+    vi.mocked(NodeContent).mockImplementation(() => newContent as any);
 
-  (Project.findByIdAndUpdate as Mock).mockResolvedValueOnce({});
-  (NodeContentVersion.countDocuments as Mock).mockResolvedValueOnce(0);
+    (Project.findByIdAndUpdate as Mock).mockResolvedValueOnce({});
+    (NodeContentVersion.countDocuments as Mock).mockResolvedValueOnce(0);
 
-  const res = await request(app).put("/api/nodeContent/n1").send({
-    name: "new",
-    category: "c",
-    content: "new",
-    projectId: "p1",
-  });
+    const res = await request(app).put("/api/nodeContent/n1").send({
+      name: "new",
+      category: "c",
+      content: "new",
+      projectId: "p1",
+    });
 
-  expect(res.status).toBe(200);
+    expect(res.status).toBe(200);
 
-  // fallback creates version → EXPECT IT
-  expect(NodeContentVersion.create).toHaveBeenCalledWith(
-    expect.objectContaining({
-      meta: { from: "updateNodeContent-fallback" },
-    }),
-  );
+    // fallback creates version → EXPECT IT
+    expect(NodeContentVersion.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        meta: { from: "updateNodeContent-fallback" },
+      }),
+    );
 
-  expect(newContent.save).toHaveBeenCalled();
+    expect(newContent.save).toHaveBeenCalled();
   });
 
   /* ------------------------------
@@ -552,30 +559,32 @@ it("PUT /api/nodeContent/:nodeId transactional path: existing is null → fallba
 ------------------------------- */
   it("POST /:nodeId/versions/:versionId/revert transactional path: missing version -> abortTransaction + 404", async () => {
     const sessionMock = {
-    startTransaction: vi.fn(),
-    commitTransaction: vi.fn().mockResolvedValue(undefined),
-    abortTransaction: vi.fn().mockResolvedValue(undefined),
-    endSession: vi.fn().mockResolvedValue(undefined),
-  } as unknown as mongoose.ClientSession;
+      startTransaction: vi.fn(),
+      commitTransaction: vi.fn().mockResolvedValue(undefined),
+      abortTransaction: vi.fn().mockResolvedValue(undefined),
+      endSession: vi.fn().mockResolvedValue(undefined),
+    } as unknown as mongoose.ClientSession;
 
-  vi.spyOn(mongoose, "startSession").mockResolvedValueOnce(sessionMock);
+    vi.spyOn(mongoose, "startSession").mockResolvedValueOnce(sessionMock);
 
-  // Mock NodeContentVersion.findOne with session returning null (missing version)
-  (NodeContentVersion.findOne as unknown as Mock).mockImplementationOnce(() => ({
-    session: (_s?: any) => Promise.resolve(null),
-  }));
+    // Mock NodeContentVersion.findOne with session returning null (missing version)
+    (NodeContentVersion.findOne as unknown as Mock).mockImplementationOnce(
+      () => ({
+        session: (_s?: any) => Promise.resolve(null),
+      }),
+    );
 
-  // Also mock the non-session version for fallback path
-  (NodeContentVersion.findOne as unknown as Mock).mockResolvedValueOnce(null);
+    // Also mock the non-session version for fallback path
+    (NodeContentVersion.findOne as unknown as Mock).mockResolvedValueOnce(null);
 
-  const res = await request(app)
-    .post("/api/nodeContent/n1/versions/some-missing/revert")
-    .send({ projectId: "p1" });
+    const res = await request(app)
+      .post("/api/nodeContent/n1/versions/some-missing/revert")
+      .send({ projectId: "p1" });
 
-  expect(res.status).toBe(404);
-  expect(sessionMock.abortTransaction).toHaveBeenCalled();
-  expect(sessionMock.endSession).toHaveBeenCalled();
-});
+    expect(res.status).toBe(404);
+    expect(sessionMock.abortTransaction).toHaveBeenCalled();
+    expect(sessionMock.endSession).toHaveBeenCalled();
+  });
 
   it("GET /api/nodeContent with nodeId+projectId returns filtered contents (200)", async () => {
     // setze die Rückgabe für diesen Test
@@ -671,9 +680,9 @@ it("PUT /api/nodeContent/:nodeId transactional path: existing is null → fallba
 
     // simulate an existing NodeContent so fallback path will try to create a backup version
     NC.findOne
-    .mockResolvedValueOnce(existingContent) // for backup
-    .mockResolvedValueOnce(existingContent) // for update
-    .mockResolvedValueOnce(existingContent); // for response
+      .mockResolvedValueOnce(existingContent) // for backup
+      .mockResolvedValueOnce(existingContent) // for update
+      .mockResolvedValueOnce(existingContent); // for response
 
     // NodeContentVersion.create should be called in fallback path
     NCVersion.create.mockResolvedValueOnce({ _id: "ver-backup" });
@@ -704,7 +713,7 @@ it("PUT /api/nodeContent/:nodeId transactional path: existing is null → fallba
       category: "c",
       content: "old",
     };
-    
+
     // NodeContent.findOne returns existing -> should cause 409
     (NodeContent as any).findOne = vi.fn().mockResolvedValueOnce(existing);
 
@@ -789,9 +798,7 @@ it("PUT /api/nodeContent/:nodeId transactional path: existing is null → fallba
   it("POST /api/nodeContent/:nodeId/versions returns 500 when create fails", async () => {
     // simulate NodeContentVersion.create throwing
     const err = new Error("db-fail");
-    (NodeContentVersion.create as unknown as Mock).mockRejectedValueOnce(
-      err,
-    );
+    (NodeContentVersion.create as unknown as Mock).mockRejectedValueOnce(err);
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const res = await request(app).post("/api/nodeContent/nZ/versions").send({

@@ -215,7 +215,10 @@ export const updateNodeContent = async (
       );*/
 
       // new way to trigger encryption
-      let nodeContent = await NodeContent.findOne({ nodeId, projectId }).session(session);
+      let nodeContent = await NodeContent.findOne({
+        nodeId,
+        projectId,
+      }).session(session);
 
       if (!nodeContent) {
         nodeContent = new NodeContent({ nodeId, projectId });
@@ -227,7 +230,6 @@ export const updateNodeContent = async (
       if (icon !== undefined) nodeContent.icon = icon;
 
       await nodeContent.save({ session });
-
 
       await Project.findByIdAndUpdate(
         projectId,
@@ -265,7 +267,10 @@ export const updateNodeContent = async (
       await session.commitTransaction();
       await session.endSession();
 
-      const updatedNodeContent = await NodeContent.findOne({ nodeId, projectId });
+      const updatedNodeContent = await NodeContent.findOne({
+        nodeId,
+        projectId,
+      });
       res.status(200).json(updatedNodeContent);
       return;
     } else {
@@ -317,18 +322,18 @@ export const updateNodeContent = async (
       $set: { updatedAt: new Date() },
     });
 
-    if(!skipVersion) {
+    if (!skipVersion) {
       const count2 = await NodeContentVersion.countDocuments({
         nodeId,
         projectId,
       });
-      
+
       if (count2 > MAX_VERSIONS) {
         const toDelete = count2 - MAX_VERSIONS;
         const oldest = await NodeContentVersion.find({ nodeId, projectId })
-        .sort({ createdAt: 1 })
-        .limit(toDelete)
-        .select("_id")
+          .sort({ createdAt: 1 })
+          .limit(toDelete)
+          .select("_id");
 
         const ids = oldest.map((o) => o._id);
         if (ids.length) {
@@ -344,8 +349,8 @@ export const updateNodeContent = async (
     console.error("Fallback update failed:", err);
     res.status(500).json({ error: "Internal Server Error" });
     return;
-    }
-  };
+  }
+};
 
 /**
  * POST /:nodeId/versions  -> manuell Version anlegen
@@ -381,8 +386,8 @@ export const createVersion = async (
       const oldest = await NodeContentVersion.find({ nodeId, projectId })
         .sort({ createdAt: 1 })
         .limit(toDelete)
-        .select("_id")
-        //.lean();
+        .select("_id");
+      //.lean();
 
       const ids = oldest.map((o) => o._id);
       if (ids.length)
@@ -418,8 +423,8 @@ export const listVersions = async (
     const versions = await NodeContentVersion.find({ nodeId, projectId })
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit)
-      // .lean(); this bypasses decryption hooks
+      .limit(limit);
+    // .lean(); this bypasses decryption hooks
 
     res.status(200).json(versions); // decrypted
   } catch (error) {
@@ -528,18 +533,21 @@ export const revertToVersion = async (
 
       // use find() + save() pattern
 
-      let nodeContent = await NodeContent.findOne({ nodeId, projectId }).session(session);
+      let nodeContent = await NodeContent.findOne({
+        nodeId,
+        projectId,
+      }).session(session);
 
       if (!nodeContent) {
         nodeContent = new NodeContent({ nodeId, projectId });
       }
 
       // Update with version data (already decrypted from findOne above)
-      nodeContent.name =  version.name;
+      nodeContent.name = version.name;
       nodeContent.category = version.category;
       nodeContent.content = version.content;
 
-      // Pre-save hook encrypts here 
+      // Pre-save hook encrypts here
       await nodeContent.save({ session });
 
       // trim versions if exceeded
@@ -549,11 +557,11 @@ export const revertToVersion = async (
       }).session(session);
       if (count > MAX_VERSIONS) {
         const toDelete = count - MAX_VERSIONS;
-        const oldest = (await NodeContentVersion.find({ nodeId, projectId })
+        const oldest = await NodeContentVersion.find({ nodeId, projectId })
           .sort({ createdAt: 1 })
           .limit(toDelete)
           .select("_id")
-          .session(session));
+          .session(session);
 
         const ids = oldest.map((o) => o._id);
         if (ids.length)
@@ -566,7 +574,7 @@ export const revertToVersion = async (
       await session.endSession();
 
       // Query back to get decrypted version
-      const updated = await NodeContent.findOne({ nodeId, projectId }); 
+      const updated = await NodeContent.findOne({ nodeId, projectId });
       res.status(200).json(updated);
       return;
     }
