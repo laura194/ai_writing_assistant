@@ -1,23 +1,10 @@
-## Update NodeContent controller
-
-### 3.2 NodeContent controller tests
-
-For `NodeContent.test.ts`:
-
-- Similar structure to Project tests:
-  - Creation returns decrypted response.
-  - Raw DB contains encrypted fields (optional).
-  - Read endpoints always return decrypted content.
-  - Updating content:
-    - Modified fields change and remain readable.
-    - Old versions are stored via `NodeContentVersion` with correct encryption (if relevant).
-  - Behavior with encryption disabled flag.
-
+### 1. NodeContent controller tests
+increase test coverage.
 ---
 
-## 4. Comment controller plan
+## 2. Comment controller plan
 
-### 4.1 Endpoints / handlers
+### 2.1 Endpoints / handlers
 
 For `CommentController`:
 
@@ -34,7 +21,7 @@ For `CommentController`:
 - `deleteComment`
   - Remove by id (soft/hard).
 
-### 4.2 Comment controller tests
+### 2.2 Comment controller tests
 
 For `CommentController` tests:
 
@@ -53,21 +40,3 @@ For `CommentController` tests:
 - Edge cases:
   - Comment not found → 404.
   - Invalid IDs / validation errors.
-
----
-
-## 5. Cross‑cutting concerns for controllers
-
-### 5.1 Error handling
-
-- Standardize error format (validation errors, 404, 500).
-- Distinguish between:
-  - Mongoose validation errors.
-  - Cast errors (invalid ObjectId).
-  - Unknown errors.
-
-### 5.2 DTOs / response shaping
-
-- Define DTO / response mappers to prevent:
-  - Exposing raw internal IDs you do not want public.
-  - Exposing any encryption metadata (if you store IV, etc.).
