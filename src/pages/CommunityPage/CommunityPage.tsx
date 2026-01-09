@@ -130,8 +130,8 @@ const CommunityPage = () => {
                 ? project.upvotedBy.filter((u) => u !== currentUsername)
                 : [...project.upvotedBy, currentUsername],
             }
-          : project,
-      ),
+          : project
+      )
     );
 
     try {
@@ -156,8 +156,8 @@ const CommunityPage = () => {
                 ? project.favoritedBy.filter((u) => u !== currentUsername)
                 : [...project.favoritedBy, currentUsername],
             }
-          : project,
-      ),
+          : project
+      )
     );
 
     try {
@@ -173,19 +173,19 @@ const CommunityPage = () => {
 
       {/* Hintergrund-Effekte */}
       <motion.div
-        className="absolute top-[-4rem] right-[-4rem] w-84 h-84 bg-[#f1d818] opacity-35 dark:bg-[#fce009] dark:opacity-20 blur-3xl rotate-12 rounded-[1.25rem]"
-        animate={{ scale: [1, 0.85, 1] }}
+        className="absolute -top-32 -left-32 w-108 h-108 bg-[#ff78c5] opacity-25 dark:bg-[#ff74c3] dark:opacity-30 blur-3xl rotate-12 rounded-[1.25rem]"
+        animate={{ scale: [1, 0.7, 1] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-[-6rem] left-[-4rem] w-80 h-80 bg-[#e16015] opacity-30 dark:bg-[#f97a30] dark:opacity-20 blur-3xl -rotate-12 rounded-[1.25rem]"
-        animate={{ scale: [1, 1.25, 1] }}
+        className="absolute -bottom-40 -right-40 w-86 h-86 bg-[#e02232] opacity-30 dark:bg-[#ff4756] dark:opacity-25 blur-3xl -rotate-12 rounded-[1.25rem]"
+        animate={{ scale: [1, 1.3, 1] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <div className="flex-1 flex items-center justify-center relative pt-14">
         <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
-          <div className="w-[900px] h-[900px] bg-[#bb6108] opacity-20 dark:bg-[#f79635] dark:opacity-10 blur-3xl rounded-full mix-blend-screen" />
+          <div className="w-[900px] h-[900px] bg-[#eb2d6d] opacity-15 dark:bg-[#f33776] dark:opacity-15 blur-3xl rounded-full mix-blend-screen" />
         </div>
         <main className="flex-1 w-full flex items-center justify-center py-10 z-10">
           <motion.div
@@ -203,10 +203,10 @@ const CommunityPage = () => {
                 duration: 4,
                 repeat: Infinity,
               }}
-              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(251,146,60,0.7)] dark:shadow-[0_0_30px_rgba(251,146,60,0.25)] w-full max-w-3xl"
+              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(243,36,105,0.7)] dark:shadow-[0_0_30px_rgba(243,36,105,0.25)] w-full max-w-3xl"
               style={{
                 backgroundImage:
-                  "linear-gradient(90deg, #9e1d0b, #f77d19, #fcf10f)",
+                  "linear-gradient(90deg, #a10c20, #f3155f, #f977b0)",
                 backgroundSize: "200% 200%",
               }}
             >
@@ -356,7 +356,7 @@ const CommunityPage = () => {
                               <ThumbsUp
                                 className={`w-5 h-5 ${
                                   (project.upvotedBy ?? []).includes(
-                                    currentUsername,
+                                    currentUsername
                                   )
                                     ? "fill-[#cb8a07]"
                                     : "stroke-[#cb8a07]"
@@ -378,7 +378,7 @@ const CommunityPage = () => {
                               <Heart
                                 className={`w-5 h-5 ${
                                   (project.favoritedBy ?? []).includes(
-                                    currentUsername,
+                                    currentUsername
                                   )
                                     ? "fill-[#fb923c]"
                                     : "stroke-[#fb923c]"
