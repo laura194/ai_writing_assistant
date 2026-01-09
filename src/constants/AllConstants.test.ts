@@ -18,8 +18,8 @@ vi.mock("../assets/images/landing-page", () => ({
   clerk: "clerk.png",
   github: "github.png",
   teamImg: "team.png",
-  questionmark: "question.png",
   studiproject: "studiproject.png",
+  studiproject2: "studiproject2.png",
 }));
 
 // Import after mock
@@ -119,7 +119,7 @@ describe("constants/LandingPageText", () => {
     expect(projects[0].source_code_link).toContain("github.com");
 
     // Second project image
-    expect(projects[1].image).toBe("question.png");
+    expect(projects[1].image).toBe("studiproject2.png");
   });
 });
 
@@ -137,7 +137,7 @@ describe("constants/styles/LandingPageStyles", () => {
 
     for (const k of keys) {
       expect(Object.prototype.hasOwnProperty.call(LandingPageStyles, k)).toBe(
-        true,
+        true
       );
       const val = (LandingPageStyles as any)[k];
       expect(typeof val).toBe("string");
