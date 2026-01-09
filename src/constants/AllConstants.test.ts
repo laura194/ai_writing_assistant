@@ -137,7 +137,7 @@ describe("constants/styles/LandingPageStyles", () => {
 
     for (const k of keys) {
       expect(Object.prototype.hasOwnProperty.call(LandingPageStyles, k)).toBe(
-        true
+        true,
       );
       const val = (LandingPageStyles as any)[k];
       expect(typeof val).toBe("string");
