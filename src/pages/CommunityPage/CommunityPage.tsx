@@ -130,8 +130,8 @@ const CommunityPage = () => {
                 ? project.upvotedBy.filter((u) => u !== currentUsername)
                 : [...project.upvotedBy, currentUsername],
             }
-          : project
-      )
+          : project,
+      ),
     );
 
     try {
@@ -156,8 +156,8 @@ const CommunityPage = () => {
                 ? project.favoritedBy.filter((u) => u !== currentUsername)
                 : [...project.favoritedBy, currentUsername],
             }
-          : project
-      )
+          : project,
+      ),
     );
 
     try {
@@ -356,7 +356,7 @@ const CommunityPage = () => {
                               <ThumbsUp
                                 className={`w-5 h-5 ${
                                   (project.upvotedBy ?? []).includes(
-                                    currentUsername
+                                    currentUsername,
                                   )
                                     ? "fill-[#ef3573]"
                                     : "stroke-[#ef3573]"
@@ -378,7 +378,7 @@ const CommunityPage = () => {
                               <Heart
                                 className={`w-5 h-5 ${
                                   (project.favoritedBy ?? []).includes(
-                                    currentUsername
+                                    currentUsername,
                                   )
                                     ? "fill-[#ef3573]"
                                     : "stroke-[#ef3573]"
