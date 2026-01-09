@@ -130,8 +130,8 @@ const CommunityPage = () => {
                 ? project.upvotedBy.filter((u) => u !== currentUsername)
                 : [...project.upvotedBy, currentUsername],
             }
-          : project,
-      ),
+          : project
+      )
     );
 
     try {
@@ -156,8 +156,8 @@ const CommunityPage = () => {
                 ? project.favoritedBy.filter((u) => u !== currentUsername)
                 : [...project.favoritedBy, currentUsername],
             }
-          : project,
-      ),
+          : project
+      )
     );
 
     try {
@@ -173,19 +173,19 @@ const CommunityPage = () => {
 
       {/* Hintergrund-Effekte */}
       <motion.div
-        className="absolute top-[-4rem] right-[-4rem] w-84 h-84 bg-[#f1d818] opacity-35 dark:bg-[#fce009] dark:opacity-20 blur-3xl rotate-12 rounded-[1.25rem]"
-        animate={{ scale: [1, 0.85, 1] }}
+        className="absolute -top-32 -left-32 w-108 h-108 bg-[#ff78c5] opacity-25 dark:bg-[#ff74c3] dark:opacity-30 blur-3xl rotate-12 rounded-[1.25rem]"
+        animate={{ scale: [1, 0.7, 1] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-[-6rem] left-[-4rem] w-80 h-80 bg-[#e16015] opacity-30 dark:bg-[#f97a30] dark:opacity-20 blur-3xl -rotate-12 rounded-[1.25rem]"
-        animate={{ scale: [1, 1.25, 1] }}
+        className="absolute -bottom-40 -right-40 w-86 h-86 bg-[#e02232] opacity-30 dark:bg-[#ff4756] dark:opacity-25 blur-3xl -rotate-12 rounded-[1.25rem]"
+        animate={{ scale: [1, 1.3, 1] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <div className="flex-1 flex items-center justify-center relative pt-14">
         <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
-          <div className="w-[900px] h-[900px] bg-[#bb6108] opacity-20 dark:bg-[#f79635] dark:opacity-10 blur-3xl rounded-full mix-blend-screen" />
+          <div className="w-[900px] h-[900px] bg-[#eb2d6d] opacity-15 dark:bg-[#f33776] dark:opacity-15 blur-3xl rounded-full mix-blend-screen" />
         </div>
         <main className="flex-1 w-full flex items-center justify-center py-10 z-10">
           <motion.div
@@ -203,10 +203,10 @@ const CommunityPage = () => {
                 duration: 4,
                 repeat: Infinity,
               }}
-              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(251,146,60,0.7)] dark:shadow-[0_0_30px_rgba(251,146,60,0.25)] w-full max-w-3xl"
+              className="p-[3px] rounded-3xl shadow-[0_0_30px_rgba(243,36,105,0.7)] dark:shadow-[0_0_30px_rgba(243,36,105,0.25)] w-full max-w-3xl"
               style={{
                 backgroundImage:
-                  "linear-gradient(90deg, #9e1d0b, #f77d19, #fcf10f)",
+                  "linear-gradient(90deg, #a10c20, #f3155f, #f977b0)",
                 backgroundSize: "200% 200%",
               }}
             >
@@ -235,13 +235,13 @@ const CommunityPage = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search by title, author, category, or tag..."
-                    className="w-full max-w-md px-4 py-2 rounded-full border border-[#c5bbeb] dark:border-[#3b2f58] bg-[#f3f0fb] dark:bg-[#2a1e44] text-[#362466] dark:text-white placeholder-[#7b6ea5] dark:placeholder-[#aaa6c3] focus:outline-none focus:ring-2 focus:ring-[#fb923c] transition"
+                    className="w-full max-w-md px-4 py-2 rounded-full border border-[#c5bbeb] dark:border-[#3b2f58] bg-[#f3f0fb] dark:bg-[#2a1e44] text-[#362466] dark:text-white placeholder-[#7b6ea5] dark:placeholder-[#aaa6c3] focus:outline-none focus:ring-2 focus:ring-[#f32469] transition"
                   />
                   <button
                     onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-                    className={`px-6 py-2 rounded-full font-medium transition ${
+                    className={`px-6 py-2 rounded-full cursor-pointer font-medium transition ${
                       showOnlyFavorites
-                        ? "bg-[#fb923c] text-white shadow-[0_0_15px_rgba(251,146,60,0.4)]"
+                        ? "bg-[#791134] text-white shadow-[0_0_15px_rgba(243,36,105,0.4)]"
                         : "bg-[#e7e4f4] dark:bg-[#3a2e54] text-[#362466] dark:text-[#aaa6c3] hover:bg-[#ddd6f3] dark:hover:bg-[#4a3a64]"
                     }`}
                   >
@@ -269,7 +269,7 @@ const CommunityPage = () => {
                       data-aos-delay="2400"
                       className="font-bold text-xl text-center mb-6"
                     >
-                      <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-r from-red-600 via-rose-500 to-pink-500 bg-clip-text text-transparent">
                         No community projects yet.
                       </span>
                     </div>
@@ -284,8 +284,8 @@ const CommunityPage = () => {
                           whileHover={{
                             scale: 1.05,
                             boxShadow: isDark
-                              ? "0 2px 24px rgba(251,146,60,0.35)"
-                              : "0 2px 24px rgba(251,146,60,0.6)",
+                              ? "0 2px 24px rgba(243,36,105,0.35)"
+                              : "0 2px 24px rgba(243,36,105,0.6)",
                           }}
                           className="group flex flex-col gap-4 px-6 py-6 bg-[#dad5ee] dark:bg-[#2a1e44] rounded-xl shadow-[0_2px_12px_rgba(139,92,246,0.15)] transition"
                         >
@@ -296,8 +296,8 @@ const CommunityPage = () => {
                               className="cursor-pointer"
                             >
                               <div className="flex items-center gap-3 mb-2">
-                                <FolderOpen className="w-6 h-6 stroke-[#cb8a07] dark:stroke-[#fb923c]" />
-                                <h3 className="text-lg font-semibold truncate group-hover:text-[#cb8a07] dark:group-hover:text-[#fb923c]">
+                                <FolderOpen className="w-6 h-6 stroke-[#c92058] dark:stroke-[#ef3573]" />
+                                <h3 className="text-lg font-semibold truncate group-hover:text-[#c92058] dark:group-hover:text-[#ef3573]">
                                   {project.titleCommunityPage}
                                 </h3>
                               </div>
@@ -324,12 +324,12 @@ const CommunityPage = () => {
                             )}
 
                             <div className="text-sm mt-2">
-                              <span className="font-medium text-[#c54516]">
+                              <span className="font-medium text-[#b93539]">
                                 Category:
                               </span>{" "}
                               {project.category || "—"}{" "}
                               <span className="mx-1">•</span>
-                              <span className="font-medium text-[#d49307]">
+                              <span className="font-medium text-[#d22fa9]">
                                 Type:
                               </span>{" "}
                               {project.typeOfDocument || "—"}
@@ -351,15 +351,15 @@ const CommunityPage = () => {
                                 e.stopPropagation();
                                 handleUpvote(project._id!);
                               }}
-                              className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition"
+                              className="flex items-center gap-1 text-sm hover:text-[#c92058] dark:hover:text-[#ef3573] transition cursor-pointer"
                             >
                               <ThumbsUp
                                 className={`w-5 h-5 ${
                                   (project.upvotedBy ?? []).includes(
-                                    currentUsername,
+                                    currentUsername
                                   )
-                                    ? "fill-[#cb8a07]"
-                                    : "stroke-[#cb8a07]"
+                                    ? "fill-[#ef3573]"
+                                    : "stroke-[#ef3573]"
                                 }`}
                               />
                               <span>{(project.upvotedBy ?? []).length}</span>
@@ -373,15 +373,15 @@ const CommunityPage = () => {
                                 e.stopPropagation();
                                 toggleFavorite(project._id!);
                               }}
-                              className="flex items-center gap-1 text-sm hover:text-[#cb8a07] dark:hover:text-[#fb923c] transition"
+                              className="flex items-center gap-1 text-sm hover:text-[#c92058] dark:hover:text-[#ef3573] transition cursor-pointer"
                             >
                               <Heart
                                 className={`w-5 h-5 ${
                                   (project.favoritedBy ?? []).includes(
-                                    currentUsername,
+                                    currentUsername
                                   )
-                                    ? "fill-[#fb923c]"
-                                    : "stroke-[#fb923c]"
+                                    ? "fill-[#ef3573]"
+                                    : "stroke-[#ef3573]"
                                 }`}
                               />
                               <span>Favorite</span>

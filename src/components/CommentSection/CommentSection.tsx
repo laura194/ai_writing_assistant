@@ -70,7 +70,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
   const sortedComments = [...comments].sort(
     (a, b) =>
       new Date(b.date || b.createdAt || "").getTime() -
-      new Date(a.date || a.createdAt || "").getTime(),
+      new Date(a.date || a.createdAt || "").getTime()
   );
 
   return (
@@ -83,10 +83,10 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
       {/* Header-Bar */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between px-4 py-3 text-left transition ${
+        className={`w-full flex items-center justify-between px-4 py-3 text-left transition cursor-pointer ${
           isDark
-            ? "hover:bg-[#2f2450] text-[#fb923c]"
-            : "hover:bg-[#ddd6f3] text-[#cb8a07]"
+            ? "hover:bg-[#2f2450] text-[#ef3573]"
+            : "hover:bg-[#ddd6f3] text-[#c92058]"
         }`}
       >
         <div className="flex items-center gap-2 font-semibold">
@@ -129,7 +129,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
                 placeholder="Write a comment..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                className={`flex-1 px-3 py-2 rounded-lg text-sm ${
+                className={`flex-1 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#f32469] transition ${
                   isDark
                     ? "bg-[#2e2348] text-white placeholder-[#aaa]"
                     : "bg-[#dad5ee] text-[#362466]"
@@ -138,7 +138,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={handleAddComment}
-                className="flex items-center gap-2 px-4 py-2 bg-[#cb8a07] hover:bg-[#b07a07] dark:bg-[#fb923c] dark:hover:bg-[#f77d19] text-white rounded-lg transition"
+                className="flex items-center gap-2 px-4 py-2 bg-[#c92058] hover:bg-[#a11544] dark:bg-[#ef3573] dark:hover:bg-[#ac1245] text-white rounded-lg transition cursor-pointer"
               >
                 <SendHorizonal size={16} /> Send
               </motion.button>
@@ -160,7 +160,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
                     className={`p-3 rounded-xl ${isDark ? "bg-[#2e2348]" : "bg-[#e0dbf4]"}`}
                   >
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium text-[#362466] dark:text-[#fbbf24]">
+                      <span className="font-medium text-[#362466] dark:text-[#ef3573]">
                         {c.username}
                       </span>
                       <span className="text-xs text-[#666] dark:text-[#aaa]">
