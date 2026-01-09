@@ -6,8 +6,7 @@
     "dev": "ts-node-dev src/index.ts",
     "start": "node index.js",
     "test": "vitest",
-    "test:encryption": "vitest src/utils/encryption.test.ts",
-    "test:run": "vitest run"
+    "test:encryption": "vitest src/utils/encryption.test.ts"
   },
   "keywords": [],
   "author": "",
