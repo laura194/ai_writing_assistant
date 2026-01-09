@@ -70,7 +70,7 @@ const CommentSection = ({ projectId }: CommentSectionProps) => {
   const sortedComments = [...comments].sort(
     (a, b) =>
       new Date(b.date || b.createdAt || "").getTime() -
-      new Date(a.date || a.createdAt || "").getTime()
+      new Date(a.date || a.createdAt || "").getTime(),
   );
 
   return (
