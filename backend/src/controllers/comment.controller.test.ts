@@ -1,5 +1,5 @@
 import request from "supertest";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock} from "vitest";
 import app from "../app"; // Express app export
 import Comment from "../models/Comment";
 
@@ -27,7 +27,7 @@ describe("Comment Controller", () => {
       username: "Alice",
       content: "Hello",
     });
-    (Comment as unknown as vi.Mock).mockImplementation(() => ({
+    (Comment as unknown as Mock).mockImplementation(() => ({
       save: mockSave,
     }));
 
@@ -58,7 +58,7 @@ describe("Comment Controller", () => {
   it("POST /api/comments save error returns 500", async () => {
     const error = new Error("DB error");
     const mockSave = vi.fn().mockRejectedValue(error);
-    (Comment as unknown as vi.Mock).mockImplementation(() => ({
+    (Comment as unknown as Mock).mockImplementation(() => ({
       save: mockSave,
     }));
     const consoleErrorMock = vi
@@ -97,11 +97,11 @@ describe("Comment Controller", () => {
     ];
 
     // find returns promise resolving to mockComments sorted descending
-    (Comment.find as unknown as vi.Mock).mockReturnValue({
+    (Comment.find as unknown as Mock).mockReturnValue({
       sort: vi
         .fn()
         .mockResolvedValue(
-          mockComments.sort((a, b) => b.createdAt - a.createdAt),
+          mockComments.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
         ),
     });
 
@@ -119,7 +119,7 @@ describe("Comment Controller", () => {
 
   it("GET /api/comments/:projectId error returns 500", async () => {
     const error = new Error("DB fail");
-    (Comment.find as unknown as vi.Mock).mockReturnValue({
+    (Comment.find as unknown as Mock).mockReturnValue({
       sort: vi.fn().mockRejectedValue(error),
     });
     const consoleErrorMock = vi
@@ -136,7 +136,7 @@ describe("Comment Controller", () => {
   });
 
   it("DELETE /api/comments/:id deletes comment", async () => {
-    (Comment.findByIdAndDelete as unknown as vi.Mock).mockResolvedValue({
+    (Comment.findByIdAndDelete as unknown as Mock).mockResolvedValue({
       _id: "123",
       projectId: "p1",
       username: "Alice",
@@ -151,7 +151,7 @@ describe("Comment Controller", () => {
   });
 
   it("DELETE /api/comments/:id not found returns 404", async () => {
-    (Comment.findByIdAndDelete as unknown as vi.Mock).mockResolvedValue(null);
+    (Comment.findByIdAndDelete as unknown as Mock).mockResolvedValue(null);
 
     const res = await request(app).delete("/api/comments/unknown");
 
@@ -161,7 +161,7 @@ describe("Comment Controller", () => {
 
   it("DELETE /api/comments/:id error returns 500", async () => {
     const error = new Error("DB error");
-    (Comment.findByIdAndDelete as unknown as vi.Mock).mockRejectedValue(error);
+    (Comment.findByIdAndDelete as unknown as Mock).mockRejectedValue(error);
     const consoleErrorMock = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});
