@@ -19,8 +19,11 @@ services:
     container_name: ai_writing_assistant_backend
     depends_on:
       - mongodb
+      - pandoc
     ports:
       - "5001:5001"
+    volumes:
+      - tmp-data:/tmp
     networks:
       - ai_writing_assistant_network
 
@@ -34,8 +37,19 @@ services:
     networks:
       - ai_writing_assistant_network
 
+  pandoc:
+    image: laura194/pandoc:latest
+    container_name: ai_writing_assistant_pandoc
+    volumes:
+      - tmp-data:/workspace
+    working_dir: /workspace
+    networks:
+      - ai_writing_assistant_network
+    entrypoint: ["sleep", "infinity"]
+
 volumes:
   mongo-data:
+  tmp-data:
 
 networks:
   ai_writing_assistant_network:
