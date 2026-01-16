@@ -3,7 +3,7 @@ FROM node:22-alpine AS build
 
 WORKDIR /app/backend
 
-# package.json and package-lock.json copy and install
+# package.json und package-lock.json kopieren und installieren
 COPY backend/package*.json ./
 RUN npm install
 
@@ -16,7 +16,7 @@ RUN npx tsc
 # Stage 2: Runtime
 FROM node:22-alpine
 
-# Install Docker CLI
+# Docker CLI installieren, damit ExportService docker run ausführen kann
 RUN apk add --no-cache docker-cli bash
 
 WORKDIR /app/backend
@@ -24,10 +24,10 @@ WORKDIR /app/backend
 COPY --from=build /app/backend/node_modules ./node_modules
 COPY --from=build /app/backend/dist ./dist
 
-# Build-time argument
+# Argument zur Build-Zeit
 ARG MONGO_URI
-# Make the variable available at runtime
-ENV MONGO_URI=${MONGO_URI}
+# Variable zur Runtime verfügbar machen
+ENV MONGO_URI=$MONGO_URI
 
 EXPOSE 3000
 

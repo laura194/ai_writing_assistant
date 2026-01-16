@@ -21,12 +21,22 @@ services:
       - mongodb
       - pandoc
     ports:
-      - "5001:5001"
+      - "5001:3000"   # Container lauscht auf 3000
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - tmp-data:/tmp
+      - /var/run/docker.sock:/var/run/docker.sock  # damit docker run geht
+      - tmp-data:/tmp                              # tmpDir wird hier erzeugt
     networks:
       - ai_writing_assistant_network
+
+  pandoc:
+    image: laura194/pandoc:latest
+    container_name: ai_writing_assistant_pandoc
+    volumes:
+      - tmp-data:/workspace                        # gleiche Daten wie /tmp im Backend
+    working_dir: /workspace
+    networks:
+      - ai_writing_assistant_network
+    entrypoint: ["sleep", "infinity"]              # bleibt wie bei dir
 
   frontend:
     image: laura194/frontend:latest
@@ -38,19 +48,9 @@ services:
     networks:
       - ai_writing_assistant_network
 
-  pandoc:
-    image: laura194/pandoc:latest
-    container_name: ai_writing_assistant_pandoc
-    volumes:
-      - tmp-data:/workspace
-    working_dir: /workspace
-    networks:
-      - ai_writing_assistant_network
-    entrypoint: ["sleep", "infinity"]
-
 volumes:
   mongo-data:
-  tmp-data:
+  tmp-data:                                        # gemeinsam genutztes Volume
 
 networks:
   ai_writing_assistant_network:
