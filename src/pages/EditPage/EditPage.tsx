@@ -90,7 +90,36 @@ const EditPage = () => {
         const r = el.getBoundingClientRect();
         // add small padding
         const padding = 8;
-        setHighlightRect(new DOMRect(r.left - padding, r.top - padding, r.width + padding * 2, r.height + padding * 2));
+
+        // If the current target is not the header, ensure we don't include the fixed header
+        // in the highlighted hole. Compute header bottom and clamp the top of the hole
+        // to be at least below the header.
+        const headerEl = document.getElementById("tutorial-header");
+        const headerBottom = headerEl ? headerEl.getBoundingClientRect().bottom : 0;
+
+        let top = r.top;
+        let height = r.height;
+
+        if (id !== "tutorial-header" && headerBottom > 0) {
+          const adjustedTop = Math.max(r.top, headerBottom + padding);
+          const adjustedBottom = r.bottom;
+          const adjustedHeight = adjustedBottom - adjustedTop;
+          if (adjustedHeight <= 0) {
+            setHighlightRect(null);
+            return;
+          }
+          top = adjustedTop;
+          height = adjustedHeight;
+        }
+
+        setHighlightRect(
+          new DOMRect(
+            r.left - padding,
+            top - padding,
+            r.width + padding * 2,
+            height + padding * 2,
+          ),
+        );
       } else {
         setHighlightRect(null);
       }
