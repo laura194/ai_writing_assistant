@@ -21,7 +21,7 @@ services:
       - mongodb
       - pandoc
     ports:
-      - "5001:3000"   # Container lauscht auf 3000
+      - "5001:5001"  
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # damit docker run geht
       - tmp-data:/tmp                              # tmpDir wird hier erzeugt
