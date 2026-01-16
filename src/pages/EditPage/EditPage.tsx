@@ -112,14 +112,24 @@ const EditPage = () => {
           height = adjustedHeight;
         }
 
-        setHighlightRect(
-          new DOMRect(
-            r.left - padding,
-            top - padding,
-            r.width + padding * 2,
-            height + padding * 2,
-          ),
-        );
+        // Clamp the computed rect to the viewport so rounded corners render
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        const left = Math.max(0, Math.floor(r.left - padding));
+        const topClamped = Math.max(0, Math.floor(top - padding));
+        const right = Math.min(vw, Math.ceil(r.left + r.width + padding));
+        const bottom = Math.min(vh, Math.ceil(top + height + padding));
+
+        const finalWidth = right - left;
+        const finalHeight = bottom - topClamped;
+
+        if (finalWidth <= 0 || finalHeight <= 0) {
+          setHighlightRect(null);
+          return;
+        }
+
+        setHighlightRect(new DOMRect(left, topClamped, finalWidth, finalHeight));
       } else {
         setHighlightRect(null);
       }
@@ -133,6 +143,14 @@ const EditPage = () => {
       window.removeEventListener('scroll', computeRect, true);
     };
   }, [tutorialActive, tutorialStep]);
+
+  // Corner radius for the highlight hole (dynamic based on hole size)
+  const highlightCornerRadius = (() => {
+    if (!highlightRect) return 10;
+    const minSize = Math.min(highlightRect.width, highlightRect.height);
+    // Use up to 12% of the smaller dimension, clamped between 6 and 28px
+    return Math.max(6, Math.min(28, Math.floor(minSize * 0.12)));
+  })();
   const { projectId } = useParams<{ projectId: string }>();
 
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -746,8 +764,8 @@ const EditPage = () => {
                       y={highlightRect.y}
                       width={highlightRect.width}
                       height={highlightRect.height}
-                      rx={10}
-                      ry={10}
+                      rx={highlightCornerRadius}
+                      ry={highlightCornerRadius}
                       fill="black"
                     />
                   )}
