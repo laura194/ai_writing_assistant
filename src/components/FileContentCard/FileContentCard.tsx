@@ -439,6 +439,7 @@ function FileContentCard({
 
       <div className="absolute top-4 right-10 flex items-center">
         <motion.button
+          id="tutorial-ai-button"
           whileHover={{
             scale: 1.075,
             boxShadow: isDark

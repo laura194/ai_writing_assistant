@@ -42,6 +42,11 @@ const tutorialSteps = [
     description: 'Im Hauptbereich kannst du den Inhalt des ausgewählten Kapitels bearbeiten. Änderungen werden automatisch gespeichert.',
   },
   {
+    target: 'tutorial-ai-button',
+    title: 'AI-Hilfe',
+    description: 'Mit diesem Button kannst du die KI nach dem ausgewählten Inhalt fragen — z. B. um Vorschläge, Umschreibungen oder Ergänzungen zu erhalten.',
+  },
+  {
     target: 'tutorial-bottomnav',
     title: 'Ansichten wechseln',
     description: 'Unten links kannst du zwischen verschiedenen Ansichten wie AI, Gesamtdokument und Beiträgen wechseln.',
