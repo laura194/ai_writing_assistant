@@ -50,7 +50,11 @@ export const createNodeContent = async (
       projectId,
     });
 
-    const savedNodeContent = await newNodeContent.save();
+    // Pre-save hook encryption
+    await newNodeContent.save();
+
+    // Query back to get decrypted version
+    const savedNodeContent = await NodeContent.findById(newNodeContent._id);
     res.status(201).json(savedNodeContent);
   } catch (error) {
     console.error("Error saving node content:", error);
@@ -76,6 +80,7 @@ export const getNodeContents = async (
       filter.projectId = projectId.toString();
     }
 
+    // Post-find hook automatically decyripts content
     const contents = await NodeContent.find(filter);
 
     res.status(200).json(contents);
@@ -99,6 +104,7 @@ export const getNodeContentById = async (
   }
 
   try {
+    // Post-find hook automatically decyripts content
     const nodeContent = await NodeContent.findOne({
       nodeId: id,
       projectId: projectId.toString(),
@@ -119,7 +125,7 @@ export const getNodeContentById = async (
 };
 
 /**
- * UPDATE (PUT) — erstellt vor dem Update eine Version des bisherigen Inhalts
+ * UPDATE (PUT) — uses find() + save() pattern to trigger pre-save hooks
  */
 export const updateNodeContent = async (
   req: Request,
@@ -163,19 +169,21 @@ export const updateNodeContent = async (
     }
 
     if (useTransaction && session) {
+      // Post-findOne hook decyripts existing content
       const existing = await NodeContent.findOne({ nodeId, projectId }).session(
         session,
       );
 
       if (existing && !skipVersion) {
+        // Pre-save hook will encrypt when creating version
         await NodeContentVersion.create(
           [
             {
               nodeId: existing.nodeId,
               projectId: existing.projectId,
-              name: existing.name,
+              name: existing.name, // already decrypted
               category: existing.category,
-              content: existing.content,
+              content: existing.content, // already decrypted
               userId: getUserIdFromReq(req),
               meta: { from: "updateNodeContent" },
             },
@@ -184,7 +192,7 @@ export const updateNodeContent = async (
         );
       }
 
-      type UpsertData = {
+      /*type UpsertData = {
         name: string;
         category: string;
         content: string;
@@ -204,7 +212,24 @@ export const updateNodeContent = async (
         { nodeId, projectId },
         { $set: upsertData },
         { new: true, upsert: true, setDefaultsOnInsert: true, session },
-      );
+      );*/
+
+      // new way to trigger encryption
+      let nodeContent = await NodeContent.findOne({
+        nodeId,
+        projectId,
+      }).session(session);
+
+      if (!nodeContent) {
+        nodeContent = new NodeContent({ nodeId, projectId });
+      }
+
+      nodeContent.name = name;
+      nodeContent.category = category;
+      nodeContent.content = content;
+      if (icon !== undefined) nodeContent.icon = icon;
+
+      await nodeContent.save({ session });
 
       await Project.findByIdAndUpdate(
         projectId,
@@ -242,6 +267,10 @@ export const updateNodeContent = async (
       await session.commitTransaction();
       await session.endSession();
 
+      const updatedNodeContent = await NodeContent.findOne({
+        nodeId,
+        projectId,
+      });
       res.status(200).json(updatedNodeContent);
       return;
     } else {
@@ -277,19 +306,17 @@ export const updateNodeContent = async (
       });
     }
 
-    const updatedNodeContent = await NodeContent.findOneAndUpdate(
-      { nodeId, projectId },
-      {
-        $set: {
-          name,
-          category,
-          content,
-          projectId,
-          ...(icon !== undefined ? { icon } : {}),
-        },
-      },
-      { new: true, upsert: true, setDefaultsOnInsert: true },
-    );
+    let nodeContent = await NodeContent.findOne({ nodeId, projectId });
+    if (!nodeContent) {
+      nodeContent = new NodeContent({ nodeId, projectId });
+    }
+
+    nodeContent.name = name;
+    nodeContent.category = category;
+    nodeContent.content = content;
+    if (icon !== undefined) nodeContent.icon = icon;
+
+    await nodeContent.save();
 
     await Project.findByIdAndUpdate(projectId, {
       $set: { updatedAt: new Date() },
@@ -300,23 +327,22 @@ export const updateNodeContent = async (
         nodeId,
         projectId,
       });
+
       if (count2 > MAX_VERSIONS) {
         const toDelete = count2 - MAX_VERSIONS;
-        const oldest = (await NodeContentVersion.find({ nodeId, projectId })
+        const oldest = await NodeContentVersion.find({ nodeId, projectId })
           .sort({ createdAt: 1 })
           .limit(toDelete)
-          .select("_id")
-          .lean()
-          .session(session)) as Array<{
-          _id: mongoose.Types.ObjectId | string;
-        }>;
+          .select("_id");
 
         const ids = oldest.map((o) => o._id);
-        if (ids.length)
+        if (ids.length) {
           await NodeContentVersion.deleteMany({ _id: { $in: ids } });
+        }
       }
     }
 
+    const updatedNodeContent = await NodeContent.findOne({ nodeId, projectId });
     res.status(200).json(updatedNodeContent);
     return;
   } catch (err) {
@@ -360,15 +386,17 @@ export const createVersion = async (
       const oldest = await NodeContentVersion.find({ nodeId, projectId })
         .sort({ createdAt: 1 })
         .limit(toDelete)
-        .select("_id")
-        .lean();
+        .select("_id");
+      //.lean();
 
       const ids = oldest.map((o) => o._id);
       if (ids.length)
         await NodeContentVersion.deleteMany({ _id: { $in: ids } });
     }
 
-    res.status(201).json(version);
+    // Query back to get decrypted
+    const decryptedVersion = await NodeContentVersion.findById(version._id);
+    res.status(201).json(decryptedVersion);
   } catch (error) {
     console.error("createVersion error:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -391,12 +419,14 @@ export const listVersions = async (
   try {
     const limit = Math.min(Number(req.query.limit ?? 50), 200);
     const skip = Number(req.query.skip ?? 0);
+
     const versions = await NodeContentVersion.find({ nodeId, projectId })
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit)
-      .lean();
-    res.status(200).json(versions);
+      .limit(limit);
+    // .lean(); this bypasses decryption hooks
+
+    res.status(200).json(versions); // decrypted
   } catch (error) {
     console.error("listVersions error:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -419,12 +449,14 @@ export const getVersion = async (
     const version = await NodeContentVersion.findOne({
       _id: versionId,
       nodeId,
-    }).lean();
+    });
+    // .lean(); this bypasses decryption hooks
+
     if (!version) {
       res.status(404).json({ error: "version not found" });
       return;
     }
-    res.status(200).json(version);
+    res.status(200).json(version); // decrypted
   } catch (error) {
     console.error("getVersion error:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -488,9 +520,9 @@ export const revertToVersion = async (
             {
               nodeId: existing.nodeId,
               projectId: existing.projectId,
-              name: existing.name,
+              name: existing.name, // already decrypted
               category: existing.category,
-              content: existing.content,
+              content: existing.content, // already decrypted
               userId: getUserIdFromReq(req),
               meta: { from: "revert" },
             },
@@ -499,19 +531,24 @@ export const revertToVersion = async (
         );
       }
 
-      const updated = await NodeContent.findOneAndUpdate(
-        { nodeId, projectId },
-        {
-          $set: {
-            name: version.name,
-            category: version.category,
-            content: version.content,
-            projectId,
-            updatedAt: new Date(),
-          },
-        },
-        { new: true, upsert: true, session },
-      );
+      // use find() + save() pattern
+
+      let nodeContent = await NodeContent.findOne({
+        nodeId,
+        projectId,
+      }).session(session);
+
+      if (!nodeContent) {
+        nodeContent = new NodeContent({ nodeId, projectId });
+      }
+
+      // Update with version data (already decrypted from findOne above)
+      nodeContent.name = version.name;
+      nodeContent.category = version.category;
+      nodeContent.content = version.content;
+
+      // Pre-save hook encrypts here
+      await nodeContent.save({ session });
 
       // trim versions if exceeded
       const count = await NodeContentVersion.countDocuments({
@@ -520,14 +557,11 @@ export const revertToVersion = async (
       }).session(session);
       if (count > MAX_VERSIONS) {
         const toDelete = count - MAX_VERSIONS;
-        const oldest = (await NodeContentVersion.find({ nodeId, projectId })
+        const oldest = await NodeContentVersion.find({ nodeId, projectId })
           .sort({ createdAt: 1 })
           .limit(toDelete)
           .select("_id")
-          .lean()
-          .session(session)) as Array<{
-          _id: mongoose.Types.ObjectId | string;
-        }>;
+          .session(session);
 
         const ids = oldest.map((o) => o._id);
         if (ids.length)
@@ -539,6 +573,8 @@ export const revertToVersion = async (
       await session.commitTransaction();
       await session.endSession();
 
+      // Query back to get decrypted version
+      const updated = await NodeContent.findOne({ nodeId, projectId });
       res.status(200).json(updated);
       return;
     }
@@ -581,40 +617,39 @@ export const revertToVersion = async (
       });
     }
 
-    const updated = await NodeContent.findOneAndUpdate(
-      { nodeId, projectId },
-      {
-        $set: {
-          name: version.name,
-          category: version.category,
-          content: version.content,
-          projectId,
-          updatedAt: new Date(),
-        },
-      },
-      { new: true, upsert: true },
-    );
+    // Use find() + save()
+    let nodeContent = await NodeContent.findOne({ nodeId, projectId });
+
+    if (!nodeContent) {
+      nodeContent = new NodeContent({ nodeId, projectId });
+    }
+
+    nodeContent.name = version.name;
+    nodeContent.category = version.category;
+    nodeContent.content = version.content;
+
+    // Pre-save hook encrypts
+    await nodeContent.save();
 
     const count = await NodeContentVersion.countDocuments({
       nodeId,
       projectId,
     });
+
     if (count > MAX_VERSIONS) {
       const toDelete = count - MAX_VERSIONS;
-      const oldest = (await NodeContentVersion.find({ nodeId, projectId })
+      const oldest = await NodeContentVersion.find({ nodeId, projectId })
         .sort({ createdAt: 1 })
         .limit(toDelete)
-        .select("_id")
-        .lean()
-        .session(session)) as Array<{
-        _id: mongoose.Types.ObjectId | string;
-      }>;
+        .select("_id");
 
       const ids = oldest.map((o) => o._id);
       if (ids.length)
         await NodeContentVersion.deleteMany({ _id: { $in: ids } });
     }
 
+    // Query back for decrypted version
+    const updated = await NodeContent.findOne({ nodeId, projectId });
     res.status(200).json(updated);
     return;
   } catch (err) {
