@@ -29,27 +29,32 @@ const tutorialSteps = [
   {
     target: 'tutorial-header',
     title: 'Header & Navigation',
-    description: 'Hier findest du die wichtigsten Navigationsmöglichkeiten, wie das Öffnen und Erstellen von Projekten, den Community-Bereich und die Einstellungen.',
+    description:
+      'Here you find the main navigation options: create/open projects, access the community area, and open settings.',
   },
   {
     target: 'tutorial-sidebar',
-    title: 'Projektstruktur',
-    description: 'Links siehst du die Kapitelstruktur deines Projekts. Hier kannst du Kapitel hinzufügen, umbenennen, verschieben oder löschen.',
+    title: 'Project Structure',
+    description:
+      'On the left you see the chapter structure of your project. You can add, rename, move or delete chapters here.',
   },
   {
     target: 'tutorial-editor',
     title: 'Editor',
-    description: 'Im Hauptbereich kannst du den Inhalt des ausgewählten Kapitels bearbeiten. Änderungen werden automatisch gespeichert.',
+    description:
+      'In the main area you can edit the content of the selected chapter. Changes are saved automatically.',
   },
   {
     target: 'tutorial-ai-button',
-    title: 'AI-Hilfe',
-    description: 'Mit diesem Button kannst du die KI nach dem ausgewählten Inhalt fragen — z. B. um Vorschläge, Umschreibungen oder Ergänzungen zu erhalten.',
+    title: 'AI Assistance',
+    description:
+      'Use this button to ask the AI about the selected content — for suggestions, rewrites or enhancements.',
   },
   {
     target: 'tutorial-bottomnav',
-    title: 'Ansichten wechseln',
-    description: 'Unten links kannst du zwischen verschiedenen Ansichten wie AI, Gesamtdokument und Beiträgen wechseln.',
+    title: 'Switch Views',
+    description:
+      'At the bottom left you can switch between different views like AI, full document and contributions.',
   },
 ];
 
@@ -793,29 +798,33 @@ const EditPage = () => {
                 <div className="font-bold text-lg mb-2 text-[#7c3aed] dark:text-[#facc15]">{tutorialSteps[tutorialStep].title}</div>
                 <div className="mb-4 text-sm text-[#261e3b] dark:text-[#e9e5f8] text-center">{tutorialSteps[tutorialStep].description}</div>
                 <div className="flex items-center gap-2 mt-2">
-                  <button
-                    className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold disabled:opacity-50"
-                    onClick={handlePrevStep}
-                    disabled={tutorialStep === 0}
-                  >
-                    Previous
-                  </button>
+                  {tutorialStep > 0 && (
+                    <button
+                      className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold"
+                      onClick={handlePrevStep}
+                    >
+                      Previous
+                    </button>
+                  )}
+
                   <span className="text-xs text-[#473885] dark:text-[#facc15]">
                     Step {tutorialStep + 1} / {tutorialSteps.length}
                   </span>
-                  <button
-                    className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold disabled:opacity-50"
-                    onClick={handleNextStep}
-                    disabled={tutorialStep === tutorialSteps.length - 1}
-                  >
-                    Next
-                  </button>
+
+                  {tutorialStep < tutorialSteps.length - 1 && (
+                    <button
+                      className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold"
+                      onClick={handleNextStep}
+                    >
+                      Next
+                    </button>
+                  )}
                 </div>
                 <button
                   className="mt-4 px-4 py-1 rounded bg-[#7c3aed] text-white dark:bg-[#facc15] dark:text-[#1e1538] font-bold shadow hover:scale-105 transition-transform"
                   onClick={handleTutorialClose}
                 >
-                  Tutorial beenden
+                  End Tutorial
                 </button>
               </div>
             </div>
