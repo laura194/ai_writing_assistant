@@ -72,21 +72,38 @@ const EditPage = () => {
     setTutorialStep((prev) => (prev > 0 ? prev - 1 : prev));
   };
 
-  // Helper for positioning tooltip (simple version: fixed positions for demo)
-  const getTooltipPosition = () => {
-    switch (tutorialSteps[tutorialStep].target) {
-      case 'tutorial-header':
-        return { top: 70, left: '50%', transform: 'translateX(-50%)' };
-      case 'tutorial-sidebar':
-        return { top: 180, left: 60 };
-      case 'tutorial-editor':
-        return { top: 180, left: '40%' };
-      case 'tutorial-bottomnav':
-        return { bottom: 40, left: 80 };
-      default:
-        return { top: 100, left: 100 };
+  // (Tooltip is now centered; per-step positioning kept for possible later use)
+
+  // Highlight (hole) for current tutorial target
+  const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    if (!tutorialActive) {
+      setHighlightRect(null);
+      return;
     }
-  };
+
+    const computeRect = () => {
+      const id = tutorialSteps[tutorialStep]?.target;
+      const el = id ? document.getElementById(id) : null;
+      if (el) {
+        const r = el.getBoundingClientRect();
+        // add small padding
+        const padding = 8;
+        setHighlightRect(new DOMRect(r.left - padding, r.top - padding, r.width + padding * 2, r.height + padding * 2));
+      } else {
+        setHighlightRect(null);
+      }
+    };
+
+    computeRect();
+    window.addEventListener('resize', computeRect);
+    window.addEventListener('scroll', computeRect, true);
+    return () => {
+      window.removeEventListener('resize', computeRect);
+      window.removeEventListener('scroll', computeRect, true);
+    };
+  }, [tutorialActive, tutorialStep]);
   const { projectId } = useParams<{ projectId: string }>();
 
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -676,7 +693,7 @@ const EditPage = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex flex-col h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-x-hidden">
-        <div id="tutorial-header">
+        <div>
           <Header
             onUndo={handleUndo}
             onRedo={handleRedo}
@@ -686,41 +703,69 @@ const EditPage = () => {
           />
         </div>
 
-        {/* Tutorial Overlay */}
+        {/* Tutorial Overlay with highlight hole */}
         {tutorialActive && (
-          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center" style={{ pointerEvents: 'auto' }}>
-            {/* Tooltip */}
+          <div className="fixed inset-0 z-[100] pointer-events-auto">
+            {/* SVG mask: white = overlay, black = hole (transparent) */}
+            <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <mask id="tutorial-mask">
+                  <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                  {highlightRect && (
+                    <rect
+                      x={highlightRect.x}
+                      y={highlightRect.y}
+                      width={highlightRect.width}
+                      height={highlightRect.height}
+                      rx={10}
+                      ry={10}
+                      fill="black"
+                    />
+                  )}
+                </mask>
+              </defs>
+              <rect width="100%" height="100%" fill="rgba(0,0,0,0.6)" mask="url(#tutorial-mask)" />
+            </svg>
+
+            {/* Tooltip positioned near the highlighted area when available */}
             <div
-              className="absolute bg-white dark:bg-[#1e1538] rounded-2xl shadow-lg p-6 max-w-xs border-2 border-[#7c3aed] flex flex-col items-center"
-              style={{ ...getTooltipPosition(), zIndex: 110 }}
+              className="absolute z-[110] flex items-center justify-center"
+              style={{
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 110,
+              }}
             >
-              <div className="font-bold text-lg mb-2 text-[#7c3aed] dark:text-[#facc15]">{tutorialSteps[tutorialStep].title}</div>
-              <div className="mb-4 text-sm text-[#261e3b] dark:text-[#e9e5f8] text-center">{tutorialSteps[tutorialStep].description}</div>
-              <div className="flex items-center gap-2 mt-2">
+              <div className="bg-white dark:bg-[#1e1538] rounded-2xl shadow-lg p-6 max-w-xs border-2 border-[#7c3aed] flex flex-col items-center">
+                <div className="font-bold text-lg mb-2 text-[#7c3aed] dark:text-[#facc15]">{tutorialSteps[tutorialStep].title}</div>
+                <div className="mb-4 text-sm text-[#261e3b] dark:text-[#e9e5f8] text-center">{tutorialSteps[tutorialStep].description}</div>
+                <div className="flex items-center gap-2 mt-2">
+                  <button
+                    className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold disabled:opacity-50"
+                    onClick={handlePrevStep}
+                    disabled={tutorialStep === 0}
+                  >
+                    Previous
+                  </button>
+                  <span className="text-xs text-[#473885] dark:text-[#facc15]">
+                    Step {tutorialStep + 1} / {tutorialSteps.length}
+                  </span>
+                  <button
+                    className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold disabled:opacity-50"
+                    onClick={handleNextStep}
+                    disabled={tutorialStep === tutorialSteps.length - 1}
+                  >
+                    Next
+                  </button>
+                </div>
                 <button
-                  className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold disabled:opacity-50"
-                  onClick={handlePrevStep}
-                  disabled={tutorialStep === 0}
+                  className="mt-4 px-4 py-1 rounded bg-[#7c3aed] text-white dark:bg-[#facc15] dark:text-[#1e1538] font-bold shadow hover:scale-105 transition-transform"
+                  onClick={handleTutorialClose}
                 >
-                  Previous
-                </button>
-                <span className="text-xs text-[#473885] dark:text-[#facc15]">
-                  Step {tutorialStep + 1} / {tutorialSteps.length}
-                </span>
-                <button
-                  className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold disabled:opacity-50"
-                  onClick={handleNextStep}
-                  disabled={tutorialStep === tutorialSteps.length - 1}
-                >
-                  Next
+                  Tutorial beenden
                 </button>
               </div>
-              <button
-                className="mt-4 px-4 py-1 rounded bg-[#7c3aed] text-white dark:bg-[#facc15] dark:text-[#1e1538] font-bold shadow hover:scale-105 transition-transform"
-                onClick={handleTutorialClose}
-              >
-                Tutorial beenden
-              </button>
             </div>
           </div>
         )}
