@@ -25,7 +25,68 @@ interface Snapshot {
   activeView: string;
 }
 
+const tutorialSteps = [
+  {
+    target: 'tutorial-header',
+    title: 'Header & Navigation',
+    description: 'Hier findest du die wichtigsten Navigationsmöglichkeiten, wie das Öffnen und Erstellen von Projekten, den Community-Bereich und die Einstellungen.',
+  },
+  {
+    target: 'tutorial-sidebar',
+    title: 'Projektstruktur',
+    description: 'Links siehst du die Kapitelstruktur deines Projekts. Hier kannst du Kapitel hinzufügen, umbenennen, verschieben oder löschen.',
+  },
+  {
+    target: 'tutorial-editor',
+    title: 'Editor',
+    description: 'Im Hauptbereich kannst du den Inhalt des ausgewählten Kapitels bearbeiten. Änderungen werden automatisch gespeichert.',
+  },
+  {
+    target: 'tutorial-bottomnav',
+    title: 'Ansichten wechseln',
+    description: 'Unten links kannst du zwischen verschiedenen Ansichten wie AI, Gesamtdokument und Beiträgen wechseln.',
+  },
+];
+
 const EditPage = () => {
+  // Tutorial state
+  const [tutorialActive, setTutorialActive] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+
+  // Handler for Header button
+  const handleTutorialClick = () => {
+    setTutorialActive(true);
+    setTutorialStep(0);
+  };
+
+  // Handler for closing tutorial
+  const handleTutorialClose = () => {
+    setTutorialActive(false);
+  };
+
+  // Navigation
+  const handleNextStep = () => {
+    setTutorialStep((prev) => (prev < tutorialSteps.length - 1 ? prev + 1 : prev));
+  };
+  const handlePrevStep = () => {
+    setTutorialStep((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
+  // Helper for positioning tooltip (simple version: fixed positions for demo)
+  const getTooltipPosition = () => {
+    switch (tutorialSteps[tutorialStep].target) {
+      case 'tutorial-header':
+        return { top: 70, left: '50%', transform: 'translateX(-50%)' };
+      case 'tutorial-sidebar':
+        return { top: 180, left: 60 };
+      case 'tutorial-editor':
+        return { top: 180, left: '40%' };
+      case 'tutorial-bottomnav':
+        return { bottom: 40, left: 80 };
+      default:
+        return { top: 100, left: 100 };
+    }
+  };
   const { projectId } = useParams<{ projectId: string }>();
 
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -615,16 +676,59 @@ const EditPage = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex flex-col h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-x-hidden">
-        <Header
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          canUndo={canUndo}
-          canRedo={canRedo}
-        />
+        <div id="tutorial-header">
+          <Header
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onTutorialClick={handleTutorialClick}
+          />
+        </div>
+
+        {/* Tutorial Overlay */}
+        {tutorialActive && (
+          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center" style={{ pointerEvents: 'auto' }}>
+            {/* Tooltip */}
+            <div
+              className="absolute bg-white dark:bg-[#1e1538] rounded-2xl shadow-lg p-6 max-w-xs border-2 border-[#7c3aed] flex flex-col items-center"
+              style={{ ...getTooltipPosition(), zIndex: 110 }}
+            >
+              <div className="font-bold text-lg mb-2 text-[#7c3aed] dark:text-[#facc15]">{tutorialSteps[tutorialStep].title}</div>
+              <div className="mb-4 text-sm text-[#261e3b] dark:text-[#e9e5f8] text-center">{tutorialSteps[tutorialStep].description}</div>
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold disabled:opacity-50"
+                  onClick={handlePrevStep}
+                  disabled={tutorialStep === 0}
+                >
+                  Previous
+                </button>
+                <span className="text-xs text-[#473885] dark:text-[#facc15]">
+                  Step {tutorialStep + 1} / {tutorialSteps.length}
+                </span>
+                <button
+                  className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold disabled:opacity-50"
+                  onClick={handleNextStep}
+                  disabled={tutorialStep === tutorialSteps.length - 1}
+                >
+                  Next
+                </button>
+              </div>
+              <button
+                className="mt-4 px-4 py-1 rounded bg-[#7c3aed] text-white dark:bg-[#facc15] dark:text-[#1e1538] font-bold shadow hover:scale-105 transition-transform"
+                onClick={handleTutorialClose}
+              >
+                Tutorial beenden
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-1 relative">
           <div
-            className={`sticky top-0 left-0 h-screen ${menuOpen ? "w-1/4" : "w-19"} transition-all duration-500 flex flex-col relative`}
+            className={`sticky top-0 left-0 h-screen ${menuOpen ? 'w-1/4' : 'w-19'} transition-all duration-500 flex flex-col relative`}
+            id="tutorial-sidebar"
           >
             <div className="bg-[#f4f2fa] dark:bg-[#1e1538] py-2 px-4 flex h-full flex-col justify-between shadow-[inset_0_0_30px_rgba(120,69,239,0.55)] dark:shadow-[inset_0_0_30px_rgba(120,69,239,0.25)] pt-14">
               <button
@@ -633,7 +737,6 @@ const EditPage = () => {
               >
                 <Bars3Icon className="h-6 w-6 text-[#473885] dark:text-[#c4b5fd]" />
               </button>
-
               {menuOpen && (
                 <ul className="flex-1 space-y-2 overflow-y-auto no-scrollbar px-2">
                   {nodes.map((node) => (
@@ -650,7 +753,7 @@ const EditPage = () => {
                   ))}
                 </ul>
               )}
-              <div>
+              <div id="tutorial-bottomnav">
                 <BottomNavigationBar
                   activeView={activeView}
                   onChangeView={handleViewChange}
@@ -662,6 +765,7 @@ const EditPage = () => {
 
           <main
             className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-6 pt-20`}
+            id="tutorial-editor"
           >
             <motion.div
               initial={{ backgroundPosition: "0% 0%" }}

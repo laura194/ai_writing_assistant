@@ -8,11 +8,21 @@ import ThemeToggleButton from "../ThemeToggleButton/ThemeToggleButton";
 import { UndoRedoButton } from "../UndoRedoButton/UndoRedoButton";
 import { SettingsButton } from "../SettingsButton/SettingsButton";
 
+// Simple magnifier icon (inline SVG)
+const MagnifierIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="inline-block align-middle mr-1">
+    <circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2" />
+    <line x1="14.1213" y1="14.1213" x2="18" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+
 interface HeaderProps {
   onUndo?: () => void;
   onRedo?: () => void;
   canUndo?: boolean;
   canRedo?: boolean;
+  onTutorialClick?: () => void;
 }
 
 const Header = ({
@@ -20,6 +30,7 @@ const Header = ({
   onRedo,
   canUndo = false,
   canRedo = false,
+  onTutorialClick,
 }: HeaderProps) => {
   const { user } = useUser();
   const { pathname } = useLocation();
@@ -104,6 +115,18 @@ const Header = ({
         </div>
 
         <div className="flex flex-1 items-center gap-4 justify-end">
+          {/* Tutorial Button */}
+          <button
+            type="button"
+            className="flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-300 text-[#261e3b] dark:text-[#1e1538] font-semibold shadow hover:scale-105 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 gap-1"
+            style={{ fontSize: '15px' }}
+            onClick={onTutorialClick}
+            aria-label="Start Tutorial"
+          >
+            <MagnifierIcon />
+            Tutorial
+          </button>
+
           <ThemeToggleButton />
 
           {user && (
