@@ -757,6 +757,7 @@ const EditPage = () => {
             canUndo={canUndo}
             canRedo={canRedo}
             onTutorialClick={handleTutorialClick}
+            activeView={activeView}
           />
         </div>
 
