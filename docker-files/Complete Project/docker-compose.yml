@@ -21,10 +21,10 @@ services:
       - mongodb
       - pandoc
     ports:
-      - "5001:5001"  
+      - "5001:5001"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock  
-      - tmp-data:/tmp                              
+      - /var/run/docker.sock:/var/run/docker.sock
+      - tmp-data:/tmp
     networks:
       - ai_writing_assistant_network
 
@@ -32,11 +32,11 @@ services:
     image: laura194/pandoc:latest
     container_name: ai_writing_assistant_pandoc
     volumes:
-      - tmp-data:/workspace                        
+      - tmp-data:/workspace
     working_dir: /workspace
     networks:
       - ai_writing_assistant_network
-    entrypoint: ["sleep", "infinity"]              
+    entrypoint: ["sleep", "infinity"]
 
   frontend:
     image: laura194/frontend:latest
@@ -50,7 +50,7 @@ services:
 
 volumes:
   mongo-data:
-  tmp-data:                                        
+  tmp-data:
 
 networks:
   ai_writing_assistant_network:
