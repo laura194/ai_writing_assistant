@@ -45,11 +45,6 @@ jobs:
             --build-arg MONGO_URI=${{ secrets.MONGO_URI }}
           docker push laura194/backend:${{ steps.version.outputs.tag }}
 
-      - name: Build & Push Pandoc
-        run: |
-          docker build . \
-            --file docker-files/Dockerfile.pandoc \
-            --tag laura194/pandoc:${{ steps.version.outputs.tag }}
-          docker push laura194/pandoc:${{ steps.version.outputs.tag }}
+
 
       
