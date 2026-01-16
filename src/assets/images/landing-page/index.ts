@@ -18,6 +18,7 @@ import clerk from "./tech/clerk.webp";
 import teamImg from "./team.png";
 import questionmark from "./question-mark.webp";
 import studiproject from "./studiproject.png";
+import studiproject2 from "./studiprojectII.png";
 
 export {
   backend,
@@ -38,4 +39,5 @@ export {
   teamImg,
   questionmark,
   studiproject,
+  studiproject2,
 };

@@ -15,8 +15,8 @@ import {
   clerk,
   github,
   teamImg,
-  questionmark,
   studiproject,
+  studiproject2,
 } from "../assets/images/landing-page";
 
 export const navLinks = [
@@ -138,7 +138,7 @@ const projects = [
   {
     name: "Student Project II",
     description:
-      "The second project focuses on collaboration. Users can create, share, and reuse writing structures and work together on academic texts in a transparent, AI-supported environment. More information will be available soon.",
+      "The second project focuses on collaboration. Users can create, share, and reuse writing structures and work together on academic texts in a transparent, AI-supported environment. In addition, we introduced several smaller improvements to ensure consistent behavior, prevent regressions, and maintain the system's long-term stability.",
     tags: [
       {
         name: "community-driven",
@@ -153,8 +153,8 @@ const projects = [
         color: "pink-text-gradient",
       },
     ],
-    image: questionmark,
-    source_code_link: "https://github.com/",
+    image: studiproject2,
+    source_code_link: "https://github.com/laura194/ai_writing_assistant/",
   },
 ];
 
