@@ -1,177 +1,750 @@
-import request from "supertest";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import app from "../app"; // Express app export
+import type { Mock } from "vitest";
 import Comment from "../models/Comment";
+import * as commentController from "./comment.controller";
 
+// Mock Request and Response objects
+const mockRequest = (body: any = {}, params: any = {}, query: any = {}) => ({
+  body,
+  params,
+  query,
+});
+
+const mockResponse = () => {
+  const res: any = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  return res;
+};
+
+/* ------------------------------------------------------------------ */
+/* MOCK MODEL                                                         */
+/* ------------------------------------------------------------------ */
 vi.mock("../models/Comment", () => {
+  const Model = vi.fn();
+
   return {
-    default: Object.assign(
-      vi.fn(() => ({ save: vi.fn() })), // constructor with save()
-      {
-        find: vi.fn(),
-        findByIdAndDelete: vi.fn(),
-      }, // static methods
-    ),
+    default: Object.assign(Model, {
+      find: vi.fn(),
+      findById: vi.fn(),
+      findOne: vi.fn(),
+      deleteOne: vi.fn(),
+      save: vi.fn(),
+    }),
   };
 });
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.resetAllMocks();
 });
 
+/* ------------------------------------------------------------------ */
+/* HELPER FUNCTIONS                                                   */
+/* ------------------------------------------------------------------ */
+const createMockComment = (overrides = {}) => ({
+  _id: "1",
+  projectId: "p1",
+  username: "Alice",
+  content: "Hello",
+  createdAt: new Date(),
+  save: vi.fn(),
+  ...overrides,
+});
+
+/* ------------------------------------------------------------------ */
+/* TESTS                                                             */
+/* ------------------------------------------------------------------ */
 describe("Comment Controller", () => {
-  it("POST /api/comments creates a comment", async () => {
-    const mockSave = vi.fn().mockResolvedValue({
-      _id: "123",
-      projectId: "p1",
-      username: "Alice",
-      content: "Hello",
-    });
-    (Comment as unknown as vi.Mock).mockImplementation(() => ({
-      save: mockSave,
-    }));
-
-    const res = await request(app).post("/api/comments").send({
-      projectId: "p1",
-      username: "Alice",
-      content: "Hello",
-    });
-
-    expect(res.status).toBe(201);
-    expect(res.body).toMatchObject({
-      projectId: "p1",
-      username: "Alice",
-      content: "Hello",
-    });
-    expect(mockSave).toHaveBeenCalled();
-  });
-
-  it("POST /api/comments missing fields returns 400", async () => {
-    const res = await request(app).post("/api/comments").send({
-      username: "Alice",
-    });
-
-    expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error", "Missing required fields");
-  });
-
-  it("POST /api/comments save error returns 500", async () => {
-    const error = new Error("DB error");
-    const mockSave = vi.fn().mockRejectedValue(error);
-    (Comment as unknown as vi.Mock).mockImplementation(() => ({
-      save: mockSave,
-    }));
-    const consoleErrorMock = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    const res = await request(app).post("/api/comments").send({
-      projectId: "p1",
-      username: "Alice",
-      content: "Hello",
-    });
-
-    expect(res.status).toBe(500);
-    expect(res.body).toHaveProperty("error", "Failed to create comment");
-    expect(consoleErrorMock).toHaveBeenCalledWith(error);
-
-    consoleErrorMock.mockRestore();
-  });
-
-  it("GET /api/comments/:projectId returns comments sorted", async () => {
-    const mockComments = [
-      {
+  /* ---------------------------- createComment ---------------------------- */
+  describe("createComment", () => {
+    it("should create a comment successfully", async () => {
+      const saved = {
         _id: "1",
         projectId: "p1",
         username: "Alice",
-        content: "First",
-        createdAt: new Date("2025-10-01"),
-      },
-      {
-        _id: "2",
+        content: "Hello",
+        createdAt: new Date(),
+      };
+
+      const saveMock = vi.fn().mockResolvedValue(saved);
+      (Comment as unknown as Mock).mockImplementation(() => ({
+        save: saveMock,
+      }));
+
+      (Comment.findById as unknown as Mock).mockResolvedValue(saved);
+
+      const req = mockRequest({
         projectId: "p1",
-        username: "Bob",
-        content: "Second",
-        createdAt: new Date("2025-10-02"),
-      },
-    ];
+        username: "Alice",
+        content: "Hello",
+      });
+      const res = mockResponse();
 
-    // find returns promise resolving to mockComments sorted descending
-    (Comment.find as unknown as vi.Mock).mockReturnValue({
-      sort: vi
-        .fn()
-        .mockResolvedValue(
-          mockComments.sort((a, b) => b.createdAt - a.createdAt),
-        ),
+      await commentController.createComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(saved);
+      expect(Comment).toHaveBeenCalledWith({
+        projectId: "p1",
+        username: "Alice",
+        content: "Hello",
+      });
     });
 
-    const res = await request(app).get("/api/comments/p1");
+    it("should return 400 if projectId is missing", async () => {
+      const req = mockRequest({
+        username: "Alice",
+        content: "Hello",
+      });
+      const res = mockResponse();
 
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ username: "Bob" }),
-        expect.objectContaining({ username: "Alice" }),
-      ]),
-    );
-    expect(Comment.find).toHaveBeenCalledWith({ projectId: "p1" });
-  });
+      await commentController.createComment(req as any, res as any);
 
-  it("GET /api/comments/:projectId error returns 500", async () => {
-    const error = new Error("DB fail");
-    (Comment.find as unknown as vi.Mock).mockReturnValue({
-      sort: vi.fn().mockRejectedValue(error),
-    });
-    const consoleErrorMock = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    const res = await request(app).get("/api/comments/p1");
-
-    expect(res.status).toBe(500);
-    expect(res.body).toHaveProperty("error", "Failed to fetch comments");
-    expect(consoleErrorMock).toHaveBeenCalledWith(error);
-
-    consoleErrorMock.mockRestore();
-  });
-
-  it("DELETE /api/comments/:id deletes comment", async () => {
-    (Comment.findByIdAndDelete as unknown as vi.Mock).mockResolvedValue({
-      _id: "123",
-      projectId: "p1",
-      username: "Alice",
-      content: "Hi",
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "All fields are required",
+      });
     });
 
-    const res = await request(app).delete("/api/comments/123");
+    it("should return 400 if username is missing", async () => {
+      const req = mockRequest({
+        projectId: "p1",
+        content: "Hello",
+      });
+      const res = mockResponse();
 
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty("message", "Comment deleted successfully");
-    expect(Comment.findByIdAndDelete).toHaveBeenCalledWith("123");
+      await commentController.createComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "All fields are required",
+      });
+    });
+
+    it("should return 400 if content is missing", async () => {
+      const req = mockRequest({
+        projectId: "p1",
+        username: "Alice",
+      });
+      const res = mockResponse();
+
+      await commentController.createComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "All fields are required",
+      });
+    });
+
+    it("should return 500 on save error", async () => {
+      (Comment as unknown as Mock).mockImplementation(() => ({
+        save: vi.fn().mockRejectedValue(new Error("DB error")),
+      }));
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({
+        projectId: "p1",
+        username: "Alice",
+        content: "Hello",
+      });
+      const res = mockResponse();
+
+      await commentController.createComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
+
+    it("should return 500 on findById error after save", async () => {
+      const saved = {
+        _id: "1",
+        projectId: "p1",
+        username: "Alice",
+        content: "Hello",
+      };
+
+      const saveMock = vi.fn().mockResolvedValue(saved);
+      (Comment as unknown as Mock).mockImplementation(() => ({
+        save: saveMock,
+      }));
+
+      (Comment.findById as unknown as Mock).mockRejectedValue(
+        new Error("DB error"),
+      );
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({
+        projectId: "p1",
+        username: "Alice",
+        content: "Hello",
+      });
+      const res = mockResponse();
+
+      await commentController.createComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
   });
 
-  it("DELETE /api/comments/:id not found returns 404", async () => {
-    (Comment.findByIdAndDelete as unknown as vi.Mock).mockResolvedValue(null);
+  /* ---------------------------- getCommentsByProjectId ---------------------------- */
+  describe("getCommentsByProjectId", () => {
+    it("should return comments by projectId", async () => {
+      const comments = [
+        { _id: "1", content: "A", projectId: "p1", createdAt: new Date() },
+        { _id: "2", content: "B", projectId: "p1", createdAt: new Date() },
+      ];
 
-    const res = await request(app).delete("/api/comments/unknown");
+      (Comment.find as unknown as Mock).mockReturnValue({
+        sort: vi.fn().mockResolvedValue(comments),
+      });
 
-    expect(res.status).toBe(404);
-    expect(res.body).toHaveProperty("error", "Comment not found");
+      const req = mockRequest({}, { projectId: "p1" });
+      const res = mockResponse();
+
+      await commentController.getCommentsByProjectId(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(comments);
+      expect(Comment.find).toHaveBeenCalledWith({ projectId: "p1" });
+    });
+
+    it("should return 400 if projectId is missing", async () => {
+      const req = mockRequest({}, {});
+      const res = mockResponse();
+
+      await commentController.getCommentsByProjectId(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Project ID is required",
+      });
+    });
+
+    it("should return 500 on DB error", async () => {
+      (Comment.find as unknown as Mock).mockReturnValue({
+        sort: vi.fn().mockRejectedValue(new Error("DB fail")),
+      });
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({}, { projectId: "p1" });
+      const res = mockResponse();
+
+      await commentController.getCommentsByProjectId(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
   });
 
-  it("DELETE /api/comments/:id error returns 500", async () => {
-    const error = new Error("DB error");
-    (Comment.findByIdAndDelete as unknown as vi.Mock).mockRejectedValue(error);
-    const consoleErrorMock = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
+  /* ---------------------------- getCommentById ---------------------------- */
+  describe("getCommentById", () => {
+    it("should return a comment by id", async () => {
+      const comment = {
+        _id: "1",
+        projectId: "p1",
+        username: "Alice",
+        content: "Hello",
+        createdAt: new Date(),
+      };
 
-    const res = await request(app).delete("/api/comments/123");
+      (Comment.findById as unknown as Mock).mockResolvedValue(comment);
 
-    expect(res.status).toBe(500);
-    expect(res.body).toHaveProperty("error", "Failed to delete comment");
-    expect(consoleErrorMock).toHaveBeenCalledWith(error);
+      const req = mockRequest({}, { id: "1" });
+      const res = mockResponse();
 
-    consoleErrorMock.mockRestore();
+      await commentController.getCommentById(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(comment);
+      expect(Comment.findById).toHaveBeenCalledWith("1");
+    });
+
+    it("should return 400 if id is missing", async () => {
+      const req = mockRequest({}, {});
+      const res = mockResponse();
+
+      await commentController.getCommentById(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Comment ID is required",
+      });
+    });
+
+    it("should return 404 if comment not found", async () => {
+      (Comment.findById as unknown as Mock).mockResolvedValue(null);
+
+      const req = mockRequest({}, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.getCommentById(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Comment not found",
+      });
+    });
+
+    it("should return 500 on DB error", async () => {
+      (Comment.findById as unknown as Mock).mockRejectedValue(
+        new Error("DB error"),
+      );
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({}, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.getCommentById(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
+  });
+
+  /* ---------------------------- updateComment ---------------------------- */
+  describe("updateComment", () => {
+    it("should update a comment successfully", async () => {
+      const comment = createMockComment({
+        _id: "1",
+        content: "Old content",
+        save: vi.fn().mockResolvedValue(true),
+      });
+
+      const updatedComment = {
+        _id: "1",
+        projectId: "p1",
+        username: "Alice",
+        content: "New content",
+        createdAt: new Date(),
+      };
+
+      (Comment.findById as unknown as Mock)
+        .mockResolvedValueOnce(comment) // First call for finding
+        .mockResolvedValueOnce(updatedComment); // Second call for response
+
+      const req = mockRequest({ content: "New content" }, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.updateComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(updatedComment);
+      expect(comment.content).toBe("New content");
+      expect(comment.save).toHaveBeenCalled();
+    });
+
+    it("should return 400 if id is missing", async () => {
+      const req = mockRequest({ content: "New content" }, {});
+      const res = mockResponse();
+
+      await commentController.updateComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Comment ID is required",
+      });
+    });
+
+    it("should return 400 if content is missing", async () => {
+      const req = mockRequest({}, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.updateComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Content is required",
+      });
+    });
+
+    it("should return 404 if comment not found", async () => {
+      (Comment.findById as unknown as Mock).mockResolvedValue(null);
+
+      const req = mockRequest({ content: "New content" }, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.updateComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Comment not found",
+      });
+    });
+
+    it("should return 500 on findById error", async () => {
+      (Comment.findById as unknown as Mock).mockRejectedValue(
+        new Error("DB error"),
+      );
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({ content: "New content" }, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.updateComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
+
+    it("should return 500 on save error", async () => {
+      const comment = createMockComment({
+        save: vi.fn().mockRejectedValue(new Error("Save error")),
+      });
+
+      (Comment.findById as unknown as Mock).mockResolvedValue(comment);
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({ content: "New content" }, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.updateComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
+
+    it("should return 500 on second findById error", async () => {
+      const comment = createMockComment({
+        save: vi.fn().mockResolvedValue(true),
+      });
+
+      (Comment.findById as unknown as Mock)
+        .mockResolvedValueOnce(comment) // First call for finding
+        .mockRejectedValueOnce(new Error("DB error")); // Second call for response
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({ content: "New content" }, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.updateComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
+  });
+
+  /* ---------------------------- deleteComment ---------------------------- */
+  describe("deleteComment", () => {
+    it("should delete a comment successfully", async () => {
+      const comment = {
+        _id: "1",
+        projectId: "p1",
+        username: "Alice",
+        content: "Hello",
+        createdAt: new Date(),
+      };
+
+      (Comment.findById as unknown as Mock).mockResolvedValue(comment);
+      (Comment.deleteOne as unknown as Mock).mockResolvedValue({
+        deletedCount: 1,
+      });
+
+      const req = mockRequest({}, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.deleteComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Comment successfully deleted",
+        deletedComment: comment,
+      });
+      expect(Comment.deleteOne).toHaveBeenCalledWith({ _id: "1" });
+    });
+
+    it("should return 400 if id is missing", async () => {
+      const req = mockRequest({}, {});
+      const res = mockResponse();
+
+      await commentController.deleteComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Comment ID is required",
+      });
+    });
+
+    it("should return 404 if comment not found", async () => {
+      (Comment.findById as unknown as Mock).mockResolvedValue(null);
+
+      const req = mockRequest({}, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.deleteComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Comment not found",
+      });
+    });
+
+    it("should return 500 on findById error", async () => {
+      (Comment.findById as unknown as Mock).mockRejectedValue(
+        new Error("DB error"),
+      );
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({}, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.deleteComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
+
+    it("should return 500 on deleteOne error", async () => {
+      const comment = {
+        _id: "1",
+        projectId: "p1",
+        username: "Alice",
+        content: "Hello",
+        createdAt: new Date(),
+      };
+
+      (Comment.findById as unknown as Mock).mockResolvedValue(comment);
+      (Comment.deleteOne as unknown as Mock).mockRejectedValue(
+        new Error("DB error"),
+      );
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({}, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.deleteComment(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
+  });
+
+  /* ---------------------------- getCommentsByUsername ---------------------------- */
+  describe("getCommentsByUsername", () => {
+    it("should return comments by username", async () => {
+      const comments = [
+        {
+          _id: "1",
+          projectId: "p1",
+          username: "Alice",
+          content: "Hello",
+          createdAt: new Date(),
+        },
+      ];
+
+      (Comment.find as unknown as Mock).mockResolvedValue(comments);
+
+      const req = mockRequest({}, {}, { username: "Alice" });
+      const res = mockResponse();
+
+      await commentController.getCommentsByUsername(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(comments);
+      expect(Comment.find).toHaveBeenCalledWith({ username: "Alice" });
+    });
+
+    it("should return 400 if username is missing", async () => {
+      const req = mockRequest({}, {}, {});
+      const res = mockResponse();
+
+      await commentController.getCommentsByUsername(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Username is required",
+      });
+    });
+
+    it("should return 500 on DB error", async () => {
+      (Comment.find as unknown as Mock).mockRejectedValue(
+        new Error("DB error"),
+      );
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({}, {}, { username: "Alice" });
+      const res = mockResponse();
+
+      await commentController.getCommentsByUsername(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
+  });
+
+  /* ---------------------------- toggleUpvote ---------------------------- */
+  describe("toggleUpvote", () => {
+    it("should toggle upvote successfully", async () => {
+      const comment = createMockComment({
+        upvotes: [],
+        save: vi.fn().mockResolvedValue(true),
+      });
+
+      const updatedComment = {
+        _id: "1",
+        projectId: "p1",
+        username: "Alice",
+        content: "Hello",
+        upvotes: ["Bob"],
+        createdAt: new Date(),
+      };
+
+      (Comment.findById as unknown as Mock)
+        .mockResolvedValueOnce(comment) // First call for finding
+        .mockResolvedValueOnce(updatedComment); // Second call for response
+
+      const req = mockRequest({ username: "Bob" }, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.toggleUpvote(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(updatedComment);
+      expect(comment.save).toHaveBeenCalled();
+    });
+
+    it("should return 400 if username is missing", async () => {
+      const req = mockRequest({}, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.toggleUpvote(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Username is required",
+      });
+    });
+
+    it("should return 404 if comment not found", async () => {
+      (Comment.findById as unknown as Mock).mockResolvedValue(null);
+
+      const req = mockRequest({ username: "Bob" }, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.toggleUpvote(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Comment not found",
+      });
+    });
+
+    it("should return 500 on findById error", async () => {
+      (Comment.findById as unknown as Mock).mockRejectedValue(
+        new Error("DB error"),
+      );
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({ username: "Bob" }, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.toggleUpvote(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
+
+    it("should return 500 on save error", async () => {
+      const comment = createMockComment({
+        upvotes: [],
+        save: vi.fn().mockRejectedValue(new Error("Save error")),
+      });
+
+      (Comment.findById as unknown as Mock).mockResolvedValue(comment);
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({ username: "Bob" }, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.toggleUpvote(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
+
+    it("should return 500 on second findById error", async () => {
+      const comment = createMockComment({
+        upvotes: [],
+        save: vi.fn().mockResolvedValue(true),
+      });
+
+      (Comment.findById as unknown as Mock)
+        .mockResolvedValueOnce(comment) // First call for finding
+        .mockRejectedValueOnce(new Error("DB error")); // Second call for response
+
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const req = mockRequest({ username: "Bob" }, { id: "1" });
+      const res = mockResponse();
+
+      await commentController.toggleUpvote(req as any, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Internal Server Error",
+      });
+
+      spy.mockRestore();
+    });
   });
 });
