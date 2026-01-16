@@ -99,6 +99,18 @@ const Header = ({
         {/* GROUP 3: FAQ / Settings */}
         <div className="flex flex-1 items-center gap-16 justify-center">
           <div className="hidden lg:flex items-center gap-4">
+            {/* Place Tutorial left of FAQ on large screens */}
+            <button
+              type="button"
+              onClick={onTutorialClick}
+              title="Start Tutorial"
+              aria-label="Start Tutorial"
+              className="hidden lg:flex items-center px-3 py-1 rounded-md bg-transparent text-current font-semibold hover:bg-[#dedbf0] dark:hover:bg-[#373254] transition-colors gap-1 focus:outline-none lg:-mr-2"
+              style={{ fontSize: '15px' }}
+            >
+              <MagnifierIcon />
+              <span>Tutorial</span>
+            </button>
             <FAQDropdown />
             <SettingsButton />
           </div>
@@ -115,10 +127,10 @@ const Header = ({
         </div>
 
         <div className="flex flex-1 items-center gap-4 justify-end">
-          {/* Tutorial Button */}
+          {/* Small-screen Tutorial Button (hidden on large screens) */}
           <button
             type="button"
-            className="flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-300 text-[#261e3b] dark:text-[#1e1538] font-semibold shadow hover:scale-105 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 gap-1"
+            className="flex items-center px-3 py-1.5 rounded-md bg-transparent text-current font-semibold hover:bg-[#dedbf0] dark:hover:bg-[#373254] transition-colors gap-1 lg:hidden focus:outline-none"
             style={{ fontSize: '15px' }}
             onClick={onTutorialClick}
             aria-label="Start Tutorial"

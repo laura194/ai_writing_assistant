@@ -30,7 +30,7 @@ const tutorialSteps = [
     target: 'tutorial-header',
     title: 'Header & Navigation',
     description:
-      'Here you find the main navigation options: create/open projects, access the community area, and open settings.',
+      'Here you find the main navigation options: create/open projects, access the community area, open settings, light/dark mode and logout.',
   },
   {
     target: 'tutorial-sidebar',
@@ -54,7 +54,7 @@ const tutorialSteps = [
     target: 'tutorial-bottomnav',
     title: 'Switch Views',
     description:
-      'At the bottom left you can switch between different views like AI, full document and contributions.',
+      'At the bottom left you can switch between different views for inspecting the AI Protocol of your AI usage, exporting your work as documents and uploading your project to the community page.',
   },
 ];
 
