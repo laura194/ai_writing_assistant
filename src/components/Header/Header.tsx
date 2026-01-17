@@ -7,28 +7,17 @@ import { FAQDropdown } from "../FAQDropdown/FAQDropdown.tsx";
 import ThemeToggleButton from "../ThemeToggleButton/ThemeToggleButton";
 import { UndoRedoButton } from "../UndoRedoButton/UndoRedoButton";
 import { SettingsButton } from "../SettingsButton/SettingsButton";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 
-// Simple magnifier icon (inline SVG)
-const MagnifierIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 20 20"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className="inline-block align-middle mr-1"
-  >
-    <circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2" />
-    <line
-      x1="14.1213"
-      y1="14.1213"
-      x2="18"
-      y2="18"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
+// Simple magnifier icon (Heroicons)
+// Accept an optional className so callers can set a fixed color to prevent
+// the icon from inheriting parent hover text color.
+const MagnifierIcon = ({ className = "" }: { className?: string }) => (
+  <MagnifyingGlassIcon
+    className={`inline-block align-middle mr-1 ${className}`}
+    width={18}
+    height={18}
+  />
 );
 
 interface HeaderProps {
@@ -109,9 +98,10 @@ const Header = ({
         <div className="hidden lg:flex flex-1 items-center justify-center text-sm font-medium dark:text-[#afa6c5] text-[#261e3b]">
           <Link
             to="/communityPage"
-            className="relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-[#f32469] after:transition-all after:duration-250 hover:text-[#9f1945] dark:hover:text-[#ffe6ef] hover:after:w-full"
+            className="relative whitespace-nowrap after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-[#00FFD1] after:transition-all after:duration-250 hover:text-[#14ab94] dark:hover:text-[#e1fffa] hover:after:w-full flex items-center"
           >
-            Community
+            <MagnifierIcon className="text-[#261e3b] dark:text-[#afa6c5]" />
+            <span>Community</span>
           </Link>
         </div>
 
@@ -119,7 +109,7 @@ const Header = ({
         <div className="flex flex-1 items-center gap-16 justify-center">
           <div className="hidden lg:flex items-center gap-4">
             {/* Place Tutorial left of FAQ on large screens (only show when in file/editor view) */}
-            {activeView === "file" && (
+              {activeView === "file" && (
               <button
                 type="button"
                 onClick={onTutorialClick}
@@ -128,7 +118,7 @@ const Header = ({
                 className="hidden lg:flex items-center gap-1 text-sm text-[#261e3b] dark:text-[#afa6c5] cursor-pointer hover:text-[#9c85d4] dark:hover:text-[#ffffff] transition-colors duration-150 font-medium px-3 py-1 rounded-md lg:-mr-2 focus:outline-none"
                 style={{ fontSize: "15px" }}
               >
-                <MagnifierIcon />
+                <MagnifierIcon className="text-[#261e3b] dark:text-[#afa6c5]" />
                 <span>Tutorial</span>
               </button>
             )}
@@ -157,7 +147,7 @@ const Header = ({
               onClick={onTutorialClick}
               aria-label="Start Tutorial"
             >
-              <MagnifierIcon />
+              <MagnifierIcon className="text-[#261e3b] dark:text-[#afa6c5]" />
               Tutorial
             </button>
           )}
