@@ -125,7 +125,7 @@ const Header = ({
                 onClick={onTutorialClick}
                 title="Start Tutorial"
                 aria-label="Start Tutorial"
-                className="hidden lg:flex items-center px-3 py-1 rounded-md bg-transparent text-current font-semibold hover:bg-[#dedbf0] dark:hover:bg-[#373254] transition-colors gap-1 focus:outline-none lg:-mr-2"
+                className="hidden lg:flex items-center gap-1 text-sm text-[#261e3b] dark:text-[#afa6c5] cursor-pointer hover:text-[#9c85d4] dark:hover:text-[#ffffff] transition-colors duration-150 font-medium px-3 py-1 rounded-md lg:-mr-2 focus:outline-none"
                 style={{ fontSize: "15px" }}
               >
                 <MagnifierIcon />
@@ -152,7 +152,7 @@ const Header = ({
           {activeView === "file" && (
             <button
               type="button"
-              className="flex items-center px-3 py-1.5 rounded-md bg-transparent text-current font-semibold hover:bg-[#dedbf0] dark:hover:bg-[#373254] transition-colors gap-1 lg:hidden focus:outline-none"
+              className="flex items-center gap-1 text-sm text-[#261e3b] dark:text-[#afa6c5] cursor-pointer hover:text-[#9c85d4] dark:hover:text-[#ffffff] transition-colors duration-150 font-medium px-3 py-1.5 rounded-md lg:hidden focus:outline-none"
               style={{ fontSize: "15px" }}
               onClick={onTutorialClick}
               aria-label="Start Tutorial"
