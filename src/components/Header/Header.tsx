@@ -109,7 +109,7 @@ const Header = ({
         <div className="flex flex-1 items-center gap-16 justify-center">
           <div className="hidden lg:flex items-center gap-4">
             {/* Place Tutorial left of FAQ on large screens (only show when in file/editor view) */}
-              {activeView === "file" && (
+            {activeView === "file" && (
               <button
                 type="button"
                 onClick={onTutorialClick}
