@@ -27,34 +27,34 @@ interface Snapshot {
 
 const tutorialSteps = [
   {
-    target: 'tutorial-header',
-    title: 'Header & Navigation',
+    target: "tutorial-header",
+    title: "Header & Navigation",
     description:
-      'Here you find the main navigation options: create/open projects, access the community area, open settings, light/dark mode and logout.',
+      "Here you find the main navigation options: create/open projects, access the community area, open settings, light/dark mode and logout.",
   },
   {
-    target: 'tutorial-sidebar',
-    title: 'Project Structure',
+    target: "tutorial-sidebar",
+    title: "Project Structure",
     description:
-      'On the left you see the chapter structure of your project. You can add, rename, move or delete chapters here.',
+      "On the left you see the chapter structure of your project. You can add, rename, move or delete chapters here.",
   },
   {
-    target: 'tutorial-editor',
-    title: 'Editor',
+    target: "tutorial-editor",
+    title: "Editor",
     description:
-      'In the main area you can edit the content of the selected chapter. Changes are saved automatically.',
+      "In the main area you can edit the content of the selected chapter. Changes are saved automatically.",
   },
   {
-    target: 'tutorial-ai-button',
-    title: 'AI Assistance',
+    target: "tutorial-ai-button",
+    title: "AI Assistance",
     description:
-      'Use this button to ask the AI about the selected content — for suggestions, rewrites or enhancements.',
+      "Use this button to ask the AI about the selected content — for suggestions, rewrites or enhancements.",
   },
   {
-    target: 'tutorial-bottomnav',
-    title: 'Switch Views',
+    target: "tutorial-bottomnav",
+    title: "Switch Views",
     description:
-      'At the bottom left you can switch between different views for inspecting the AI Protocol of your AI usage, exporting your work as documents and uploading your project to the community page.',
+      "At the bottom left you can switch between different views for inspecting the AI Protocol of your AI usage, exporting your work as documents and uploading your project to the community page.",
   },
 ];
 
@@ -76,7 +76,9 @@ const EditPage = () => {
 
   // Navigation
   const handleNextStep = () => {
-    setTutorialStep((prev) => (prev < tutorialSteps.length - 1 ? prev + 1 : prev));
+    setTutorialStep((prev) =>
+      prev < tutorialSteps.length - 1 ? prev + 1 : prev,
+    );
   };
   const handlePrevStep = () => {
     setTutorialStep((prev) => (prev > 0 ? prev - 1 : prev));
@@ -105,7 +107,9 @@ const EditPage = () => {
         // in the highlighted hole. Compute header bottom and clamp the top of the hole
         // to be at least below the header.
         const headerEl = document.getElementById("tutorial-header");
-        const headerBottom = headerEl ? headerEl.getBoundingClientRect().bottom : 0;
+        const headerBottom = headerEl
+          ? headerEl.getBoundingClientRect().bottom
+          : 0;
 
         let top = r.top;
         let height = r.height;
@@ -139,18 +143,20 @@ const EditPage = () => {
           return;
         }
 
-        setHighlightRect(new DOMRect(left, topClamped, finalWidth, finalHeight));
+        setHighlightRect(
+          new DOMRect(left, topClamped, finalWidth, finalHeight),
+        );
       } else {
         setHighlightRect(null);
       }
     };
 
     computeRect();
-    window.addEventListener('resize', computeRect);
-    window.addEventListener('scroll', computeRect, true);
+    window.addEventListener("resize", computeRect);
+    window.addEventListener("scroll", computeRect, true);
     return () => {
-      window.removeEventListener('resize', computeRect);
-      window.removeEventListener('scroll', computeRect, true);
+      window.removeEventListener("resize", computeRect);
+      window.removeEventListener("scroll", computeRect, true);
     };
   }, [tutorialActive, tutorialStep]);
 
@@ -765,7 +771,10 @@ const EditPage = () => {
         {tutorialActive && (
           <div className="fixed inset-0 z-[100] pointer-events-auto">
             {/* SVG mask: white = overlay, black = hole (transparent) */}
-            <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              className="absolute inset-0 w-full h-full"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <defs>
                 <mask id="tutorial-mask">
                   <rect x="0" y="0" width="100%" height="100%" fill="white" />
@@ -782,22 +791,31 @@ const EditPage = () => {
                   )}
                 </mask>
               </defs>
-              <rect width="100%" height="100%" fill="rgba(0,0,0,0.6)" mask="url(#tutorial-mask)" />
+              <rect
+                width="100%"
+                height="100%"
+                fill="rgba(0,0,0,0.6)"
+                mask="url(#tutorial-mask)"
+              />
             </svg>
 
             {/* Tooltip positioned near the highlighted area when available */}
             <div
               className="absolute z-[110] flex items-center justify-center"
               style={{
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
                 zIndex: 110,
               }}
             >
               <div className="bg-white dark:bg-[#1e1538] rounded-2xl shadow-lg p-6 max-w-xs border-2 border-[#7c3aed] flex flex-col items-center">
-                <div className="font-bold text-lg mb-2 text-[#7c3aed] dark:text-[#facc15]">{tutorialSteps[tutorialStep].title}</div>
-                <div className="mb-4 text-sm text-[#261e3b] dark:text-[#e9e5f8] text-center">{tutorialSteps[tutorialStep].description}</div>
+                <div className="font-bold text-lg mb-2 text-[#7c3aed] dark:text-[#facc15]">
+                  {tutorialSteps[tutorialStep].title}
+                </div>
+                <div className="mb-4 text-sm text-[#261e3b] dark:text-[#e9e5f8] text-center">
+                  {tutorialSteps[tutorialStep].description}
+                </div>
                 <div className="flex items-center gap-2 mt-2">
                   {tutorialStep > 0 && (
                     <button
@@ -834,7 +852,7 @@ const EditPage = () => {
 
         <div className="flex flex-1 relative">
           <div
-            className={`sticky top-0 left-0 h-screen ${menuOpen ? 'w-1/4' : 'w-19'} transition-all duration-500 flex flex-col relative`}
+            className={`sticky top-0 left-0 h-screen ${menuOpen ? "w-1/4" : "w-19"} transition-all duration-500 flex flex-col relative`}
             id="tutorial-sidebar"
           >
             <div className="bg-[#f4f2fa] dark:bg-[#1e1538] py-2 px-4 flex h-full flex-col justify-between shadow-[inset_0_0_30px_rgba(120,69,239,0.55)] dark:shadow-[inset_0_0_30px_rgba(120,69,239,0.25)] pt-14">

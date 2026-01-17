@@ -10,12 +10,26 @@ import { SettingsButton } from "../SettingsButton/SettingsButton";
 
 // Simple magnifier icon (inline SVG)
 const MagnifierIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="inline-block align-middle mr-1">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="inline-block align-middle mr-1"
+  >
     <circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2" />
-    <line x1="14.1213" y1="14.1213" x2="18" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <line
+      x1="14.1213"
+      y1="14.1213"
+      x2="18"
+      y2="18"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
   </svg>
 );
-
 
 interface HeaderProps {
   onUndo?: () => void;
@@ -49,7 +63,10 @@ const Header = ({
   );
 
   return (
-  <header id="tutorial-header" className="fixed top-0 left-0 w-full h-14 px-4 sm:px-6 lg:px-8 backdrop-blur-md bg-[#e7e3f6]/75 dark:bg-[#1e1538]/75 border-b border-[#beb1e7] dark:border-[#332857] shadow-[0_4px_50px_rgba(0,0,0,0.175)] dark:shadow-[0_4px_50px_rgba(0,0,0,0.3)] z-50 flex items-center">
+    <header
+      id="tutorial-header"
+      className="fixed top-0 left-0 w-full h-14 px-4 sm:px-6 lg:px-8 backdrop-blur-md bg-[#e7e3f6]/75 dark:bg-[#1e1538]/75 border-b border-[#beb1e7] dark:border-[#332857] shadow-[0_4px_50px_rgba(0,0,0,0.175)] dark:shadow-[0_4px_50px_rgba(0,0,0,0.3)] z-50 flex items-center"
+    >
       <div className="flex items-center w-full">
         {/* ===== LEFT BLOCK: Logo + Gruppe 1 (Projects) ===== */}
         <div className="flex flex-1 items-center gap-4 justify-start">
@@ -109,7 +126,7 @@ const Header = ({
                 title="Start Tutorial"
                 aria-label="Start Tutorial"
                 className="hidden lg:flex items-center px-3 py-1 rounded-md bg-transparent text-current font-semibold hover:bg-[#dedbf0] dark:hover:bg-[#373254] transition-colors gap-1 focus:outline-none lg:-mr-2"
-                style={{ fontSize: '15px' }}
+                style={{ fontSize: "15px" }}
               >
                 <MagnifierIcon />
                 <span>Tutorial</span>
@@ -136,7 +153,7 @@ const Header = ({
             <button
               type="button"
               className="flex items-center px-3 py-1.5 rounded-md bg-transparent text-current font-semibold hover:bg-[#dedbf0] dark:hover:bg-[#373254] transition-colors gap-1 lg:hidden focus:outline-none"
-              style={{ fontSize: '15px' }}
+              style={{ fontSize: "15px" }}
               onClick={onTutorialClick}
               aria-label="Start Tutorial"
             >
