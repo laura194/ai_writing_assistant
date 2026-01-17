@@ -430,7 +430,7 @@ const EditPage = () => {
 
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [nodes, selectedNode, activeView]);
+  }, [nodes, selectedNode, activeView, handleUndo, handleRedo]);
 
   // ---------------------- Helper: finde Node Metadata ----------------------
   const findNodeById = (
@@ -474,7 +474,10 @@ const EditPage = () => {
         console.error("❌ Failed to update project structure:", err);
       }
     },
-    [projectId, project],
+    // include selectedNode id/content and activeView so the callback stays
+    // consistent with the values it reads when it updates the lastSaved
+    // snapshot. ESLint (react-hooks/exhaustive-deps) expects these.
+    [projectId, project, selectedNode?.id, selectedNode?.content, activeView],
   );
 
   useEffect(() => {
