@@ -217,7 +217,7 @@ export const deleteProject = async (
 
   try {
     // Get project details before deletion (for response)
-    const project = await Project.findById(id); // ✅ Post-findOne hook decrypts
+    const project = await Project.findById(id); // Post-findOne hook decrypts
 
     if (!project) {
       res.status(404).json({ error: "Project not found" });
