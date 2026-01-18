@@ -63,19 +63,18 @@ const ProjectOverview = () => {
     navigate(`/edit/${id}`);
   };
 
-  const formatDate = (dateString: string | Date | undefined ) => {
+  const formatDate = (dateString: string | Date | undefined) => {
     if (!dateString) return "N/A";
 
-  // NEW: Handle both string and Date objects
-  const date = typeof dateString === 'string' 
-    ? new Date(dateString) 
-    : dateString;
-    
-  // NEW: Check if date is valid
-  if (isNaN(date.getTime())) {
-    console.error("Invalid date:", dateString);
-    return "Invalid Date";
-  }
+    // NEW: Handle both string and Date objects
+    const date =
+      typeof dateString === "string" ? new Date(dateString) : dateString;
+
+    // NEW: Check if date is valid
+    if (isNaN(date.getTime())) {
+      console.error("Invalid date:", dateString);
+      return "Invalid Date";
+    }
     return date.toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
@@ -133,7 +132,7 @@ const ProjectOverview = () => {
         username: user?.username || "",
         projectStructure: updatedProjectStructure, // Sende die aktualisierte Struktur
         isPublic: project.isPublic, // wichtig, falls dein Typ 'Project' das verlangt
-      }); 
+      });
 
       // Projekte im Zustand aktualisieren
       setProjects((prev) =>
