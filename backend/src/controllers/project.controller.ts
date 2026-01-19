@@ -164,7 +164,7 @@ export const getProjectsByUsername = async (
 
   try {
     const projects = await Project.find({ username: username.toString() }).sort(
-      { createdAt: -1 },
+      { created_at: -1 },
     ); // Post-find hook decrypts
 
     if (projects.length === 0) {
@@ -193,7 +193,7 @@ export const getRecentProjectsByUsername = async (
 
   try {
     const projects = await Project.find({ username: username.toString() })
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .limit(3); // Post-find hook decrypts
 
     res.status(200).json(projects);
@@ -250,7 +250,7 @@ export const getPublicProjects = async (
 ): Promise<void> => {
   try {
     const publicProjects = await Project.find({ isPublic: true }).sort({
-      createdAt: -1,
+      created_at: -1,
     }); // Post-find hook decrypts
 
     if (publicProjects.length === 0) {

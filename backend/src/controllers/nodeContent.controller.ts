@@ -233,7 +233,7 @@ export const updateNodeContent = async (
 
       await Project.findByIdAndUpdate(
         projectId,
-        { $set: { updatedAt: new Date() } },
+        { $set: { updated_at: new Date() } },
         { session },
       );
 
@@ -246,7 +246,7 @@ export const updateNodeContent = async (
         if (count > MAX_VERSIONS) {
           const toDelete = count - MAX_VERSIONS;
           const oldest = (await NodeContentVersion.find({ nodeId, projectId })
-            .sort({ createdAt: 1 })
+            .sort({ created_at: 1 })
             .limit(toDelete)
             .select("_id")
             .lean()
@@ -319,7 +319,7 @@ export const updateNodeContent = async (
     await nodeContent.save();
 
     await Project.findByIdAndUpdate(projectId, {
-      $set: { updatedAt: new Date() },
+      $set: { updated_at: new Date() },
     });
 
     if (!skipVersion) {
@@ -331,7 +331,7 @@ export const updateNodeContent = async (
       if (count2 > MAX_VERSIONS) {
         const toDelete = count2 - MAX_VERSIONS;
         const oldest = await NodeContentVersion.find({ nodeId, projectId })
-          .sort({ createdAt: 1 })
+          .sort({ created_at: 1 })
           .limit(toDelete)
           .select("_id");
 
@@ -384,7 +384,7 @@ export const createVersion = async (
     if (count > MAX_VERSIONS) {
       const toDelete = count - MAX_VERSIONS;
       const oldest = await NodeContentVersion.find({ nodeId, projectId })
-        .sort({ createdAt: 1 })
+        .sort({ created_at: 1 })
         .limit(toDelete)
         .select("_id");
       //.lean();
@@ -421,7 +421,7 @@ export const listVersions = async (
     const skip = Number(req.query.skip ?? 0);
 
     const versions = await NodeContentVersion.find({ nodeId, projectId })
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .skip(skip)
       .limit(limit);
     // .lean(); this bypasses decryption hooks
@@ -558,7 +558,7 @@ export const revertToVersion = async (
       if (count > MAX_VERSIONS) {
         const toDelete = count - MAX_VERSIONS;
         const oldest = await NodeContentVersion.find({ nodeId, projectId })
-          .sort({ createdAt: 1 })
+          .sort({ created_at: 1 })
           .limit(toDelete)
           .select("_id")
           .session(session);
@@ -639,7 +639,7 @@ export const revertToVersion = async (
     if (count > MAX_VERSIONS) {
       const toDelete = count - MAX_VERSIONS;
       const oldest = await NodeContentVersion.find({ nodeId, projectId })
-        .sort({ createdAt: 1 })
+        .sort({ created_at: 1 })
         .limit(toDelete)
         .select("_id");
 
