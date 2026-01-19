@@ -9,12 +9,12 @@ vi.mock("axios");
 const mockedAxios = axios as Mocked<typeof axios>;
 
 // Setup environment variables BEFORE importing the module
-vi.stubGlobal('import', {
+vi.stubGlobal("import", {
   meta: {
     env: {
-      VITE_API_BASE_URL: "http://localhost:5001"
-    }
-  }
+      VITE_API_BASE_URL: "http://localhost:5001",
+    },
+  },
 });
 
 // Now import the module
@@ -182,12 +182,9 @@ describe("ProjectService", () => {
 
       const result = await ProjectService.getProjectsByUsername("bob");
       expect(result).toEqual(projects);
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        `${BASE_URL}/by-username`,
-        {
-          params: { username: "bob" },
-        },
-      );
+      expect(mockedAxios.get).toHaveBeenCalledWith(`${BASE_URL}/by-username`, {
+        params: { username: "bob" },
+      });
     });
 
     it("returns [] if 404 error is returned", async () => {
@@ -356,7 +353,9 @@ describe("ProjectService", () => {
       const err = new Error("toggle upvote fail");
       mockedAxios.post.mockRejectedValueOnce(err);
 
-      await expect(ProjectService.toggleUpvote("123", "bob")).rejects.toThrow(err);
+      await expect(ProjectService.toggleUpvote("123", "bob")).rejects.toThrow(
+        err,
+      );
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "❌ [toggleUpvote] Error toggling upvote for project 123:",
         err,
@@ -389,7 +388,9 @@ describe("ProjectService", () => {
       const err = new Error("toggle favorite fail");
       mockedAxios.post.mockRejectedValueOnce(err);
 
-      await expect(ProjectService.toggleFavorite("123", "bob")).rejects.toThrow(err);
+      await expect(ProjectService.toggleFavorite("123", "bob")).rejects.toThrow(
+        err,
+      );
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "❌ [toggleFavorite] Error toggling favorite for project 123:",
         err,
@@ -416,7 +417,9 @@ describe("ProjectService", () => {
       const err = new Error("Network error");
       mockedAxios.get.mockRejectedValueOnce(err);
 
-      await expect(ProjectService.getProjectsByUsername("bob")).rejects.toThrow(err);
+      await expect(ProjectService.getProjectsByUsername("bob")).rejects.toThrow(
+        err,
+      );
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
@@ -424,7 +427,9 @@ describe("ProjectService", () => {
       const err = new Error("Network error");
       mockedAxios.get.mockRejectedValueOnce(err);
 
-      await expect(ProjectService.getRecentProjectsByUsername("bob")).rejects.toThrow(err);
+      await expect(
+        ProjectService.getRecentProjectsByUsername("bob"),
+      ).rejects.toThrow(err);
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
@@ -443,7 +448,9 @@ describe("ProjectService", () => {
       } as any;
       mockedAxios.get.mockRejectedValueOnce(err);
 
-      await expect(ProjectService.getProjectsByUsername("bob")).rejects.toEqual(err);
+      await expect(ProjectService.getProjectsByUsername("bob")).rejects.toEqual(
+        err,
+      );
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
@@ -454,7 +461,9 @@ describe("ProjectService", () => {
       } as any;
       mockedAxios.get.mockRejectedValueOnce(err);
 
-      await expect(ProjectService.getRecentProjectsByUsername("bob")).rejects.toEqual(err);
+      await expect(
+        ProjectService.getRecentProjectsByUsername("bob"),
+      ).rejects.toEqual(err);
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 

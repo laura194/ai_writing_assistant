@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach, beforeAll, afterEach, vi } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  beforeAll,
+  afterEach,
+  vi,
+} from "vitest";
 import dotenv from "dotenv";
 import path from "path";
 import crypto from "crypto";
@@ -152,12 +160,16 @@ describe("Encryption Utility (Node.js crypto)", () => {
         throw new Error("Random bytes generation failed");
       }) as any;
 
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-      
-      expect(() => encryptValue("test value")).toThrow("Failed to encrypt value");
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      expect(() => encryptValue("test value")).toThrow(
+        "Failed to encrypt value",
+      );
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "Encryption error:",
-        expect.any(Error)
+        expect.any(Error),
       );
 
       crypto.randomBytes = originalRandomBytes;
@@ -189,19 +201,23 @@ describe("Encryption Utility (Node.js crypto)", () => {
     });
 
     it("should return original value for invalid encrypted data", () => {
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       const invalidEncrypted = "invalid-base64-!@#$%";
       const result = decryptValue(invalidEncrypted);
       expect(result).toBe(invalidEncrypted);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "Decryption error:",
-        expect.any(Error)
+        expect.any(Error),
       );
       consoleErrorSpy.mockRestore();
     });
 
     it("should handle tampered encrypted data gracefully", () => {
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       const originalValue = "Hello, World!";
       const encrypted = encryptValue(originalValue);
 
@@ -216,7 +232,9 @@ describe("Encryption Utility (Node.js crypto)", () => {
     });
 
     it("should not decrypt with wrong key", () => {
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       const originalValue = "Secret Message";
       const encrypted = encryptValue(originalValue);
 
@@ -241,37 +259,41 @@ describe("Encryption Utility (Node.js crypto)", () => {
     it("should log warning when key is missing and encryption is enabled", async () => {
       // Re-import to get fresh module state
       const freshEncryption = await import("./encryption");
-      
-      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
       delete process.env.ENCRYPTION_KEY;
       process.env.ENCRYPTION_ENABLED = "true";
-      
+
       const value = "test value";
       freshEncryption.encryptValue(value);
-      
+
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "WARNING: ENCRYPTION_KEY not found in environment variables. Encryption will not work properly."
+        "WARNING: ENCRYPTION_KEY not found in environment variables. Encryption will not work properly.",
       );
-      
+
       consoleWarnSpy.mockRestore();
     });
 
     it("should only log key warning once", async () => {
       // Re-import to get fresh module state
       const freshEncryption = await import("./encryption");
-      
-      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
       delete process.env.ENCRYPTION_KEY;
       process.env.ENCRYPTION_ENABLED = "true";
-      
+
       // First call should log warning
       freshEncryption.encryptValue("test1");
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
-      
+
       // Second call should NOT log warning again
       freshEncryption.encryptValue("test2");
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
-      
+
       consoleWarnSpy.mockRestore();
     });
   });
@@ -439,7 +461,9 @@ describe("Encryption Utility (Node.js crypto)", () => {
         corrupted: "invalid-encrypted-data",
       };
 
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       const decrypted = decryptObject(obj, ["corrupted"]);
       expect(decrypted.corrupted).toBe("invalid-encrypted-data");
       consoleErrorSpy.mockRestore();
