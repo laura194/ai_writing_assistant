@@ -152,8 +152,8 @@ describe("CommunityPage", () => {
         _id: "c3",
         titleCommunityPage: "Untitled",
         authorName: "Cara",
-        createdAt: new Date("2024-01-01").toISOString(),
-        updatedAt: new Date("2024-01-02").toISOString(),
+        created_at: new Date("2024-01-01").toISOString(),
+        updated_at: new Date("2024-01-02").toISOString(),
       },
     ]);
 
