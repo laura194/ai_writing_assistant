@@ -72,7 +72,7 @@ Building on our foundation, V2 introduces community system and other enhanced fu
    - Mutation testing with Strykers. 
 
 #### User Experience
-- **⚙️ Settings Page:**Customize your writing environment and preferences.
+- **⚙️ Settings Page:** Customize your writing environment and preferences.
 - **🎓 Interactive Tutorial:** Guided onboarding for new users.
 - **❓ FAQ Section:** Quick answers to common questions.
 - **🌞 Light Mode:** Modern frontend design with comfortable light theme.
