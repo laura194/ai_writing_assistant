@@ -1,11 +1,12 @@
 ![Alt](https://repobeats.axiom.co/api/embed/3526f70d37e904c00e7b3aad1024b5e58cdd6132.svg "Repobeats analytics image")
+
+# AI Writing Asisstant
+
 [![Run Tests](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml)
 [![Code Quality](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml)
 [![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
 [![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml)
 
-
-# AI Writing Asisstant
 
 ## 📑 Table of Contents
 
@@ -111,7 +112,7 @@ To build and run the app locally, follow these steps:
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── vite.config.ts
-├── vitest.config.ts
+└── vitest.config.ts
 ```
 
 ## 🛠️ Dependencies Overview
