@@ -1,6 +1,11 @@
 ![Alt](https://repobeats.axiom.co/api/embed/3526f70d37e904c00e7b3aad1024b5e58cdd6132.svg "Repobeats analytics image")
+[![Run Tests](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml)
+[![Code Quality](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml)
+[![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
+[![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml)
 
-# AI Writing Assistant
+
+# AI Writing Asisstant
 
 ## 📑 Table of Contents
 
@@ -54,7 +59,11 @@ To build and run the app locally, follow these steps:
 ## 🏗️ Project Structure
 
 ```bash
-├── .github
+├── .github/workflows
+│   ├── code-quality.yml
+│   ├── docker-hub.yml
+│   ├── security.yml
+│   └── tests.yml
 ├── .idea
 ├── backend
 │   ├── node_modules
@@ -62,43 +71,94 @@ To build and run the app locally, follow these steps:
 │       ├── controllers
 │       ├── models
 │       ├── routes
-│       └── services
+│       ├──  services
+│       └── utils
+├── cypress
+│   ├──  e2e
+│   ├── fixtures
+│   └── support
 ├── docker-files
+│   ├── Complete Project
 │   └── mongoDB
 ├── node_modules
 ├── public
-├── server
-│    └── node_modules
+│    ├── dictionaries
 ├── src
+│   ├── App
+│   ├── AppRoutes
 │   ├── assets
 │   ├── components
-│   │   ├── ai
+│   ├── constants
+│   ├── hoc
 │   ├── models
 │   ├── pages
-│   ├── tests
+│   ├── providers
+│   ├── types
 │   └── utils
+├── test
+│   ├── utils
 ├── .gitignore
+├── cypress.config.ts
 ├── eslint.config.js
 ├── index.html
 ├── package-lock.json
 ├── package.json
 ├── README.md
+├── stryker.conf.js
+├── tailwind.config.cjs
+├── tailwind.config.test.cjs
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── vite.config.ts
+├── vitest.config.ts
 ```
 
 ## 🛠️ Dependencies Overview
 
+### Frontend
 - **React** with **TypeScript**
-- **NodeJS**
 - **Vite** for fast development and HMR
 - **Tailwind CSS** for styling
 - **Clerk** for authentication
-- **docx** and **file-saver** for Word export
-- **ESLint** for code quality
+
+### Backend
+- **NodeJS**
+- **Express**
+- **MongoDB**
+
+### Document Export
+- **Dockerized Pandoc** - Document conversion engine
+   - Uses LaTeX as the base format
+   - Converts to PDF and Word (DOCX) formats
+
+### Development
+- **ESLint** for code quality and linting
+- **Prettier** for code formatting
+
+### DevOps
+- **GitHub Actions** - CI/CD pipeline for automated testing
+- **Docker** - Containerization for MongoDB and Pandoc services
 
 ## 🧪 Testing
 
-Due to time constraints during the project development phase, comprehensive tests have not been implemented in this web application. We used exploratory testing to ensure the usability.
+This project uses:
+- **Vitest** for unit and integration testing with coverage reporting
+- **Cypress** for End-to-end testing
+- **Stryker** for Mutation testing
+
+### Running Tests
+
+Run tests locally:
+```bash
+# Run all tests with coverage
+npx vitest run --coverage
+
+# Run tests in watch mode
+npx vitest
+
+# Run mutation testing (optional)
+npx stryker run
+```
+
+Tests are automatically run on all pull requests to the main branch via GitHub Actions.
