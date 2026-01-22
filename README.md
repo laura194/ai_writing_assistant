@@ -36,11 +36,11 @@ The goal of this project is to develop a web-based application that supports use
 ### Version 1.0 - Core Functionality
 Our initial release focused on essential writing assistance capabilities:
 
-**📝 Chapter Structure** - Create, customize, and save hierarchical chapters and sections for organized academic writing.
-**🤖 AI Writing Assistance** - Get intelligent, context-aware suggestions and help throughout your writing process.
-**📋 AI Protocol with Filtering** - Automatic documentation of all AI interactions with advanced filtering for complete transparency and traceability.
-**📄 Word Export** - Export your complete document as a Word file.
-**✨ User-Friendly Interface** - Intuitive navigation and modern design for nice writing experience.
+- **📝 Chapter Structure:** Create, customize, and save hierarchical chapters and sections for organized academic writing.
+- **🤖 AI Writing Assistance:** Get intelligent, context-aware suggestions and help throughout your writing process.
+- **📋 AI Protocol with Filtering:** Automatic documentation of all AI interactions with advanced filtering for complete transparency and traceability.
+- **📄 Word Export:** Export your complete document as a Word file.
+- **✨ User-Friendly Interface:** Intuitive navigation and modern design for nice writing experience.
 
 ### Version 2.0 - Enhanced Functionalities
 Building on our foundation, V2 introduces community system and other enhanced functionalities:
@@ -54,13 +54,13 @@ Building on our foundation, V2 introduces community system and other enhanced fu
   - Filter and sort comments for better navigation.
 
 #### Advanced Export Options
-**📑 Multi-Format Export with Appendix:** Export to Word, PDF and LaTeX with automatic AI protocol appendix.
-**🐳 Dockerized Conversion Pipeline:** LaTeX is used as a base format for Word and PDF conversion utilising containerized Pandoc.
+- **📑 Multi-Format Export with Appendix:** Export to Word, PDF and LaTeX with automatic AI protocol appendix.
+- **🐳 Dockerized Conversion Pipeline:** LaTeX is used as a base format for Word and PDF conversion utilising containerized Pandoc.
 
 #### Security & Quality
-**🔒 Data Encryption:** MongoDB encryption with Client-Side Field Level Encryption (CSFLE).
-**✍️ Spell Check:** Automatic correction of spelling mistakes during writing.
-**📦 Version History:**Track and restore previous versions of your document with undo and redo functionality.
+- **🔒 Data Encryption:** MongoDB encryption with Client-Side Field Level Encryption (CSFLE).
+- **✍️ Spell Check:** Automatic correction of spelling mistakes during writing.
+- **📦 Version History:**Track and restore previous versions of your document with undo and redo functionality.
 
 ### ✅Testing
 - **Frontend:** 
@@ -72,10 +72,10 @@ Building on our foundation, V2 introduces community system and other enhanced fu
    - Mutation testing with Strykers. 
 
 #### User Experience
-**⚙️ Settings Page:**Customize your writing environment and preferences.
-**🎓 Interactive Tutorial:** Guided onboarding for new users.
-**❓ FAQ Section:** Quick answers to common questions.
-**🌞 Light Mode:** Modern frontend design with comfortable light theme.
+- **⚙️ Settings Page:**Customize your writing environment and preferences.
+- **🎓 Interactive Tutorial:** Guided onboarding for new users.
+- **❓ FAQ Section:** Quick answers to common questions.
+- **🌞 Light Mode:** Modern frontend design with comfortable light theme.
 
 ## 💻 Local Development
 
