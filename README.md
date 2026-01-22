@@ -62,7 +62,7 @@ Building on our foundation, V2 introduces community system and other enhanced fu
 - **✍️ Spell Check:** Automatic correction of spelling mistakes during writing.
 - **📦 Version History:**Track and restore previous versions of your document with undo and redo functionality.
 
-### ✅Testing
+#### Testing
 - **Frontend:** 
    - End-to-End tests with Cypress,
    - Integration tests with Vitest.
