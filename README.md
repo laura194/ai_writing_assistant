@@ -1,20 +1,54 @@
 ![Alt](https://repobeats.axiom.co/api/embed/3526f70d37e904c00e7b3aad1024b5e58cdd6132.svg "Repobeats analytics image")
 
-<!-- # AI Writing Asisstant
+<!-- aligned left -->
 
- [![Run Tests](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml)
+# AI Writing Asisstant
+
+[![Run Tests](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml)
 [![Code Quality](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml)
 [![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
-[![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml) -->
+[![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml) 
+
+<!-- aligned right -->
+<h1>
+  AI Writing Assistant
+  <div align="right">
+    <a href="https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml">
+      <img src="https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg" alt="Tests" />
+    </a>
+    <br/>
+    <a href="https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml">
+      <img src="https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg" alt="Code Quality" />
+    </a>
+    <br/>
+    <a href="https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml">
+      <img src="https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg" alt="Security" />
+    </a>
+    <br/>
+    <a href="https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml">
+      <img src="https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg" alt="Docker Hub" />
+    </a>
+    <br/>
+    <a href="https://vitest.dev/">
+      <img src="https://img.shields.io/badge/tested%20with-vitest-6E9F18.svg" alt="Vitest" />
+    </a>
+    <br/>
+    <a href="https://www.cypress.io/">
+      <img src="https://img.shields.io/badge/tested%20with-cypress-04C38E.svg" alt="Cypress" />
+    </a>
+  </div>
+</h1>
+
+<!-- aligned center -->
 # AI Writing Assistant
-<div align="right">
+<div align="center">
 
 [![Run Tests](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml)
 [![Code Quality](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml)
 [![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
 [![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml)
-[![Coverage](https://img.shields.io/badge/coverage-0%25-red)](https://github.com/laura194/ai_writing_assistant)
-
+[![Vitest](https://img.shields.io/badge/tested%20with-vitest-6E9F18.svg)](https://vitest.dev/)
+[![cypress](https://img.shields.io/badge/tested%20with-cypress-04C38E.svg)](https://www.cypress.io/)
 </div>
 
 ## 📑 Table of Contents
