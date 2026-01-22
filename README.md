@@ -1,12 +1,21 @@
 ![Alt](https://repobeats.axiom.co/api/embed/3526f70d37e904c00e7b3aad1024b5e58cdd6132.svg "Repobeats analytics image")
 
-# AI Writing Asisstant
+<!-- # AI Writing Asisstant
+
+ [![Run Tests](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml)
+[![Code Quality](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml)
+[![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
+[![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml) -->
+<div align="center">
+
+# AI Writing Assistant
 
 [![Run Tests](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml)
 [![Code Quality](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml)
 [![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
 [![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml)
 
+</div>
 
 ## 📑 Table of Contents
 
@@ -32,30 +41,66 @@ The goal of this project is to develop a web-based application that supports use
 
 ## 📱 Features Overview
 
-- **Chapter Structure:** Create, customize, and save chapters and sections,
-- **AI Assistance:** AI-powered suggestions and help during writing,
-- **Protocol with filter:** Automatic documentation of all AI interactions for transparency,
-- **Word Export:** Export the entire document as a Word file,
-- **User-Friendly Interface:** Intuitive operation and modern design.
+### Version 1.0 - Core Functionality
+Our initial release focused on essential writing assistance capabilities:
+
+- **📝 Chapter Structure** - Create, customize, and save hierarchical chapters and sections for organized academic writing.
+- **🤖 AI Writing Assistance** - Get intelligent, context-aware suggestions and help throughout your writing process.
+- **📋 AI Protocol with Filtering** - Automatic documentation of all AI interactions with advanced filtering for complete transparency and traceability.
+- **📄 Word Export** - Export your complete document as a Word file.
+- **✨ User-Friendly Interface** - Intuitive navigation and modern design for nice writing experience.
+
+### Version 2.0 - Enhanced Functionalities
+Building on our foundation, V2 introduces community system and other enhanced functionalities:
+
+#### Community & Collaboration
+- **👥 Community System:** 
+  - Share and discover writing contributions with other users
+  - Advanced search functionality to find relevant content
+  - Upvote and favorite contributed documents
+  - Comment and discuss on community contributions
+  - Edit and improve your own contributions
+  - Filter and sort comments for better navigation
+
+#### Advanced Export Options
+- **📑 Multi-Format Export with Appendix** - Export to Word, PDF and LaTeX with automatic AI protocol appendix
+- **🐳 Dockerized Conversion Pipeline** - LaTeX is used as a base format for Word and PDF conversion utilising containerized Pandoc
+
+#### Security & Quality
+- **🔒 Data Encryption** - MongoDB encryption with Client-Side Field Level Encryption (CSFLE)
+- **✍️ Spell Check** - Automatic correction of spelling mistakes during writing
+- **📦 Version History** - Track and restore previous versions of your document with undo and redo functionality.
+
+- **✅ Comprehensive Testing**
+  - **Frontend:** 
+      - End-to-End tests with Cypress
+      - Integration tests with Vitest
+  - **Backend:** 
+      - Unit and Integration tests with Vitest
+  - **Test Quality:**
+      - Mutation testing with Strykers 
+
+#### User Experience
+- **⚙️ Settings Page** - Customize your writing environment and preferences
+- **🎓 Interactive Tutorial** - Guided onboarding for new users
+- **❓ FAQ Section** - Quick answers to common questions
+- **🌞 Light Mode** - Modern frontend design with comfortable light theme
 
 ## 💻 Local Development
 
 To build and run the app locally, follow these steps:
 
-1. Clone the repository:
+```bash
+# 1. Clone the repository:
+gh repo clone laura194/ai_writing_assistant
+   
+# 2. Fetch dependencies:
+npm install
 
-   ```bash
-   gh repo clone laura194/ai_writing_assistant
-   ```
+# 3. Run the app:
+npm start
 
-2. Fetch dependencies:
-   ```bash
-    npm install
-   ```
-3. Run the app:
-   ```bash
-   npm start
-   ```
+```
 
 ## 🏗️ Project Structure
 
@@ -124,9 +169,9 @@ To build and run the app locally, follow these steps:
 - **Clerk** for authentication
 
 ### Backend
-- **NodeJS**
-- **Express**
-- **MongoDB**
+- **NodeJS** - JS Runtime Engine
+- **Express** - Web Framework
+- **MongoDB** - Database
 
 ### Document Export
 - **Dockerized Pandoc** - Document conversion engine
@@ -148,9 +193,8 @@ This project uses:
 - **Cypress** for End-to-end testing
 - **Stryker** for Mutation testing
 
-### Running Tests
+Run tests with:
 
-Run tests locally:
 ```bash
 # Run all tests with coverage
 npx vitest run --coverage
