@@ -6,14 +6,14 @@
 [![Code Quality](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml)
 [![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
 [![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml) -->
-<div align="center">
-
 # AI Writing Assistant
+<div align="right">
 
 [![Run Tests](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml)
 [![Code Quality](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml)
 [![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
 [![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml)
+[![Coverage](https://img.shields.io/badge/coverage-0%25-red)](https://github.com/laura194/ai_writing_assistant)
 
 </div>
 
@@ -32,8 +32,7 @@
 Members: Laura, Lisa, Gero, and Aylin
 
 This repository contains a student project created for the ongoing course
-on Study Project I & II at HWR Berlin, spanning the summmer term 2025 through
-the winter term 2026.
+on Study Project I & II at HWR Berlin, spanning the summmer term 2025 through the winter term 2026.
 
 ## 📖 Abstract
 
@@ -44,47 +43,46 @@ The goal of this project is to develop a web-based application that supports use
 ### Version 1.0 - Core Functionality
 Our initial release focused on essential writing assistance capabilities:
 
-- **📝 Chapter Structure** - Create, customize, and save hierarchical chapters and sections for organized academic writing.
-- **🤖 AI Writing Assistance** - Get intelligent, context-aware suggestions and help throughout your writing process.
-- **📋 AI Protocol with Filtering** - Automatic documentation of all AI interactions with advanced filtering for complete transparency and traceability.
-- **📄 Word Export** - Export your complete document as a Word file.
-- **✨ User-Friendly Interface** - Intuitive navigation and modern design for nice writing experience.
+**📝 Chapter Structure** - Create, customize, and save hierarchical chapters and sections for organized academic writing.
+**🤖 AI Writing Assistance** - Get intelligent, context-aware suggestions and help throughout your writing process.
+**📋 AI Protocol with Filtering** - Automatic documentation of all AI interactions with advanced filtering for complete transparency and traceability.
+**📄 Word Export** - Export your complete document as a Word file.
+**✨ User-Friendly Interface** - Intuitive navigation and modern design for nice writing experience.
 
 ### Version 2.0 - Enhanced Functionalities
 Building on our foundation, V2 introduces community system and other enhanced functionalities:
 
-#### Community & Collaboration
-- **👥 Community System:** 
-  - Share and discover writing contributions with other users
-  - Advanced search functionality to find relevant content
-  - Upvote and favorite contributed documents
-  - Comment and discuss on community contributions
-  - Edit and improve your own contributions
-  - Filter and sort comments for better navigation
+#### 👥 Community & Collaboration
+  - Share and discover writing contributions with other users.
+  - Advanced search functionality to find relevant content.
+  - Upvote and favorite contributed documents.
+  - Comment and discuss on community contributions.
+  - Edit and improve your own contributions.
+  - Filter and sort comments for better navigation.
 
 #### Advanced Export Options
-- **📑 Multi-Format Export with Appendix** - Export to Word, PDF and LaTeX with automatic AI protocol appendix
-- **🐳 Dockerized Conversion Pipeline** - LaTeX is used as a base format for Word and PDF conversion utilising containerized Pandoc
+**📑 Multi-Format Export with Appendix:** Export to Word, PDF and LaTeX with automatic AI protocol appendix.
+**🐳 Dockerized Conversion Pipeline:** LaTeX is used as a base format for Word and PDF conversion utilising containerized Pandoc.
 
 #### Security & Quality
-- **🔒 Data Encryption** - MongoDB encryption with Client-Side Field Level Encryption (CSFLE)
-- **✍️ Spell Check** - Automatic correction of spelling mistakes during writing
-- **📦 Version History** - Track and restore previous versions of your document with undo and redo functionality.
+**🔒 Data Encryption:** MongoDB encryption with Client-Side Field Level Encryption (CSFLE).
+**✍️ Spell Check:** Automatic correction of spelling mistakes during writing.
+**📦 Version History:**Track and restore previous versions of your document with undo and redo functionality.
 
-- **✅ Comprehensive Testing**
-  - **Frontend:** 
-      - End-to-End tests with Cypress
-      - Integration tests with Vitest
-  - **Backend:** 
-      - Unit and Integration tests with Vitest
-  - **Test Quality:**
-      - Mutation testing with Strykers 
+### ✅Testing
+- **Frontend:** 
+   - End-to-End tests with Cypress,
+   - Integration tests with Vitest.
+- **Backend:** 
+   - Unit and Integration tests with Vitest.
+- **Test Quality:**
+   - Mutation testing with Strykers. 
 
 #### User Experience
-- **⚙️ Settings Page** - Customize your writing environment and preferences
-- **🎓 Interactive Tutorial** - Guided onboarding for new users
-- **❓ FAQ Section** - Quick answers to common questions
-- **🌞 Light Mode** - Modern frontend design with comfortable light theme
+**⚙️ Settings Page:**Customize your writing environment and preferences.
+**🎓 Interactive Tutorial:** Guided onboarding for new users.
+**❓ FAQ Section:** Quick answers to common questions.
+**🌞 Light Mode:** Modern frontend design with comfortable light theme.
 
 ## 💻 Local Development
 
@@ -174,24 +172,25 @@ npm start
 - **MongoDB** - Database
 
 ### Document Export
-- **Dockerized Pandoc** - Document conversion engine
-   - Uses LaTeX as the base format
-   - Converts to PDF and Word (DOCX) formats
+**(Dockerized) Pandoc:** 
+   - Document conversion engine.
+   - Uses LaTeX as the base format.
+   - Converts to PDF and Word (DOCX) formats.
 
 ### Development
-- **ESLint** for code quality and linting
-- **Prettier** for code formatting
+- **ESLint** for code quality and linting.
+- **Prettier** for code formatting.
 
 ### DevOps
-- **GitHub Actions** - CI/CD pipeline for automated testing
-- **Docker** - Containerization for MongoDB and Pandoc services
+- **GitHub Actions** - CI/CD pipeline for automated testing.
+- **Docker** - Containerization for MongoDB and Pandoc services.
 
 ## 🧪 Testing
 
 This project uses:
-- **Vitest** for unit and integration testing with coverage reporting
-- **Cypress** for End-to-end testing
-- **Stryker** for Mutation testing
+- **Vitest** for unit and integration testing with coverage reporting,
+- **Cypress** for End-to-end testing,
+- **Stryker** for Mutation testing.
 
 Run tests with:
 
