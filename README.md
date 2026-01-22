@@ -1,6 +1,7 @@
 ![Alt](https://repobeats.axiom.co/api/embed/3526f70d37e904c00e7b3aad1024b5e58cdd6132.svg "Repobeats analytics image")
 
 # AI Writing Assistant
+
 <div align="left">
 
 [![Run Tests](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml)
@@ -8,6 +9,7 @@
 [![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
 [![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml)
 [![Vitest](https://img.shields.io/badge/tested%20with-vitest-6E9F18.svg)](https://vitest.dev/)
+
 </div>
 
 ## 📑 Table of Contents
@@ -34,6 +36,7 @@ The goal of this project is to develop a web-based application that supports use
 ## 📱 Features Overview
 
 ### Version 1.0 - Core Functionality
+
 Our initial release focused on essential writing assistance capabilities:
 
 - **📝 Chapter Structure:** Create, customize, and save hierarchical chapters and sections for organized academic writing.
@@ -43,35 +46,41 @@ Our initial release focused on essential writing assistance capabilities:
 - **✨ User-Friendly Interface:** Intuitive navigation and modern design for nice writing experience.
 
 ### Version 2.0 - Enhanced Functionalities
+
 Building on our foundation, V2 introduces community system and other enhanced functionalities:
 
 #### 👥 Community & Collaboration
-  - Share and discover writing contributions with other users.
-  - Advanced search functionality to find relevant content.
-  - Upvote and favorite contributed documents.
-  - Comment and discuss on community contributions.
-  - Edit and improve your own contributions.
-  - Filter and sort comments for better navigation.
+
+- Share and discover writing contributions with other users.
+- Advanced search functionality to find relevant content.
+- Upvote and favorite contributed documents.
+- Comment and discuss on community contributions.
+- Edit and improve your own contributions.
+- Filter and sort comments for better navigation.
 
 #### Advanced Export Options
+
 - **📑 Multi-Format Export with Appendix:** Export to Word, PDF and LaTeX with automatic AI protocol appendix.
 - **🐳 Dockerized Conversion Pipeline:** LaTeX is used as a base format for Word and PDF conversion utilising containerized Pandoc.
 
 #### Security & Quality
+
 - **🔒 Data Encryption:** MongoDB encryption with Client-Side Field Level Encryption (CSFLE).
 - **✍️ Spell Check:** Automatic correction of spelling mistakes during writing.
 - **📦 Version History:**Track and restore previous versions of your document with undo and redo functionality.
 
 #### Testing
-- **Frontend:** 
-   - End-to-End tests with Cypress,
-   - Integration tests with Vitest.
-- **Backend:** 
-   - Unit and Integration tests with Vitest.
+
+- **Frontend:**
+  - End-to-End tests with Cypress,
+  - Integration tests with Vitest.
+- **Backend:**
+  - Unit and Integration tests with Vitest.
 - **Test Quality:**
-   - Mutation testing with Strykers. 
+  - Mutation testing with Strykers.
 
 #### User Experience
+
 - **⚙️ Settings Page:** Customize your writing environment and preferences.
 - **🎓 Interactive Tutorial:** Guided onboarding for new users.
 - **❓ FAQ Section:** Quick answers to common questions.
@@ -84,7 +93,7 @@ To build and run the app locally, follow these steps:
 ```bash
 # 1. Clone the repository:
 gh repo clone laura194/ai_writing_assistant
-   
+
 # 2. Fetch dependencies:
 npm install
 
@@ -154,33 +163,40 @@ npm start
 ## 🛠️ Dependencies Overview
 
 ### Frontend
+
 - **React** with **TypeScript**
 - **Vite** for fast development and HMR
 - **Tailwind CSS** for styling
 - **Clerk** for authentication
 
 ### Backend
+
 - **NodeJS** - JS Runtime Engine
 - **Express** - Web Framework
 - **MongoDB** - Database
 
 ### Document Export
-**(Dockerized) Pandoc:** 
-   - Document conversion engine.
-   - Uses LaTeX as the base format.
-   - Converts to PDF and Word (DOCX) formats.
+
+**(Dockerized) Pandoc:**
+
+- Document conversion engine.
+- Uses LaTeX as the base format.
+- Converts to PDF and Word (DOCX) formats.
 
 ### Development
+
 - **ESLint** for code quality and linting.
 - **Prettier** for code formatting.
 
 ### DevOps
+
 - **GitHub Actions** - CI/CD pipeline for automated testing.
 - **Docker** - Containerization for MongoDB and Pandoc services.
 
 ## 🧪 Testing
 
 This project uses:
+
 - **Vitest** for unit and integration testing with coverage reporting,
 - **Cypress** for End-to-end testing,
 - **Stryker** for Mutation testing.
