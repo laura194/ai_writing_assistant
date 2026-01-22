@@ -8,8 +8,10 @@
 [![Code Quality](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml)
 [![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
 [![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml) 
+[![Vitest](https://img.shields.io/badge/tested%20with-vitest-6E9F18.svg)](https://vitest.dev/)
+[![cypress](https://img.shields.io/badge/tested%20with-cypress-04C38E.svg)](https://www.cypress.io/)
 
-<!-- aligned right -->
+<!-- aligned right 
 <h1>
   AI Writing Assistant
   <div align="right">
@@ -38,8 +40,9 @@
     </a>
   </div>
 </h1>
+-->
 
-<!-- aligned center -->
+<!-- aligned center 
 # AI Writing Assistant
 <div align="center">
 
@@ -50,6 +53,7 @@
 [![Vitest](https://img.shields.io/badge/tested%20with-vitest-6E9F18.svg)](https://vitest.dev/)
 [![cypress](https://img.shields.io/badge/tested%20with-cypress-04C38E.svg)](https://www.cypress.io/)
 </div>
+-->
 
 ## 📑 Table of Contents
 
