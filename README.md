@@ -1,3 +1,5 @@
+![Alt](https://repobeats.axiom.co/api/embed/3526f70d37e904c00e7b3aad1024b5e58cdd6132.svg "Repobeats analytics image")
+
 # AI Writing Assistant
 
 ## 📑 Table of Contents
