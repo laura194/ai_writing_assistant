@@ -67,7 +67,7 @@ Building on our foundation, V2 introduces community system and other enhanced fu
 
 - **🔒 Data Encryption:** MongoDB encryption with Client-Side Field Level Encryption (CSFLE).
 - **✍️ Spell Check:** Automatic correction of spelling mistakes during writing.
-- **📦 Version History:**Track and restore previous versions of your document with undo and redo functionality.
+- **📦 Version History:** Track and restore previous versions of your document with undo and redo functionality.
 
 #### Testing
 
