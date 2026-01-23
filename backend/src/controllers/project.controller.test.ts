@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi, type Mock } from "vitest";
-// import { vi } from "vitest";
 import request from "supertest";
 import express from "express";
 import bodyParser from "body-parser";
@@ -8,6 +7,12 @@ import projectRoutes from "../routes/project.routes";
 import Project from "../models/Project";
 import NodeContent from "../models/NodeContent";
 import AiProtocol from "../models/AIProtocol";
+import {
+  toggleFavorite,
+  getProjectById,
+  updateProject,
+  deleteProject,
+} from "../controllers/project.controller";
 
 // Express App für die Tests
 const app = express();
@@ -1004,5 +1009,79 @@ describe("project.controller Uncovered Lines Coverage", () => {
     );
 
     consoleErrorMock.mockRestore();
+  });
+
+  it("getProjectById ohne ID gibt 400 zurück", async () => {
+    const req = {
+      params: {},
+    } as any;
+
+    const res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as any;
+
+    await getProjectById(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Project ID is required",
+    });
+  });
+
+  it("updateProject ohne ID gibt 400 zurück", async () => {
+    const req = {
+      params: {},
+      body: {},
+    } as any;
+
+    const res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as any;
+
+    await updateProject(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Project ID is required",
+    });
+  });
+
+  it("deleteProject ohne ID gibt 400 zurück", async () => {
+    const req = {
+      params: {},
+    } as any;
+
+    const res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as any;
+
+    await deleteProject(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Project ID is required",
+    });
+  });
+
+  it("toggleFavorite ohne username gibt 400 zurück", async () => {
+    const req = {
+      params: { id: "1" },
+      body: {},
+    } as any;
+
+    const res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    } as any;
+
+    await toggleFavorite(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Username is required",
+    });
   });
 });

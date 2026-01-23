@@ -43,8 +43,8 @@ const CommunityPage = () => {
     navigate(`/read/${id}`); // eigene Route zur Detailansicht
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (dateString: string | Date) => {
+    const date = dateString instanceof Date ? dateString : new Date(dateString);
     return date.toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
@@ -54,8 +54,12 @@ const CommunityPage = () => {
 
   const filteredProjects = projects.filter((project) => {
     const search = searchTerm.toLowerCase();
-    const createdDate = project.createdAt ? new Date(project.createdAt) : null;
-    const updatedDate = project.updatedAt ? new Date(project.updatedAt) : null;
+    const createdDate = project.created_at
+      ? new Date(project.created_at)
+      : null;
+    const updatedDate = project.updated_at
+      ? new Date(project.updated_at)
+      : null;
 
     // formatiere als locale string (z. B. "Nov 11, 2025") für Textsuche
     const createdString = createdDate
@@ -336,8 +340,8 @@ const CommunityPage = () => {
                             </div>
 
                             <div className="text-xs text-[#666] dark:text-[#aaa] mt-1">
-                              Created: {formatDate(project.createdAt!)} •
-                              Updated: {formatDate(project.updatedAt!)}
+                              Created: {formatDate(project.created_at!)} •
+                              Updated: {formatDate(project.updated_at!)}
                             </div>
                           </div>
 

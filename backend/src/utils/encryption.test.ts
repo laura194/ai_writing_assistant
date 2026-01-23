@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach, beforeAll, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  beforeAll,
+  afterEach,
+  vi,
+} from "vitest";
 import dotenv from "dotenv";
 import path from "path";
 import crypto from "crypto";
@@ -45,6 +53,7 @@ describe("Encryption Utility (Node.js crypto)", () => {
     // Reset to default enabled state after each test
     process.env.ENCRYPTION_ENABLED = "true";
     process.env.ENCRYPTION_KEY = testEncryptionKey;
+    vi.clearAllMocks();
   });
 
   describe("encryptValue and decryptValue", () => {
@@ -144,6 +153,29 @@ describe("Encryption Utility (Node.js crypto)", () => {
       expect(encrypted).toBe(value);
     });
 
+    it("should handle encryption error and throw", () => {
+      // Mock crypto.randomBytes to throw an error
+      const originalRandomBytes = crypto.randomBytes;
+      crypto.randomBytes = vi.fn(() => {
+        throw new Error("Random bytes generation failed");
+      }) as any;
+
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      expect(() => encryptValue("test value")).toThrow(
+        "Failed to encrypt value",
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Encryption error:",
+        expect.any(Error),
+      );
+
+      crypto.randomBytes = originalRandomBytes;
+      consoleErrorSpy.mockRestore();
+    });
+
     it("should handle decryption with encryption disabled", () => {
       process.env.ENCRYPTION_ENABLED = "false";
       const value = "test value";
@@ -158,13 +190,34 @@ describe("Encryption Utility (Node.js crypto)", () => {
       expect(decrypted).toBe(value);
     });
 
+    it("should handle null value in decryptValue", () => {
+      const result = decryptValue(null);
+      expect(result).toBe("");
+    });
+
+    it("should handle undefined value in decryptValue", () => {
+      const result = decryptValue(undefined);
+      expect(result).toBe("");
+    });
+
     it("should return original value for invalid encrypted data", () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       const invalidEncrypted = "invalid-base64-!@#$%";
       const result = decryptValue(invalidEncrypted);
       expect(result).toBe(invalidEncrypted);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Decryption error:",
+        expect.any(Error),
+      );
+      consoleErrorSpy.mockRestore();
     });
 
     it("should handle tampered encrypted data gracefully", () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       const originalValue = "Hello, World!";
       const encrypted = encryptValue(originalValue);
 
@@ -174,9 +227,14 @@ describe("Encryption Utility (Node.js crypto)", () => {
       // Should not throw, but return the tampered value
       const result = decryptValue(tamperedEncrypted);
       expect(result).toBe(tamperedEncrypted);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
     });
 
     it("should not decrypt with wrong key", () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       const originalValue = "Secret Message";
       const encrypted = encryptValue(originalValue);
 
@@ -187,6 +245,56 @@ describe("Encryption Utility (Node.js crypto)", () => {
       const result = decryptValue(encrypted);
       expect(result).not.toBe(originalValue);
       expect(result).toBe(encrypted);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe("Key warning logging", () => {
+    beforeEach(async () => {
+      // Re-import the module to reset the keyWarningLogged flag
+      vi.resetModules();
+    });
+
+    it("should log warning when key is missing and encryption is enabled", async () => {
+      // Re-import to get fresh module state
+      const freshEncryption = await import("./encryption");
+
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+      delete process.env.ENCRYPTION_KEY;
+      process.env.ENCRYPTION_ENABLED = "true";
+
+      const value = "test value";
+      freshEncryption.encryptValue(value);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        "WARNING: ENCRYPTION_KEY not found in environment variables. Encryption will not work properly.",
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it("should only log key warning once", async () => {
+      // Re-import to get fresh module state
+      const freshEncryption = await import("./encryption");
+
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+      delete process.env.ENCRYPTION_KEY;
+      process.env.ENCRYPTION_ENABLED = "true";
+
+      // First call should log warning
+      freshEncryption.encryptValue("test1");
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+
+      // Second call should NOT log warning again
+      freshEncryption.encryptValue("test2");
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+
+      consoleWarnSpy.mockRestore();
     });
   });
 
@@ -222,7 +330,7 @@ describe("Encryption Utility (Node.js crypto)", () => {
       expect(decrypted.age).toBe(obj.age);
     });
 
-    it("should handle objects with nested structures", () => {
+    it("should handle objects with nested structures (string JSON)", () => {
       const obj = {
         content: JSON.stringify({ nested: "data", value: 123 }),
         title: "Test",
@@ -249,23 +357,64 @@ describe("Encryption Utility (Node.js crypto)", () => {
       expect(decrypted.metadata).toEqual({ userId: 123, role: "admin" });
     });
 
+    it("should handle JSON arrays in decryption", () => {
+      const obj = {
+        tags: '["tag1", "tag2", "tag3"]',
+        id: 123,
+      };
+
+      const encrypted = encryptObject(obj, ["tags"]);
+      const decrypted = decryptObject(encrypted, ["tags"]);
+
+      expect(decrypted.tags).toEqual(["tag1", "tag2", "tag3"]);
+    });
+
     it("should handle empty objects", () => {
       const obj = {};
       const encrypted = encryptObject(obj, []);
       expect(encrypted).toEqual({});
     });
 
-    it("should skip null or undefined fields", () => {
+    it("should skip null fields in encryptObject", () => {
       const obj = {
         name: "John",
         email: null as any,
+      };
+
+      const encrypted = encryptObject(obj, ["name", "email"]);
+      expect(encrypted.name).not.toBe(obj.name);
+      expect(encrypted.email).toBeNull();
+    });
+
+    it("should skip undefined fields in encryptObject", () => {
+      const obj = {
+        name: "John",
         phone: undefined as any,
       };
 
-      const encrypted = encryptObject(obj, ["name", "email", "phone"]);
+      const encrypted = encryptObject(obj, ["name", "phone"]);
       expect(encrypted.name).not.toBe(obj.name);
-      expect(encrypted.email).toBeNull();
       expect(encrypted.phone).toBeUndefined();
+    });
+
+    it("should skip null fields in decryptObject", () => {
+      const obj = {
+        name: "encryptedValue",
+        email: null as any,
+      };
+
+      const decrypted = decryptObject(obj, ["name", "email"]);
+      expect(decrypted.email).toBeNull();
+    });
+
+    it("should skip undefined fields in decryptObject", () => {
+      const obj = {
+        name: "encryptedValue",
+        phone: undefined as any,
+      };
+
+      const decrypted = decryptObject(obj, ["name", "phone"]);
+      expect(decrypted.phone).toBeUndefined();
     });
 
     it("should handle objects with only encrypted fields", () => {
@@ -312,8 +461,22 @@ describe("Encryption Utility (Node.js crypto)", () => {
         corrupted: "invalid-encrypted-data",
       };
 
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       const decrypted = decryptObject(obj, ["corrupted"]);
       expect(decrypted.corrupted).toBe("invalid-encrypted-data");
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("should handle non-string values in decryptObject (skip them)", () => {
+      const obj = {
+        name: "John",
+        age: 30 as any, // Not a string, should be skipped
+      };
+
+      const decrypted = decryptObject(obj, ["name", "age"]);
+      expect(decrypted.age).toBe(30);
     });
 
     it("should return original object when encryption is disabled", () => {
@@ -327,6 +490,19 @@ describe("Encryption Utility (Node.js crypto)", () => {
       const encrypted = encryptObject(obj, ["name", "email"]);
       expect(encrypted).toEqual(obj);
       expect(encrypted).toBe(obj); // Should be same reference
+    });
+
+    it("should return original object in decryptObject when encryption is disabled", () => {
+      process.env.ENCRYPTION_ENABLED = "false";
+
+      const obj = {
+        name: "John Doe",
+        email: "john@example.com",
+      };
+
+      const decrypted = decryptObject(obj, ["name", "email"]);
+      expect(decrypted).toEqual(obj);
+      expect(decrypted).toBe(obj);
     });
   });
 

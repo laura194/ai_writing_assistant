@@ -80,16 +80,16 @@ describe("Project type", () => {
       name: "Test",
       username: "bob",
       projectStructure: [],
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-02T00:00:00Z",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-01-02T00:00:00Z",
       isPublic: false,
       upvotedBy: [],
       favoritedBy: [],
     };
-    // optional fields should be strings (when present)
+    // optional fields should be strings or Date (when present)
     expectTypeOf(project._id).toEqualTypeOf<string | undefined>();
-    expectTypeOf(project.createdAt).toEqualTypeOf<string | undefined>();
-    expectTypeOf(project.updatedAt).toEqualTypeOf<string | undefined>();
+    expectTypeOf(project.created_at).toEqualTypeOf<string | Date | undefined>();
+    expectTypeOf(project.updated_at).toEqualTypeOf<string | Date | undefined>();
   });
   // ✅ NEU: Test für neue optionale Felder in Project
   it("should allow new optional fields like tags, titleCommunityPage, category, typeOfDocument, authorName, upvotedBy, and favoritedBy", () => {

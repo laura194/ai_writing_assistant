@@ -67,8 +67,8 @@ const communityProjects = [
     tags: ["ai", "ml"],
     category: "Science",
     typeOfDocument: "Paper",
-    createdAt: new Date("2024-05-01").toISOString(),
-    updatedAt: new Date("2024-06-01").toISOString(),
+    created_at: new Date("2024-05-01").toISOString(),
+    updated_at: new Date("2024-06-01").toISOString(),
     upvotedBy: [],
     favoritedBy: [],
   },
@@ -79,8 +79,8 @@ const communityProjects = [
     tags: [],
     category: "Design",
     typeOfDocument: "Doc",
-    createdAt: new Date("2024-03-10").toISOString(),
-    updatedAt: new Date("2024-04-20").toISOString(),
+    created_at: new Date("2024-03-10").toISOString(),
+    updated_at: new Date("2024-04-20").toISOString(),
     upvotedBy: [],
     favoritedBy: [],
   },
@@ -228,8 +228,8 @@ describe("CommunityPage extra coverage", () => {
     getPublicProjects.mockResolvedValueOnce([
       {
         ...communityProjects[0],
-        createdAt: undefined,
-        updatedAt: undefined,
+        created_at: undefined,
+        updated_at: undefined,
       },
     ]);
     const { default: CommunityPage } = await import("./CommunityPage");

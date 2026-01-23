@@ -30,8 +30,8 @@ export interface Project {
   titleCommunityPage?: string; // neu: Community Page Title
   category?: string; // neu: Kategorie
   typeOfDocument?: string; // neu: Dokumenttyp
-  createdAt?: string;
-  updatedAt?: string;
+  created_at?: string | Date;
+  updated_at?: string | Date;
   authorName?: string; // Optional: Name des Autors
   upvotedBy: string[];
   favoritedBy: string[];
