@@ -25,7 +25,148 @@ interface Snapshot {
   activeView: string;
 }
 
+const tutorialSteps = [
+  {
+    target: "tutorial-header",
+    title: "Header & Navigation",
+    description:
+      "Here you find the main navigation options: create/open projects, access the community area, open settings, light/dark mode and logout.",
+  },
+  {
+    target: "tutorial-sidebar",
+    title: "Project Structure",
+    description:
+      "On the left you see the chapter structure of your project. You can add, rename, move or delete chapters here.",
+  },
+  {
+    target: "tutorial-editor",
+    title: "Editor",
+    description:
+      "In the main area you can edit the content of the selected chapter. Changes are saved automatically.",
+  },
+  {
+    target: "tutorial-ai-button",
+    title: "AI Assistance",
+    description:
+      "Use this button to ask the AI about the selected content — for suggestions, rewrites or enhancements.",
+  },
+  {
+    target: "tutorial-bottomnav",
+    title: "Switch Views",
+    description:
+      "At the bottom left you can switch between different views for inspecting the AI Protocol of your AI usage, exporting your work as documents and uploading your project to the community page.",
+  },
+];
+
 const EditPage = () => {
+  // Tutorial state
+  const [tutorialActive, setTutorialActive] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+
+  // Handler for Header button
+  const handleTutorialClick = () => {
+    setTutorialActive(true);
+    setTutorialStep(0);
+  };
+
+  // Handler for closing tutorial
+  const handleTutorialClose = () => {
+    setTutorialActive(false);
+  };
+
+  // Navigation
+  const handleNextStep = () => {
+    setTutorialStep((prev) =>
+      prev < tutorialSteps.length - 1 ? prev + 1 : prev,
+    );
+  };
+  const handlePrevStep = () => {
+    setTutorialStep((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
+  // (Tooltip is now centered; per-step positioning kept for possible later use)
+
+  // Highlight (hole) for current tutorial target
+  const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    if (!tutorialActive) {
+      setHighlightRect(null);
+      return;
+    }
+
+    const computeRect = () => {
+      const id = tutorialSteps[tutorialStep]?.target;
+      const el = id ? document.getElementById(id) : null;
+      if (el) {
+        const r = el.getBoundingClientRect();
+        // add small padding
+        const padding = 8;
+
+        // If the current target is not the header, ensure we don't include the fixed header
+        // in the highlighted hole. Compute header bottom and clamp the top of the hole
+        // to be at least below the header.
+        const headerEl = document.getElementById("tutorial-header");
+        const headerBottom = headerEl
+          ? headerEl.getBoundingClientRect().bottom
+          : 0;
+
+        let top = r.top;
+        let height = r.height;
+
+        if (id !== "tutorial-header" && headerBottom > 0) {
+          const adjustedTop = Math.max(r.top, headerBottom + padding);
+          const adjustedBottom = r.bottom;
+          const adjustedHeight = adjustedBottom - adjustedTop;
+          if (adjustedHeight <= 0) {
+            setHighlightRect(null);
+            return;
+          }
+          top = adjustedTop;
+          height = adjustedHeight;
+        }
+
+        // Clamp the computed rect to the viewport so rounded corners render
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        const left = Math.max(0, Math.floor(r.left - padding));
+        const topClamped = Math.max(0, Math.floor(top - padding));
+        const right = Math.min(vw, Math.ceil(r.left + r.width + padding));
+        const bottom = Math.min(vh, Math.ceil(top + height + padding));
+
+        const finalWidth = right - left;
+        const finalHeight = bottom - topClamped;
+
+        if (finalWidth <= 0 || finalHeight <= 0) {
+          setHighlightRect(null);
+          return;
+        }
+
+        setHighlightRect(
+          new DOMRect(left, topClamped, finalWidth, finalHeight),
+        );
+      } else {
+        setHighlightRect(null);
+      }
+    };
+
+    computeRect();
+    window.addEventListener("resize", computeRect);
+    window.addEventListener("scroll", computeRect, true);
+    return () => {
+      window.removeEventListener("resize", computeRect);
+      window.removeEventListener("scroll", computeRect, true);
+    };
+  }, [tutorialActive, tutorialStep]);
+
+  // Corner radius for the highlight hole (dynamic based on hole size)
+  const highlightCornerRadius = (() => {
+    if (!highlightRect) return 10;
+    const minSize = Math.min(highlightRect.width, highlightRect.height);
+    // Use up to 12% of the smaller dimension, clamped between 6 and 28px
+    return Math.max(6, Math.min(28, Math.floor(minSize * 0.12)));
+  })();
   const { projectId } = useParams<{ projectId: string }>();
 
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -289,7 +430,7 @@ const EditPage = () => {
 
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [nodes, selectedNode, activeView]);
+  }, [nodes, selectedNode, activeView, handleUndo, handleRedo]);
 
   // ---------------------- Helper: finde Node Metadata ----------------------
   const findNodeById = (
@@ -333,7 +474,10 @@ const EditPage = () => {
         console.error("❌ Failed to update project structure:", err);
       }
     },
-    [projectId, project],
+    // include selectedNode id/content and activeView so the callback stays
+    // consistent with the values it reads when it updates the lastSaved
+    // snapshot. ESLint (react-hooks/exhaustive-deps) expects these.
+    [projectId, project, selectedNode?.id, selectedNode?.content, activeView],
   );
 
   useEffect(() => {
@@ -615,16 +759,104 @@ const EditPage = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex flex-col h-screen bg-[#e0dbf4] text-[#362466] dark:bg-[#090325] dark:text-white relative overflow-x-hidden">
-        <Header
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          canUndo={canUndo}
-          canRedo={canRedo}
-        />
+        <div>
+          <Header
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onTutorialClick={handleTutorialClick}
+            activeView={activeView}
+          />
+        </div>
+
+        {/* Tutorial Overlay with highlight hole */}
+        {tutorialActive && (
+          <div className="fixed inset-0 z-[100] pointer-events-auto">
+            {/* SVG mask: white = overlay, black = hole (transparent) */}
+            <svg
+              className="absolute inset-0 w-full h-full"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <mask id="tutorial-mask">
+                  <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                  {highlightRect && (
+                    <rect
+                      x={highlightRect.x}
+                      y={highlightRect.y}
+                      width={highlightRect.width}
+                      height={highlightRect.height}
+                      rx={highlightCornerRadius}
+                      ry={highlightCornerRadius}
+                      fill="black"
+                    />
+                  )}
+                </mask>
+              </defs>
+              <rect
+                width="100%"
+                height="100%"
+                fill="rgba(0,0,0,0.6)"
+                mask="url(#tutorial-mask)"
+              />
+            </svg>
+
+            {/* Tooltip positioned near the highlighted area when available */}
+            <div
+              className="absolute z-[110] flex items-center justify-center"
+              style={{
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: 110,
+              }}
+            >
+              <div className="bg-white dark:bg-[#1e1538] rounded-2xl shadow-lg p-6 max-w-xs border-2 border-[#7c3aed] flex flex-col items-center">
+                <div className="font-bold text-lg mb-2 text-[#7c3aed] dark:text-[#facc15]">
+                  {tutorialSteps[tutorialStep].title}
+                </div>
+                <div className="mb-4 text-sm text-[#261e3b] dark:text-[#e9e5f8] text-center">
+                  {tutorialSteps[tutorialStep].description}
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  {tutorialStep > 0 && (
+                    <button
+                      className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold"
+                      onClick={handlePrevStep}
+                    >
+                      Previous
+                    </button>
+                  )}
+
+                  <span className="text-xs text-[#473885] dark:text-[#facc15]">
+                    Step {tutorialStep + 1} / {tutorialSteps.length}
+                  </span>
+
+                  {tutorialStep < tutorialSteps.length - 1 && (
+                    <button
+                      className="px-3 py-1 rounded bg-[#e0dbf4] dark:bg-[#332857] text-[#7c3aed] dark:text-[#facc15] font-semibold"
+                      onClick={handleNextStep}
+                    >
+                      Next
+                    </button>
+                  )}
+                </div>
+                <button
+                  className="mt-4 px-4 py-1 rounded bg-[#7c3aed] text-white dark:bg-[#facc15] dark:text-[#1e1538] font-bold shadow hover:scale-105 transition-transform"
+                  onClick={handleTutorialClose}
+                >
+                  End Tutorial
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-1 relative">
           <div
             className={`sticky top-0 left-0 h-screen ${menuOpen ? "w-1/4" : "w-19"} transition-all duration-500 flex flex-col relative`}
+            id="tutorial-sidebar"
           >
             <div className="bg-[#f4f2fa] dark:bg-[#1e1538] py-2 px-4 flex h-full flex-col justify-between shadow-[inset_0_0_30px_rgba(120,69,239,0.55)] dark:shadow-[inset_0_0_30px_rgba(120,69,239,0.25)] pt-14">
               <button
@@ -633,7 +865,6 @@ const EditPage = () => {
               >
                 <Bars3Icon className="h-6 w-6 text-[#473885] dark:text-[#c4b5fd]" />
               </button>
-
               {menuOpen && (
                 <ul className="flex-1 space-y-2 overflow-y-auto no-scrollbar px-2">
                   {nodes.map((node) => (
@@ -650,7 +881,7 @@ const EditPage = () => {
                   ))}
                 </ul>
               )}
-              <div>
+              <div id="tutorial-bottomnav">
                 <BottomNavigationBar
                   activeView={activeView}
                   onChangeView={handleViewChange}
@@ -662,6 +893,7 @@ const EditPage = () => {
 
           <main
             className={`${menuOpen ? "w-3/4" : "w-full"} transition-all duration-300 p-6 pt-20`}
+            id="tutorial-editor"
           >
             <motion.div
               initial={{ backgroundPosition: "0% 0%" }}
