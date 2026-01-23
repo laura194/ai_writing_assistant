@@ -1,4 +1,16 @@
+![Alt](https://repobeats.axiom.co/api/embed/3526f70d37e904c00e7b3aad1024b5e58cdd6132.svg "Repobeats analytics image")
+
 # AI Writing Assistant
+
+<div align="left">
+
+[![Run Tests](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/tests.yml)
+[![Code Quality](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/code-quality.yml)
+[![Security](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/security.yml)
+[![Docker Hub](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml/badge.svg)](https://github.com/laura194/ai_writing_assistant/actions/workflows/docker-hub.yml)
+[![Vitest](https://img.shields.io/badge/tested%20with-vitest-6E9F18.svg)](https://vitest.dev/)
+
+</div>
 
 ## 📑 Table of Contents
 
@@ -15,8 +27,7 @@
 Members: Laura, Lisa, Gero, and Aylin
 
 This repository contains a student project created for the ongoing course
-on Study Project I & II at HWR Berlin, spanning the summmer term 2025 through
-the winter term 2026.
+on Study Project I & II at HWR Berlin, spanning the summmer term 2025 through the winter term 2026.
 
 ## 📖 Abstract
 
@@ -24,35 +35,81 @@ The goal of this project is to develop a web-based application that supports use
 
 ## 📱 Features Overview
 
-- **Chapter Structure:** Create, customize, and save chapters and sections,
-- **AI Assistance:** AI-powered suggestions and help during writing,
-- **Protocol with filter:** Automatic documentation of all AI interactions for transparency,
-- **Word Export:** Export the entire document as a Word file,
-- **User-Friendly Interface:** Intuitive operation and modern design.
+### Version 1.0 - Core Functionality
+
+Our initial release focused on essential writing assistance capabilities:
+
+- **📝 Chapter Structure:** Create, customize, and save hierarchical chapters and sections for organized academic writing.
+- **🤖 AI Writing Assistance:** Get intelligent, context-aware suggestions and help throughout your writing process.
+- **📋 AI Protocol with Filtering:** Automatic documentation of all AI interactions with advanced filtering for complete transparency and traceability.
+- **📄 Word Export:** Export your complete document as a Word file.
+- **✨ User-Friendly Interface:** Intuitive navigation and modern design for nice writing experience.
+
+### Version 2.0 - Enhanced Functionalities
+
+Building on our foundation, V2 introduces community system and other enhanced functionalities:
+
+#### 👥 Community & Collaboration
+
+- Share and discover writing contributions with other users.
+- Advanced search functionality to find relevant content.
+- Upvote and favorite contributed documents.
+- Comment and discuss on community contributions.
+- Edit and improve your own contributions.
+- Filter and sort comments for better navigation.
+
+#### Advanced Export Options
+
+- **📑 Multi-Format Export with Appendix:** Export to Word, PDF and LaTeX with automatic AI protocol appendix.
+- **🐳 Dockerized Conversion Pipeline:** LaTeX is used as a base format for Word and PDF conversion utilising containerized Pandoc.
+
+#### Security & Quality
+
+- **🔒 Data Encryption:** MongoDB encryption with Client-Side Field Level Encryption (CSFLE).
+- **✍️ Spell Check:** Automatic correction of spelling mistakes during writing.
+- **📦 Version History:** Track and restore previous versions of your document with undo and redo functionality.
+
+#### Testing
+
+- **Frontend:**
+  - End-to-End tests with Cypress,
+  - Integration tests with Vitest.
+- **Backend:**
+  - Unit and Integration tests with Vitest.
+- **Test Quality:**
+  - Mutation testing with Strykers.
+
+#### User Experience
+
+- **⚙️ Settings Page:** Customize your writing environment and preferences.
+- **🎓 Interactive Tutorial:** Guided onboarding for new users.
+- **❓ FAQ Section:** Quick answers to common questions.
+- **🌞 Light Mode:** Modern frontend design with comfortable light theme.
 
 ## 💻 Local Development
 
 To build and run the app locally, follow these steps:
 
-1. Clone the repository:
+```bash
+# 1. Clone the repository:
+gh repo clone laura194/ai_writing_assistant
 
-   ```bash
-   gh repo clone laura194/ai_writing_assistant
-   ```
+# 2. Fetch dependencies:
+npm install
 
-2. Fetch dependencies:
-   ```bash
-    npm install
-   ```
-3. Run the app:
-   ```bash
-   npm start
-   ```
+# 3. Run the app:
+npm start
+
+```
 
 ## 🏗️ Project Structure
 
 ```bash
-├── .github
+├── .github/workflows
+│   ├── code-quality.yml
+│   ├── docker-hub.yml
+│   ├── security.yml
+│   └── tests.yml
 ├── .idea
 ├── backend
 │   ├── node_modules
@@ -60,43 +117,101 @@ To build and run the app locally, follow these steps:
 │       ├── controllers
 │       ├── models
 │       ├── routes
-│       └── services
+│       ├──  services
+│       └── utils
+├── cypress
+│   ├──  e2e
+│   ├── fixtures
+│   └── support
 ├── docker-files
+│   ├── Complete Project
 │   └── mongoDB
 ├── node_modules
 ├── public
-├── server
-│    └── node_modules
+│    ├── dictionaries
 ├── src
+│   ├── App
+│   ├── AppRoutes
 │   ├── assets
 │   ├── components
-│   │   ├── ai
+│   ├── constants
+│   ├── hoc
 │   ├── models
 │   ├── pages
-│   ├── tests
+│   ├── providers
+│   ├── types
 │   └── utils
+├── test
+│   ├── utils
 ├── .gitignore
+├── cypress.config.ts
 ├── eslint.config.js
 ├── index.html
 ├── package-lock.json
 ├── package.json
 ├── README.md
+├── stryker.conf.js
+├── tailwind.config.cjs
+├── tailwind.config.test.cjs
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── vite.config.ts
+└── vitest.config.ts
 ```
 
 ## 🛠️ Dependencies Overview
 
+### Frontend
+
 - **React** with **TypeScript**
-- **NodeJS**
 - **Vite** for fast development and HMR
 - **Tailwind CSS** for styling
 - **Clerk** for authentication
-- **docx** and **file-saver** for Word export
-- **ESLint** for code quality
+
+### Backend
+
+- **NodeJS** - JS Runtime Engine
+- **Express** - Web Framework
+- **MongoDB** - Database
+
+### Document Export
+
+**(Dockerized) Pandoc:**
+
+- Document conversion engine.
+- Uses LaTeX as the base format.
+- Converts to PDF and Word (DOCX) formats.
+
+### Development
+
+- **ESLint** for code quality and linting.
+- **Prettier** for code formatting.
+
+### DevOps
+
+- **GitHub Actions** - CI/CD pipeline for automated testing.
+- **Docker** - Containerization for MongoDB and Pandoc services.
 
 ## 🧪 Testing
 
-Due to time constraints during the project development phase, comprehensive tests have not been implemented in this web application. We used exploratory testing to ensure the usability.
+This project uses:
+
+- **Vitest** for unit and integration testing with coverage reporting,
+- **Cypress** for End-to-end testing,
+- **Stryker** for Mutation testing.
+
+Run tests with:
+
+```bash
+# Run all tests with coverage
+npx vitest run --coverage
+
+# Run tests in watch mode
+npx vitest
+
+# Run mutation testing (optional)
+npx stryker run
+```
+
+Tests are automatically run on all pull requests to the main branch via GitHub Actions.
